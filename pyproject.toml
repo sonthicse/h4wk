@@ -1,0 +1,26 @@
+[project]
+name = "h4wk"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Thi Duong", email = "sonthicse@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+h4wk = "main:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["collectors", "collectors.*"]
+namespaces = true
