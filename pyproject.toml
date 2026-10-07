@@ -7,7 +7,9 @@ authors = [
     { name = "Thi Duong", email = "sonthicse@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "yt-dlp[default]>=2026.8.19",
+]
 
 [project.scripts]
 h4wk = "main:main"
