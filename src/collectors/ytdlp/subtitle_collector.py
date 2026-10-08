@@ -5,7 +5,6 @@ from yt_dlp.networking import Request
 
 from .base import YtDlpCollector
 
-
 class SubtitleCollector(YtDlpCollector):
     """Thu thập subtitle từ URL bằng yt-dlp, không tải media."""
 
@@ -14,7 +13,7 @@ class SubtitleCollector(YtDlpCollector):
 
         Ưu tiên phụ đề thủ công của chủ kênh; nếu không có thì lấy phụ đề
         tự động của YouTube. Nếu cả hai đều không có (hoặc không có định
-        dạng json3), ném ValueError. Không tải video, không ghi file.
+        dạng json3), ném ValueError.
         """
         with self._get_ydl_instance(extra_opts={"noplaylist": True}) as ydl:
             try:
@@ -54,19 +53,3 @@ class SubtitleCollector(YtDlpCollector):
                 raise
 
             return json.loads(raw.decode("utf-8"))
-
-
-collector = SubtitleCollector()
-
-target_url = "https://www.youtube.com/watch?v=4ycKrWTvzNY"
-lang = "vi"
-
-try:
-    data = collector.collect(target_url, lang="vi")
-    print(f"===== NỘI DUNG PHỤ ĐỀ ({lang}) =====")
-    for event in data.get("events", []):
-        text = "".join(seg.get("utf8", "") for seg in event.get("segs", [])).strip()
-        if text:
-            print(text)
-except (RuntimeError, ValueError) as e:
-    print(e)
