@@ -25,14 +25,12 @@ class CommentCollector(YtDlpCollector):
 
 
 
-collector = CommentCollector()
+# collector = CommentCollector()
 
-target_url = "https://www.youtube.com/watch?v=hZVH-y1atWw"
-comments = collector.collect(target_url)
+# target_url = "https://www.youtube.com/watch?v=hZVH-y1atWw"
+# comments = collector.collect(target_url)
 
-#import json 
-#output_file = "comments.json"
-#with open(output_file, "w", encoding="utf-8") as f:
-    #json.dump(comments, f, ensure_ascii=False, indent=4, default=str)
-#print(f"Đã thu thập {len(comments)} comment từ: {target_url}")
-#print(f"Đã lưu kết quả vào: {output_file}")
+# import json 
+# output_file = "comments.json"
+# with open(output_file, "w", encoding="utf-8") as f:
+    # json.dump(comments, f, ensure_ascii=False, indent=4, default=str)
