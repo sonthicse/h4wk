@@ -2,8 +2,6 @@ from typing import Any
 
 from .base import YoutubeApiCollector
 
-# Các part đọc được bằng API key; fileDetails, processingDetails và
-# suggestions chỉ dành cho chủ video nên không đưa vào mặc định.
 DEFAULT_PARTS = (
     "snippet",
     "contentDetails",

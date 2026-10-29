@@ -2,8 +2,6 @@ from typing import Any
 
 from .base import YoutubeApiCollector
 
-# auditDetails và contentOwnerDetails chỉ dành cho chủ kênh hoặc đối tác
-# nội dung nên không đưa vào mặc định.
 DEFAULT_PARTS = (
     "snippet",
     "contentDetails",
