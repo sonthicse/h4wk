@@ -20,20 +20,10 @@ class CommentCollector(YoutubeApiCollector):
         Lỗi từ API (ví dụ commentsDisabled) được truyền lên bên gọi.
         """
         video_id = self._extract_video_id(target_url)
-        threads = []
         with self._get_client() as client:
-            request = client.commentThreads().list(
-                part="snippet,replies",
-                videoId=video_id,
-                maxResults=100,
-            )
-            while request is not None:
-                response = request.execute()
-                threads.extend(response.get("items", []))
-                if max_comments is not None and len(threads) >= max_comments:
-                    threads = threads[:max_comments]
-                    break
-                request = client.commentThreads().list_next(request, response)
+            resource = client.commentThreads()
+            request = resource.list(part="snippet,replies", videoId=video_id, maxResults=100)
+            threads = self._collect_pages(resource, request, max_comments)
 
             if fetch_all_replies:
                 for thread in threads:
@@ -43,13 +33,8 @@ class CommentCollector(YoutubeApiCollector):
                         thread["replies"] = {"comments": self._collect_replies(client, thread["id"])}
         return threads
 
-    @staticmethod
-    def _collect_replies(client, parent_id):
+    def _collect_replies(self, client, parent_id):
         """Lấy toàn bộ phản hồi của một bình luận gốc qua comments.list."""
-        replies = []
-        request = client.comments().list(part="snippet", parentId=parent_id, maxResults=100)
-        while request is not None:
-            response = request.execute()
-            replies.extend(response.get("items", []))
-            request = client.comments().list_next(request, response)
-        return replies
+        resource = client.comments()
+        request = resource.list(part="snippet", parentId=parent_id, maxResults=100)
+        return self._collect_pages(resource, request)
