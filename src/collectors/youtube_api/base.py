@@ -3,9 +3,13 @@ import re
 from contextlib import contextmanager
 from urllib.parse import parse_qs, urlparse
 
+from dotenv import load_dotenv
 from googleapiclient.discovery import build
 
 from ..base import BaseCollector
+
+# Đọc .env ở thư mục gốc dự án; biến môi trường đã đặt sẵn được ưu tiên.
+load_dotenv()
 
 _VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 _CHANNEL_ID_RE = re.compile(r"^UC[A-Za-z0-9_-]{22}$")
@@ -22,7 +26,8 @@ class YoutubeApiCollector(BaseCollector):
     def __init__(self, api_key=None, credentials=None, custom_opts=None):
         """Khởi tạo collector với API key hoặc credentials OAuth.
 
-        Nếu không truyền cả hai, đọc API key từ biến môi trường YOUTUBE_API_KEY.
+        Nếu không truyền cả hai, đọc API key từ biến môi trường YOUTUBE_API_KEY
+        hoặc từ file .env ở thư mục gốc dự án.
         custom_opts được truyền thẳng vào googleapiclient.discovery.build().
         """
         api_key = api_key or os.environ.get("YOUTUBE_API_KEY")
