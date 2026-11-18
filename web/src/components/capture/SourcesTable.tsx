@@ -7,9 +7,10 @@ import { sourceStatusVariant } from './helpers'
 
 function formatCost(cost: SourceCall['cost']) {
   const parts = []
-  if (cost?.quotaUnits !== undefined) parts.push(`${cost.quotaUnits} quota`)
-  if (cost?.credits !== undefined) parts.push(`${cost.credits} credits`)
-  return parts.length ? parts.join(', ') : '—'
+  if (cost?.quotaUnits) parts.push(`${cost.quotaUnits} quota ${cost.quotaUnits === 1 ? 'unit' : 'units'}`)
+  if (cost?.credits) parts.push(`${cost.credits} ${cost.credits === 1 ? 'credit' : 'credits'}`)
+  if (parts.length) return parts.join(', ')
+  return cost ? 'free' : '—' // có ghi chi phí nhưng bằng 0: miễn phí
 }
 
 export default function SourcesTable({ sources }: { sources: SourceCall[] }) {
