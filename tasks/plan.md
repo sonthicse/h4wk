@@ -221,7 +221,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 1: Luồng tối giản (tuần 1)
 
-- [ ] T5: `evidence-store`: ghi bản thu, manifest, verify
+- [x] T5: `evidence-store`: ghi bản thu, manifest, verify
 - [ ] T6: `case-core`: case, đối tượng, nhật ký, chỉ mục
 - [ ] T7: `case-core`: đăng nhập 2 tài khoản
 - [ ] T8: `collectors`: hợp đồng adapter và orchestrator

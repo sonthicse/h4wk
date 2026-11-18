@@ -129,9 +129,9 @@ Người làm: Thi. Phụ thuộc: T4. Cỡ: M.
 
 Nghiệm thu:
 
-- [ ] Sửa 1 byte thì `verify` báo FAIL đúng file đó.
-- [ ] Xoá một file thì báo `missing`; thêm một file lạ thì báo `unexpected`.
-- [ ] Thu lại cùng video thì manifest mới có `previous_capture`.
+- [x] Sửa 1 byte thì `verify` báo FAIL đúng file đó.
+- [x] Xoá một file thì báo `missing`; thêm một file lạ thì báo `unexpected`.
+- [x] Thu lại cùng video thì manifest mới có `previous_capture`.
 
 Kiểm tra: `uv run pytest tests/unit/test_evidence.py`.
 

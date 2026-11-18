@@ -12,6 +12,8 @@ from h4wk.collectors.models import Normalized
 from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
 from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig
 from h4wk.evidence.models import Manifest
+from h4wk.evidence.verify import FileStatus
+from h4wk.evidence.verify import verify as verify_capture
 from h4wk.media.timeline import Timeline
 
 app = typer.Typer(no_args_is_help=True)
@@ -81,6 +83,16 @@ def schema_export() -> None:
     """Xuất JSON Schema của C1–C5 vào docs/contracts/."""
     for path in export_schemas(REPO_ROOT / "docs" / "contracts"):
         typer.echo(f"wrote: {path}")
+
+
+@app.command()
+def verify(capture_dir: Path) -> None:
+    """Kiểm tra toàn vẹn một bản thu: tính lại SHA-256 từng file và so với manifest."""
+    results = verify_capture(capture_dir)
+    for r in results:
+        typer.echo(f"{r.status.value:<10} {r.path}")
+    if any(r.status != FileStatus.OK for r in results):
+        raise typer.Exit(code=1)
 
 
 def main() -> None:
