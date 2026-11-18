@@ -1,0 +1,38 @@
+# Dữ liệu thu thập, bằng chứng, database chỉ mục, hàng đợi job (SPEC §11: không commit data/)
+/data/
+
+# Secret: API key, mật khẩu. Chỉ commit bản mẫu .env.example
+.env
+.env.*
+!.env.example
+
+# Cấu hình thật của từng máy. Chỉ commit bản mẫu config/*.toml.example
+/config/*.toml
+
+# File tạm và tài liệu nội bộ chưa công khai
+/.tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Frontend
+node_modules/
+/web/dist/
+
+# Editor và hệ điều hành
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Cài đặt Claude Code riêng của từng máy
+.claude/settings.local.json
