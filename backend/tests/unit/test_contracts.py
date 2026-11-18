@@ -478,8 +478,8 @@ def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
         "c5-analysis.json",
     }
     for p in written:
-        json.loads(p.read_text())
+        json.loads(p.read_text(encoding="utf-8"))
     # Chạy lại cho ra đúng nội dung cũ, để docs/contracts/ không đổi vô cớ.
-    before = {p.name: p.read_text() for p in written}
+    before = {p.name: p.read_text(encoding="utf-8") for p in written}
     export_schemas(tmp_path)
-    assert before == {p.name: p.read_text() for p in written}
+    assert before == {p.name: p.read_text(encoding="utf-8") for p in written}

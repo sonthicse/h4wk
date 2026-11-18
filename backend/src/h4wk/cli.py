@@ -70,7 +70,8 @@ def export_schemas(out_dir: Path) -> list[Path]:
     for name, tp in CONTRACTS.items():
         schema = TypeAdapter(tp).json_schema(mode="validation")
         path = out_dir / f"{name}.json"
-        path.write_text(json.dumps(schema, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
+        text = json.dumps(schema, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        path.write_text(text, encoding="utf-8")
         written.append(path)
     return written
 
