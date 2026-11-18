@@ -7,10 +7,22 @@ dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "typer>=0.12",
+    "anthropic>=2.10.0",
+    "openai>=3.55.1",
+    "google-genai>=3.5.0",
+    "python-dotenv>=1.2.4",
+    "scenedetect-headless>=0.7.3,<0.8",
+    "opencv-python-headless>=5.1.0.95",
+    "numpy>=2.5.5",
 ]
 
 [project.scripts]
 h4wk = "h4wk.cli:main"
+
+[project.optional-dependencies]
+stt = [
+    "faster-whisper>=1.2.1",
+]
 
 [dependency-groups]
 dev = [
@@ -35,5 +47,8 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["live: test gọi mạng/API thật, chạy tay bằng -m live"]
+markers = [
+    "live: test gọi mạng/API thật, chạy tay bằng -m live",
+    "gpu: kiểm thử trên GPU với model và bản thu T44",
+]
 addopts = "-m 'not live'"

@@ -350,7 +350,7 @@ Gateway có hai hàm `complete_structured(task, messages, schema)` và `describe
 
 Nghiệm thu:
 
-- [ ] Có test cho các trường hợp: JSON sai được sửa ở lần gửi lại; nhà cung cấp 1 lỗi thì chuyển sang nhà cung cấp 2; định tuyến đọc đúng từ cấu hình; gán `media.vision` cho model không có `vision` thì báo lỗi.
+- [x] Có test cho các trường hợp: JSON sai được sửa ở lần gửi lại; nhà cung cấp 1 lỗi thì chuyển sang nhà cung cấp 2; định tuyến đọc đúng từ cấu hình; gán `media.vision` cho model không có `vision` thì báo lỗi.
 
 Kiểm tra: `uv run pytest tests/unit/test_ai_gateway.py`.
 
@@ -367,6 +367,8 @@ Nghiệm thu:
 
 - [ ] Mỗi nhà cung cấp đã có key chạy được một lời gọi văn bản trong `-m live`, trả về đối tượng hợp lệ.
 - [ ] Mỗi nhà cung cấp có model đọc ảnh chạy được một lời gọi ảnh.
+
+Đã triển khai ba adapter và kiểm thử qua SDK. Nghiệm thu live đang chờ API key.
 
 Kiểm tra: `uv run pytest -m live -k ai_provider`.
 
@@ -387,10 +389,12 @@ ffmpeg tạo `proxy_480p.mp4` (H.264) và `audio_16k.wav` (mono). faster-whisper
 Nghiệm thu:
 
 - [ ] Video mẫu (T44) cho ra transcript có mốc thời gian hợp lệ.
-- [ ] Với video không có phụ đề, timeline dùng transcript `stt`.
+- [x] Với video không có phụ đề, timeline dùng transcript `stt`.
 - [ ] Chạy hai job liên tiếp thì model chỉ được nạp một lần (kiểm qua log).
 
-Kiểm tra: `uv run pytest tests/integration/test_media_stt.py` (đánh dấu `gpu` nếu cần).
+Đã kiểm tra bằng FFmpeg thật việc tạo proxy và audio, khôi phục tệp bị cắt dở và giữ OCR khi chạy lại. Test với model mô phỏng kiểm tra thứ tự phụ đề và log nạp model cho hai bản thu. Hàm `process_full_capture` nhận một `SttWorker` dùng chung; việc nối worker vào hàng đợi GPU thuộc bước tích hợp pipeline.
+
+Kiểm tra: `uv run pytest tests/integration/test_media_stt.py`, cần `ffmpeg` và `ffprobe` trong PATH. Để nghiệm thu GPU, đặt `H4WK_STT_MODEL` thành tên hoặc đường dẫn model đã chọn và `H4WK_T44_CAPTURE` thành thư mục bản thu T44 rồi chạy `uv run --extra stt pytest -m gpu tests/integration/test_media_stt.py`.
 
 File: `src/h4wk/media/{proxy.py,stt.py,models.py}`, tests.
 Người làm: Bảo. Phụ thuộc: T3, T10. Cỡ: M.
@@ -401,8 +405,8 @@ PySceneDetect tách cảnh và lấy một khung đại diện cho mỗi cảnh.
 
 Nghiệm thu:
 
-- [ ] Clip thử có một dòng chữ nhỏ ở góc chỉ hiện 1 giây thì khung đó được giữ.
-- [ ] Cảnh tĩnh 2 phút cho ra tối đa 3 khung.
+- [x] Clip thử có một dòng chữ nhỏ ở góc chỉ hiện 1 giây thì khung đó được giữ.
+- [x] Cảnh tĩnh 2 phút cho ra tối đa 3 khung.
 
 Kiểm tra: `uv run pytest tests/unit/test_keyframes.py`, dùng các clip thử tự tạo bằng ffmpeg.
 
@@ -415,9 +419,13 @@ PaddleOCR tiếng Việt chạy trên từng keyframe và thumbnail, ghi `ocr.js
 
 Nghiệm thu:
 
-- [ ] Khung mẫu có chữ "LỪA ĐẢO" cho ra đúng chữ đó, giữ nguyên dấu, kèm bbox.
+- [x] Khung mẫu có chữ "LỪA ĐẢO" cho ra đúng chữ đó, giữ nguyên dấu, kèm bbox.
 
-Kiểm tra: `uv run pytest tests/unit/test_ocr.py`.
+Gọi `process_ocr(capture_dir, derived_dir)` để đọc chỉ mục T19 và thumbnail cục bộ. Trong `derived/<capture>/ocr.json`, mỗi dòng ở `lines` có `frame`, `t` (giây; null với thumbnail), `text`, `bbox` theo thứ tự x, y, rộng, cao (pixel ảnh nguồn) và `score`. Mục `images` liệt kê cả ảnh không có chữ.
+
+Worker CPU dùng môi trường uv riêng để giữ đúng phiên bản OpenCV của T19. Lần đầu cần mạng để tải dependency và trọng số. Bộ phát hiện là [PP-OCRv5 mobile của PaddlePaddle](https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det). Bản demo dùng bộ nhận dạng tiếng Việt của meomeo163, phát hành theo CC BY-NC 4.0. [Model card và điều kiện sử dụng](https://huggingface.co/meomeo163/PP-OCRv5-vi-latin-rec-v4)
+
+Kiểm tra cả inference CPU thật: `H4WK_TEST_OCR=1 uv run pytest tests/unit/test_ocr.py` trong `backend/`.
 
 File: `src/h4wk/media/ocr.py`, tests.
 Người làm: Bảo. Phụ thuộc: T19. Cỡ: S.

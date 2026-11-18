@@ -13,3 +13,7 @@ enabled = true
 [comments]
 batch_size = 30                # số comment mỗi lô gửi LLM (20–50)
 # max_per_video = 500          # bỏ trống thì không giới hạn
+
+[keyframes]
+phash_threshold = 6   # số bit khác nhau trong pHash 64 bit
+tile_threshold = 2.0  # độ lệch tuyệt đối trung bình theo kênh màu, mỗi ô 0–255

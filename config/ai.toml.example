@@ -1,6 +1,6 @@
 # Cấu hình nhà cung cấp AI và định tuyến tác vụ AI (hợp đồng C5).
 # Không ghi API key ở đây: key nằm trong .env.
-# Các nhà cung cấp khác (OpenAI, Gemini, DeepSeek, Qwen, GLM, Kimi) được thêm ở task T17.
+# Mỗi tên provider dùng khóa riêng tương ứng trong .env.example.
 
 [providers.anthropic]
 type = "anthropic"
@@ -13,13 +13,60 @@ structured = true
 vision = true
 structured = true
 
-# Mẫu cho nhà cung cấp OpenAI-compatible (bắt buộc có base_url):
-# [providers.deepseek]
-# type = "openai_compat"
-# base_url = "https://api.deepseek.com"
-# [providers.deepseek.models."<tên model>"]
-# vision = false
-# structured = false
+# https://developers.openai.com/api/docs/models/gpt-5-mini
+[providers.openai]
+type = "openai_compat"
+base_url = "https://api.openai.com/v1"
+[providers.openai.models."gpt-5-mini"]
+vision = true
+structured = true
+
+# https://aistudio.google.com/docs/models/gemini-3.6-flash
+[providers.gemini]
+type = "gemini"
+[providers.gemini.models."gemini-3.6-flash"]
+vision = true
+structured = true
+
+# https://api-docs.deepseek.com/guides/vision/
+[providers.deepseek]
+type = "openai_compat"
+base_url = "https://api.deepseek.com"
+[providers.deepseek.models."deepseek-flash"]
+vision = true
+structured = false
+
+# https://www.alibabacloud.com/help/en/model-studio/qwen-structured-output
+[providers.qwen]
+type = "openai_compat"
+base_url = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+[providers.qwen.models."qwen-vl-max"]
+vision = true
+structured = false
+
+# https://docs.z.ai/guides/capabilities/struct-output
+[providers.glm]
+type = "openai_compat"
+base_url = "https://api.z.ai/api/paas/v4"
+[providers.glm.models."glm-4.7"]
+vision = false
+structured = false
+
+# https://platform.kimi.ai/docs/guide/use-json-mode-feature-of-kimi-api
+[providers.kimi]
+type = "openai_compat"
+base_url = "https://api.moonshot.ai/v1"
+[providers.kimi.models."kimi-k3.1-pro"]
+vision = true
+structured = false
+
+# https://openrouter.ai/openai/gpt-5-mini/
+[providers.openrouter]
+type = "openai_compat"
+base_url = "https://openrouter.ai/api/v1"
+[providers.openrouter.models."openai/gpt-5-mini"]
+vision = true
+structured = true
 
 # Mỗi tác vụ AI: danh sách (provider, model) theo thứ tự ưu tiên.
 # media.vision chỉ được gán cho model có vision = true.

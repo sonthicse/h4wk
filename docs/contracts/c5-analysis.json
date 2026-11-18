@@ -39,6 +39,27 @@
       "title": "FaceSettings",
       "type": "object"
     },
+    "KeyframeSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "phash_threshold": {
+          "default": 6,
+          "maximum": 64,
+          "minimum": 0,
+          "title": "Phash Threshold",
+          "type": "integer"
+        },
+        "tile_threshold": {
+          "default": 2.0,
+          "maximum": 255,
+          "minimum": 0,
+          "title": "Tile Threshold",
+          "type": "number"
+        }
+      },
+      "title": "KeyframeSettings",
+      "type": "object"
+    },
     "RefImageSettings": {
       "additionalProperties": false,
       "properties": {
@@ -89,6 +110,13 @@
       "$ref": "#/$defs/FaceSettings",
       "default": {
         "enabled": true
+      }
+    },
+    "keyframes": {
+      "$ref": "#/$defs/KeyframeSettings",
+      "default": {
+        "phash_threshold": 6,
+        "tile_threshold": 2.0
       }
     },
     "ref_image": {

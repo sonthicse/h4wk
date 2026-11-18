@@ -239,7 +239,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [ ] T15: Adapter Supadata và credit
 - [ ] T45: `case-core`: dựng lại database chỉ mục
 - [ ] T46: `jobs`: chạy lại job bị treo và xử lý playlist
-- [ ] T16: `ai-gateway`: lõi
+- [x] T16: `ai-gateway`: lõi
 - [ ] T17: `ai-gateway`: provider anthropic, openai_compat, gemini
 
 ### Checkpoint B: chuyển nguồn khi lỗi chạy được, đổi nhà cung cấp AI bằng cấu hình
@@ -247,8 +247,8 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 ### Phase 3: Media đa phương thức (tuần 2–3)
 
 - [ ] T18: Proxy 480p, audio, STT
-- [ ] T19: Keyframe theo mức thay đổi
-- [ ] T20: OCR trên keyframe và thumbnail
+- [x] T19: Keyframe theo mức thay đổi
+- [x] T20: OCR trên keyframe và thumbnail
 - [ ] T21: VLM mô tả keyframe và thumbnail
 - [ ] T22: Timeline đầy đủ
 
