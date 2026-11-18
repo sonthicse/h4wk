@@ -54,6 +54,20 @@ def test_logout_ends_session(client: TestClient) -> None:
     assert client.get("/api/cases").status_code == 401
 
 
+def test_expired_session_is_rejected(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
+    from datetime import datetime, timedelta
+
+    from h4wk.core import auth
+    from h4wk.core.types import VN_TZ
+
+    assert client.get("/api/cases").status_code == 200
+    later = datetime.now(VN_TZ) + auth.SESSION_TTL - timedelta(minutes=1)
+    monkeypatch.setattr(auth, "_now", lambda: later)
+    assert client.get("/api/cases").status_code == 200  # còn 1 phút
+    monkeypatch.setattr(auth, "_now", lambda: later + timedelta(minutes=2))
+    assert client.get("/api/cases").status_code == 401
+
+
 def test_password_is_hashed(data_dir: Path) -> None:
     create_user("bao", "bí-mật")
     # Chế độ WAL: dữ liệu mới có thể còn nằm trong file -wal.

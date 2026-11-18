@@ -9,7 +9,7 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError
 from sqlmodel import Session
 
-from h4wk.core.db import SessionRow, UserRow, get_engine
+from h4wk.core.db import SessionRow, UserRow, as_aware, get_engine
 from h4wk.core.types import VN_TZ
 
 SESSION_COOKIE = "h4wk_session"
@@ -67,7 +67,7 @@ def session_user(token: str | None) -> str | None:
         row = s.get(SessionRow, _token_hash(token))
         if row is None:
             return None
-        if row.expires_at.replace(tzinfo=VN_TZ) <= _now():
+        if as_aware(row.expires_at) <= _now():
             s.delete(row)
             s.commit()
             return None

@@ -182,9 +182,9 @@ Kèm theo là hàm phân loại đầu vào: link hoặc ID video, kênh, `@hand
 
 Nghiệm thu:
 
-- [ ] Có test với `FakeCollector` cho các trường hợp thành công, chuyển nguồn, hết quota, tạm ngưng nguồn, nguồn bị tắt và không còn nguồn.
-- [ ] Manifest liệt kê cả những lần gọi thất bại.
-- [ ] Một adapter giả mới chỉ cần một file và một dòng đăng ký là được orchestrator dùng (có test).
+- [x] Có test với `FakeCollector` cho các trường hợp thành công, chuyển nguồn, hết quota, tạm ngưng nguồn, nguồn bị tắt và không còn nguồn.
+- [x] Manifest liệt kê cả những lần gọi thất bại.
+- [x] Một adapter giả mới chỉ cần một file và một dòng đăng ký là được orchestrator dùng (có test).
 
 Kiểm tra: `uv run pytest tests/unit/test_orchestrator.py tests/unit/test_target_parse.py`.
 

@@ -2,13 +2,14 @@
 database chỉ để tra cứu nhanh và dựng lại được (T45)."""
 
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlalchemy import Engine, event
 from sqlmodel import Field, Session, SQLModel, create_engine
 
 from h4wk.core.config import data_dir
+from h4wk.core.types import VN_TZ
 
 
 class CaseRow(SQLModel, table=True):
@@ -39,6 +40,15 @@ class SessionRow(SQLModel, table=True):
     expires_at: datetime
 
 
+class SourceStateRow(SQLModel, table=True):
+    """Tình trạng nguồn thu, dùng chung giữa các worker."""
+
+    __tablename__ = "source_state"
+    provider: str = Field(primary_key=True)
+    consecutive_failures: int = 0
+    suspended_until: datetime | None = None
+
+
 _engines: dict[Path, Engine] = {}
 
 
@@ -58,6 +68,11 @@ def get_engine(root: Path | None = None) -> Engine:
         SQLModel.metadata.create_all(engine)
         _engines[path] = engine
     return _engines[path]
+
+
+def as_aware(dt: datetime) -> datetime:
+    """SQLite không lưu múi giờ; SQLAlchemy lưu giờ UTC. Đọc ra luôn đổi về giờ Việt Nam."""
+    return (dt if dt.tzinfo else dt.replace(tzinfo=UTC)).astimezone(VN_TZ)
 
 
 def get_session() -> Iterator[Session]:
