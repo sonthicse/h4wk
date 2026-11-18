@@ -25,6 +25,7 @@ type Props = {
 }
 
 export default function ProviderCard({ provider: p, isNew, changed, onChange, onRemove }: Props) {
+  const [editingKey, setEditingKey] = useState(false)
   const [modelName, setModelName] = useState('')
   const [modelCaps, setModelCaps] = useState({ vision: false, structured: false })
   // Test chạy trên cấu hình đã lưu ở server, nên phải Save trước nếu vừa sửa.
@@ -78,14 +79,38 @@ export default function ProviderCard({ provider: p, isNew, changed, onChange, on
 
         <div className="space-y-1.5">
           <Label htmlFor={`${id}-key`}>API key</Label>
-          <Input
-            id={`${id}-key`}
-            type="password"
-            autoComplete="off"
-            placeholder={p.apiKeyMasked ? `${p.apiKeyMasked} (enter a new key to replace)` : 'Not set'}
-            value={p.newApiKey}
-            onChange={(e) => onChange({ ...p, newApiKey: e.target.value })}
-          />
+          {p.apiKeyMasked && !editingKey ? (
+            <div className="flex items-center gap-2">
+              <code id={`${id}-key`} className="flex-1 rounded-md border bg-muted px-3 py-1.5 font-mono text-sm">
+                {p.apiKeyMasked}
+              </code>
+              <Button variant="outline" onClick={() => setEditingKey(true)}>
+                Change key
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                id={`${id}-key`}
+                type="password"
+                autoComplete="off"
+                placeholder={p.apiKeyMasked ? 'Paste the new key' : 'Not set'}
+                value={p.newApiKey}
+                onChange={(e) => onChange({ ...p, newApiKey: e.target.value })}
+              />
+              {p.apiKeyMasked && (
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    onChange({ ...p, newApiKey: '' })
+                    setEditingKey(false)
+                  }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
             {p.newApiKey.trim()
               ? 'New key will be stored on the server when you save.'

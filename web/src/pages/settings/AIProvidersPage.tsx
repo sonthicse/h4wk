@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { PlusIcon } from 'lucide-react'
+import { CheckIcon, LoaderCircleIcon, PlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import AddProviderDialog from '@/components/settings/ai/AddProviderDialog'
 import { draftErrors, providerChanged, toDraft, toInput, type Draft } from '@/components/settings/ai/draft'
@@ -45,27 +45,42 @@ export default function AIProvidersPage() {
   const errors = draftErrors(draft)
 
   return (
-    <div className="space-y-6 pb-16">
-      <section className="space-y-3">
-        <div>
-          <h2 className="text-lg font-semibold">Task routing</h2>
-          <p className="text-sm text-muted-foreground">
-            Each task tries its models from top to bottom and falls back to the next one on failure.
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold">AI providers</h2>
+        <div className="flex items-center gap-3">
+          {save.isError && <span className="text-sm text-destructive">Save failed. Try again.</span>}
+          {dirty ? (
+            <Badge variant="outline" className="border-amber-500 text-amber-600">
+              Unsaved changes
+            </Badge>
+          ) : savedAt ? (
+            <span role="status" className="flex items-center gap-1 text-sm text-muted-foreground">
+              <CheckIcon className="size-4" /> Saved
+            </span>
+          ) : null}
+          <Button variant="outline" disabled={!dirty || save.isPending} onClick={() => edit(toDraft(saved))}>
+            Discard
+          </Button>
+          <Button disabled={!dirty || errors.length > 0 || save.isPending} onClick={() => save.mutate()}>
+            {save.isPending && <LoaderCircleIcon className="animate-spin" />}
+            Save
+          </Button>
         </div>
-        <div className="space-y-3">
-          {AI_TASKS.map((t) => (
-            <TaskRoutes
-              key={t}
-              task={t}
-              routes={draft.tasks[t]}
-              providers={draft.providers}
-              changed={changedTasks.includes(t)}
-              onChange={(routes) => edit({ ...draft, tasks: { ...draft.tasks, [t]: routes } })}
-            />
-          ))}
-        </div>
-      </section>
+      </div>
+
+      {errors.length > 0 && (
+        <Alert variant="destructive">
+          <AlertTitle>Fix before saving</AlertTitle>
+          <AlertDescription>
+            <ul className="list-inside list-disc">
+              {errors.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -89,32 +104,26 @@ export default function AIProvidersPage() {
         </div>
       </section>
 
-      <div className="sticky bottom-0 -mx-1 space-y-2 border-t bg-background/95 px-1 py-3 backdrop-blur">
-        {errors.length > 0 && (
-          <Alert variant="destructive">
-            <AlertTitle>Fix before saving</AlertTitle>
-            <AlertDescription>
-              <ul className="list-inside list-disc">
-                {errors.map((e) => (
-                  <li key={e}>{e}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-        {save.isError && <p className="text-sm text-destructive">Could not save. Try again.</p>}
-        <div className="flex items-center gap-3">
-          {dirty ? <Badge variant="outline">Unsaved changes</Badge> : savedAt && <Badge>Saved</Badge>}
-          <div className="ml-auto flex gap-2">
-            <Button variant="ghost" disabled={!dirty || save.isPending} onClick={() => edit(toDraft(saved))}>
-              Discard
-            </Button>
-            <Button disabled={!dirty || errors.length > 0 || save.isPending} onClick={() => save.mutate()}>
-              {save.isPending ? 'Saving…' : 'Save changes'}
-            </Button>
-          </div>
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">Task routing</h2>
+          <p className="text-sm text-muted-foreground">
+            Each task tries its models from top to bottom and falls back to the next one on failure.
+          </p>
         </div>
-      </div>
+        <div className="space-y-3">
+          {AI_TASKS.map((t) => (
+            <TaskRoutes
+              key={t}
+              task={t}
+              routes={draft.tasks[t]}
+              providers={draft.providers}
+              changed={changedTasks.includes(t)}
+              onChange={(routes) => edit({ ...draft, tasks: { ...draft.tasks, [t]: routes } })}
+            />
+          ))}
+        </div>
+      </section>
 
       <AddProviderDialog
         open={adding}
