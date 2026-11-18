@@ -1,0 +1,33 @@
+import { NavLink, Outlet } from 'react-router'
+import { cn } from '@/lib/utils'
+
+// Khung trang Settings (SPEC 10.10): mục 1–5 ở Sources, mục 6–7 ở AI providers.
+const tabs = [
+  { to: '/settings/sources', label: 'Sources' },
+  { to: '/settings/ai', label: 'AI providers' },
+]
+
+export default function SettingsLayout() {
+  return (
+    <div className="space-y-4">
+      <h1 className="text-2xl font-semibold">Settings</h1>
+      <nav className="flex gap-1 border-b" aria-label="Settings sections">
+        {tabs.map((t) => (
+          <NavLink
+            key={t.to}
+            to={t.to}
+            className={({ isActive }) =>
+              cn(
+                '-mb-px border-b-2 px-3 py-2 text-sm',
+                isActive ? 'border-primary font-medium' : 'border-transparent text-muted-foreground hover:text-foreground',
+              )
+            }
+          >
+            {t.label}
+          </NavLink>
+        ))}
+      </nav>
+      <Outlet />
+    </div>
+  )
+}

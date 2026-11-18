@@ -34,11 +34,11 @@ const caseNav = [
   { path: 'entities', label: 'Entities', icon: UsersIcon },
 ]
 
-function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: typeof FlagIcon }) {
+function NavItem({ to, label, icon: Icon, end = true }: { to: string; label: string; icon: typeof FlagIcon; end?: boolean }) {
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={useMatch({ path: to, end: true }) !== null} tooltip={label}>
-        <NavLink to={to} end>
+      <SidebarMenuButton asChild isActive={useMatch({ path: to, end }) !== null} tooltip={label}>
+        <NavLink to={to} end={end}>
           <Icon />
           <span>{label}</span>
         </NavLink>
@@ -98,7 +98,7 @@ export default function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <NavItem to="/settings" label="Settings" icon={SettingsIcon} />
+          <NavItem to="/settings" label="Settings" icon={SettingsIcon} end={false} />
         </SidebarMenu>
         <ApiStatus />
       </SidebarFooter>
