@@ -1,0 +1,2 @@
+# Bản mẫu cho config/sources.toml. `uv run h4wk init` chép file này thành sources.toml nếu chưa có.
+# Định dạng file (hợp đồng C5) sẽ được định nghĩa ở task T4.

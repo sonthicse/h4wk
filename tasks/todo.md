@@ -26,9 +26,9 @@ Tạo `backend/` gồm uv, FastAPI, ruff, pytest và CLI `h4wk` có lệnh `init
 
 Nghiệm thu:
 
-- [ ] `uv run h4wk init` tạo `data/` và `config/*.toml` từ file mẫu.
-- [ ] `GET /api/health` trả về `{"status":"ok"}`.
-- [ ] Trang React gọi được `/api/health` qua proxy.
+- [x] `uv run h4wk init` tạo `data/` và `config/*.toml` từ file mẫu.
+- [x] `GET /api/health` trả về `{"status":"ok"}`.
+- [x] Trang React gọi được `/api/health` qua proxy.
 
 Kiểm tra: `uv run pytest` (có 1 test cho health), `npm run build`, mở :5173 và thấy trạng thái "ok".
 

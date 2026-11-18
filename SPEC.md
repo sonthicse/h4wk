@@ -61,7 +61,7 @@ Một số từ dùng thống nhất trong các tài liệu:
 | Khớp ảnh mẫu | Ứng viên: CLIP (`open_clip`) hoặc DINOv2, cần `torch` | Chốt ở spike T3 |
 | LLM/VLM | Lớp riêng với 3 loại adapter: Anthropic SDK, OpenAI-compatible (OpenAI, DeepSeek, Qwen/DashScope, Zhipu GLM, Moonshot Kimi, OpenRouter…), Google GenAI | Tên model đặt trong file cấu hình |
 | Frontend | React, Vite, TypeScript, React Router, TanStack Query, Tailwind và shadcn/ui | Giao diện tiếng Anh. Trình phát dùng thẻ `<video>` với lớp phủ tự viết |
-| Chất lượng code | `ruff` (lint và format), `pytest`; `eslint` và `tsc` cho frontend | |
+| Chất lượng code | `ruff` (lint và format), `pytest`; `oxlint` và `tsc` cho frontend | |
 
 Máy chạy cần WSL2 với GPU NVIDIA và CUDA, `ffmpeg` trong PATH, Node 20 trở lên. Không dùng Docker.
 

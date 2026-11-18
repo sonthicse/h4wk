@@ -1,0 +1,39 @@
+[project]
+name = "h4wk"
+version = "0.1.0"
+description = "h4wk: SOCMINT YouTube demo"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "typer>=0.12",
+]
+
+[project.scripts]
+h4wk = "h4wk.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "httpx2>=2.16",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/h4wk"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: test gọi mạng/API thật, chạy tay bằng -m live"]
+addopts = "-m 'not live'"
