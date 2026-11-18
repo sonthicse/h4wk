@@ -216,7 +216,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T1: Scaffold backend và frontend
 - [x] T2: Spike yt-dlp trên WSL và độ trễ RSS
 - [ ] T3: Spike môi trường GPU và các model
-- [ ] T4: Hợp đồng C1–C5
+- [x] T4: Hợp đồng C1–C5
 - [ ] T44: Bản thu mẫu (xong phần tổng hợp; còn quay video thật, cần trước T18 và T41)
 
 ### Phase 1: Luồng tối giản (tuần 1)

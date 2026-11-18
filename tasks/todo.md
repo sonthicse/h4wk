@@ -90,7 +90,7 @@ Nghiệm thu:
 
 - [x] Mỗi mô hình có trong test ít nhất một ví dụ hợp lệ và một ví dụ bị từ chối.
 - [x] `h4wk schema export` sinh đủ file schema cho C1–C5.
-- [ ] Hai người đã duyệt hợp đồng.
+- [x] Hai người đã duyệt hợp đồng.
 
 Kiểm tra: `uv run pytest tests/unit/test_contracts.py`.
 
