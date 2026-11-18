@@ -6,6 +6,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+USERNAME, PASSWORD = "thi", "mật-khẩu-thử"
+
 
 @pytest.fixture
 def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
@@ -15,8 +17,19 @@ def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 @pytest.fixture
-def client(data_dir: Path) -> Iterator[TestClient]:
+def anon_client(data_dir: Path) -> Iterator[TestClient]:
+    """Client chưa đăng nhập; đã có sẵn tài khoản USERNAME."""
     from h4wk.api.app import app
+    from h4wk.core.auth import create_user
 
+    create_user(USERNAME, PASSWORD)
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture
+def client(anon_client: TestClient) -> TestClient:
+    """Client đã đăng nhập bằng USERNAME."""
+    r = anon_client.post("/api/auth/login", json={"username": USERNAME, "password": PASSWORD})
+    assert r.status_code == 204, r.text
+    return anon_client

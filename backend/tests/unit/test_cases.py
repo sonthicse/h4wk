@@ -74,5 +74,5 @@ def test_index_survives_restart(client: TestClient) -> None:
     case = _create(client)
     from h4wk.api.app import app
 
-    with TestClient(app) as c2:
+    with TestClient(app, cookies=client.cookies) as c2:
         assert c2.get(f"/api/cases/{case['id']}").status_code == 200

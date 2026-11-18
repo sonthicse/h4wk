@@ -25,6 +25,20 @@ class EntityRow(SQLModel, table=True):
     name: str
 
 
+class UserRow(SQLModel, table=True):
+    __tablename__ = "users"
+    username: str = Field(primary_key=True)
+    password_hash: str  # argon2
+    created_at: datetime
+
+
+class SessionRow(SQLModel, table=True):
+    __tablename__ = "sessions"
+    token_hash: str = Field(primary_key=True)  # SHA-256 của token trong cookie
+    username: str = Field(foreign_key="users.username")
+    expires_at: datetime
+
+
 _engines: dict[Path, Engine] = {}
 
 

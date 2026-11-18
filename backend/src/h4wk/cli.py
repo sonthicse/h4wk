@@ -9,6 +9,7 @@ from pydantic import TypeAdapter
 
 from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
 from h4wk.collectors.models import Normalized
+from h4wk.core.auth import create_user
 from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
 from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig
 from h4wk.core.db import get_engine
@@ -20,6 +21,8 @@ from h4wk.media.timeline import Timeline
 app = typer.Typer(no_args_is_help=True)
 schema_app = typer.Typer(no_args_is_help=True, help="JSON Schema của hợp đồng C1–C5.")
 app.add_typer(schema_app, name="schema")
+user_app = typer.Typer(no_args_is_help=True, help="Tài khoản đăng nhập.")
+app.add_typer(user_app, name="user")
 
 # Tên file → kiểu cần xuất JSON Schema.
 CONTRACTS: dict[str, object] = {
@@ -85,6 +88,20 @@ def schema_export() -> None:
     """Xuất JSON Schema của C1–C5 vào docs/contracts/."""
     for path in export_schemas(REPO_ROOT / "docs" / "contracts"):
         typer.echo(f"wrote: {path}")
+
+
+@user_app.command("create")
+def user_create(
+    username: str,
+    password: str = typer.Option(..., prompt=True, hide_input=True, confirmation_prompt=True),
+) -> None:
+    """Tạo tài khoản; mật khẩu được hỏi khi chạy và lưu dạng hash argon2."""
+    try:
+        create_user(username, password)
+    except ValueError as e:
+        typer.echo(str(e), err=True)
+        raise typer.Exit(code=1) from None
+    typer.echo(f"created user: {username}")
 
 
 @app.command()

@@ -223,7 +223,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 - [x] T5: `evidence-store`: ghi bản thu, manifest, verify
 - [x] T6: `case-core`: case, đối tượng, nhật ký, chỉ mục
-- [ ] T7: `case-core`: đăng nhập 2 tài khoản
+- [x] T7: `case-core`: đăng nhập 2 tài khoản
 - [ ] T8: `collectors`: hợp đồng adapter và orchestrator
 - [ ] T9: Adapter yt-dlp
 - [ ] T10: `media`: timeline từ phụ đề YouTube

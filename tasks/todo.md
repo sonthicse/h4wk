@@ -157,8 +157,8 @@ Lệnh `h4wk user create` lưu mật khẩu dạng hash (argon2 hoặc bcrypt). 
 
 Nghiệm thu:
 
-- [ ] Gọi API khi chưa đăng nhập nhận về 401.
-- [ ] Audit ghi đúng `user:<username>`; đăng nhập sai có dòng trong system audit.
+- [x] Gọi API khi chưa đăng nhập nhận về 401.
+- [x] Audit ghi đúng `user:<username>`; đăng nhập sai có dòng trong system audit.
 
 Kiểm tra: `uv run pytest tests/unit/test_auth.py`.
 
