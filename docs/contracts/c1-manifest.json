@@ -230,9 +230,9 @@
   },
   "additionalProperties": false,
   "properties": {
-    "collected_at_utc": {
+    "collected_at": {
       "format": "date-time",
-      "title": "Collected At Utc",
+      "title": "Collected At",
       "type": "string"
     },
     "collector": {
@@ -253,7 +253,7 @@
     "previous_capture": {
       "anyOf": [
         {
-          "pattern": "^\\d{8}T\\d{6}Z$",
+          "pattern": "^\\d{8}T\\d{6}$",
           "type": "string"
         },
         {
@@ -290,7 +290,7 @@
   "required": [
     "schema",
     "source_url",
-    "collected_at_utc",
+    "collected_at",
     "collector",
     "trigger",
     "level",

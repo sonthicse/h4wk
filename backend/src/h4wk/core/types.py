@@ -4,7 +4,7 @@ Các enum `Cap` và `CollectLevel` thuộc C2 nhưng đặt ở đây, vì C1 (e
 mà evidence-store không được phụ thuộc collectors. `collectors.models` xuất lại hai enum này.
 """
 
-from datetime import UTC, datetime
+from datetime import datetime, timedelta, timezone
 from enum import StrEnum
 from typing import Annotated
 
@@ -25,17 +25,21 @@ class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_by_name=True, serialize_by_alias=True)
 
 
-def _to_utc(d: datetime) -> datetime:
-    return d.astimezone(UTC)
+# Giờ Việt Nam. Việt Nam không đổi giờ theo mùa nên dùng độ lệch cố định.
+VN_TZ = timezone(timedelta(hours=7))
 
 
-def _iso_z(d: datetime) -> str:
-    return d.isoformat().replace("+00:00", "Z")
+def _to_vn(d: datetime) -> datetime:
+    return d.astimezone(VN_TZ)
 
 
-# Thời gian luôn có múi giờ, được đổi sang UTC, ghi ra dạng ISO-8601 có hậu tố Z (SPEC §6).
-UtcDatetime = Annotated[
-    AwareDatetime, AfterValidator(_to_utc), PlainSerializer(_iso_z, return_type=str)
+def _iso(d: datetime) -> str:
+    return d.isoformat()
+
+
+# Thời gian luôn có múi giờ, được đổi sang giờ Việt Nam, ghi ra ISO-8601 kèm +07:00 (SPEC §6).
+VnDatetime = Annotated[
+    AwareDatetime, AfterValidator(_to_vn), PlainSerializer(_iso, return_type=str)
 ]
 
 # Người thực hiện: `user:<username>` hoặc `system:<rule>`.
@@ -43,8 +47,8 @@ Actor = Annotated[str, StringConstraints(pattern=r"^(user|system):\S+$")]
 
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
 
-# Tên thư mục bản thu, ví dụ 20261118T084530Z.
-CaptureTs = Annotated[str, StringConstraints(pattern=r"^\d{8}T\d{6}Z$")]
+# Tên thư mục bản thu theo giờ Việt Nam, ví dụ 20261118T154530.
+CaptureTs = Annotated[str, StringConstraints(pattern=r"^\d{8}T\d{6}$")]
 
 NonNegInt = Annotated[int, Field(ge=0)]
 NonNegFloat = Annotated[float, Field(ge=0)]

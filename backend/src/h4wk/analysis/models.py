@@ -1,14 +1,12 @@
 """Hợp đồng C4: dấu hiệu (hits.json), nghi vấn (findings.json), quyết định rà soát
 (một dòng trong reviews.jsonl). hits.json và findings.json là mảng JSON (SPEC 10.6)."""
 
-import hashlib
-import json
 from enum import StrEnum
 from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
-from h4wk.core.types import Actor, BBox, CaptureTs, Contract, NonNegFloat, RelPath, UtcDatetime
+from h4wk.core.types import Actor, BBox, CaptureTs, Contract, NonNegFloat, RelPath, VnDatetime
 
 
 class Via(StrEnum):
@@ -84,27 +82,10 @@ class ModelRef(Contract):
     model: str
 
 
-def finding_key(
-    video_id: str, source_kind: str, location_id: str | None, entity: str, analyzer: str
-) -> str:
-    """Mã của nghi vấn, giữ nguyên giữa các lần chạy để giữ quyết định rà soát cũ.
-
-    location_id là segment_id, hoặc comment_id với nghi vấn từ comment. Mã là SHA-256 (hex)
-    của mảng JSON 5 phần tử theo đúng thứ tự trên, viết gọn, không thoát ký tự Unicode.
-    """
-    raw = json.dumps(
-        [video_id, source_kind, location_id, entity, analyzer],
-        ensure_ascii=False,
-        separators=(",", ":"),
-    )
-    return hashlib.sha256(raw.encode()).hexdigest()
-
-
 class Finding(Contract):
     """Một nghi vấn (một phần tử của findings.json)."""
 
     id: str = Field(pattern=r"^f_\S+$")
-    key: str
     run_id: str
     case_id: str
     video_id: str
@@ -137,22 +118,15 @@ class Finding(Contract):
             raise ValueError("nghi vấn từ comment phải có comment_id")
         if self.start is not None and self.end is not None and self.end < self.start:
             raise ValueError("end phải >= start")
-        location = self.comment_id if self.source_kind == SourceKind.COMMENT else self.segment_id
-        expected = finding_key(
-            self.video_id, self.source_kind, location, self.entity, self.analyzer
-        )
-        if self.key != expected:
-            raise ValueError("key không khớp với (video_id, source_kind, vị trí, entity, analyzer)")
         return self
 
 
 class ReviewDecision(Contract):
     """Một quyết định rà soát (một dòng của reviews.jsonl)."""
 
-    finding_key: str
     finding_id: str
     run_id: str
     status: Literal["confirmed", "rejected", "needs_info"]
     by: Actor
-    at: UtcDatetime
+    at: VnDatetime
     note: str = ""

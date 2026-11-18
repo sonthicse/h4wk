@@ -16,10 +16,6 @@
       "title": "Finding Id",
       "type": "string"
     },
-    "finding_key": {
-      "title": "Finding Key",
-      "type": "string"
-    },
     "note": {
       "default": "",
       "title": "Note",
@@ -40,7 +36,6 @@
     }
   },
   "required": [
-    "finding_key",
     "finding_id",
     "run_id",
     "status",

@@ -14,7 +14,7 @@ from h4wk.core.types import (
     NonNegInt,
     RelPath,
     Sha256,
-    UtcDatetime,
+    VnDatetime,
 )
 
 
@@ -53,7 +53,7 @@ class SourceCall(Contract):
     provider: str | None
     what: Cap
     status: SourceStatus
-    started_at: UtcDatetime | None = None
+    started_at: VnDatetime | None = None
     duration_ms: NonNegInt | None = None
     cost: Cost | None = None
     error: str | None = None
@@ -74,7 +74,7 @@ class FileEntry(Contract):
 class Manifest(Contract):
     schema_: Literal["h4wk.manifest/1"] = Field(alias="schema")
     source_url: str
-    collected_at_utc: UtcDatetime
+    collected_at: VnDatetime
     collector: Actor
     trigger: Trigger
     level: CollectLevel

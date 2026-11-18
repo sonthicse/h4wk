@@ -3,14 +3,14 @@
 import copy
 import json
 import tomllib
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 import pytest
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
-from h4wk.analysis.models import EntityHit, Finding, ReviewDecision, finding_key
+from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
 from h4wk.cli import export_schemas
 from h4wk.collectors.models import Cap, CollectLevel, Normalized
 from h4wk.core.config import REPO_ROOT
@@ -25,7 +25,7 @@ SHA = "a" * 64
 MANIFEST: dict[str, Any] = {
     "schema": "h4wk.manifest/1",
     "source_url": "https://www.youtube.com/watch?v=abc123",
-    "collected_at_utc": "2026-11-18T08:45:30Z",
+    "collected_at": "2026-11-18T15:45:30+07:00",
     "collector": "system:watchlist:w_012",
     "trigger": {"type": "watchlist", "watch_item": "w_012", "event": "new_video"},
     "level": "full",
@@ -35,7 +35,7 @@ MANIFEST: dict[str, Any] = {
             "provider": "youtube_api",
             "what": "video.metadata",
             "status": "ok",
-            "started_at": "2026-11-18T08:45:30Z",
+            "started_at": "2026-11-18T15:45:30+07:00",
             "duration_ms": 412,
             "cost": {"quota_units": 1},
         },
@@ -66,7 +66,7 @@ NORMALIZED: dict[str, Any] = {
         "tags": ["tin tức"],
         "category": "News & Politics",
         "duration_s": 652.0,
-        "published_at": "2026-11-18T08:00:00Z",
+        "published_at": "2026-11-18T15:00:00+07:00",
         "view_count": 10,
         "like_count": 1,
         "comment_count": 2,
@@ -100,7 +100,7 @@ NORMALIZED: dict[str, Any] = {
 TIMELINE: dict[str, Any] = {
     "schema": "h4wk.timeline/1",
     "video_id": "abc123",
-    "capture": "20261118T084530Z",
+    "capture": "20261118T154530",
     "source_video_sha256": SHA,
     "transcript_kind": "stt",
     "thumbnails": [
@@ -152,10 +152,10 @@ HIT: dict[str, Any] = {
 def _finding(**over: Any) -> dict[str, Any]:
     f: dict[str, Any] = {
         "id": "f_0001",
-        "run_id": "r_20261118T090000Z",
+        "run_id": "r_20261118T160000",
         "case_id": "2026-11_case-0007",
         "video_id": "abc123",
-        "capture": "20261118T084530Z",
+        "capture": "20261118T154530",
         "analyzer": "llm",
         "analyzer_version": "0.1.0",
         "model": {"provider": "anthropic", "model": "claude-sonnet-5-5"},
@@ -177,28 +177,17 @@ def _finding(**over: Any) -> dict[str, Any]:
         "reason": "Ảnh ghép khuôn mặt đối tượng với còng tay.",
     }
     f.update(over)
-    f.setdefault(
-        "key",
-        finding_key(
-            f["video_id"],
-            f["source_kind"],
-            f["segment_id"] or f["comment_id"],
-            f["entity"],
-            f["analyzer"],
-        ),
-    )
     return f
 
 
 FINDING = _finding()
 
 REVIEW: dict[str, Any] = {
-    "finding_key": FINDING["key"],
     "finding_id": "f_0001",
-    "run_id": "r_20261118T090000Z",
+    "run_id": "r_20261118T160000",
     "status": "confirmed",
     "by": "user:thi",
-    "at": "2026-11-18T09:30:00Z",
+    "at": "2026-11-18T16:30:00+07:00",
     "note": "",
 }
 
@@ -304,11 +293,15 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
         "đường dẫn tuyệt đối",
     ),
     (Manifest, _set("files", {"a.json": {"sha256": "A" * 64, "bytes": 1}})(MANIFEST), "sha256 hoa"),
-    (Manifest, _set("previous_capture", "2026-11-18T08:45:30Z")(MANIFEST), "sai dạng capture ts"),
+    (
+        Manifest,
+        _set("previous_capture", "2026-11-18T15:45:30+07:00")(MANIFEST),
+        "sai dạng capture ts",
+    ),
     (Manifest, _set("collector", "thi")(MANIFEST), "actor thiếu tiền tố"),
     (
         Manifest,
-        _set("collected_at_utc", "2026-11-18T08:45:30")(MANIFEST),
+        _set("collected_at", "2026-11-18T15:45:30")(MANIFEST),
         "thời gian không múi giờ",
     ),
     (Manifest, _set("level", "everything")(MANIFEST), "mức thu không tồn tại"),
@@ -334,6 +327,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Timeline, _set("transcript_kind", "manual")(TIMELINE), "loại transcript lạ"),
     (Timeline, _set("segments.0.id", "7")(TIMELINE), "id đoạn sai dạng"),
     (Timeline, _set("capture", "hôm nay")(TIMELINE), "capture sai dạng"),
+    (Timeline, _set("capture", "20261118T084530Z")(TIMELINE), "capture dạng UTC cũ"),
     # C4: hit
     (EntityHit, _set("via", "voice")(HIT), "via lạ"),
     (EntityHit, {**HIT, "via": "comment", "comment_id": None}, "via comment thiếu comment_id"),
@@ -348,7 +342,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Finding, _finding(analyzer="llm", model=None), "llm thiếu model"),
     (Finding, _finding(confidence="87%"), "mức tin cậy dạng phần trăm"),
     (Finding, _finding(category="spam"), "category lạ"),
-    (Finding, _finding(key="b" * 64), "key không khớp các trường"),
+    (Finding, _finding(key="b" * 64), "trường key đã bỏ"),
     # C4: review
     (ReviewDecision, _set("status", "approved")(REVIEW), "status lạ"),
     (ReviewDecision, _set("by", "thi")(REVIEW), "actor thiếu tiền tố"),
@@ -411,33 +405,25 @@ def test_rejected_examples(model: type[BaseModel], data: dict[str, Any], why: st
 # ------------------------------------------------------------ quy ước chung
 
 
-def test_datetime_serializes_utc_with_z() -> None:
+def test_datetime_serializes_vietnam_time() -> None:
     m = Manifest.model_validate(MANIFEST)
     dumped = json.loads(m.model_dump_json())
-    assert dumped["collected_at_utc"] == "2026-11-18T08:45:30Z"
+    assert dumped["collected_at"] == "2026-11-18T15:45:30+07:00"
     assert dumped["schema"] == "h4wk.manifest/1"
 
 
-def test_datetime_with_offset_is_normalized_to_utc() -> None:
-    m = Manifest.model_validate({**MANIFEST, "collected_at_utc": "2026-11-18T15:45:30+07:00"})
-    assert m.collected_at_utc == datetime(2026, 11, 18, 8, 45, 30, tzinfo=UTC)
-    vn = datetime(2026, 11, 18, 15, 45, 30, tzinfo=timezone(timedelta(hours=7)))
-    m2 = Manifest.model_validate({**MANIFEST, "collected_at_utc": vn})
-    assert json.loads(m2.model_dump_json())["collected_at_utc"] == "2026-11-18T08:45:30Z"
+def test_utc_input_is_converted_to_vietnam_time() -> None:
+    # YouTube trả giờ UTC; khi đọc vào phải đổi sang giờ Việt Nam.
+    for value in ["2026-11-18T08:45:30Z", datetime(2026, 11, 18, 8, 45, 30, tzinfo=UTC)]:
+        m = Manifest.model_validate({**MANIFEST, "collected_at": value})
+        assert m.collected_at.utcoffset() == timedelta(hours=7)
+        assert json.loads(m.model_dump_json())["collected_at"] == "2026-11-18T15:45:30+07:00"
 
 
 def test_cap_values_match_manifest_what() -> None:
     assert Cap.VIDEO_METADATA.value == "video.metadata"
     assert Cap.MEDIA.value == "video.media"
     assert {lv.value for lv in CollectLevel} == {"metadata", "text", "full"}
-
-
-def test_finding_key_is_stable_and_field_sensitive() -> None:
-    k = finding_key("abc123", "speech", "seg_0007", "e_01", "static")
-    assert k == finding_key("abc123", "speech", "seg_0007", "e_01", "static")
-    assert len(k) == 64
-    assert k != finding_key("abc123", "speech", "seg_0008", "e_01", "static")
-    assert k != finding_key("abc123", "speech", "seg_0007", "e_01", "llm")
 
 
 def test_hits_and_findings_files_are_lists() -> None:

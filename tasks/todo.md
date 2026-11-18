@@ -81,7 +81,7 @@ Viết mô hình Pydantic cho:
 - C1: manifest, kèm enum `status`;
 - C2: `Video`, `Channel`, `Transcript`, `Comment`, `Thumbnail`, `MediaFile`, `Normalized`, enum `Cap` và `CollectLevel`;
 - C3: `Timeline`, có khối `thumbnails`;
-- C4: `EntityHit`, `Finding` (có `key` và `triggers`), `ReviewDecision`;
+- C4: `EntityHit`, `Finding` (có `triggers`), `ReviewDecision`;
 - C5: định dạng `sources.toml`, `ai.toml` (có khả năng `vision`, `structured` cho từng model) và `analysis.toml`.
 
 Lệnh `h4wk schema export` xuất JSON Schema vào `docs/contracts/`. Thi viết; Bảo cùng duyệt C3, C4 và phần `ai.toml` của C5.
@@ -465,7 +465,7 @@ Tầng LLM gửi tới tác vụ AI `analysis.classify` các phần sau:
 - trong video liên quan tới đối tượng, mọi đoạn có `offensive_cues`, kể cả khi không nhắc tên, kèm ngữ cảnh cấp video (tiêu đề, mô tả, danh sách dấu hiệu);
 - tiêu đề, mô tả và thumbnail có dấu hiệu hoặc có `offensive_cues`.
 
-Đầu ra theo C4, có `triggers` ghi rõ dấu hiệu nào khiến đoạn được gửi đi. Nghi vấn `visual` phải trích khung hình và nêu lý do dựa trên nội dung hình. `key` của nghi vấn tính theo C4. Prompt nằm ở `analysis/prompts/classify.md` và phân biệt rõ phê bình hợp lý với bôi nhọ.
+Đầu ra theo C4, có `triggers` ghi rõ dấu hiệu nào khiến đoạn được gửi đi. Nghi vấn `visual` phải trích khung hình và nêu lý do dựa trên nội dung hình. Prompt nằm ở `analysis/prompts/classify.md` và phân biệt rõ phê bình hợp lý với bôi nhọ.
 
 Nghiệm thu:
 
@@ -494,13 +494,13 @@ Người làm: Bảo. Phụ thuộc: T23. Cỡ: S.
 
 ### T25: `review`: backend hàng đợi và quyết định
 
-API hàng đợi chỉ trả nghi vấn của lần chạy mới nhất cho mỗi bản thu, lọc được theo video, `source_kind` và trạng thái, sắp theo severity rồi đến thời gian. `POST /api/findings/{id}/decision` nhận status `confirmed`, `rejected` hoặc `needs_info`; `rejected` bắt buộc có note. Mỗi quyết định được ghi thêm vào `reviews.jsonl` theo `finding_key`, ghi audit, rồi cập nhật chỉ mục. Ngoài endpoint này, code không đặt trạng thái `confirmed` ở đâu khác. Task làm và test bằng nghi vấn mẫu của T44.
+API hàng đợi chỉ trả nghi vấn của lần chạy mới nhất cho mỗi bản thu, lọc được theo video, `source_kind` và trạng thái, sắp theo severity rồi đến thời gian. `POST /api/findings/{id}/decision` nhận status `confirmed`, `rejected` hoặc `needs_info`; `rejected` bắt buộc có note. Mỗi quyết định được ghi thêm vào `reviews.jsonl` theo `finding_id` và `run_id`, ghi audit, rồi cập nhật chỉ mục. Ngoài endpoint này, code không đặt trạng thái `confirmed` ở đâu khác. Task làm và test bằng nghi vấn mẫu của T44.
 
 Nghiệm thu:
 
 - [ ] Bác nghi vấn mà không có lý do thì nhận 422.
 - [ ] Sau `reindex`, trạng thái rà soát vẫn giữ nguyên.
-- [ ] Chạy phân tích lại cho ra nghi vấn cùng `key` thì quyết định cũ vẫn hiện.
+- [ ] Chạy phân tích lại thì nghi vấn của lần chạy mới ở trạng thái chưa rà soát; quyết định của lần chạy trước vẫn còn trong `reviews.jsonl`.
 
 Kiểm tra: `uv run pytest tests/unit/test_review.py`.
 

@@ -128,7 +128,7 @@ h4wk/
 ## 6. Quy ước code
 
 - Python có type hint đầy đủ. Dữ liệu đi qua ranh giới giữa các module luôn là mô hình Pydantic. `ruff` đặt độ dài dòng 100. Tên module, hàm và biến viết bằng tiếng Anh; comment và docstring viết bằng tiếng Việt.
-- Thời gian luôn là `datetime` có timezone UTC, ghi ra đĩa theo ISO-8601 với hậu tố `Z`.
+- Thời gian luôn là `datetime` có múi giờ, theo giờ Việt Nam (UTC+07:00), ghi ra đĩa theo ISO-8601 kèm `+07:00`, ví dụ `2026-11-18T15:45:30+07:00`. Thời gian lấy từ nguồn ngoài (YouTube trả giờ UTC) được đổi sang giờ Việt Nam khi đọc vào. Tên thư mục bản thu có dạng `YYYYMMDDTHHMMSS`, theo giờ Việt Nam.
 - Người thực hiện thao tác luôn ghi dạng `user:<username>` hoặc `system:<rule>`.
 - Adapter ném đúng loại lỗi đã định nghĩa trong C2, để orchestrator biết nên thử lại hay chuyển nguồn.
 - Model GPU được nạp một lần cho mỗi worker process, không nạp lại cho từng job.
@@ -171,7 +171,7 @@ Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải 
 - [ ] Một case có ít nhất 10 video thật đã xử lý xong. Hàng đợi có ít nhất một nghi vấn từ lời nói, một từ chữ OCR và một từ hình ảnh (`visual`).
 - [ ] Có ít nhất một nghi vấn từ hình ảnh nằm ở đoạn không ai nhắc tên đối tượng, được tìm ra nhờ khuôn mặt mẫu, ảnh mẫu hoặc ngữ cảnh của cả video.
 - [ ] Bấm vào một nghi vấn thì video phát từ `start − 2s`. Đoạn bị nghi được tô màu trên thanh thời gian, transcript chạy theo, và khung hình hiện ra kèm khung bao của chữ OCR, khuôn mặt hoặc ảnh mẫu đã khớp.
-- [ ] Thao tác Confirm, Reject (bắt buộc ghi lý do) và Needs info được ghi vào nhật ký case cùng người làm, thời điểm UTC và lý do. Nghi vấn chỉ chuyển sang confirmed khi analyst bấm Confirm.
+- [ ] Thao tác Confirm, Reject (bắt buộc ghi lý do) và Needs info được ghi vào nhật ký case cùng người làm, thời điểm và lý do. Nghi vấn chỉ chuyển sang confirmed khi analyst bấm Confirm.
 
 ### Màn 2: dán link trực tiếp
 
@@ -239,9 +239,9 @@ data/
     ├── case.json                        ← mục tiêu, đối tượng, người phụ trách
     ├── log/audit.jsonl
     ├── entities/<entity_id>/refs/{face,image}/
-    ├── channels/<channel_id>/captures/<YYYYMMDDTHHMMSSZ>/...
+    ├── channels/<channel_id>/captures/<YYYYMMDDTHHMMSS>/...
     ├── videos/<video_id>/               ← để phẳng theo video ID, không lồng dưới kênh
-    │   ├── captures/<YYYYMMDDTHHMMSSZ>/ ← khoá chỉ đọc sau khi ghi manifest
+    │   ├── captures/<YYYYMMDDTHHMMSS>/ ← khoá chỉ đọc sau khi ghi manifest
     │   │   ├── sources/<provider>/...   ← dữ liệu thô nguyên văn
     │   │   ├── normalized.json          ← C2
     │   │   └── manifest.json
@@ -258,7 +258,7 @@ data/
 {
   "schema": "h4wk.manifest/1",
   "source_url": "https://www.youtube.com/watch?v=…",
-  "collected_at_utc": "2026-11-18T08:45:30Z",
+  "collected_at": "2026-11-18T15:45:30+07:00",
   "collector": "user:thi | system:watchlist:w_012",
   "trigger": {"type": "manual|watchlist", "watch_item": "w_012", "event": "new_video"},
   "level": "full",
@@ -350,7 +350,7 @@ Hợp đồng C3 là `timeline.json`:
 ```json
 {
   "schema": "h4wk.timeline/1",
-  "video_id": "…", "capture": "20261118T084530Z",
+  "video_id": "…", "capture": "20261118T154530",
   "source_video_sha256": "…", "transcript_kind": "uploaded|auto|supadata_ai|stt",
   "thumbnails": [{
     "file": "thumbnails/maxres.jpg",
@@ -410,7 +410,7 @@ Nghi vấn (`findings.json`):
 
 ```json
 {
-  "id": "f_…", "key": "…", "run_id": "…", "case_id": "…", "video_id": "…", "capture": "…",
+  "id": "f_…", "run_id": "…", "case_id": "…", "video_id": "…", "capture": "…",
   "analyzer": "static|llm", "analyzer_version": "0.1.0",
   "model": {"provider": "…", "model": "…"},
   "source_kind": "speech|ocr|visual|title|description|thumbnail|comment",
@@ -428,10 +428,10 @@ Nghi vấn (`findings.json`):
 Quyết định rà soát (một dòng trong `reviews.jsonl`):
 
 ```json
-{"finding_key": "…", "finding_id": "f_…", "run_id": "…", "status": "confirmed|rejected|needs_info", "by": "user:thi", "at": "…", "note": "…"}
+{"finding_id": "f_…", "run_id": "…", "status": "confirmed|rejected|needs_info", "by": "user:thi", "at": "…", "note": "…"}
 ```
 
-`key` của nghi vấn là mã băm của `(video_id, source_kind, segment_id hoặc comment_id, entity, analyzer)`. Chạy phân tích lại cho ra nghi vấn cùng `key` thì quyết định cũ được giữ.
+Mỗi lần chạy phân tích sinh nghi vấn với `id` mới. Nghi vấn của lần chạy mới luôn bắt đầu ở trạng thái chưa rà soát, kể cả khi giống một nghi vấn đã được quyết định ở lần chạy trước. Quyết định cũ vẫn nằm trong `reviews.jsonl`, gắn với `finding_id` và `run_id` cũ.
 
 Quy tắc:
 
@@ -523,7 +523,7 @@ Nghiệm thu: chạy được trên Chrome bản mới nhất ở độ rộng t
 Luôn làm:
 
 - Chạy `pytest` và `ruff` trước khi commit.
-- Dùng thời gian UTC và đặt tên theo ID của YouTube.
+- Dùng giờ Việt Nam và đặt tên theo ID của YouTube.
 - Ghi nhật ký cho mọi thao tác, kể cả thao tác thất bại.
 - Validate mọi đầu ra của LLM/VLM.
 - Lưu dữ liệu thô nguyên văn.
@@ -571,6 +571,8 @@ Các quyết định đã chốt:
 - Phân tích chạy trên một transcript chính; các transcript khác chỉ để xem.
 - Chỉ thu phụ đề tiếng Việt: bản người đăng tải lên (`vi*`) và bản tự động gốc (`vi-orig`). Không thu bản dịch máy, vì lấy mọi ngôn ngữ kéo theo hơn 100 bản dịch và bị YouTube trả HTTP 429 (spike T2).
 - Giữ mức thu, mặc định là `full`.
+- Mọi thời gian trong dữ liệu, nhật ký và giao diện dùng giờ Việt Nam (UTC+07:00).
+- Phân tích lại một video thì mọi nghi vấn của lần chạy mới phải được rà soát lại; quyết định cũ không tự áp dụng.
 - Comment được gửi nguyên văn cho nhà cung cấp AI, kể cả tên và ID người bình luận.
 - `config/ai.toml.example` cấu hình sẵn nhiều nhà cung cấp: Anthropic, OpenAI, Gemini và các nhà OpenAI-compatible như DeepSeek, Qwen, GLM, Kimi. Settings chỉ cho chọn nhà cung cấp và model, không có lựa chọn theo quốc gia.
 - Có khớp khuôn mặt, với các giới hạn ở 10.6 và phần 11. Điều này đảo ngược quy định "không nhận diện khuôn mặt" trong mô tả gốc (mục 13, 14); dữ liệu khuôn mặt là dữ liệu cá nhân nhạy cảm theo Nghị định 13/2023, nên khi demo dùng khuôn mặt của chính thành viên nhóm làm đối tượng, và báo cáo môn học giải thích lý do thay đổi.

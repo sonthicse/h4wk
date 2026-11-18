@@ -252,7 +252,7 @@
   "additionalProperties": false,
   "properties": {
     "capture": {
-      "pattern": "^\\d{8}T\\d{6}Z$",
+      "pattern": "^\\d{8}T\\d{6}$",
       "title": "Capture",
       "type": "string"
     },

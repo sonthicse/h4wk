@@ -83,3 +83,8 @@ Cùng ngày, sau phần 1 của spike T2:
 
 - Chỉ thu phụ đề tiếng Việt, không thu phụ đề mọi ngôn ngữ.
 - Nhóm không có kênh YouTube riêng. Màn 3 theo dõi kênh tin tức nên chỉ trình diễn phát hiện và tự xử lý video mới, không trình diễn nghi vấn mới.
+
+Cùng ngày, khi duyệt hợp đồng C1–C5:
+
+- Mọi thời gian dùng giờ Việt Nam (UTC+07:00) thay cho UTC.
+- Phân tích lại một video thì phải rà soát lại toàn bộ nghi vấn; bỏ cơ chế giữ quyết định cũ theo `key`.

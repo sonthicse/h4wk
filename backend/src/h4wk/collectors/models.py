@@ -12,7 +12,7 @@ from h4wk.core.types import (
     NonNegInt,
     RelPath,
     TranscriptKind,
-    UtcDatetime,
+    VnDatetime,
 )
 
 __all__ = [
@@ -38,7 +38,7 @@ class Video(Contract):
     tags: list[str] = []
     category: str | None = None
     duration_s: NonNegFloat | None = None
-    published_at: UtcDatetime | None = None
+    published_at: VnDatetime | None = None
     view_count: NonNegInt | None = None
     like_count: NonNegInt | None = None
     comment_count: NonNegInt | None = None
@@ -52,7 +52,7 @@ class Channel(Contract):
     title: str
     description: str = ""
     country: str | None = None
-    created_at: UtcDatetime | None = None
+    created_at: VnDatetime | None = None
     subscriber_count: NonNegInt | None = None
     view_count: NonNegInt | None = None
     video_count: NonNegInt | None = None
@@ -84,7 +84,7 @@ class Comment(Contract):
     parent_id: str | None = None  # None là comment gốc; có giá trị là reply
     author_channel_id: str | None = None
     text: str
-    published_at: UtcDatetime | None = None
+    published_at: VnDatetime | None = None
     like_count: NonNegInt | None = None
 
     @model_validator(mode="after")
