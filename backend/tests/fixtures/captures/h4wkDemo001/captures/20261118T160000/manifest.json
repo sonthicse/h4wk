@@ -1,0 +1,98 @@
+{
+  "schema": "h4wk.manifest/1",
+  "source_url": "https://www.youtube.com/watch?v=h4wkDemo001",
+  "collected_at": "2026-11-18T16:00:00+07:00",
+  "collector": "user:thi",
+  "trigger": {
+    "type": "manual",
+    "watch_item": null,
+    "event": null
+  },
+  "level": "full",
+  "tool_version": "h4wk 0.1.0",
+  "sources": [
+    {
+      "provider": "ytdlp",
+      "what": "video.metadata",
+      "status": "ok",
+      "started_at": null,
+      "duration_ms": null,
+      "cost": null,
+      "error": null,
+      "version": "2026.10.26"
+    },
+    {
+      "provider": "ytdlp",
+      "what": "channel.metadata",
+      "status": "ok",
+      "started_at": null,
+      "duration_ms": null,
+      "cost": null,
+      "error": null,
+      "version": "2026.10.26"
+    },
+    {
+      "provider": "ytdlp",
+      "what": "video.transcripts",
+      "status": "ok",
+      "started_at": null,
+      "duration_ms": null,
+      "cost": null,
+      "error": null,
+      "version": "2026.10.26"
+    },
+    {
+      "provider": "ytdlp",
+      "what": "video.comments",
+      "status": "ok",
+      "started_at": null,
+      "duration_ms": null,
+      "cost": null,
+      "error": null,
+      "version": "2026.10.26"
+    },
+    {
+      "provider": "ytdlp",
+      "what": "video.thumbnails",
+      "status": "ok",
+      "started_at": null,
+      "duration_ms": null,
+      "cost": null,
+      "error": null,
+      "version": "2026.10.26"
+    },
+    {
+      "provider": "ytdlp",
+      "what": "video.media",
+      "status": "ok",
+      "started_at": null,
+      "duration_ms": null,
+      "cost": null,
+      "error": null,
+      "version": "2026.10.26"
+    }
+  ],
+  "files": {
+    "normalized.json": {
+      "sha256": "1673b3fe84b7d5bde1599c01dd68a92697dcd7efc3dcd740e2588510d905bc84",
+      "bytes": 2937
+    },
+    "sources/ytdlp/h4wkDemo001.info.json": {
+      "sha256": "10df7d75ff78672f1554fa8f347e02fcb8e45491de715590ade9be198aca60dc",
+      "bytes": 194
+    },
+    "sources/ytdlp/h4wkDemo001.mp4": {
+      "sha256": "2bd4b1c312da3f036e3bd8376785c6e161b6a6c9a921e37f5996bedb1130ad77",
+      "bytes": 232745
+    },
+    "sources/ytdlp/h4wkDemo001.vi-orig.vtt": {
+      "sha256": "c6546bb36b102649e0ee105b3381487222f0730ba9ae0fe4f42125afba83b69d",
+      "bytes": 429
+    },
+    "sources/ytdlp/maxres.jpg": {
+      "sha256": "dbbf2b6cbb46b987b1d15e351cf175b60816acc73d3fd298359577ea9f3848b3",
+      "bytes": 8062
+    }
+  },
+  "previous_capture": null
+}

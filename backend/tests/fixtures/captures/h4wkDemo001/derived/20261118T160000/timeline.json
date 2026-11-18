@@ -1,0 +1,123 @@
+{
+  "schema": "h4wk.timeline/1",
+  "video_id": "h4wkDemo001",
+  "capture": "20261118T160000",
+  "source_video_sha256": "2bd4b1c312da3f036e3bd8376785c6e161b6a6c9a921e37f5996bedb1130ad77",
+  "transcript_kind": "auto",
+  "thumbnails": [
+    {
+      "file": "sources/ytdlp/maxres.jpg",
+      "ocr": [
+        {
+          "text": "TỘI PHẠM",
+          "bbox": [
+            218.0,
+            316.0,
+            202.0,
+            38.0
+          ]
+        }
+      ],
+      "visual": {
+        "description": "Ảnh khuôn mặt bị đè chữ đỏ và vẽ còng tay.",
+        "offensive_cues": [
+          "chữ 'TỘI PHẠM' đè lên khuôn mặt",
+          "vẽ còng tay"
+        ],
+        "provider": "fake",
+        "model": "fake-vlm"
+      }
+    }
+  ],
+  "segments": [
+    {
+      "id": "seg_0001",
+      "start": 0.0,
+      "end": 10.0,
+      "speech": "Hôm nay mình nói về Trần Văn Mẫu. Ai cũng biết hắn là kẻ lừa đảo.",
+      "ocr": [],
+      "visual": []
+    },
+    {
+      "id": "seg_0002",
+      "start": 10.0,
+      "end": 20.0,
+      "speech": "Mọi người xem dòng chữ trên màn hình.",
+      "ocr": [
+        {
+          "text": "TRẦN VĂN MẪU LỪA ĐẢO",
+          "bbox": [
+            36.0,
+            165.0,
+            566.0,
+            42.0
+          ],
+          "frame": "frames/000015.jpg",
+          "t": 15.0
+        }
+      ],
+      "visual": []
+    },
+    {
+      "id": "seg_0003",
+      "start": 20.0,
+      "end": 30.0,
+      "speech": "Còn đây là bức ảnh mà ai cũng đang chia sẻ.",
+      "ocr": [
+        {
+          "text": "TỘI PHẠM",
+          "bbox": [
+            218.0,
+            316.0,
+            202.0,
+            38.0
+          ],
+          "frame": "frames/000025.jpg",
+          "t": 25.0
+        }
+      ],
+      "visual": [
+        {
+          "description": "Ảnh khuôn mặt bị đè chữ đỏ và vẽ còng tay.",
+          "offensive_cues": [
+            "chữ 'TỘI PHẠM' đè lên khuôn mặt",
+            "vẽ còng tay"
+          ],
+          "provider": "fake",
+          "model": "fake-vlm",
+          "frame": "frames/000025.jpg",
+          "t": 25.0
+        }
+      ]
+    },
+    {
+      "id": "seg_0004",
+      "start": 30.0,
+      "end": 40.0,
+      "speech": "Hẹn gặp lại các bạn ở video sau.",
+      "ocr": [
+        {
+          "text": "TVM đồ hèn",
+          "bbox": [
+            545.0,
+            336.0,
+            88.0,
+            18.0
+          ],
+          "frame": "frames/000034.jpg",
+          "t": 34.5
+        }
+      ],
+      "visual": [
+        {
+          "description": "Một ảnh hoa văn đã đổi màu ở góc phải.",
+          "offensive_cues": [],
+          "provider": "fake",
+          "model": "fake-vlm",
+          "frame": "frames/000032.jpg",
+          "t": 32.0
+        }
+      ]
+    }
+  ]
+}

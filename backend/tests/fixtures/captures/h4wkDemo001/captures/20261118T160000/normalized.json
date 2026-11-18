@@ -1,0 +1,121 @@
+{
+  "schema": "h4wk.normalized/1",
+  "video": {
+    "id": "h4wkDemo001",
+    "channel_id": "UCh4wkDemoChannel000000",
+    "title": "Video thử nghiệm h4wk",
+    "description": "Video tổng hợp dùng cho test. Đối tượng giả: Trần Văn Mẫu.",
+    "tags": [
+      "thử nghiệm"
+    ],
+    "category": null,
+    "duration_s": 40.0,
+    "published_at": "2026-11-18T15:30:00+07:00",
+    "view_count": 12,
+    "like_count": 1,
+    "comment_count": 3,
+    "availability": "public",
+    "is_live": false
+  },
+  "channel": {
+    "id": "UCh4wkDemoChannel000000",
+    "handle": "@h4wkdemo",
+    "title": "Kênh thử nghiệm h4wk",
+    "description": "",
+    "country": null,
+    "created_at": null,
+    "subscriber_count": null,
+    "view_count": null,
+    "video_count": null,
+    "avatar_url": null,
+    "banner_url": null,
+    "links": []
+  },
+  "video_ids": [],
+  "transcripts": [
+    {
+      "kind": "auto",
+      "lang": "vi",
+      "segments": [
+        {
+          "start": 0.5,
+          "end": 4.5,
+          "text": "Hôm nay mình nói về Trần Văn Mẫu."
+        },
+        {
+          "start": 5.0,
+          "end": 9.5,
+          "text": "Ai cũng biết hắn là kẻ lừa đảo."
+        },
+        {
+          "start": 10.5,
+          "end": 19.0,
+          "text": "Mọi người xem dòng chữ trên màn hình."
+        },
+        {
+          "start": 20.5,
+          "end": 29.0,
+          "text": "Còn đây là bức ảnh mà ai cũng đang chia sẻ."
+        },
+        {
+          "start": 30.5,
+          "end": 39.0,
+          "text": "Hẹn gặp lại các bạn ở video sau."
+        }
+      ]
+    }
+  ],
+  "comments": [
+    {
+      "id": "c1",
+      "parent_id": null,
+      "author_channel_id": "UCcommenter000000000001",
+      "text": "Trần Văn Mẫu đúng là lừa đảo",
+      "published_at": "2026-11-18T15:40:00+07:00",
+      "like_count": 4
+    },
+    {
+      "id": "c1.r1",
+      "parent_id": "c1",
+      "author_channel_id": "UCcommenter000000000002",
+      "text": "đồng ý",
+      "published_at": "2026-11-18T15:45:00+07:00",
+      "like_count": null
+    },
+    {
+      "id": "c2",
+      "parent_id": null,
+      "author_channel_id": "UCcommenter000000000003",
+      "text": "Video hay, cảm ơn bạn",
+      "published_at": "2026-11-18T15:50:00+07:00",
+      "like_count": null
+    }
+  ],
+  "thumbnails": [
+    {
+      "name": "maxres",
+      "url": null,
+      "file": "sources/ytdlp/maxres.jpg",
+      "width": 640,
+      "height": 360
+    }
+  ],
+  "media": [
+    {
+      "kind": "video",
+      "file": "sources/ytdlp/h4wkDemo001.mp4",
+      "height": 360,
+      "vcodec": "h264",
+      "acodec": "aac",
+      "duration_s": 40.0
+    }
+  ],
+  "provenance": {
+    "video.metadata": "ytdlp",
+    "channel.metadata": "ytdlp",
+    "video.transcripts": "ytdlp",
+    "video.comments": "ytdlp",
+    "video.thumbnails": "ytdlp",
+    "video.media": "ytdlp"
+  }
+}

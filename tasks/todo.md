@@ -110,10 +110,12 @@ Kèm theo là `normalized.json`, `manifest.json`, `timeline.json`, `hits.json` v
 
 Nghiệm thu:
 
-- [ ] Mọi file JSON mẫu validate được theo C1–C4.
-- [ ] `verify` (T5) chạy trên bản thu mẫu báo OK; trước khi có T5, SHA-256 trong manifest được kiểm bằng `sha256sum`.
+- [x] Mọi file JSON mẫu validate được theo C1–C4.
+- [x] `verify` (T5) chạy trên bản thu mẫu báo OK; trước khi có T5, SHA-256 trong manifest được kiểm bằng `sha256sum`.
 
 Kiểm tra: `uv run pytest tests/unit/test_fixtures.py`.
+
+Bản hiện tại dùng video tổng hợp do `tests/fixtures/build_sample_capture.py` dựng (chữ và ảnh vẽ bằng ffmpeg, tiếng bíp thay giọng nói, khuôn mặt là hình vẽ). Khi nhóm quay video thật, thay video và ảnh trong script rồi chạy lại để tính lại SHA-256.
 
 File: `tests/fixtures/captures/*`, `tests/fixtures/refs/*`, `tests/unit/test_fixtures.py`.
 Người làm: Thi. Phụ thuộc: T4. Cỡ: M.
