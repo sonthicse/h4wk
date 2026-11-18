@@ -162,7 +162,9 @@ def main() -> None:
                 gone = [v for v, p in prev.items() if v not in items and p > oldest]
                 if gone:
                     log({"type": "missing", "source": source, "channel": ch, "videos": gone})
-        time.sleep(max(0, INTERVAL - (time.monotonic() - start)))
+        took = time.monotonic() - start
+        log({"type": "tick", "api": key is not None, "took_s": round(took, 1)})
+        time.sleep(max(0, INTERVAL - took))
 
 
 if __name__ == "__main__":
