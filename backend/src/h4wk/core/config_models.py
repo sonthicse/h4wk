@@ -128,13 +128,7 @@ class CommentSettings(Contract):
     max_per_video: int | None = Field(default=None, ge=1)  # None: không giới hạn
 
 
-class KeyframeSettings(Contract):
-    phash_threshold: int = Field(default=6, ge=0, le=64)
-    tile_threshold: float = Field(default=2.0, ge=0, le=255)
-
-
 class AnalysisConfig(Contract):
-    keyframes: KeyframeSettings = KeyframeSettings()
     transcript_priority: Annotated[list[TranscriptKind], AfterValidator(_no_duplicates)] = [
         TranscriptKind.UPLOADED,
         TranscriptKind.STT,

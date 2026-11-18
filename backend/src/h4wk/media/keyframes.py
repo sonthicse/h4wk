@@ -13,9 +13,15 @@ import numpy as np
 from pydantic import Field, ValidationError
 from scenedetect import ContentDetector, detect
 
-from h4wk.core.config_models import KeyframeSettings
 from h4wk.core.types import Contract
 from h4wk.media.files import atomic_output
+
+
+class KeyframeSettings(Contract):
+    """Ngưỡng giữ khung. Không nằm trong analysis.toml (hợp đồng C5 không có mục này)."""
+
+    phash_threshold: int = Field(default=6, ge=0, le=64)  # số bit khác nhau trong pHash 64 bit
+    tile_threshold: float = Field(default=2.0, ge=0, le=255)  # lệch trung bình mỗi ô, 0–255
 
 
 class Keyframe(Contract):

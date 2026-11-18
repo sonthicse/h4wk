@@ -5,8 +5,7 @@ from pathlib import Path
 import cv2
 import pytest
 
-from h4wk.core.config_models import AnalysisConfig, KeyframeSettings, load_toml
-from h4wk.media.keyframes import extract_keyframes
+from h4wk.media.keyframes import KeyframeSettings, extract_keyframes
 
 CLIPS = Path(__file__).parents[1] / "fixtures" / "clips"
 
@@ -57,8 +56,7 @@ def test_static_two_minutes_and_cached_retry(tmp_path, monkeypatch):
 def test_change_thresholds_keeps_scene_representatives(tmp_path):
     setup_proxy(tmp_path, "corner-text.mp4")
     assert len(extract_keyframes(tmp_path)) > 2
-    config = tmp_path / "analysis.toml"
-    config.write_text("[keyframes]\nphash_threshold=64\ntile_threshold=255\n")
-    frames = extract_keyframes(tmp_path, load_toml(config, AnalysisConfig).keyframes)
+    settings = KeyframeSettings(phash_threshold=64, tile_threshold=255)
+    frames = extract_keyframes(tmp_path, settings)
     assert [(frame.t, frame.scene) for frame in frames] == [(0, 1), (3.25, 2)]
     assert set((tmp_path / "frames").glob("*.jpg")) == {tmp_path / frame.file for frame in frames}
