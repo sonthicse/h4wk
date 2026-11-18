@@ -1,16 +1,29 @@
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { useParams } from 'react-router'
+import { getCase } from '@/api/cases'
+import { listFindings, type Finding } from '@/api/findings'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { severityRank, severityVariant, statusVariant, timedSources, timeRange, videoLink } from '@/lib/findings'
-import { findings, type Finding, type Severity } from '@/mocks/data'
+import { formatTime, severityRank, severityVariant } from '@/lib/findings'
 
-type Filters = { q: string; severity: string; category: string; source: string; status: string }
-const emptyFilters: Filters = { q: '', severity: 'all', category: 'all', source: 'all', status: 'all' }
+type Severity = Finding['severity']
+type Filters = { q: string; severity: string; category: string; source: string }
+const emptyFilters: Filters = { q: '', severity: 'all', category: 'all', source: 'all' }
+
+function timeRange(f: Finding) {
+  return f.start == null ? '—' : `${formatTime(f.start)}–${formatTime(f.end ?? f.start)}`
+}
+
+// Trang Video detail vẫn dùng dữ liệu giả (T26), nên tạm mở video gốc trên YouTube tại đúng giây.
+function youtubeLink(f: Finding) {
+  const t = f.start == null ? '' : `&t=${Math.max(0, Math.floor(f.start) - 2)}s`
+  return `https://www.youtube.com/watch?v=${encodeURIComponent(f.video_id)}${t}`
+}
 
 function FilterSelect({
   label,
@@ -47,16 +60,24 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
   )
 }
 
-function FindingSheet({ finding, onClose }: { finding: Finding | null; onClose: () => void }) {
+function FindingSheet({
+  finding,
+  entityName,
+  onClose,
+}: {
+  finding: Finding | null
+  entityName: (id: string) => string
+  onClose: () => void
+}) {
   return (
     <Sheet open={finding !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-[28rem] sm:max-w-md">
         {finding && (
           <>
             <SheetHeader>
-              <SheetTitle>{finding.videoTitle}</SheetTitle>
+              <SheetTitle className="font-mono">{finding.video_id}</SheetTitle>
               <SheetDescription>
-                {finding.channel} · {finding.sourceKind} · {timeRange(finding)}
+                {finding.source_kind} · {timeRange(finding)} · capture {finding.capture}
               </SheetDescription>
             </SheetHeader>
             <dl className="space-y-4 overflow-y-auto px-4">
@@ -67,27 +88,29 @@ function FindingSheet({ finding, onClose }: { finding: Finding | null; onClose: 
                 <Badge variant={severityVariant[finding.severity]}>{finding.severity}</Badge>
                 <Badge variant="outline">{finding.category}</Badge>
                 <Badge variant="outline">{finding.confidence}</Badge>
-                <Badge variant={statusVariant[finding.status]}>{finding.status}</Badge>
               </div>
-              <Detail label="Entity">{finding.entity}</Detail>
+              <Detail label="Entity">{entityName(finding.entity)}</Detail>
               <Detail label="Reason">{finding.reason}</Detail>
               <Detail label="Triggers">
                 <ul className="space-y-1">
-                  {finding.triggers.map((t) => (
-                    <li key={t.via} className="font-mono text-xs">
-                      {t.via} · score {t.score.toFixed(2)}
+                  {(finding.triggers ?? []).map((t, i) => (
+                    <li key={i} className="font-mono text-xs">
+                      {t.via}
+                      {t.score != null && ` · score ${t.score.toFixed(2)}`}
                     </li>
                   ))}
                 </ul>
               </Detail>
               <Detail label="Analyzer">
-                {finding.analyzer}
+                {finding.analyzer} {finding.analyzer_version}
                 {finding.model && (
                   <span className="text-muted-foreground"> · {finding.model.provider}/{finding.model.model}</span>
                 )}
               </Detail>
               <Button asChild className="w-full">
-                <Link to={videoLink(finding)}>Open in video</Link>
+                <a href={youtubeLink(finding)} target="_blank" rel="noreferrer">
+                  Open on YouTube
+                </a>
               </Button>
             </dl>
           </>
@@ -102,19 +125,27 @@ export default function FindingsPage() {
   const [filters, setFilters] = useState<Filters>(emptyFilters)
   const [selected, setSelected] = useState<Finding | null>(null)
 
-  const caseFindings = findings.filter((f) => f.caseId === caseId)
+  const findings = useQuery({ queryKey: ['findings', caseId], queryFn: () => listFindings(caseId!) })
+  const caseFile = useQuery({ queryKey: ['case', caseId], queryFn: () => getCase(caseId!) })
+  // Nghi vấn chỉ ghi id đối tượng (e_01); tên lấy từ case.
+  const entityName = (id: string) => caseFile.data?.entities.find((e) => e.id === id)?.name ?? id
+
+  const caseFindings = findings.data ?? []
   const q = filters.q.trim().toLowerCase()
   const rows = caseFindings
     .filter((f) => filters.severity === 'all' || f.severity === filters.severity)
     .filter((f) => filters.category === 'all' || f.category === filters.category)
-    .filter((f) => filters.source === 'all' || f.sourceKind === filters.source)
-    .filter((f) => filters.status === 'all' || f.status === filters.status)
-    .filter((f) => !q || `${f.quote} ${f.videoTitle} ${f.entity}`.toLowerCase().includes(q))
-    .sort((a, b) => severityRank[a.severity] - severityRank[b.severity] || a.videoTitle.localeCompare(b.videoTitle) || a.start - b.start)
+    .filter((f) => filters.source === 'all' || f.source_kind === filters.source)
+    .filter((f) => !q || `${f.quote} ${f.video_id} ${entityName(f.entity)}`.toLowerCase().includes(q))
+    .sort(
+      (a, b) =>
+        severityRank[a.severity] - severityRank[b.severity] ||
+        a.video_id.localeCompare(b.video_id) ||
+        (a.start ?? 0) - (b.start ?? 0),
+    )
 
   const set = (key: keyof Filters) => (value: string) => setFilters((f) => ({ ...f, [key]: value }))
   const count = (s: Severity) => caseFindings.filter((f) => f.severity === s).length
-  const pending = caseFindings.filter((f) => f.status === 'pending').length
   const isFiltered = JSON.stringify(filters) !== JSON.stringify(emptyFilters)
 
   return (
@@ -125,7 +156,6 @@ export default function FindingsPage() {
           <Badge variant="destructive">{count('high')} high</Badge>
           <Badge variant="default">{count('medium')} medium</Badge>
           <Badge variant="secondary">{count('low')} low</Badge>
-          <Badge variant="outline">{pending} pending review</Badge>
         </div>
       </div>
 
@@ -150,12 +180,6 @@ export default function FindingsPage() {
           options={['speech', 'ocr', 'visual', 'title', 'description', 'thumbnail', 'comment']}
           onChange={set('source')}
         />
-        <FilterSelect
-          label="Statuses"
-          value={filters.status}
-          options={['pending', 'confirmed', 'rejected', 'needs_info']}
-          onChange={set('status')}
-        />
         {isFiltered && (
           <Button variant="ghost" onClick={() => setFilters(emptyFilters)}>
             Clear
@@ -166,6 +190,7 @@ export default function FindingsPage() {
         </span>
       </div>
 
+      {findings.error && <p className="text-sm text-destructive">Could not load findings: {findings.error.message}</p>}
       <Table>
         <TableHeader>
           <TableRow>
@@ -177,7 +202,6 @@ export default function FindingsPage() {
             <TableHead>Category</TableHead>
             <TableHead>Severity</TableHead>
             <TableHead>Confidence</TableHead>
-            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -194,40 +218,50 @@ export default function FindingsPage() {
                 }
               }}
             >
-              <TableCell className="max-w-48 truncate">{f.videoTitle}</TableCell>
+              <TableCell className="font-mono text-xs">{f.video_id}</TableCell>
               <TableCell className="font-mono">
-                {timedSources.has(f.sourceKind) ? (
-                  <Link to={videoLink(f)} className="hover:underline" onClick={(e) => e.stopPropagation()}>
-                    {timeRange(f)}
-                  </Link>
-                ) : (
+                {f.start == null ? (
                   '—'
+                ) : (
+                  <a
+                    href={youtubeLink(f)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {timeRange(f)}
+                  </a>
                 )}
               </TableCell>
-              <TableCell>{f.sourceKind}</TableCell>
-              <TableCell className="whitespace-nowrap">{f.entity}</TableCell>
+              <TableCell>{f.source_kind}</TableCell>
+              <TableCell className="whitespace-nowrap">{entityName(f.entity)}</TableCell>
               <TableCell className="max-w-80 truncate">{f.quote}</TableCell>
               <TableCell>{f.category}</TableCell>
               <TableCell>
                 <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
               </TableCell>
               <TableCell>{f.confidence}</TableCell>
-              <TableCell>
-                <Badge variant={statusVariant[f.status]}>{f.status}</Badge>
-              </TableCell>
             </TableRow>
           ))}
-          {rows.length === 0 && (
+          {findings.isPending && (
             <TableRow>
-              <TableCell colSpan={9} className="text-center text-muted-foreground">
-                No findings match these filters.
+              <TableCell colSpan={8} className="text-center text-muted-foreground">
+                Loading…
+              </TableCell>
+            </TableRow>
+          )}
+          {findings.data && rows.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={8} className="text-center text-muted-foreground">
+                {caseFindings.length === 0 ? 'No findings yet. Collect a video to analyze it.' : 'No findings match these filters.'}
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
 
-      <FindingSheet finding={selected} onClose={() => setSelected(null)} />
+      <FindingSheet finding={selected} entityName={entityName} onClose={() => setSelected(null)} />
     </div>
   )
 }

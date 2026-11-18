@@ -107,6 +107,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cases/{case_id}/collect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Collect */
+        post: operations["collect_api_cases__case_id__collect_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Jobs */
+        get: operations["list_jobs_api_jobs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Job */
+        get: operations["get_job_api_jobs__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cases/{case_id}/findings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Findings */
+        get: operations["findings_api_cases__case_id__findings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -173,6 +241,35 @@ export interface components {
             title: string;
         };
         /**
+         * Category
+         * @enum {string}
+         */
+        Category: "insult" | "unsupported_accusation" | "fabrication" | "legitimate_criticism" | "neutral";
+        /** CollectBody */
+        CollectBody: {
+            /** Url */
+            url: string;
+            /** @default full */
+            level: components["schemas"]["CollectLevel"];
+            /**
+             * Force
+             * @default false
+             */
+            force: boolean;
+        };
+        /**
+         * CollectLevel
+         * @description Mức thu (SPEC 10.7).
+         * @enum {string}
+         */
+        CollectLevel: "metadata" | "text" | "full";
+        /**
+         * Confidence
+         * @description Mức tin cậy viết bằng chữ, không dùng phần trăm.
+         * @enum {string}
+         */
+        Confidence: "unverified" | "likely" | "highly_likely";
+        /**
          * Entity
          * @description Đối tượng cần bảo vệ. Ảnh mẫu nằm ở entities/<id>/refs/{face,image}/.
          */
@@ -207,10 +304,106 @@ export interface components {
              */
             abbreviations: string[];
         };
+        /**
+         * Finding
+         * @description Một nghi vấn (một phần tử của findings.json).
+         */
+        Finding: {
+            /** Id */
+            id: string;
+            /** Run Id */
+            run_id: string;
+            /** Case Id */
+            case_id: string;
+            /** Video Id */
+            video_id: string;
+            /** Capture */
+            capture: string;
+            /**
+             * Analyzer
+             * @enum {string}
+             */
+            analyzer: "static" | "llm";
+            /** Analyzer Version */
+            analyzer_version: string;
+            model?: components["schemas"]["ModelRef"] | null;
+            source_kind: components["schemas"]["SourceKind"];
+            /**
+             * Triggers
+             * @default []
+             */
+            triggers: components["schemas"]["Trigger"][];
+            /** Segment Id */
+            segment_id?: string | null;
+            /** Comment Id */
+            comment_id?: string | null;
+            /** Start */
+            start?: number | null;
+            /** End */
+            end?: number | null;
+            /**
+             * Quote
+             * @default
+             */
+            quote: string;
+            /** Frame */
+            frame?: string | null;
+            /** Bbox */
+            bbox?: [
+                number,
+                number,
+                number,
+                number
+            ] | null;
+            /** Entity */
+            entity: string;
+            category: components["schemas"]["Category"];
+            severity: components["schemas"]["Severity"];
+            confidence: components["schemas"]["Confidence"];
+            /** Reason */
+            reason: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** Job */
+        Job: {
+            /** Id */
+            id: string;
+            /** Case Id */
+            case_id: string;
+            /** Target */
+            target: string;
+            /** Video Id */
+            video_id: string;
+            /** Level */
+            level: string;
+            /** Trigger */
+            trigger: string;
+            /** Status */
+            status: string;
+            /** Step */
+            step: string | null;
+            /** Progress */
+            progress: number;
+            /** Capture */
+            capture: string | null;
+            /** Run Id */
+            run_id: string | null;
+            /** Error */
+            error: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** LoginBody */
         LoginBody: {
@@ -223,6 +416,45 @@ export interface components {
         Me: {
             /** Username */
             username: string;
+        };
+        /** ModelRef */
+        ModelRef: {
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+        };
+        /**
+         * Severity
+         * @enum {string}
+         */
+        Severity: "low" | "medium" | "high";
+        /**
+         * SourceKind
+         * @enum {string}
+         */
+        SourceKind: "speech" | "ocr" | "visual" | "title" | "description" | "thumbnail" | "comment";
+        /**
+         * Trigger
+         * @description Dấu hiệu đã kéo một đoạn vào phân tích.
+         */
+        Trigger: {
+            via: components["schemas"]["Via"];
+            /** Segment Id */
+            segment_id?: string | null;
+            /** Comment Id */
+            comment_id?: string | null;
+            /** Frame */
+            frame?: string | null;
+            /** Bbox */
+            bbox?: [
+                number,
+                number,
+                number,
+                number
+            ] | null;
+            /** Score */
+            score?: number | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -237,6 +469,11 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
+        /**
+         * Via
+         * @enum {string}
+         */
+        Via: "speech" | "ocr" | "title" | "description" | "comment" | "thumbnail" | "face" | "ref_image";
     };
     responses: never;
     parameters: never;
@@ -421,6 +658,134 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Entity"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    collect_api_cases__case_id__collect_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CollectBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_jobs_api_jobs_get: {
+        parameters: {
+            query?: {
+                case?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_job_api_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    findings_api_cases__case_id__findings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Finding"][];
                 };
             };
             /** @description Validation Error */

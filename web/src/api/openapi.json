@@ -232,6 +232,199 @@
         }
       }
     },
+    "/api/cases/{case_id}/collect": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Collect",
+        "operationId": "collect_api_cases__case_id__collect_post",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "List Jobs",
+        "operationId": "list_jobs_api_jobs_get",
+        "parameters": [
+          {
+            "name": "case",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Case"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  },
+                  "title": "Response List Jobs Api Jobs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job",
+        "operationId": "get_job_api_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/{case_id}/findings": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Findings",
+        "operationId": "findings_api_cases__case_id__findings_get",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Finding"
+                  },
+                  "title": "Response Findings Api Cases  Case Id  Findings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health": {
       "get": {
         "summary": "Health",
@@ -341,6 +534,59 @@
         ],
         "title": "CaseSummary"
       },
+      "Category": {
+        "type": "string",
+        "enum": [
+          "insult",
+          "unsupported_accusation",
+          "fabrication",
+          "legitimate_criticism",
+          "neutral"
+        ],
+        "title": "Category"
+      },
+      "CollectBody": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "level": {
+            "$ref": "#/components/schemas/CollectLevel",
+            "default": "full"
+          },
+          "force": {
+            "type": "boolean",
+            "title": "Force",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "CollectBody"
+      },
+      "CollectLevel": {
+        "type": "string",
+        "enum": [
+          "metadata",
+          "text",
+          "full"
+        ],
+        "title": "CollectLevel",
+        "description": "M\u1ee9c thu (SPEC 10.7)."
+      },
+      "Confidence": {
+        "type": "string",
+        "enum": [
+          "unverified",
+          "likely",
+          "highly_likely"
+        ],
+        "title": "Confidence",
+        "description": "M\u1ee9c tin c\u1eady vi\u1ebft b\u1eb1ng ch\u1eef, kh\u00f4ng d\u00f9ng ph\u1ea7n tr\u0103m."
+      },
       "Entity": {
         "properties": {
           "id": {
@@ -409,6 +655,190 @@
         ],
         "title": "EntityCreate"
       },
+      "Finding": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^f_[0-9A-HJKMNP-TV-Z]{26}$",
+            "title": "Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "video_id": {
+            "type": "string",
+            "title": "Video Id"
+          },
+          "capture": {
+            "type": "string",
+            "pattern": "^\\d{8}T\\d{6}$",
+            "title": "Capture"
+          },
+          "analyzer": {
+            "type": "string",
+            "enum": [
+              "static",
+              "llm"
+            ],
+            "title": "Analyzer"
+          },
+          "analyzer_version": {
+            "type": "string",
+            "title": "Analyzer Version"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModelRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_kind": {
+            "$ref": "#/components/schemas/SourceKind"
+          },
+          "triggers": {
+            "items": {
+              "$ref": "#/components/schemas/Trigger"
+            },
+            "type": "array",
+            "title": "Triggers",
+            "default": []
+          },
+          "segment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segment Id"
+          },
+          "comment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment Id"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          },
+          "quote": {
+            "type": "string",
+            "title": "Quote",
+            "default": ""
+          },
+          "frame": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frame"
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array",
+                "maxItems": 4,
+                "minItems": 4
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bbox"
+          },
+          "entity": {
+            "type": "string",
+            "title": "Entity"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/Severity"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/Confidence"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "run_id",
+          "case_id",
+          "video_id",
+          "capture",
+          "analyzer",
+          "analyzer_version",
+          "source_kind",
+          "entity",
+          "category",
+          "severity",
+          "confidence",
+          "reason"
+        ],
+        "title": "Finding",
+        "description": "M\u1ed9t nghi v\u1ea5n (m\u1ed9t ph\u1ea7n t\u1eed c\u1ee7a findings.json)."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -421,6 +851,114 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "Job": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "case_id": {
+            "type": "string",
+            "title": "Case Id"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          },
+          "video_id": {
+            "type": "string",
+            "title": "Video Id"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "trigger": {
+            "type": "string",
+            "title": "Trigger"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step"
+          },
+          "progress": {
+            "type": "integer",
+            "title": "Progress"
+          },
+          "capture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capture"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "case_id",
+          "target",
+          "video_id",
+          "level",
+          "trigger",
+          "status",
+          "step",
+          "progress",
+          "capture",
+          "run_id",
+          "error",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Job"
       },
       "LoginBody": {
         "properties": {
@@ -452,6 +990,132 @@
           "username"
         ],
         "title": "Me"
+      },
+      "ModelRef": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "provider",
+          "model"
+        ],
+        "title": "ModelRef"
+      },
+      "Severity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ],
+        "title": "Severity"
+      },
+      "SourceKind": {
+        "type": "string",
+        "enum": [
+          "speech",
+          "ocr",
+          "visual",
+          "title",
+          "description",
+          "thumbnail",
+          "comment"
+        ],
+        "title": "SourceKind"
+      },
+      "Trigger": {
+        "properties": {
+          "via": {
+            "$ref": "#/components/schemas/Via"
+          },
+          "segment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Segment Id"
+          },
+          "comment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment Id"
+          },
+          "frame": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frame"
+          },
+          "bbox": {
+            "anyOf": [
+              {
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array",
+                "maxItems": 4,
+                "minItems": 4
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bbox"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "via"
+        ],
+        "title": "Trigger",
+        "description": "D\u1ea5u hi\u1ec7u \u0111\u00e3 k\u00e9o m\u1ed9t \u0111o\u1ea1n v\u00e0o ph\u00e2n t\u00edch."
       },
       "ValidationError": {
         "properties": {
@@ -492,6 +1156,20 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "Via": {
+        "type": "string",
+        "enum": [
+          "speech",
+          "ocr",
+          "title",
+          "description",
+          "comment",
+          "thumbnail",
+          "face",
+          "ref_image"
+        ],
+        "title": "Via"
       }
     }
   }
