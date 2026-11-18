@@ -453,7 +453,7 @@ def test_hits_and_findings_files_are_lists() -> None:
 )
 def test_config_examples_load(name: str, model: type[BaseModel]) -> None:
     path = REPO_ROOT / "config" / f"{name}.toml.example"
-    model.model_validate(tomllib.loads(path.read_text()))
+    model.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))
 
 
 def test_load_toml_reads_vietnamese_as_utf8(tmp_path: Path) -> None:

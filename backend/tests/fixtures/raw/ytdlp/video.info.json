@@ -1,0 +1,114 @@
+{
+ "id": "h4wkDemo001",
+ "title": "Video thử nghiệm h4wk",
+ "description": "Mô tả có dấu.\nDòng 2",
+ "channel_id": "UCh4wkDemoChannel000000",
+ "channel": "Kênh thử nghiệm h4wk",
+ "uploader_id": "@h4wkdemo",
+ "channel_url": "https://www.youtube.com/channel/UCh4wkDemoChannel000000",
+ "channel_follower_count": 1200,
+ "duration": 40,
+ "timestamp": 1795509000,
+ "upload_date": "20261118",
+ "view_count": 12,
+ "like_count": 1,
+ "comment_count": 3,
+ "availability": "public",
+ "live_status": "not_live",
+ "is_live": false,
+ "was_live": false,
+ "categories": [
+  "News & Politics"
+ ],
+ "tags": [
+  "thử nghiệm",
+  "h4wk"
+ ],
+ "thumbnails": [
+  {
+   "url": "https://i.ytimg.com/vi/h4wkDemo001/default.jpg",
+   "width": 120,
+   "height": 90,
+   "id": "0"
+  },
+  {
+   "url": "https://i.ytimg.com/vi_webp/h4wkDemo001/maxresdefault.webp",
+   "width": 1920,
+   "height": 1080,
+   "id": "41"
+  },
+  {
+   "url": "https://i.ytimg.com/vi/h4wkDemo001/maxresdefault.jpg",
+   "width": 1280,
+   "height": 720,
+   "id": "40"
+  },
+  {
+   "url": "https://i.ytimg.com/vi/h4wkDemo001/sddefault.jpg",
+   "id": "36"
+  }
+ ],
+ "subtitles": {
+  "vi": [
+   {
+    "ext": "json3",
+    "url": "https://x"
+   }
+  ],
+  "en": [
+   {
+    "ext": "json3",
+    "url": "https://x"
+   }
+  ]
+ },
+ "automatic_captions": {
+  "vi-orig": [
+   {
+    "ext": "json3",
+    "url": "https://x"
+   }
+  ],
+  "vi": [
+   {
+    "ext": "json3",
+    "url": "https://x"
+   }
+  ],
+  "fr": [
+   {
+    "ext": "json3",
+    "url": "https://x"
+   }
+  ]
+ },
+ "comments": [
+  {
+   "id": "Ugw1",
+   "parent": "root",
+   "text": "Trần Văn Mẫu đúng là lừa đảo",
+   "like_count": 4,
+   "author_id": "UCcommenter000000000001",
+   "author": "@nguoi1",
+   "timestamp": 1795509600
+  },
+  {
+   "id": "Ugw1.r1",
+   "parent": "Ugw1",
+   "text": "đồng ý",
+   "like_count": 0,
+   "author_id": "UCcommenter000000000002",
+   "author": "@nguoi2",
+   "timestamp": 1795509900
+  },
+  {
+   "id": "Ugw2",
+   "parent": "root",
+   "text": "Video hay",
+   "author_id": "UCcommenter000000000003"
+  }
+ ],
+ "_version": {
+  "version": "2026.10.26"
+ }
+}

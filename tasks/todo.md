@@ -90,7 +90,7 @@ Nghiệm thu:
 
 - [x] Mỗi mô hình có trong test ít nhất một ví dụ hợp lệ và một ví dụ bị từ chối.
 - [x] `h4wk schema export` sinh đủ file schema cho C1–C5.
-- [ ] Hai người đã duyệt hợp đồng.
+- [x] Hai người đã duyệt hợp đồng.
 
 Kiểm tra: `uv run pytest tests/unit/test_contracts.py`.
 
@@ -110,10 +110,13 @@ Kèm theo là `normalized.json`, `manifest.json`, `timeline.json`, `hits.json` v
 
 Nghiệm thu:
 
-- [ ] Mọi file JSON mẫu validate được theo C1–C4.
-- [ ] `verify` (T5) chạy trên bản thu mẫu báo OK; trước khi có T5, SHA-256 trong manifest được kiểm bằng `sha256sum`.
+- [x] Mọi file JSON mẫu validate được theo C1–C4.
+- [x] `verify` (T5) chạy trên bản thu mẫu báo OK; trước khi có T5, SHA-256 trong manifest được kiểm bằng `sha256sum`.
+- [ ] Quay video thật: lời nói tiếng Việt có tên đối tượng giả, khuôn mặt thật của thành viên đóng vai đối tượng. Thay video và ảnh khuôn mặt mẫu trong `tests/fixtures/build_sample_capture.py` rồi chạy lại script. Mục này phải xong trước T18 và T41.
 
 Kiểm tra: `uv run pytest tests/unit/test_fixtures.py`.
+
+Bản hiện tại dùng video tổng hợp do `tests/fixtures/build_sample_capture.py` dựng (chữ và ảnh vẽ bằng ffmpeg, tiếng bíp thay giọng nói, khuôn mặt là hình vẽ). Khi nhóm quay video thật, thay video và ảnh trong script rồi chạy lại để tính lại SHA-256.
 
 File: `tests/fixtures/captures/*`, `tests/fixtures/refs/*`, `tests/unit/test_fixtures.py`.
 Người làm: Thi. Phụ thuộc: T4. Cỡ: M.
@@ -126,9 +129,9 @@ Người làm: Thi. Phụ thuộc: T4. Cỡ: M.
 
 Nghiệm thu:
 
-- [ ] Sửa 1 byte thì `verify` báo FAIL đúng file đó.
-- [ ] Xoá một file thì báo `missing`; thêm một file lạ thì báo `unexpected`.
-- [ ] Thu lại cùng video thì manifest mới có `previous_capture`.
+- [x] Sửa 1 byte thì `verify` báo FAIL đúng file đó.
+- [x] Xoá một file thì báo `missing`; thêm một file lạ thì báo `unexpected`.
+- [x] Thu lại cùng video thì manifest mới có `previous_capture`.
 
 Kiểm tra: `uv run pytest tests/unit/test_evidence.py`.
 
@@ -141,8 +144,8 @@ SQLite (chế độ WAL, qua SQLModel) làm chỉ mục cho case, đối tượn
 
 Nghiệm thu:
 
-- [ ] Tạo case qua API thì có `case.json` và một dòng trong audit.
-- [ ] Một thao tác thất bại cũng để lại dòng audit với `status` lỗi.
+- [x] Tạo case qua API thì có `case.json` và một dòng trong audit.
+- [x] Một thao tác thất bại cũng để lại dòng audit với `status` lỗi.
 Kiểm tra: `uv run pytest tests/unit/test_cases.py`.
 
 File: `src/h4wk/core/{db.py,cases.py,audit.py}`, `api/cases.py`, tests.
@@ -154,8 +157,8 @@ Lệnh `h4wk user create` lưu mật khẩu dạng hash (argon2 hoặc bcrypt). 
 
 Nghiệm thu:
 
-- [ ] Gọi API khi chưa đăng nhập nhận về 401.
-- [ ] Audit ghi đúng `user:<username>`; đăng nhập sai có dòng trong system audit.
+- [x] Gọi API khi chưa đăng nhập nhận về 401.
+- [x] Audit ghi đúng `user:<username>`; đăng nhập sai có dòng trong system audit.
 
 Kiểm tra: `uv run pytest tests/unit/test_auth.py`.
 
@@ -179,9 +182,9 @@ Kèm theo là hàm phân loại đầu vào: link hoặc ID video, kênh, `@hand
 
 Nghiệm thu:
 
-- [ ] Có test với `FakeCollector` cho các trường hợp thành công, chuyển nguồn, hết quota, tạm ngưng nguồn, nguồn bị tắt và không còn nguồn.
-- [ ] Manifest liệt kê cả những lần gọi thất bại.
-- [ ] Một adapter giả mới chỉ cần một file và một dòng đăng ký là được orchestrator dùng (có test).
+- [x] Có test với `FakeCollector` cho các trường hợp thành công, chuyển nguồn, hết quota, tạm ngưng nguồn, nguồn bị tắt và không còn nguồn.
+- [x] Manifest liệt kê cả những lần gọi thất bại.
+- [x] Một adapter giả mới chỉ cần một file và một dòng đăng ký là được orchestrator dùng (có test).
 
 Kiểm tra: `uv run pytest tests/unit/test_orchestrator.py tests/unit/test_target_parse.py`.
 
@@ -194,8 +197,8 @@ Người làm: Thi. Phụ thuộc: T5. Cỡ: M.
 
 Nghiệm thu:
 
-- [ ] Phần chuyển sang dữ liệu chung có test dùng `info.json` và file phụ đề đã ghi sẵn, không gọi mạng.
-- [ ] Test live thu đủ một video thật.
+- [x] Phần chuyển sang dữ liệu chung có test dùng `info.json` và file phụ đề đã ghi sẵn, không gọi mạng.
+- [x] Test live thu đủ một video thật.
 
 Kiểm tra: `uv run pytest tests/unit/test_ytdlp_normalize.py` và `uv run pytest -m live -k ytdlp`.
 
@@ -248,12 +251,14 @@ API gồm `POST /api/cases/{id}/collect`, `GET /api/jobs?case=`, `GET /api/jobs/
 
 Nghiệm thu:
 
-- [ ] Integration test chạy toàn luồng với adapter giả và bản thu mẫu, kết thúc với nghi vấn có trong chỉ mục và trả về qua API findings.
-- [ ] Khi một bước lỗi, job chuyển sang `failed`, có thông báo lỗi và có dòng audit.
+- [x] Integration test chạy toàn luồng với adapter giả và bản thu mẫu, kết thúc với nghi vấn có trong chỉ mục và trả về qua API findings.
+- [x] Khi một bước lỗi, job chuyển sang `failed`, có thông báo lỗi và có dòng audit.
 
 Kiểm tra: `uv run pytest tests/integration/test_pipeline.py`; thủ công: chạy hai `huey_consumer` rồi gọi API với một link thật.
 
 File: `src/h4wk/jobs/{queue.py,pipeline.py}`, `api/jobs.py`, `api/findings.py`, tests.
+Bước media và analyze hiện là bản tạm trong `jobs/placeholder.py` (gom phụ đề thành đoạn 8–20 giây; khớp nguyên văn tên và hai từ xúc phạm mẫu). T10 và T11 thay hai bước này.
+
 Người làm: Thi. Phụ thuộc: T7, T9, T44. Tích hợp sau: T10, T11. Cỡ: M.
 
 ### T13: UI tối giản: login, cases, collect, danh sách nghi vấn
@@ -397,7 +402,7 @@ Nghiệm thu:
 Kiểm tra: `uv run pytest tests/integration/test_media_stt.py`, cần `ffmpeg` và `ffprobe` trong PATH. Để nghiệm thu GPU, đặt `H4WK_STT_MODEL` thành tên hoặc đường dẫn model đã chọn và `H4WK_T44_CAPTURE` thành thư mục bản thu T44 rồi chạy `uv run --extra stt pytest -m gpu tests/integration/test_media_stt.py`.
 
 File: `src/h4wk/media/{proxy.py,stt.py,models.py}`, tests.
-Người làm: Bảo. Phụ thuộc: T3, T10. Cỡ: M.
+Người làm: Bảo. Phụ thuộc: T3, T10, T44 (video thật; STT không chạy được trên tiếng bíp của bản tổng hợp). Cỡ: M.
 
 ### T19: Keyframe theo mức thay đổi
 
@@ -610,7 +615,7 @@ Nghiệm thu:
 Kiểm tra: `uv run pytest tests/unit/test_faces.py` (đánh dấu `gpu` nếu cần).
 
 File: `src/h4wk/analysis/faces.py`, `tests/fixtures/faces/*`, tests.
-Người làm: Bảo. Phụ thuộc: T39, T19, T3, T23. Cỡ: M.
+Người làm: Bảo. Phụ thuộc: T39, T19, T3, T23, T44 (video thật; bộ dò khuôn mặt không nhận ra hình vẽ của bản tổng hợp). Cỡ: M.
 
 ### T42: Checklist demo
 

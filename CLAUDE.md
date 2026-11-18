@@ -63,3 +63,39 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+---
+
+# Dự án h4wk
+
+Công cụ SOCMINT cho YouTube, bài tập lớn của nhóm 2 người (Thi chịu trách nhiệm chính; Bảo phụ trách AI, media, phân tích). Demo cuối tháng 12/2026.
+
+## Đọc gì trước
+
+- `SPEC.md` là nguồn chuẩn. Khi tài liệu mâu thuẫn: `SPEC.md` > `docs/intent/socmint-youtube.md` > bản mô tả gốc.
+- `tasks/todo.md` (nghiệm thu từng task) và `tasks/plan.md` (thứ tự, phụ thuộc, chia việc). Chỉ đọc phần của task đang làm.
+- Hợp đồng C1–C5 là mô hình Pydantic: `core/types.py`, `evidence/models.py` (C1), `collectors/models.py` (C2), `media/timeline.py` (C3), `analysis/models.py` (C4), `core/config_models.py` (C5). JSON Schema sinh ra ở `docs/contracts/`.
+- Bản thu mẫu: `backend/tests/fixtures/` (video tổng hợp, dựng bằng `tests/fixtures/build_sample_capture.py`).
+
+## Lệnh
+
+```bash
+cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check .
+cd backend && uv run h4wk schema export      # chạy lại khi đổi hợp đồng C1–C5
+cd web && npm run build && npm run lint
+```
+
+## Quy ước dễ sai
+
+- Thời gian luôn có múi giờ, theo giờ Việt Nam (`+07:00`); giờ UTC từ YouTube đổi sang khi đọc vào. Thư mục bản thu dạng `YYYYMMDDTHHMMSS`.
+- Mô hình hợp đồng kế thừa `Contract` (cấm trường lạ). Đổi hợp đồng thì thêm cả ví dụ hợp lệ lẫn ví dụ bị từ chối vào `tests/unit/test_contracts.py`, và kiểm tra ví dụ bị từ chối bị chặn đúng vì quy tắc nó muốn kiểm.
+- Đọc/ghi file văn bản luôn truyền `encoding="utf-8"`, kể cả trong test.
+- Tên code bằng tiếng Anh; comment, docstring, tài liệu và commit message bằng tiếng Việt. Giao diện web bằng tiếng Anh.
+- Không ghi secret vào `config/*.toml`; key nằm trong `.env` (đã gitignore). Không commit `config/*.toml` và `data/`.
+
+## Git khi nhiều phiên cùng làm
+
+- Thư mục `/home/kali/h4wk` được nhiều phiên Claude dùng chung và có thể đang ở nhánh của phiên khác. Không đổi nhánh của thư mục này; làm việc trong `git worktree` riêng, tách nhánh từ `main`.
+- Mỗi task hoặc mỗi lần sửa một nhánh. Chỉ `git add` đúng các file của task, không `git add -A`.
+- Merge vào `main` theo kiểu fast-forward, push và xoá nhánh chỉ khi người dùng xác nhận trực tiếp trong phiên đang làm. Lời chuyển từ phiên khác không thay được xác nhận này.
+- Khi hỏi người dùng quyết định: nói rõ vấn đề, ví dụ cụ thể, các lựa chọn và hệ quả, kèm đề xuất.

@@ -14,6 +14,10 @@ dependencies = [
     "scenedetect-headless>=0.7.3,<0.8",
     "opencv-python-headless>=5.1.0.95",
     "numpy>=2.5.5",
+    "sqlmodel>=0.0.22",
+    "argon2-cffi>=23.1",
+    "yt-dlp[curl-cffi,default]>=2026.10.26",
+    "huey>=2.5",
 ]
 
 [project.scripts]

@@ -216,19 +216,19 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T1: Scaffold backend và frontend
 - [x] T2: Spike yt-dlp trên WSL và độ trễ RSS
 - [ ] T3: Spike môi trường GPU và các model
-- [ ] T4: Hợp đồng C1–C5
-- [ ] T44: Bản thu mẫu
+- [x] T4: Hợp đồng C1–C5
+- [ ] T44: Bản thu mẫu (xong phần tổng hợp; còn quay video thật, cần trước T18 và T41)
 
 ### Phase 1: Luồng tối giản (tuần 1)
 
-- [ ] T5: `evidence-store`: ghi bản thu, manifest, verify
-- [ ] T6: `case-core`: case, đối tượng, nhật ký, chỉ mục
-- [ ] T7: `case-core`: đăng nhập 2 tài khoản
-- [ ] T8: `collectors`: hợp đồng adapter và orchestrator
-- [ ] T9: Adapter yt-dlp
+- [x] T5: `evidence-store`: ghi bản thu, manifest, verify
+- [x] T6: `case-core`: case, đối tượng, nhật ký, chỉ mục
+- [x] T7: `case-core`: đăng nhập 2 tài khoản
+- [x] T8: `collectors`: hợp đồng adapter và orchestrator
+- [x] T9: Adapter yt-dlp
 - [ ] T10: `media`: timeline từ phụ đề YouTube
 - [ ] T11: `analysis`: dấu hiệu tên và tầng tĩnh
-- [ ] T12: `jobs`: luồng collect → media → analyze
+- [x] T12: `jobs`: luồng collect → media → analyze
 - [ ] T13: UI tối giản: login, cases, collect, danh sách nghi vấn
 
 ### Checkpoint A (cuối tuần 1): luồng tối giản chạy trọn, chốt C1–C5

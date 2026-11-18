@@ -7,7 +7,8 @@ Bản demo SOCMINT cho YouTube. Đặc tả nằm trong [SPEC.md](SPEC.md), kế
 - WSL2 (Ubuntu hoặc Kali). Các bước xử lý media và AI về sau cần GPU NVIDIA và CUDA.
 - [uv](https://docs.astral.sh/uv/). uv tự tải Python 3.12 nếu máy chưa có.
 - Node 20 trở lên và npm.
-- `ffmpeg` trong PATH (dùng từ các task media trở đi).
+- `ffmpeg` trong PATH (yt-dlp dùng để ghép video và audio).
+- [Deno](https://deno.land) trong PATH: yt-dlp cần JS runtime để tải từ YouTube (spike T2). Cài bằng `curl -fsSL https://deno.land/install.sh | sh` rồi thêm `~/.deno/bin` vào PATH.
 
 Không dùng Docker.
 
@@ -53,6 +54,8 @@ Mở http://localhost:5173. Trang chủ hiện `API status: ok` nghĩa là đã 
 cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check .
 cd web && npm run build && npm run lint
 ```
+
+Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run pytest -m live`.
 
 Các lệnh khác (tạo tài khoản, worker, verify bản thu…) có ở [SPEC.md §4](SPEC.md#4-lệnh); lệnh nào chưa có thì sẽ được thêm dần theo task.
 

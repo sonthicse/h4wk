@@ -1,0 +1,203 @@
+[
+  {
+    "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3A",
+    "run_id": "r_20261118T160500",
+    "case_id": "2026-11_case-demo",
+    "video_id": "h4wkDemo001",
+    "capture": "20261118T160000",
+    "analyzer": "static",
+    "analyzer_version": "0.1.0",
+    "model": null,
+    "source_kind": "speech",
+    "triggers": [
+      {
+        "via": "speech",
+        "segment_id": "seg_0001",
+        "comment_id": null,
+        "frame": null,
+        "bbox": null,
+        "score": null
+      }
+    ],
+    "segment_id": "seg_0001",
+    "comment_id": null,
+    "start": 5.0,
+    "end": 9.5,
+    "quote": "Ai cũng biết hắn là kẻ lừa đảo.",
+    "frame": null,
+    "bbox": null,
+    "entity": "e_01",
+    "category": "insult",
+    "severity": "medium",
+    "confidence": "unverified",
+    "reason": "Từ 'lừa đảo' trong đoạn nhắc tên đối tượng."
+  },
+  {
+    "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3B",
+    "run_id": "r_20261118T160500",
+    "case_id": "2026-11_case-demo",
+    "video_id": "h4wkDemo001",
+    "capture": "20261118T160000",
+    "analyzer": "static",
+    "analyzer_version": "0.1.0",
+    "model": null,
+    "source_kind": "ocr",
+    "triggers": [
+      {
+        "via": "ocr",
+        "segment_id": "seg_0002",
+        "comment_id": null,
+        "frame": "frames/000015.jpg",
+        "bbox": [
+          36.0,
+          165.0,
+          566.0,
+          42.0
+        ],
+        "score": null
+      }
+    ],
+    "segment_id": "seg_0002",
+    "comment_id": null,
+    "start": 10.0,
+    "end": 20.0,
+    "quote": "TRẦN VĂN MẪU LỪA ĐẢO",
+    "frame": "frames/000015.jpg",
+    "bbox": [
+      36.0,
+      165.0,
+      566.0,
+      42.0
+    ],
+    "entity": "e_01",
+    "category": "insult",
+    "severity": "medium",
+    "confidence": "unverified",
+    "reason": "Chữ trên hình gắn tên đối tượng với từ 'lừa đảo'."
+  },
+  {
+    "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3C",
+    "run_id": "r_20261118T160500",
+    "case_id": "2026-11_case-demo",
+    "video_id": "h4wkDemo001",
+    "capture": "20261118T160000",
+    "analyzer": "llm",
+    "analyzer_version": "0.1.0",
+    "model": {
+      "provider": "fake",
+      "model": "fake-llm"
+    },
+    "source_kind": "visual",
+    "triggers": [
+      {
+        "via": "face",
+        "segment_id": "seg_0003",
+        "comment_id": null,
+        "frame": "frames/000025.jpg",
+        "bbox": [
+          192.0,
+          52.0,
+          256.0,
+          256.0
+        ],
+        "score": 0.91
+      }
+    ],
+    "segment_id": "seg_0003",
+    "comment_id": null,
+    "start": 20.0,
+    "end": 30.0,
+    "quote": "",
+    "frame": "frames/000025.jpg",
+    "bbox": [
+      192.0,
+      52.0,
+      256.0,
+      256.0
+    ],
+    "entity": "e_01",
+    "category": "insult",
+    "severity": "high",
+    "confidence": "likely",
+    "reason": "Khuôn mặt đối tượng bị đè chữ 'TỘI PHẠM' và vẽ còng tay; đoạn này không ai nhắc tên."
+  },
+  {
+    "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3D",
+    "run_id": "r_20261118T160500",
+    "case_id": "2026-11_case-demo",
+    "video_id": "h4wkDemo001",
+    "capture": "20261118T160000",
+    "analyzer": "static",
+    "analyzer_version": "0.1.0",
+    "model": null,
+    "source_kind": "ocr",
+    "triggers": [
+      {
+        "via": "ocr",
+        "segment_id": "seg_0004",
+        "comment_id": null,
+        "frame": "frames/000034.jpg",
+        "bbox": [
+          545.0,
+          336.0,
+          88.0,
+          18.0
+        ],
+        "score": null
+      }
+    ],
+    "segment_id": "seg_0004",
+    "comment_id": null,
+    "start": 34.0,
+    "end": 35.0,
+    "quote": "TVM đồ hèn",
+    "frame": "frames/000034.jpg",
+    "bbox": [
+      545.0,
+      336.0,
+      88.0,
+      18.0
+    ],
+    "entity": "e_01",
+    "category": "insult",
+    "severity": "low",
+    "confidence": "unverified",
+    "reason": "Chữ nhỏ ở góc, viết tắt tên đối tượng kèm 'đồ hèn', chỉ hiện 1 giây."
+  },
+  {
+    "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3E",
+    "run_id": "r_20261118T160500",
+    "case_id": "2026-11_case-demo",
+    "video_id": "h4wkDemo001",
+    "capture": "20261118T160000",
+    "analyzer": "llm",
+    "analyzer_version": "0.1.0",
+    "model": {
+      "provider": "fake",
+      "model": "fake-llm"
+    },
+    "source_kind": "comment",
+    "triggers": [
+      {
+        "via": "comment",
+        "segment_id": null,
+        "comment_id": "c1",
+        "frame": null,
+        "bbox": null,
+        "score": null
+      }
+    ],
+    "segment_id": null,
+    "comment_id": "c1",
+    "start": null,
+    "end": null,
+    "quote": "Trần Văn Mẫu đúng là lừa đảo",
+    "frame": null,
+    "bbox": null,
+    "entity": "e_01",
+    "category": "unsupported_accusation",
+    "severity": "low",
+    "confidence": "likely",
+    "reason": "Comment cáo buộc đối tượng lừa đảo mà không đưa bằng chứng."
+  }
+]
