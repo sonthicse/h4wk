@@ -144,8 +144,8 @@ SQLite (chế độ WAL, qua SQLModel) làm chỉ mục cho case, đối tượn
 
 Nghiệm thu:
 
-- [ ] Tạo case qua API thì có `case.json` và một dòng trong audit.
-- [ ] Một thao tác thất bại cũng để lại dòng audit với `status` lỗi.
+- [x] Tạo case qua API thì có `case.json` và một dòng trong audit.
+- [x] Một thao tác thất bại cũng để lại dòng audit với `status` lỗi.
 Kiểm tra: `uv run pytest tests/unit/test_cases.py`.
 
 File: `src/h4wk/core/{db.py,cases.py,audit.py}`, `api/cases.py`, tests.

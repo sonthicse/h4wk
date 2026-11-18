@@ -11,6 +11,7 @@ from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
 from h4wk.collectors.models import Normalized
 from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
 from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig
+from h4wk.core.db import get_engine
 from h4wk.evidence.models import Manifest
 from h4wk.evidence.verify import FileStatus
 from h4wk.evidence.verify import verify as verify_capture
@@ -46,6 +47,7 @@ def init_workspace(data_dir: Path, config_dir: Path) -> list[Path]:
     Trả về danh sách file cấu hình vừa tạo.
     """
     data_dir.mkdir(parents=True, exist_ok=True)
+    get_engine(data_dir)  # tạo database chỉ mục nếu chưa có
     created: list[Path] = []
     for example in sorted(config_dir.glob("*.toml.example")):
         target = example.with_suffix("")  # bỏ đuôi .example

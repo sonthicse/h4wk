@@ -14,6 +14,7 @@ def test_init_creates_data_dir(tmp_path: Path) -> None:
     data_dir = tmp_path / "data"
     init_workspace(data_dir=data_dir, config_dir=tmp_path / "config")
     assert data_dir.is_dir()
+    assert (data_dir / "index.db").is_file()
 
 
 def test_init_copies_examples_to_toml(tmp_path: Path) -> None:
