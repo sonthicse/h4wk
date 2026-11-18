@@ -251,12 +251,14 @@ API gồm `POST /api/cases/{id}/collect`, `GET /api/jobs?case=`, `GET /api/jobs/
 
 Nghiệm thu:
 
-- [ ] Integration test chạy toàn luồng với adapter giả và bản thu mẫu, kết thúc với nghi vấn có trong chỉ mục và trả về qua API findings.
-- [ ] Khi một bước lỗi, job chuyển sang `failed`, có thông báo lỗi và có dòng audit.
+- [x] Integration test chạy toàn luồng với adapter giả và bản thu mẫu, kết thúc với nghi vấn có trong chỉ mục và trả về qua API findings.
+- [x] Khi một bước lỗi, job chuyển sang `failed`, có thông báo lỗi và có dòng audit.
 
 Kiểm tra: `uv run pytest tests/integration/test_pipeline.py`; thủ công: chạy hai `huey_consumer` rồi gọi API với một link thật.
 
 File: `src/h4wk/jobs/{queue.py,pipeline.py}`, `api/jobs.py`, `api/findings.py`, tests.
+Bước media và analyze hiện là bản tạm trong `jobs/placeholder.py` (gom phụ đề thành đoạn 8–20 giây; khớp nguyên văn tên và hai từ xúc phạm mẫu). T10 và T11 thay hai bước này.
+
 Người làm: Thi. Phụ thuộc: T7, T9, T44. Tích hợp sau: T10, T11. Cỡ: M.
 
 ### T13: UI tối giản: login, cases, collect, danh sách nghi vấn

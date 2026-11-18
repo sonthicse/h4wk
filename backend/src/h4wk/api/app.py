@@ -8,12 +8,13 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
 from h4wk.api import auth as auth_api
-from h4wk.api import cases
+from h4wk.api import cases, jobs
 from h4wk.core import audit, auth
 
 app = FastAPI(title="h4wk")
 app.include_router(auth_api.router)
 app.include_router(cases.router)
+app.include_router(jobs.router)
 
 # Mọi API đều cần đăng nhập, trừ các đường dẫn này (mặc định là chặn).
 PUBLIC_PATHS = {"/api/health"}

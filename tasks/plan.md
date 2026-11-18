@@ -228,7 +228,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T9: Adapter yt-dlp
 - [ ] T10: `media`: timeline từ phụ đề YouTube
 - [ ] T11: `analysis`: dấu hiệu tên và tầng tĩnh
-- [ ] T12: `jobs`: luồng collect → media → analyze
+- [x] T12: `jobs`: luồng collect → media → analyze
 - [ ] T13: UI tối giản: login, cases, collect, danh sách nghi vấn
 
 ### Checkpoint A (cuối tuần 1): luồng tối giản chạy trọn, chốt C1–C5

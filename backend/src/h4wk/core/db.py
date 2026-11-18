@@ -49,6 +49,39 @@ class SourceStateRow(SQLModel, table=True):
     suspended_until: datetime | None = None
 
 
+class JobRow(SQLModel, table=True):
+    """Một lần chạy luồng collect → media → analyze cho một video."""
+
+    __tablename__ = "jobs"
+    id: str = Field(primary_key=True)
+    case_id: str = Field(foreign_key="cases.id", index=True)
+    target: str
+    video_id: str
+    level: str
+    force: bool = False
+    trigger: str  # user:<username> hoặc system:<rule>
+    status: str = "queued"  # queued | running | done | failed
+    step: str | None = None  # collect | media | analyze
+    progress: int = 0
+    capture: str | None = None
+    run_id: str | None = None
+    error: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class FindingRow(SQLModel, table=True):
+    """Chỉ mục nghi vấn; nội dung đầy đủ nằm ở findings.json, ở đây giữ bản sao JSON."""
+
+    __tablename__ = "findings"
+    id: str = Field(primary_key=True)
+    case_id: str = Field(foreign_key="cases.id", index=True)
+    video_id: str
+    capture: str
+    run_id: str
+    data: str
+
+
 _engines: dict[Path, Engine] = {}
 
 
