@@ -21,6 +21,12 @@ function findingStats(caseId: string, entity: Entity) {
   return { total: list.length, open }
 }
 
+// "1 image" / "2 images"; từ đặc biệt: entity → entities, alias → aliases.
+function plural(n: number, word: string) {
+  if (n === 1) return `${n} ${word}`
+  return `${n} ${word === 'entity' ? 'entities' : word === 'alias' ? 'aliases' : word + 's'}`
+}
+
 export default function EntitiesPage() {
   const { caseId = '' } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -38,8 +44,8 @@ export default function EntitiesPage() {
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold">Entities</h1>
         <div className="flex items-center gap-2 text-sm">
-          <Badge variant="outline">{all.length} entities</Badge>
-          <Badge variant="outline">{refCount} reference images</Badge>
+          <Badge variant="outline">{plural(all.length, 'entity')}</Badge>
+          <Badge variant="outline">{plural(refCount, 'reference image')}</Badge>
           <Button className="ml-2" onClick={() => setCreating(true)}>
             New entity
           </Button>
@@ -82,12 +88,12 @@ export default function EntitiesPage() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate font-medium">{e.name}</span>
-                      <Badge variant={stats.open > 0 ? 'default' : 'secondary'}>{stats.total} findings</Badge>
+                      <Badge variant={stats.open > 0 ? 'default' : 'secondary'}>{plural(stats.total, 'finding')}</Badge>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {e.aliases.length} aliases · {e.abbreviations.length} abbr. ·{' '}
-                      {e.refs.filter((r) => r.kind === 'face').length} faces ·{' '}
-                      {e.refs.filter((r) => r.kind === 'image').length} images
+                      {plural(e.aliases.length, 'alias')} · {e.abbreviations.length} abbr. ·{' '}
+                      {plural(e.refs.filter((r) => r.kind === 'face').length, 'face')} ·{' '}
+                      {plural(e.refs.filter((r) => r.kind === 'image').length, 'image')}
                     </p>
                   </button>
                 </li>
@@ -115,7 +121,7 @@ function EntityDetail({ caseId, entity }: { caseId: string; entity: Entity }) {
         </div>
         <div className="flex items-center gap-3 text-sm">
           <span className="text-muted-foreground">
-            {stats.total} findings · {stats.open} open
+            {plural(stats.total, 'finding')} · {stats.open} open
           </span>
           <Button asChild variant="outline" size="sm">
             <Link to={`/cases/${caseId}/findings`}>View findings</Link>
