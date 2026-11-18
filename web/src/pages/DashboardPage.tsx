@@ -1,6 +1,128 @@
-import PlaceholderPage from '@/pages/PlaceholderPage'
+import { useQuery } from '@tanstack/react-query'
+import { Link, useParams } from 'react-router'
+import ActivityChart from '@/components/dashboard/ActivityChart'
+import EventFeed from '@/components/dashboard/EventFeed'
+import UsageCard from '@/components/dashboard/UsageCard'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { severityVariant, statusVariant } from '@/lib/findings'
+import { getDashboard } from '@/mocks/dashboard'
+import type { ReviewStatus, Severity } from '@/mocks/data'
 
-// Stub; trang thật được dựng ở T31, T35.
+const severities: Severity[] = ['high', 'medium', 'low']
+const statuses: ReviewStatus[] = ['pending', 'confirmed', 'rejected', 'needs_info']
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardDescription>{label}</CardDescription>
+        <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
+      </CardHeader>
+    </Card>
+  )
+}
+
+function Breakdown<K extends string>({
+  title,
+  keys,
+  counts,
+  variant,
+}: {
+  title: string
+  keys: K[]
+  counts: Record<K, number>
+  variant: Record<K, 'destructive' | 'default' | 'secondary' | 'outline'>
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2">
+          {keys.map((k) => (
+            <li key={k} className="flex items-center justify-between">
+              <Badge variant={variant[k]}>{k}</Badge>
+              <span className="text-lg font-medium tabular-nums">{counts[k]}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function DashboardPage() {
-  return <PlaceholderPage title="Dashboard" task="T31, T35" />
+  const { caseId = '' } = useParams()
+  // Số liệu cũng làm mới mỗi 5 giây để khớp với dòng sự kiện (video watchlist xử lý xong thì số tăng).
+  const stats = useQuery({ queryKey: ['dashboard', caseId], queryFn: () => getDashboard(caseId), refetchInterval: 5000 })
+
+  if (stats.isPending) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    )
+  }
+
+  if (stats.error) {
+    return (
+      <Alert variant="destructive">
+        <AlertTitle>Could not load the dashboard</AlertTitle>
+        <AlertDescription>Try reloading the page.</AlertDescription>
+      </Alert>
+    )
+  }
+
+  if (!stats.data) {
+    return (
+      <div className="space-y-4">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <Alert>
+          <AlertTitle>Case not found</AlertTitle>
+          <AlertDescription>
+            No case has the id “{caseId}”. <Link to="/cases" className="underline">Back to cases</Link>
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
+
+  const d = stats.data
+  const totalFindings = severities.reduce((sum, s) => sum + d.findingsBySeverity[s], 0)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-baseline justify-between">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <div className="flex gap-2 text-sm">
+          <Badge variant="outline">{d.caseName}</Badge>
+          <Badge variant="outline">{totalFindings} {totalFindings === 1 ? 'finding' : 'findings'}</Badge>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <StatCard label="Channels" value={d.channelCount} />
+        <StatCard label="Videos" value={d.videoCount} />
+        <StatCard label="Captures" value={d.captureCount} />
+      </div>
+
+      <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Breakdown title="Findings by severity" keys={severities} counts={d.findingsBySeverity} variant={severityVariant} />
+            <Breakdown title="Findings by review status" keys={statuses} counts={d.findingsByStatus} variant={statusVariant} />
+          </div>
+          <ActivityChart data={d.activity} />
+          <UsageCard youtubeQuota={d.youtubeQuota} supadataCredits={d.supadataCredits} />
+        </div>
+        <EventFeed caseId={caseId} />
+      </div>
+    </div>
+  )
 }
