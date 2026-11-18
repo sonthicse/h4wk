@@ -3,7 +3,6 @@ import { CircleCheckIcon, CircleXIcon, GavelIcon, RadioTowerIcon } from 'lucide-
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatVnDateTime } from '@/lib/format'
 import { listEvents, type FeedEvent } from '@/mocks/dashboard'
 import { findings } from '@/mocks/data'
@@ -58,7 +57,7 @@ function EventItem({ event, caseId }: { event: FeedEvent; caseId: string }) {
             <Badge variant={jobVariant[event.job.status]}>{event.job.status}</Badge>
           </div>
         )}
-        {event.error && <p className="font-mono text-xs break-words text-destructive">{event.error}</p>}
+        {event.error && <p className="font-mono text-xs [overflow-wrap:anywhere] text-destructive">{event.error}</p>}
       </div>
     </li>
   )
@@ -85,13 +84,13 @@ export default function EventFeed({ caseId }: { caseId: string }) {
           <p className="text-sm text-muted-foreground">No events yet. Add a channel to the watchlist or collect a video.</p>
         )}
         {events.data && events.data.length > 0 && (
-          <ScrollArea className="h-[34rem] pr-3">
+          <div className="h-full overflow-y-auto pr-3">
             <ol aria-live="polite" className="divide-y">
               {events.data.map((e) => (
                 <EventItem key={e.id} event={e} caseId={caseId} />
               ))}
             </ol>
-          </ScrollArea>
+          </div>
         )}
       </CardContent>
     </Card>
