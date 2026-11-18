@@ -112,6 +112,7 @@ Nghiệm thu:
 
 - [x] Mọi file JSON mẫu validate được theo C1–C4.
 - [x] `verify` (T5) chạy trên bản thu mẫu báo OK; trước khi có T5, SHA-256 trong manifest được kiểm bằng `sha256sum`.
+- [ ] Quay video thật: lời nói tiếng Việt có tên đối tượng giả, khuôn mặt thật của thành viên đóng vai đối tượng. Thay video và ảnh khuôn mặt mẫu trong `tests/fixtures/build_sample_capture.py` rồi chạy lại script. Mục này phải xong trước T18 và T41.
 
 Kiểm tra: `uv run pytest tests/unit/test_fixtures.py`.
 
@@ -395,7 +396,7 @@ Nghiệm thu:
 Kiểm tra: `uv run pytest tests/integration/test_media_stt.py` (đánh dấu `gpu` nếu cần).
 
 File: `src/h4wk/media/{proxy.py,stt.py,models.py}`, tests.
-Người làm: Bảo. Phụ thuộc: T3, T10. Cỡ: M.
+Người làm: Bảo. Phụ thuộc: T3, T10, T44 (video thật; STT không chạy được trên tiếng bíp của bản tổng hợp). Cỡ: M.
 
 ### T19: Keyframe theo mức thay đổi
 
@@ -604,7 +605,7 @@ Nghiệm thu:
 Kiểm tra: `uv run pytest tests/unit/test_faces.py` (đánh dấu `gpu` nếu cần).
 
 File: `src/h4wk/analysis/faces.py`, `tests/fixtures/faces/*`, tests.
-Người làm: Bảo. Phụ thuộc: T39, T19, T3, T23. Cỡ: M.
+Người làm: Bảo. Phụ thuộc: T39, T19, T3, T23, T44 (video thật; bộ dò khuôn mặt không nhận ra hình vẽ của bản tổng hợp). Cỡ: M.
 
 ### T42: Checklist demo
 

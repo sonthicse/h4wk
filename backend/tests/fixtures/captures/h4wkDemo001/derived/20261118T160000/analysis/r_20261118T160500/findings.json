@@ -45,10 +45,15 @@
     "triggers": [
       {
         "via": "ocr",
-        "segment_id": null,
+        "segment_id": "seg_0002",
         "comment_id": null,
         "frame": "frames/000015.jpg",
-        "bbox": null,
+        "bbox": [
+          36.0,
+          165.0,
+          566.0,
+          42.0
+        ],
         "score": null
       }
     ],
@@ -86,7 +91,7 @@
     "triggers": [
       {
         "via": "face",
-        "segment_id": null,
+        "segment_id": "seg_0003",
         "comment_id": null,
         "frame": "frames/000025.jpg",
         "bbox": [
@@ -129,10 +134,15 @@
     "triggers": [
       {
         "via": "ocr",
-        "segment_id": null,
+        "segment_id": "seg_0004",
         "comment_id": null,
         "frame": "frames/000034.jpg",
-        "bbox": null,
+        "bbox": [
+          545.0,
+          336.0,
+          88.0,
+          18.0
+        ],
         "score": null
       }
     ],

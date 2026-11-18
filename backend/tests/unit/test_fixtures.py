@@ -101,6 +101,17 @@ def test_findings_match_run_and_capture(findings: list[Finding], timeline: Timel
     assert all("Mẫu" not in speech_by_seg[f.segment_id] for f in visual if f.segment_id)
 
 
+def test_triggers_match_hits(findings: list[Finding], hits: list[EntityHit]) -> None:
+    """Mỗi trigger của nghi vấn phải là một dấu hiệu có thật trong hits.json, cùng đối tượng."""
+    by_loc = {(h.via, h.segment_id, h.comment_id, h.frame): h for h in hits}
+    for f in findings:
+        assert f.triggers, f.id
+        for t in f.triggers:
+            hit = by_loc.get((t.via, t.segment_id, t.comment_id, t.frame))
+            assert hit is not None, (f.id, t)
+            assert hit.entity == f.entity, f.id
+
+
 def test_reference_images_exist() -> None:
     assert list((REFS_DIR / "face").glob("*.png"))
     assert list((REFS_DIR / "image").glob("*.png"))

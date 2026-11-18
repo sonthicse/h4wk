@@ -473,7 +473,14 @@ def findings() -> list[Finding]:
                 "quote": BIG_TEXT,
                 "frame": "frames/000015.jpg",
                 "bbox": BBOX_BIG,
-                "triggers": [{"via": "ocr", "frame": "frames/000015.jpg"}],
+                "triggers": [
+                    {
+                        "via": "ocr",
+                        "segment_id": "seg_0002",
+                        "frame": "frames/000015.jpg",
+                        "bbox": BBOX_BIG,
+                    }
+                ],
                 "category": "insult",
                 "severity": "medium",
                 "reason": "Chữ trên hình gắn tên đối tượng với từ 'lừa đảo'.",
@@ -489,7 +496,13 @@ def findings() -> list[Finding]:
                 "frame": "frames/000025.jpg",
                 "bbox": BBOX_FACE,
                 "triggers": [
-                    {"via": "face", "frame": "frames/000025.jpg", "bbox": BBOX_FACE, "score": 0.91}
+                    {
+                        "via": "face",
+                        "segment_id": "seg_0003",
+                        "frame": "frames/000025.jpg",
+                        "bbox": BBOX_FACE,
+                        "score": 0.91,
+                    }
                 ],
                 "category": "insult",
                 "severity": "high",
@@ -507,7 +520,14 @@ def findings() -> list[Finding]:
                 "quote": CORNER_TEXT,
                 "frame": "frames/000034.jpg",
                 "bbox": BBOX_CORNER,
-                "triggers": [{"via": "ocr", "frame": "frames/000034.jpg"}],
+                "triggers": [
+                    {
+                        "via": "ocr",
+                        "segment_id": "seg_0004",
+                        "frame": "frames/000034.jpg",
+                        "bbox": BBOX_CORNER,
+                    }
+                ],
                 "category": "insult",
                 "severity": "low",
                 "reason": "Chữ nhỏ ở góc, viết tắt tên đối tượng kèm 'đồ hèn', chỉ hiện 1 giây.",
