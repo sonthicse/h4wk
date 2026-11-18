@@ -40,7 +40,7 @@ Người làm: Thi. Phụ thuộc: không có. Cỡ: M.
 Script tạm đặt trong `docs/spikes/`. Spike gồm ba phần:
 
 1. Dùng yt-dlp tải metadata, phụ đề tiếng Việt, comment và video 720p của 3 video tiếng Việt từ máy này. Ghi lại lỗi gặp phải (bot check, PO token, yêu cầu JS runtime như Deno) và cách xử lý (cookies, plugin, phiên bản yt-dlp). Thử thêm một video vừa đăng vài phút để xem đã có bản 720p và phụ đề tự động chưa.
-2. Đăng 3 video lên kênh thử nghiệm, poll RSS mỗi 30 giây, ghi độ trễ từ lúc video công khai tới lúc video xuất hiện trong feed.
+2. Theo dõi RSS của vài kênh tin tức đăng thường xuyên (nhóm không có kênh riêng), poll mỗi 30 giây, ghi độ trễ từ lúc video công khai tới lúc video xuất hiện trong feed.
 3. Đo cùng độ trễ đó với endpoint `playlistItems` của YouTube API trên uploads playlist.
 
 Nghiệm thu:
@@ -639,7 +639,7 @@ Nghiệm thu:
 
 - [ ] Thêm kênh có 15 video trong RSS giả thì tạo đúng 10 job; lần poll tiếp theo không tạo job nào.
 - [ ] Feed RSS giả thêm 1 entry thì tạo đúng 1 job; chạy lại không tạo job trùng.
-- [ ] Thủ công: đăng video thật lên kênh thử nghiệm thì có nghi vấn trong hàng đợi.
+- [ ] Thủ công: một kênh tin tức trong watchlist đăng video mới thì video được tự thu và xử lý (bấm Check now nếu chưa thấy).
 
 Kiểm tra: `uv run pytest tests/unit/test_watchlist.py` và làm thủ công màn 3.
 
@@ -733,7 +733,7 @@ Gồm các task: T15, T24, T27, T28, T29, T33, T34, T35, T40, T41, T45, T46.
 
 ### T36: Dữ liệu case demo
 
-Thu và xử lý 10–20 video thật cho case demo, tạo đối tượng demo kèm ảnh mẫu. Đối tượng demo dùng khuôn mặt của một thành viên nhóm. Case phải có ít nhất một video mà nghi vấn hình ảnh nằm ở đoạn không ai nhắc tên. Chuẩn bị sẵn video sẽ đăng trong màn 3 và video ngắn cho màn 2.
+Thu và xử lý 10–20 video thật cho case demo, tạo đối tượng demo kèm ảnh mẫu. Đối tượng demo dùng khuôn mặt của một thành viên nhóm. Case phải có ít nhất một video mà nghi vấn hình ảnh nằm ở đoạn không ai nhắc tên. Chuẩn bị sẵn video ngắn cho màn 2, và chọn kênh tin tức cho watchlist ở màn 3.
 
 Nghiệm thu:
 

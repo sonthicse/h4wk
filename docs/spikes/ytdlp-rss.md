@@ -76,4 +76,4 @@ Cần đo lại độ trễ thật của API khi làm T30 (nút Check now), bằ
 - yt-dlp chạy được trên máy này, sau khi cài Deno và `curl_cffi`, và chỉ lấy phụ đề tiếng Việt.
 - **RSS trễ quá 3 phút**: cache 15 phút, cộng với mẫu đo được trễ 10 phút. Vì vậy **màn 3 dùng nút Check now lúc demo**. Nút này gọi `playlistItems` của YouTube API, vốn không bị cache CDN. Kiểm tra RSS định kỳ vẫn giữ để tiết kiệm quota.
 - Watchlist phải chống trùng theo ID video và không coi việc một video biến mất khỏi feed là video bị xoá, vì RSS chập chờn giữa các máy chủ cache.
-- Spike này dùng kênh tin tức của người khác vì nhóm chưa có kênh thử nghiệm. Màn 3 cần một kênh do nhóm quản lý để đăng video lúc demo. SPEC phần 13 đang ghi "Kênh YouTube thử nghiệm cho màn 3 đã có", nên cần sửa lại câu này.
+- Spike này dùng kênh tin tức của người khác vì nhóm không có kênh riêng. Nhóm quyết định giữ cách này cho màn 3 (SPEC đã cập nhật): màn 3 chỉ trình diễn phát hiện và tự xử lý video mới.

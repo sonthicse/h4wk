@@ -35,7 +35,7 @@ Demo chạy được là tiêu chí chính; báo cáo phương pháp đứng th�
 
 1. Case chuẩn bị sẵn với 10–20 video thật. Video phát nhảy đúng tới đoạn bị nghi. Hàng đợi có nghi vấn từ lời nói, từ chữ trên hình và từ hình ảnh, trong đó có ít nhất một nghi vấn hình ảnh ở đoạn không ai nhắc tên. Analyst duyệt nghi vấn ngay trên giao diện.
 2. Dán link trực tiếp: hệ thống xử lý ngay tại chỗ một video ngắn.
-3. Watchlist: đăng video lên kênh thử nghiệm, nghi vấn mới tự xuất hiện trong hàng đợi, mục tiêu là trong khoảng 10 phút.
+3. Watchlist: một kênh tin tức đang theo dõi đăng video mới, hệ thống tự phát hiện và tự xử lý video đó, mục tiêu là trong khoảng 10 phút.
 
 Buổi demo cũng trình diễn giao diện chỉnh nguồn để cho thấy kiến trúc adapter.
 
@@ -82,3 +82,4 @@ Cùng ngày, sau vòng review tài liệu:
 Cùng ngày, sau phần 1 của spike T2:
 
 - Chỉ thu phụ đề tiếng Việt, không thu phụ đề mọi ngôn ngữ.
+- Nhóm không có kênh YouTube riêng. Màn 3 theo dõi kênh tin tức nên chỉ trình diễn phát hiện và tự xử lý video mới, không trình diễn nghi vấn mới.

@@ -180,9 +180,9 @@ Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải 
 
 ### Màn 3: watchlist
 
-- [ ] Đăng một video mới lên kênh trong watchlist. Hệ thống tự phát hiện, tự xử lý, và nghi vấn mới xuất hiện trong hàng đợi.
+- [ ] Một kênh tin tức trong watchlist (ví dụ HTV Tin Tức, VTV24) đăng video mới. Hệ thống tự phát hiện, tự thu và tự xử lý video đó, và video hiện trong case. Nhóm không có kênh riêng để tự đăng video, và video của kênh tin tức thường không nhắc tới đối tượng demo, nên màn 3 không yêu cầu có nghi vấn mới.
 - [ ] Dòng sự kiện trên dashboard hiện `New video detected on <channel>`.
-- [ ] Mục tiêu: nghi vấn xuất hiện trong khoảng 10 phút sau khi video công khai. Nếu spike T2 cho thấy RSS chậm, lúc demo dùng nút Check now.
+- [ ] Mục tiêu: video được xử lý xong trong khoảng 10 phút sau khi được phát hiện. Spike T2 cho thấy RSS bị cache tới 15 phút, nên lúc demo bấm nút Check now để phát hiện ngay.
 
 ### Bằng chứng
 
@@ -200,7 +200,7 @@ Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải 
 
 | Tuần | Việc | Mốc |
 |---|---|---|
-| 1 | Chốt C1–C5. Chạy các spike: yt-dlp tải được trên WSL, độ trễ RSS trên kênh thử nghiệm, bốn thư viện GPU cùng chạy trong một môi trường. Dựng luồng tối giản chạy qua `jobs`: dán link → yt-dlp → bản thu và manifest → transcript → khớp tên tĩnh → 1 nghi vấn trên một trang đơn giản | Luồng tối giản chạy từ đầu đến cuối |
+| 1 | Chốt C1–C5. Chạy các spike: yt-dlp tải được trên WSL, độ trễ RSS trên kênh tin tức đăng thường xuyên, bốn thư viện GPU cùng chạy trong một môi trường. Dựng luồng tối giản chạy qua `jobs`: dán link → yt-dlp → bản thu và manifest → transcript → khớp tên tĩnh → 1 nghi vấn trên một trang đơn giản | Luồng tối giản chạy từ đầu đến cuối |
 | 2–3 | YouTube API, Supadata, chuyển nguồn khi lỗi; keyframe, OCR, VLM, timeline; `ai-gateway`; LLM cho `analysis`, gồm cả comment; khớp khuôn mặt và ảnh mẫu; màn chi tiết video; hàng đợi rà soát | Màn 1 và màn 2 chạy được ở dạng thô |
 | 4 | Watchlist RSS và Check now; dòng sự kiện | Ba màn demo chạy trọn |
 | 5 | Giao diện Settings đầy đủ 7 mục, dashboard | Đạt toàn bộ tiêu chí ở phần 8 |
@@ -574,5 +574,5 @@ Các quyết định đã chốt:
 - Comment được gửi nguyên văn cho nhà cung cấp AI, kể cả tên và ID người bình luận.
 - `config/ai.toml.example` cấu hình sẵn nhiều nhà cung cấp: Anthropic, OpenAI, Gemini và các nhà OpenAI-compatible như DeepSeek, Qwen, GLM, Kimi. Settings chỉ cho chọn nhà cung cấp và model, không có lựa chọn theo quốc gia.
 - Có khớp khuôn mặt, với các giới hạn ở 10.6 và phần 11. Điều này đảo ngược quy định "không nhận diện khuôn mặt" trong mô tả gốc (mục 13, 14); dữ liệu khuôn mặt là dữ liệu cá nhân nhạy cảm theo Nghị định 13/2023, nên khi demo dùng khuôn mặt của chính thành viên nhóm làm đối tượng, và báo cáo môn học giải thích lý do thay đổi.
-- Kênh YouTube thử nghiệm cho màn 3 đã có.
+- Nhóm không có kênh YouTube riêng. Màn 3 theo dõi kênh tin tức đăng thường xuyên, nên chỉ trình diễn việc phát hiện và tự xử lý video mới, không trình diễn nghi vấn mới.
 - Thi là người chịu trách nhiệm chính và duyệt mọi thay đổi hợp đồng sau checkpoint A.
