@@ -115,7 +115,7 @@ export default function ProviderCard({ provider: p, isNew, changed, onChange, on
             {p.newApiKey.trim()
               ? 'New key will be stored on the server when you save.'
               : hasKey(p)
-                ? `Saved key: ${p.apiKeyMasked}. The full key is never sent back to the browser.`
+                ? 'The saved key is never shown again. To change it, enter a new one and save.'
                 : 'No key yet. Routes to this provider are skipped.'}
           </p>
         </div>
