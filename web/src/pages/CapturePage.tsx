@@ -1,6 +1,56 @@
-import PlaceholderPage from '@/pages/PlaceholderPage'
+import { useQuery } from '@tanstack/react-query'
+import { Link, useParams } from 'react-router'
+import FilesTable from '@/components/capture/FilesTable'
+import ManifestCard from '@/components/capture/ManifestCard'
+import SourcesTable from '@/components/capture/SourcesTable'
+import { Badge } from '@/components/ui/badge'
+import { getCapture } from '@/mocks/captures'
 
-// Stub; trang thật được dựng ở T29.
 export default function CapturePage() {
-  return <PlaceholderPage title="Capture" task="T29" />
+  const { caseId = '', videoId = '', captureId = '' } = useParams()
+  const capture = useQuery({
+    queryKey: ['capture', caseId, videoId, captureId],
+    queryFn: () => getCapture(caseId, videoId, captureId),
+  })
+  const videoUrl = `/cases/${caseId}/videos/${videoId}`
+
+  if (capture.isLoading) return <p className="text-sm text-muted-foreground">Loading capture…</p>
+  if (capture.error) return <p className="text-sm text-destructive">Could not load capture.</p>
+
+  const c = capture.data
+  if (!c) {
+    return (
+      <div className="space-y-2">
+        <h1 className="text-2xl font-semibold">Capture not found</h1>
+        <p className="text-sm text-muted-foreground">
+          There is no capture <code>{captureId}</code> for video <code>{videoId}</code> in this case.
+        </p>
+        <Link className="text-sm underline" to={`/cases/${caseId}/videos/${videoId}`}>
+          Back to video
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-baseline justify-between gap-4">
+        <div>
+          <Link className="text-sm text-muted-foreground underline" to={videoUrl}>
+            ← Back to video
+          </Link>
+          <h1 className="text-2xl font-semibold">{c.videoTitle}</h1>
+        </div>
+        <div className="flex gap-2 text-sm">
+          <Badge variant="outline">
+            <code>{c.id}</code>
+          </Badge>
+          <Badge variant="outline">{c.manifest.level}</Badge>
+        </div>
+      </div>
+      <ManifestCard manifest={c.manifest} />
+      <SourcesTable sources={c.manifest.sources} />
+      <FilesTable capture={c} />
+    </div>
+  )
 }
