@@ -4,11 +4,15 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { formatVnDateTime, formatVnTime } from '@/lib/format'
+import { formatVnDateTime } from '@/lib/format'
 import { listEvents, type FeedEvent } from '@/mocks/dashboard'
+import { findings } from '@/mocks/data'
 import type { JobStatus } from '@/mocks/jobs'
 
 const POLL_MS = 5000
+
+// Chỉ link tới video có trong dữ liệu giả; video watchlist mới chưa có trang chi tiết.
+const knownVideos = new Set(findings.map((f) => f.videoId))
 
 // Cùng cách tô màu trạng thái job như trang Collect.
 const jobVariant: Record<JobStatus, 'secondary' | 'default' | 'outline' | 'destructive'> = {
@@ -33,17 +37,20 @@ function EventItem({ event, caseId }: { event: FeedEvent; caseId: string }) {
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-medium">{event.message}</p>
-          <time dateTime={event.at} title={formatVnDateTime(event.at)} className="shrink-0 text-xs text-muted-foreground tabular-nums">
-            {formatVnTime(event.at)}
+          <time dateTime={event.at} className="shrink-0 text-xs text-muted-foreground tabular-nums">
+            {formatVnDateTime(event.at)}
           </time>
         </div>
-        {event.videoId && (
+        {event.videoId && knownVideos.has(event.videoId) && (
           <Link
             to={`/cases/${caseId}/videos/${event.videoId}`}
             className="block truncate text-sm text-muted-foreground hover:text-foreground hover:underline"
           >
             {event.videoTitle}
           </Link>
+        )}
+        {event.videoId && !knownVideos.has(event.videoId) && (
+          <p className="truncate text-sm text-muted-foreground">{event.videoTitle}</p>
         )}
         {event.job && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">

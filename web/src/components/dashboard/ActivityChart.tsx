@@ -11,8 +11,8 @@ import {
 import type { DayActivity } from '@/mocks/dashboard'
 
 const config = {
-  captures: { label: 'Captures', color: 'var(--chart-2)' },
-  findings: { label: 'Findings', color: 'var(--chart-4)' },
+  captures: { label: 'Captures', color: 'oklch(0.62 0.17 255)' },
+  findings: { label: 'Findings', color: 'var(--destructive)' },
 } satisfies ChartConfig
 
 // Ngày hiện theo giờ Việt Nam, dạng 18/11.
