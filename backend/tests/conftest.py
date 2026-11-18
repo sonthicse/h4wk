@@ -33,3 +33,17 @@ def client(anon_client: TestClient) -> TestClient:
     r = anon_client.post("/api/auth/login", json={"username": USERNAME, "password": PASSWORD})
     assert r.status_code == 204, r.text
     return anon_client
+
+
+@pytest.fixture(autouse=True)
+def _no_network(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test thường không được gọi mạng; chỉ test đánh dấu `live` mới được."""
+    if request.node.get_closest_marker("live"):
+        return
+    import socket
+
+    def guard(*_a: object, **_k: object) -> None:
+        raise RuntimeError("test không được gọi mạng (đánh dấu @pytest.mark.live nếu cần)")
+
+    monkeypatch.setattr(socket.socket, "connect", guard)
+    monkeypatch.setattr(socket, "getaddrinfo", guard)

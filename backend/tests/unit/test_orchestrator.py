@@ -241,7 +241,7 @@ def test_new_adapter_needs_one_file_and_one_registry_line(
     clock: Clock, case_root: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # "Một file" là lớp FakeCollector ở trên; "một dòng" là mục trong registry.COLLECTORS.
-    monkeypatch.setitem(registry.COLLECTORS, "fake", lambda: FakeCollector("fake", ALL))
+    monkeypatch.setattr(registry, "COLLECTORS", {"fake": lambda: FakeCollector("fake", ALL)})
     orch = Orchestrator.from_config(
         case_dir=case_root, sources=SourcesConfig(), now=clock, sleep=lambda _s: None
     )

@@ -197,8 +197,8 @@ Người làm: Thi. Phụ thuộc: T5. Cỡ: M.
 
 Nghiệm thu:
 
-- [ ] Phần chuyển sang dữ liệu chung có test dùng `info.json` và file phụ đề đã ghi sẵn, không gọi mạng.
-- [ ] Test live thu đủ một video thật.
+- [x] Phần chuyển sang dữ liệu chung có test dùng `info.json` và file phụ đề đã ghi sẵn, không gọi mạng.
+- [x] Test live thu đủ một video thật.
 
 Kiểm tra: `uv run pytest tests/unit/test_ytdlp_normalize.py` và `uv run pytest -m live -k ytdlp`.
 

@@ -9,6 +9,7 @@ dependencies = [
     "typer>=0.12",
     "sqlmodel>=0.0.22",
     "argon2-cffi>=23.1",
+    "yt-dlp[curl-cffi,default]>=2026.10.26",
 ]
 
 [project.scripts]
