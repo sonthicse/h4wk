@@ -82,7 +82,7 @@ export default function EntitiesPage() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate font-medium">{e.name}</span>
-                      <Badge variant={stats.open > 0 ? 'default' : 'secondary'}>{stats.total}</Badge>
+                      <Badge variant={stats.open > 0 ? 'default' : 'secondary'}>{stats.total} findings</Badge>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {e.aliases.length} aliases · {e.abbreviations.length} abbr. ·{' '}
