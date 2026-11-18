@@ -344,6 +344,9 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Finding, _finding(confidence="87%"), "mức tin cậy dạng phần trăm"),
     (Finding, _finding(category="spam"), "category lạ"),
     (Finding, _finding(id="f_0001"), "id không phải ULID"),
+    (Finding, _finding(source_kind="speech", segment_id=None), "speech thiếu segment_id"),
+    (Finding, _finding(source_kind="ocr", start=None), "ocr thiếu start"),
+    (Finding, _finding(source_kind="visual", segment_id=None), "visual thiếu segment_id"),
     (Finding, _finding(id="f_01jd3z8k5q6r7s8t9v0w1x2y3z"), "id ULID chữ thường"),
     (Finding, _finding(key="b" * 64), "trường key đã bỏ"),
     # C4: review
@@ -430,6 +433,10 @@ def test_cap_values_match_manifest_what() -> None:
     assert Cap.VIDEO_METADATA.value == "video.metadata"
     assert Cap.MEDIA.value == "video.media"
     assert {lv.value for lv in CollectLevel} == {"metadata", "text", "full"}
+
+
+def test_finding_start_zero_is_valid() -> None:
+    Finding.model_validate(_finding(source_kind="speech", start=0.0, end=4.0))
 
 
 def test_hits_and_findings_files_are_lists() -> None:

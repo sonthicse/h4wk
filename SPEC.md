@@ -436,6 +436,7 @@ Quyết định rà soát (một dòng trong `reviews.jsonl`):
 Quy tắc:
 
 - Nghi vấn `visual` phải trích khung hình và nêu lý do dựa trên nội dung hình.
+- Nghi vấn `speech`, `ocr` và `visual` phải có `segment_id` và `start`, để bấm vào nghi vấn thì video phát từ `start − 2s`.
 - Mức tin cậy viết bằng chữ, không dùng phần trăm.
 - Nghi vấn là dữ liệu phái sinh. Mỗi lần chạy ghi vào một thư mục `analysis/<run_id>/` mới, nên kết quả các lần chạy trước vẫn còn nguyên.
 - Nghi vấn từ comment chỉ hiển thị nội dung comment và liên kết tới comment đó. Công cụ không có màn hình hồ sơ người bình luận.

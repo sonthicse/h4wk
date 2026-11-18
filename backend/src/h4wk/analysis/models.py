@@ -86,6 +86,10 @@ class ModelRef(Contract):
 FindingId = Annotated[str, StringConstraints(pattern=r"^f_[0-9A-HJKMNP-TV-Z]{26}$")]
 
 
+# Nghi vấn nằm trong video: cần segment_id và start để phát video từ start − 2s (màn 1).
+_TIMED_KINDS = {SourceKind.SPEECH, SourceKind.OCR, SourceKind.VISUAL}
+
+
 class Finding(Contract):
     """Một nghi vấn (một phần tử của findings.json)."""
 
@@ -118,6 +122,8 @@ class Finding(Contract):
             raise ValueError("nghi vấn llm phải có model")
         if self.source_kind == SourceKind.VISUAL and not self.frame:
             raise ValueError("nghi vấn visual phải trích khung hình (frame)")
+        if self.source_kind in _TIMED_KINDS and (not self.segment_id or self.start is None):
+            raise ValueError(f"nghi vấn {self.source_kind} phải có segment_id và start")
         if self.source_kind == SourceKind.COMMENT and not self.comment_id:
             raise ValueError("nghi vấn từ comment phải có comment_id")
         if self.start is not None and self.end is not None and self.end < self.start:
