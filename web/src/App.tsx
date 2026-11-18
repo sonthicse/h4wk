@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import AppLayout from '@/components/AppLayout'
 import CasesPage from '@/pages/CasesPage'
+import CollectPage from '@/pages/CollectPage'
 import FindingsPage from '@/pages/FindingsPage'
 import LoginPage from '@/pages/LoginPage'
 import PlaceholderPage from '@/pages/PlaceholderPage'
@@ -20,7 +21,7 @@ export default function App() {
             <Route path="/cases/:caseId">
               <Route index element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<PlaceholderPage title="Dashboard" task="T31, T35" />} />
-              <Route path="collect" element={<PlaceholderPage title="Collect" task="T13" />} />
+              <Route path="collect" element={<CollectPage />} />
               <Route path="findings" element={<FindingsPage />} />
               <Route path="review" element={<PlaceholderPage title="Review queue" task="T28" />} />
               <Route path="watchlist" element={<PlaceholderPage title="Watchlist" task="T31" />} />

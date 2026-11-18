@@ -68,7 +68,11 @@ export default function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <span className="px-2 text-lg font-semibold group-data-[collapsible=icon]:hidden">h4wk</span>
+        {/* Chỗ đặt logo: kích thước cố định để menu không nhảy khi thu gọn sidebar. */}
+        <div
+          aria-label="Logo"
+          className="size-8 shrink-0 rounded-md border border-dashed border-muted-foreground/40"
+        />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -80,7 +84,8 @@ export default function AppSidebar() {
         </SidebarGroup>
         {current && (
           <SidebarGroup>
-            <SidebarGroupLabel>{current.name}</SidebarGroupLabel>
+            {/* Giữ chỗ cho nhãn khi thu gọn (mặc định shadcn kéo -mt-8) để icon bên dưới không nhảy lên. */}
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:mt-0">{current.name}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {caseNav.map((item) => (
