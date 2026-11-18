@@ -113,7 +113,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
         {usage && (
           <div className="space-y-1.5">
             <div className="flex justify-between">
-              <span className="font-medium">{usage.unit === 'units' ? 'Quota' : 'Credits'} this {usage.period}</span>
+              <span className="font-medium">{usage.unit === 'units' ? 'Quota today' : 'Credits this month'}</span>
               <span className="tabular-nums">
                 {usage.used.toLocaleString('en-US')} / {usage.limit.toLocaleString('en-US')} {usage.unit}
               </span>
