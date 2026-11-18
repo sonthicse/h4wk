@@ -135,7 +135,7 @@ h4wk/
 
 ```python
 class YtDlpCollector(Collector):
-    """Adapter yt-dlp: lấy media, phụ đề mọi ngôn ngữ, comment, thumbnail."""
+    """Adapter yt-dlp: lấy media, phụ đề tiếng Việt, comment, thumbnail."""
 
     name = "ytdlp"
     capabilities = {Cap.VIDEO_METADATA, Cap.TRANSCRIPTS, Cap.COMMENTS, Cap.MEDIA, Cap.THUMBNAILS}
@@ -309,7 +309,7 @@ Với mỗi loại dữ liệu, orchestrator lấy từ một nguồn: thử cá
 - Quota YouTube API được đếm theo ngày, reset lúc nửa đêm giờ Thái Bình Dương (Pacific Time). Credit Supadata đếm theo tháng.
 - Cờ `fault_injection` trong `sources.toml` cho phép giả lập một nguồn bị chặn, dùng cho test và cho demo.
 
-Ở mức thu `full`, dữ liệu cần thu gồm metadata, phụ đề mọi ngôn ngữ, toàn bộ comment và reply, thumbnail (bản lớn nhất và `0–3.jpg`), video 720p và audio.
+Ở mức thu `full`, dữ liệu cần thu gồm metadata, phụ đề tiếng Việt (bản người đăng tải lên và bản tự động gốc, không lấy bản dịch máy), toàn bộ comment và reply, thumbnail (bản lớn nhất và `0–3.jpg`), video 720p và audio.
 
 Nghiệm thu: thêm một adapter mới chỉ cần một file trong `providers/` và một dòng đăng ký.
 
@@ -455,7 +455,7 @@ Mức thu quyết định những gì được thu và xử lý. Mặc định l
 | Mức | Thu | Xử lý và phân tích |
 |---|---|---|
 | `metadata` | Metadata, thumbnail | Phân tích tiêu đề, mô tả |
-| `text` | Thêm phụ đề mọi ngôn ngữ, comment | Thêm OCR và VLM trên thumbnail; phân tích transcript, comment |
+| `text` | Thêm phụ đề tiếng Việt, comment | Thêm OCR và VLM trên thumbnail; phân tích transcript, comment |
 | `full` | Thêm video 720p, audio | Toàn bộ các bước ở 10.5 và 10.6 |
 
 Đầu vào ở màn Collect:
@@ -569,6 +569,7 @@ Các quyết định đã chốt:
 
 - Mỗi loại dữ liệu lấy từ một nguồn, các nguồn khác chỉ dự phòng khi lỗi.
 - Phân tích chạy trên một transcript chính; các transcript khác chỉ để xem.
+- Chỉ thu phụ đề tiếng Việt: bản người đăng tải lên (`vi*`) và bản tự động gốc (`vi-orig`). Không thu bản dịch máy, vì lấy mọi ngôn ngữ kéo theo hơn 100 bản dịch và bị YouTube trả HTTP 429 (spike T2).
 - Giữ mức thu, mặc định là `full`.
 - Comment được gửi nguyên văn cho nhà cung cấp AI, kể cả tên và ID người bình luận.
 - `config/ai.toml.example` cấu hình sẵn nhiều nhà cung cấp: Anthropic, OpenAI, Gemini và các nhà OpenAI-compatible như DeepSeek, Qwen, GLM, Kimi. Settings chỉ cho chọn nhà cung cấp và model, không có lựa chọn theo quốc gia.

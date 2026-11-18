@@ -46,7 +46,7 @@ Không gặp bot check, không bị đòi PO token, và không cần cookies.
 
 - Với format `bv*[height<=720]+ba`, YouTube trả AV1 hoặc VP9 trong file `.mp4`. Bước tạo bản 480p (`ffmpeg`) đọc được các codec này. Nếu muốn file gốc phát được ở mọi trình duyệt thì có thể ưu tiên H.264 bằng `format_sort: ["vcodec:h264"]`. Cần quyết định lúc làm T6.
 - Khi đặt `max_comments`, yt-dlp ghi `comment_count` bằng số comment đã lấy, nên mất tổng số comment thật. Muốn có tổng thật thì phải lấy ở bước đọc metadata (chưa bật `getcomments`), hoặc từ YouTube API.
-- SPEC ghi "phụ đề mọi ngôn ngữ", còn spike này chỉ lấy tiếng Việt theo yêu cầu của nhóm. Cần cập nhật SPEC nếu adapter cũng chỉ lấy tiếng Việt.
+- Adapter chỉ lấy phụ đề tiếng Việt, giống spike này. SPEC đã được cập nhật (phần 13).
 
 ## Phần 2: độ trễ RSS
 

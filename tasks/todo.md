@@ -39,7 +39,7 @@ Người làm: Thi. Phụ thuộc: không có. Cỡ: M.
 
 Script tạm đặt trong `docs/spikes/`. Spike gồm ba phần:
 
-1. Dùng yt-dlp tải metadata, phụ đề mọi ngôn ngữ, comment và video 720p của 3 video tiếng Việt từ máy này. Ghi lại lỗi gặp phải (bot check, PO token, yêu cầu JS runtime như Deno) và cách xử lý (cookies, plugin, phiên bản yt-dlp). Thử thêm một video vừa đăng vài phút để xem đã có bản 720p và phụ đề tự động chưa.
+1. Dùng yt-dlp tải metadata, phụ đề tiếng Việt, comment và video 720p của 3 video tiếng Việt từ máy này. Ghi lại lỗi gặp phải (bot check, PO token, yêu cầu JS runtime như Deno) và cách xử lý (cookies, plugin, phiên bản yt-dlp). Thử thêm một video vừa đăng vài phút để xem đã có bản 720p và phụ đề tự động chưa.
 2. Đăng 3 video lên kênh thử nghiệm, poll RSS mỗi 30 giây, ghi độ trễ từ lúc video công khai tới lúc video xuất hiện trong feed.
 3. Đo cùng độ trễ đó với endpoint `playlistItems` của YouTube API trên uploads playlist.
 
@@ -190,7 +190,7 @@ Người làm: Thi. Phụ thuộc: T5. Cỡ: M.
 
 ### T9: Adapter yt-dlp
 
-`YtDlpCollector` hỗ trợ các Cap: `VIDEO_METADATA`, `CHANNEL_METADATA`, `CHANNEL_VIDEOS`, `PLAYLIST_VIDEOS`, `TRANSCRIPTS` (phụ đề mọi ngôn ngữ, gắn nhãn `uploaded` hoặc `auto`), `COMMENTS` (toàn bộ, kèm reply), `THUMBNAILS` (bản lớn nhất và `0–3.jpg`), `MEDIA` (720p và audio). Chọn định dạng có phương án dự phòng khi chưa có bản 720p. Adapter phân loại lỗi của yt-dlp, ghi phiên bản yt-dlp, và hỗ trợ file cookies cùng các yêu cầu cài đặt mà T2 tìm ra.
+`YtDlpCollector` hỗ trợ các Cap: `VIDEO_METADATA`, `CHANNEL_METADATA`, `CHANNEL_VIDEOS`, `PLAYLIST_VIDEOS`, `TRANSCRIPTS` (phụ đề tiếng Việt, gắn nhãn `uploaded` hoặc `auto`), `COMMENTS` (toàn bộ, kèm reply), `THUMBNAILS` (bản lớn nhất và `0–3.jpg`), `MEDIA` (720p và audio). Chọn định dạng có phương án dự phòng khi chưa có bản 720p. Adapter phân loại lỗi của yt-dlp, ghi phiên bản yt-dlp, và hỗ trợ file cookies cùng các yêu cầu cài đặt mà T2 tìm ra.
 
 Nghiệm thu:
 
