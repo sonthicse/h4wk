@@ -1,6 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
+import { UnauthorizedError } from '@/api/client'
 import AppLayout from '@/components/AppLayout'
+import RequireLogin from '@/components/RequireLogin'
 import CapturePage from '@/pages/CapturePage'
 import CasesPage from '@/pages/CasesPage'
 import CollectPage from '@/pages/CollectPage'
@@ -15,7 +17,15 @@ import SourcesPage from '@/pages/settings/SourcesPage'
 import VideoDetailPage from '@/pages/VideoDetailPage'
 import WatchlistPage from '@/pages/WatchlistPage'
 
-const queryClient = new QueryClient()
+// Phiên hết hạn giữa chừng (API trả 401): kiểm tra lại /api/auth/me để RequireLogin chuyển sang /login.
+function onError(error: Error) {
+  if (error instanceof UnauthorizedError) queryClient.invalidateQueries({ queryKey: ['me'] })
+}
+
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError }),
+  mutationCache: new MutationCache({ onError }),
+})
 
 export default function App() {
   return (
@@ -23,24 +33,26 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<Navigate to="/cases" replace />} />
-            <Route path="/cases" element={<CasesPage />} />
-            <Route path="/cases/:caseId">
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="collect" element={<CollectPage />} />
-              <Route path="findings" element={<FindingsPage />} />
-              <Route path="videos/:videoId" element={<VideoDetailPage />} />
-              <Route path="videos/:videoId/captures/:captureId" element={<CapturePage />} />
-              <Route path="review" element={<ReviewQueuePage />} />
-              <Route path="watchlist" element={<WatchlistPage />} />
-              <Route path="entities" element={<EntitiesPage />} />
-            </Route>
-            <Route path="/settings" element={<SettingsLayout />}>
-              <Route index element={<Navigate to="sources" replace />} />
-              <Route path="sources" element={<SourcesPage />} />
-              <Route path="ai" element={<AIProvidersPage />} />
+          <Route element={<RequireLogin />}>
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Navigate to="/cases" replace />} />
+              <Route path="/cases" element={<CasesPage />} />
+              <Route path="/cases/:caseId">
+                <Route index element={<Navigate to="collect" replace />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="collect" element={<CollectPage />} />
+                <Route path="findings" element={<FindingsPage />} />
+                <Route path="videos/:videoId" element={<VideoDetailPage />} />
+                <Route path="videos/:videoId/captures/:captureId" element={<CapturePage />} />
+                <Route path="review" element={<ReviewQueuePage />} />
+                <Route path="watchlist" element={<WatchlistPage />} />
+                <Route path="entities" element={<EntitiesPage />} />
+              </Route>
+              <Route path="/settings" element={<SettingsLayout />}>
+                <Route index element={<Navigate to="sources" replace />} />
+                <Route path="sources" element={<SourcesPage />} />
+                <Route path="ai" element={<AIProvidersPage />} />
+              </Route>
             </Route>
           </Route>
         </Routes>

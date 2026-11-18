@@ -10,6 +10,7 @@ import {
   UsersIcon,
 } from 'lucide-react'
 import { NavLink, useMatch, useParams } from 'react-router'
+import { getCase } from '@/api/cases'
 import { getHealth } from '@/api/health'
 import {
   Sidebar,
@@ -23,7 +24,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { cases } from '@/mocks/data'
 
 const caseNav = [
   { path: 'dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
@@ -63,7 +63,8 @@ function ApiStatus() {
 
 export default function AppSidebar() {
   const { caseId } = useParams()
-  const current = cases.find((c) => c.id === caseId)
+  // Cùng queryKey với các trang dùng getCase nên chỉ gọi API một lần.
+  const current = useQuery({ queryKey: ['case', caseId], queryFn: () => getCase(caseId!), enabled: !!caseId }).data
 
   return (
     <Sidebar collapsible="icon">
@@ -85,7 +86,7 @@ export default function AppSidebar() {
         {current && (
           <SidebarGroup>
             {/* Giữ chỗ cho nhãn khi thu gọn (mặc định shadcn kéo -mt-8) để icon bên dưới không nhảy lên. */}
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:mt-0">{current.name}</SidebarGroupLabel>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:mt-0">{current.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {caseNav.map((item) => (
