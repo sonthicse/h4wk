@@ -41,7 +41,8 @@ function FrameImage({ frame, boxes = false, className }: { frame: Keyframe; boxe
             <span
               className={cn(
                 'absolute left-[-2px] bg-black/70 px-1 text-[11px] whitespace-nowrap',
-                b.bbox[1] < LABEL_ROOM ? 'top-0' : '-top-5', // sát mép trên thì đặt nhãn vào trong box
+                // Nhãn khuôn mặt nằm trong box, ở đáy, để không đè nhãn của ảnh mẫu bao quanh khuôn mặt.
+                b.kind === 'face' ? 'bottom-0' : b.bbox[1] < LABEL_ROOM ? 'top-0' : '-top-5', // sát mép trên thì đặt vào trong box
               )}
             >
               {b.text}
