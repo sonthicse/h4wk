@@ -1,0 +1,370 @@
+{
+  "$defs": {
+    "Category": {
+      "enum": [
+        "insult",
+        "unsupported_accusation",
+        "fabrication",
+        "legitimate_criticism",
+        "neutral"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "Confidence": {
+      "description": "Mức tin cậy viết bằng chữ, không dùng phần trăm.",
+      "enum": [
+        "unverified",
+        "likely",
+        "highly_likely"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "description": "Một nghi vấn (một phần tử của findings.json).",
+      "properties": {
+        "analyzer": {
+          "enum": [
+            "static",
+            "llm"
+          ],
+          "title": "Analyzer",
+          "type": "string"
+        },
+        "analyzer_version": {
+          "title": "Analyzer Version",
+          "type": "string"
+        },
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "capture": {
+          "pattern": "^\\d{8}T\\d{6}Z$",
+          "title": "Capture",
+          "type": "string"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/Category"
+        },
+        "comment_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment Id"
+        },
+        "confidence": {
+          "$ref": "#/$defs/Confidence"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "entity": {
+          "title": "Entity",
+          "type": "string"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        },
+        "id": {
+          "pattern": "^f_\\S+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ModelRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "quote": {
+          "default": "",
+          "title": "Quote",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "segment_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Segment Id"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "source_kind": {
+          "$ref": "#/$defs/SourceKind"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
+        },
+        "triggers": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Trigger"
+          },
+          "title": "Triggers",
+          "type": "array"
+        },
+        "video_id": {
+          "title": "Video Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "key",
+        "run_id",
+        "case_id",
+        "video_id",
+        "capture",
+        "analyzer",
+        "analyzer_version",
+        "source_kind",
+        "entity",
+        "category",
+        "severity",
+        "confidence",
+        "reason"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "ModelRef": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "title": "ModelRef",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "SourceKind": {
+      "enum": [
+        "speech",
+        "ocr",
+        "visual",
+        "title",
+        "description",
+        "thumbnail",
+        "comment"
+      ],
+      "title": "SourceKind",
+      "type": "string"
+    },
+    "Trigger": {
+      "additionalProperties": false,
+      "description": "Dấu hiệu đã kéo một đoạn vào phân tích.",
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "comment_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment Id"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "segment_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Segment Id"
+        },
+        "via": {
+          "$ref": "#/$defs/Via"
+        }
+      },
+      "required": [
+        "via"
+      ],
+      "title": "Trigger",
+      "type": "object"
+    },
+    "Via": {
+      "enum": [
+        "speech",
+        "ocr",
+        "title",
+        "description",
+        "comment",
+        "thumbnail",
+        "face",
+        "ref_image"
+      ],
+      "title": "Via",
+      "type": "string"
+    }
+  },
+  "items": {
+    "$ref": "#/$defs/Finding"
+  },
+  "type": "array"
+}

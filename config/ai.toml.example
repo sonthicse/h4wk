@@ -1,2 +1,29 @@
-# Bản mẫu cho config/ai.toml. `uv run h4wk init` chép file này thành ai.toml nếu chưa có.
-# Định dạng file (hợp đồng C5) sẽ được định nghĩa ở task T4.
+# Cấu hình nhà cung cấp AI và định tuyến tác vụ AI (hợp đồng C5).
+# Không ghi API key ở đây: key nằm trong .env.
+# Các nhà cung cấp khác (OpenAI, Gemini, DeepSeek, Qwen, GLM, Kimi) được thêm ở task T17.
+
+[providers.anthropic]
+type = "anthropic"
+
+[providers.anthropic.models."claude-sonnet-5-5"]
+vision = true
+structured = true
+
+[providers.anthropic.models."claude-haiku-5-5"]
+vision = true
+structured = true
+
+# Mẫu cho nhà cung cấp OpenAI-compatible (bắt buộc có base_url):
+# [providers.deepseek]
+# type = "openai_compat"
+# base_url = "https://api.deepseek.com"
+# [providers.deepseek.models."<tên model>"]
+# vision = false
+# structured = false
+
+# Mỗi tác vụ AI: danh sách (provider, model) theo thứ tự ưu tiên.
+# media.vision chỉ được gán cho model có vision = true.
+[tasks]
+"analysis.classify" = [{ provider = "anthropic", model = "claude-sonnet-5-5" }]
+"analysis.classify_comment" = [{ provider = "anthropic", model = "claude-haiku-5-5" }]
+"media.vision" = [{ provider = "anthropic", model = "claude-sonnet-5-5" }]

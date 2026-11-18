@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "EntityHit": {
+      "additionalProperties": false,
+      "description": "Một dấu hiệu đối tượng (một phần tử của hits.json).",
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "comment_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment Id"
+        },
+        "entity": {
+          "title": "Entity",
+          "type": "string"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "segment_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Segment Id"
+        },
+        "via": {
+          "$ref": "#/$defs/Via"
+        }
+      },
+      "required": [
+        "via",
+        "entity"
+      ],
+      "title": "EntityHit",
+      "type": "object"
+    },
+    "Via": {
+      "enum": [
+        "speech",
+        "ocr",
+        "title",
+        "description",
+        "comment",
+        "thumbnail",
+        "face",
+        "ref_image"
+      ],
+      "title": "Via",
+      "type": "string"
+    }
+  },
+  "items": {
+    "$ref": "#/$defs/EntityHit"
+  },
+  "type": "array"
+}

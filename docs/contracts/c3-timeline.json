@@ -1,0 +1,316 @@
+{
+  "$defs": {
+    "FrameOcr": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "frame": {
+          "title": "Frame",
+          "type": "string"
+        },
+        "t": {
+          "minimum": 0,
+          "title": "T",
+          "type": "number"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "bbox",
+        "frame",
+        "t"
+      ],
+      "title": "FrameOcr",
+      "type": "object"
+    },
+    "FrameVisual": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "frame": {
+          "title": "Frame",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "offensive_cues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Offensive Cues",
+          "type": "array"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "t": {
+          "minimum": 0,
+          "title": "T",
+          "type": "number"
+        }
+      },
+      "required": [
+        "description",
+        "provider",
+        "model",
+        "frame",
+        "t"
+      ],
+      "title": "FrameVisual",
+      "type": "object"
+    },
+    "OcrText": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "maxItems": 4,
+          "minItems": 4,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Bbox",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "bbox"
+      ],
+      "title": "OcrText",
+      "type": "object"
+    },
+    "Segment": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "minimum": 0,
+          "title": "End",
+          "type": "number"
+        },
+        "id": {
+          "pattern": "^seg_\\d{4,}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "ocr": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FrameOcr"
+          },
+          "title": "Ocr",
+          "type": "array"
+        },
+        "speech": {
+          "default": "",
+          "title": "Speech",
+          "type": "string"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "number"
+        },
+        "visual": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FrameVisual"
+          },
+          "title": "Visual",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "start",
+        "end"
+      ],
+      "title": "Segment",
+      "type": "object"
+    },
+    "ThumbnailAnalysis": {
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "title": "File",
+          "type": "string"
+        },
+        "ocr": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/OcrText"
+          },
+          "title": "Ocr",
+          "type": "array"
+        },
+        "visual": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Visual"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "file"
+      ],
+      "title": "ThumbnailAnalysis",
+      "type": "object"
+    },
+    "TranscriptKind": {
+      "enum": [
+        "uploaded",
+        "auto",
+        "supadata_ai",
+        "stt"
+      ],
+      "title": "TranscriptKind",
+      "type": "string"
+    },
+    "Visual": {
+      "additionalProperties": false,
+      "description": "Mô tả của VLM. Không chứa danh tính người trong ảnh.",
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "offensive_cues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Offensive Cues",
+          "type": "array"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description",
+        "provider",
+        "model"
+      ],
+      "title": "Visual",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "capture": {
+      "pattern": "^\\d{8}T\\d{6}Z$",
+      "title": "Capture",
+      "type": "string"
+    },
+    "schema": {
+      "const": "h4wk.timeline/1",
+      "title": "Schema",
+      "type": "string"
+    },
+    "segments": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Segment"
+      },
+      "title": "Segments",
+      "type": "array"
+    },
+    "source_video_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Video Sha256"
+    },
+    "thumbnails": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ThumbnailAnalysis"
+      },
+      "title": "Thumbnails",
+      "type": "array"
+    },
+    "transcript_kind": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TranscriptKind"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "video_id": {
+      "title": "Video Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema",
+    "video_id",
+    "capture"
+  ],
+  "title": "Timeline",
+  "type": "object"
+}

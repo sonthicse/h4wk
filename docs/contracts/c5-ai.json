@@ -1,0 +1,121 @@
+{
+  "$defs": {
+    "AiTask": {
+      "enum": [
+        "analysis.classify",
+        "analysis.classify_comment",
+        "media.vision"
+      ],
+      "title": "AiTask",
+      "type": "string"
+    },
+    "ModelCaps": {
+      "additionalProperties": false,
+      "properties": {
+        "structured": {
+          "default": false,
+          "title": "Structured",
+          "type": "boolean"
+        },
+        "vision": {
+          "default": false,
+          "title": "Vision",
+          "type": "boolean"
+        }
+      },
+      "title": "ModelCaps",
+      "type": "object"
+    },
+    "ProviderConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "base_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Url"
+        },
+        "models": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ModelCaps"
+          },
+          "title": "Models",
+          "type": "object"
+        },
+        "type": {
+          "enum": [
+            "anthropic",
+            "openai_compat",
+            "gemini"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "models"
+      ],
+      "title": "ProviderConfig",
+      "type": "object"
+    },
+    "Route": {
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "model"
+      ],
+      "title": "Route",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "providers": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ProviderConfig"
+      },
+      "title": "Providers",
+      "type": "object"
+    },
+    "tasks": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/Route"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "default": {},
+      "propertyNames": {
+        "$ref": "#/$defs/AiTask"
+      },
+      "title": "Tasks",
+      "type": "object"
+    }
+  },
+  "required": [
+    "providers"
+  ],
+  "title": "AiConfig",
+  "type": "object"
+}
