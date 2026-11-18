@@ -2,9 +2,9 @@
 (một dòng trong reviews.jsonl). hits.json và findings.json là mảng JSON (SPEC 10.6)."""
 
 from enum import StrEnum
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import StringConstraints, model_validator
 
 from h4wk.core.types import Actor, BBox, CaptureTs, Contract, NonNegFloat, RelPath, VnDatetime
 
@@ -82,10 +82,14 @@ class ModelRef(Contract):
     model: str
 
 
+# id của nghi vấn: `f_` + ULID (26 ký tự Crockford base32), duy nhất trong cả case.
+FindingId = Annotated[str, StringConstraints(pattern=r"^f_[0-9A-HJKMNP-TV-Z]{26}$")]
+
+
 class Finding(Contract):
     """Một nghi vấn (một phần tử của findings.json)."""
 
-    id: str = Field(pattern=r"^f_\S+$")
+    id: FindingId
     run_id: str
     case_id: str
     video_id: str
@@ -124,9 +128,16 @@ class Finding(Contract):
 class ReviewDecision(Contract):
     """Một quyết định rà soát (một dòng của reviews.jsonl)."""
 
-    finding_id: str
+    finding_id: FindingId
     run_id: str
     status: Literal["confirmed", "rejected", "needs_info"]
     by: Actor
     at: VnDatetime
     note: str = ""
+
+    @model_validator(mode="after")
+    def _reject_needs_reason(self) -> Self:
+        # reviews.jsonl chỉ ghi thêm, ghi sai thì không sửa được, nên chặn ngay ở hợp đồng.
+        if self.status == "rejected" and not self.note.strip():
+            raise ValueError("Reject phải có lý do (note)")
+        return self

@@ -88,3 +88,5 @@ Cùng ngày, khi duyệt hợp đồng C1–C5:
 
 - Mọi thời gian dùng giờ Việt Nam (UTC+07:00) thay cho UTC.
 - Phân tích lại một video thì phải rà soát lại toàn bộ nghi vấn; bỏ cơ chế giữ quyết định cũ theo `key`.
+- `id` của nghi vấn có dạng `f_<ULID>`, duy nhất trong cả case, để quyết định rà soát trỏ đúng nghi vấn.
+- Hợp đồng C4 từ chối quyết định Reject không có lý do.

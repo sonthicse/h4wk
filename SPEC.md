@@ -431,7 +431,7 @@ Quyết định rà soát (một dòng trong `reviews.jsonl`):
 {"finding_id": "f_…", "run_id": "…", "status": "confirmed|rejected|needs_info", "by": "user:thi", "at": "…", "note": "…"}
 ```
 
-Mỗi lần chạy phân tích sinh nghi vấn với `id` mới. Nghi vấn của lần chạy mới luôn bắt đầu ở trạng thái chưa rà soát, kể cả khi giống một nghi vấn đã được quyết định ở lần chạy trước. Quyết định cũ vẫn nằm trong `reviews.jsonl`, gắn với `finding_id` và `run_id` cũ.
+`id` của nghi vấn có dạng `f_<ULID>` (26 ký tự Crockford base32) và duy nhất trong cả case, vì `reviews.jsonl` ghi chung cho cả case và quyết định rà soát chỉ trỏ tới nghi vấn qua `finding_id`. Mỗi lần chạy phân tích sinh nghi vấn với `id` mới. Nghi vấn của lần chạy mới luôn bắt đầu ở trạng thái chưa rà soát, kể cả khi giống một nghi vấn đã được quyết định ở lần chạy trước. Quyết định cũ vẫn nằm trong `reviews.jsonl`, gắn với `finding_id` và `run_id` cũ.
 
 Quy tắc:
 
@@ -572,6 +572,7 @@ Các quyết định đã chốt:
 - Chỉ thu phụ đề tiếng Việt: bản người đăng tải lên (`vi*`) và bản tự động gốc (`vi-orig`). Không thu bản dịch máy, vì lấy mọi ngôn ngữ kéo theo hơn 100 bản dịch và bị YouTube trả HTTP 429 (spike T2).
 - Giữ mức thu, mặc định là `full`.
 - Mọi thời gian trong dữ liệu, nhật ký và giao diện dùng giờ Việt Nam (UTC+07:00).
+- `id` của nghi vấn là `f_<ULID>`, duy nhất trong cả case. Quyết định Reject bắt buộc có lý do, kiểm tra ngay trong hợp đồng C4.
 - Phân tích lại một video thì mọi nghi vấn của lần chạy mới phải được rà soát lại; quyết định cũ không tự áp dụng.
 - Comment được gửi nguyên văn cho nhà cung cấp AI, kể cả tên và ID người bình luận.
 - `config/ai.toml.example` cấu hình sẵn nhiều nhà cung cấp: Anthropic, OpenAI, Gemini và các nhà OpenAI-compatible như DeepSeek, Qwen, GLM, Kimi. Settings chỉ cho chọn nhà cung cấp và model, không có lựa chọn theo quốc gia.

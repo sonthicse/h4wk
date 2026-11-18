@@ -19,6 +19,7 @@ from h4wk.evidence.models import Manifest
 from h4wk.media.timeline import Timeline
 
 SHA = "a" * 64
+FID = "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3Z"  # f_ + ULID
 
 # ---------------------------------------------------------------- ví dụ hợp lệ
 
@@ -151,7 +152,7 @@ HIT: dict[str, Any] = {
 
 def _finding(**over: Any) -> dict[str, Any]:
     f: dict[str, Any] = {
-        "id": "f_0001",
+        "id": FID,
         "run_id": "r_20261118T160000",
         "case_id": "2026-11_case-0007",
         "video_id": "abc123",
@@ -183,7 +184,7 @@ def _finding(**over: Any) -> dict[str, Any]:
 FINDING = _finding()
 
 REVIEW: dict[str, Any] = {
-    "finding_id": "f_0001",
+    "finding_id": FID,
     "run_id": "r_20261118T160000",
     "status": "confirmed",
     "by": "user:thi",
@@ -342,10 +343,15 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Finding, _finding(analyzer="llm", model=None), "llm thiếu model"),
     (Finding, _finding(confidence="87%"), "mức tin cậy dạng phần trăm"),
     (Finding, _finding(category="spam"), "category lạ"),
+    (Finding, _finding(id="f_0001"), "id không phải ULID"),
+    (Finding, _finding(id="f_01jd3z8k5q6r7s8t9v0w1x2y3z"), "id ULID chữ thường"),
     (Finding, _finding(key="b" * 64), "trường key đã bỏ"),
     # C4: review
     (ReviewDecision, _set("status", "approved")(REVIEW), "status lạ"),
     (ReviewDecision, _set("by", "thi")(REVIEW), "actor thiếu tiền tố"),
+    (ReviewDecision, _set("finding_id", "f_0001")(REVIEW), "finding_id sai dạng"),
+    (ReviewDecision, {**REVIEW, "status": "rejected", "note": ""}, "reject không lý do"),
+    (ReviewDecision, {**REVIEW, "status": "rejected", "note": "   "}, "reject lý do trắng"),
     # C5: sources
     (SourcesConfig, _set("priority", {"video.media": ["tiktok"]})(SOURCES), "nguồn lạ"),
     (SourcesConfig, _set("priority", {"video.media": ["ytdlp", "ytdlp"]})(SOURCES), "trùng nguồn"),

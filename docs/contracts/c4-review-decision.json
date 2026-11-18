@@ -13,6 +13,7 @@
       "type": "string"
     },
     "finding_id": {
+      "pattern": "^f_[0-9A-HJKMNP-TV-Z]{26}$",
       "title": "Finding Id",
       "type": "string"
     },
