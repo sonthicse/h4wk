@@ -13,6 +13,9 @@ const boxStyle = {
   ref: { label: 'Reference image match', color: 'border-cyan-400 text-cyan-300' },
 }
 
+// Chiều cao (px khung 480p) tối thiểu phía trên box để đặt nhãn.
+const LABEL_ROOM = 28
+
 // Ảnh giả của một khung hình: nền màu theo hue, kèm các khung bao nếu `boxes`.
 function FrameImage({ frame, boxes = false, className }: { frame: Keyframe; boxes?: boolean; className?: string }) {
   const all = [
@@ -35,7 +38,14 @@ function FrameImage({ frame, boxes = false, className }: { frame: Keyframe; boxe
       {boxes &&
         all.map((b, i) => (
           <div key={i} className={cn('absolute border-2', boxStyle[b.kind].color)} style={pos(b.bbox)}>
-            <span className="absolute -top-5 left-[-2px] bg-black/70 px-1 text-[11px] whitespace-nowrap">{b.text}</span>
+            <span
+              className={cn(
+                'absolute left-[-2px] bg-black/70 px-1 text-[11px] whitespace-nowrap',
+                b.bbox[1] < LABEL_ROOM ? 'top-0' : '-top-5', // sát mép trên thì đặt nhãn vào trong box
+              )}
+            >
+              {b.text}
+            </span>
           </div>
         ))}
     </div>
