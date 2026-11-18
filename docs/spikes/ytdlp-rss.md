@@ -23,7 +23,7 @@ uv run --no-project --with 'yt-dlp[default,curl-cffi]' \
 
 Cả 3 video đều có bản 720p kèm audio. Không video nào có phụ đề do người đăng tải lên, chỉ có phụ đề tự động. Phụ đề tự động giữ đúng dấu tiếng Việt và có mốc thời gian theo từng từ.
 
-Chưa thử video vừa đăng vài phút. Việc này làm cùng phần 2, với video đăng lên kênh thử nghiệm.
+Video vừa đăng: xem phần 2. Video `wwZNS9_ZdBs` của VTV24, khi được phát hiện khoảng 14 phút sau lúc đăng, đã có bản 1080p và phụ đề `vi-orig`.
 
 ### Lỗi gặp phải và cách xử lý
 
@@ -50,12 +50,30 @@ Không gặp bot check, không bị đòi PO token, và không cần cookies.
 
 ## Phần 2: độ trễ RSS
 
-Chưa làm. Cần kênh thử nghiệm để đăng 3 video.
+Nhóm không có kênh thử nghiệm, nên không đăng video để đo. Thay vào đó, script [feed_latency.py](feed_latency.py) theo dõi 4 kênh tin tức đăng thường xuyên: HTV Tin Tức (`UCZYKmEA2iQOSbyKc6xj5Vfw`, khoảng 7 video/giờ), Báo Tuổi Trẻ (`UC47WI-kZXFf0H_f7pvaNCEQ`), VTV24 (`UCabsTV34JwALXKGMqHpvUiA`) và VnExpress (`UCpK5nl5llhUL4QKq03qan8g`). Script poll mỗi 30 giây. Độ trễ được tính bằng thời điểm video xuất hiện lần đầu trừ thời điểm đăng (`published`).
+
+Phép đo chỉ chạy khoảng 15 phút, vào buổi tối khi các kênh gần như không đăng video mới, nên chỉ có **1 mẫu**: video `wwZNS9_ZdBs` của VTV24 xuất hiện trong RSS **599 giây (khoảng 10 phút)** sau lúc đăng.
+
+Phát hiện chính đến từ header HTTP, không đến từ số mẫu:
+
+- RSS của YouTube được cache với `Cache-Control: public, max-age=900`, tức tối đa 15 phút. Header `Age` quan sát được dao động từ 48 đến 863 giây.
+- Có nhiều máy chủ cache, mỗi máy giữ một bản với độ cũ khác nhau. Ba request liên tiếp có thể nhận ba bản khác nhau. Vì vậy feed chập chờn: video `wwZNS9_ZdBs` xuất hiện ở một lần poll rồi biến mất ở lần poll sau.
+- Đồng hồ máy chạy đúng (khớp header `Date` của Google tới từng giây), nên độ trễ không do lệch giờ trên WSL. Script lấy thời điểm nhận bằng `Date + Age`.
+
+Do đó, độ trễ RSS gồm thời gian YouTube cập nhật feed cộng với tối đa 15 phút cache. Độ trễ này thường vượt 3 phút.
 
 ## Phần 3: độ trễ `playlistItems` của YouTube API
 
-Chưa làm. Cần YouTube API key.
+Phần này chưa có mẫu nào, vì trong thời gian chạy không kênh nào đăng video mới. Có hai quan sát:
+
+- Phản hồi của `playlistItems` không có header `Cache-Control`, nên không bị cache ở CDN như RSS. Một lần chụp đồng thời cả 4 kênh cho thấy API và RSS có cùng video mới nhất, vì không có video nào mới đăng trong 40 phút trước đó.
+- Mỗi lần gọi với `maxResults` tối đa 50 tốn 1 đơn vị quota. Poll 4 kênh mỗi 30 giây tốn khoảng 480 đơn vị/giờ, trong khi giới hạn là 10.000 đơn vị/ngày. Vì vậy chỉ nên gọi API khi bấm Check now, không nên poll liên tục.
+
+Cần đo lại độ trễ thật của API khi làm T30 (nút Check now), bằng cách chạy lại `feed_latency.py` vào giờ các kênh đăng dày (sáng hoặc trưa).
 
 ## Kết luận
 
-Chưa có kết luận. Phần 1 cho thấy yt-dlp chạy được trên máy này, sau khi cài Deno và `curl_cffi` và chỉ lấy phụ đề tiếng Việt.
+- yt-dlp chạy được trên máy này, sau khi cài Deno và `curl_cffi`, và chỉ lấy phụ đề tiếng Việt.
+- **RSS trễ quá 3 phút**: cache 15 phút, cộng với mẫu đo được trễ 10 phút. Vì vậy **màn 3 dùng nút Check now lúc demo**. Nút này gọi `playlistItems` của YouTube API, vốn không bị cache CDN. Kiểm tra RSS định kỳ vẫn giữ để tiết kiệm quota.
+- Watchlist phải chống trùng theo ID video và không coi việc một video biến mất khỏi feed là video bị xoá, vì RSS chập chờn giữa các máy chủ cache.
+- Spike này dùng kênh tin tức của người khác vì nhóm chưa có kênh thử nghiệm. Màn 3 cần một kênh do nhóm quản lý để đăng video lúc demo. SPEC phần 13 đang ghi "Kênh YouTube thử nghiệm cho màn 3 đã có", nên cần sửa lại câu này.

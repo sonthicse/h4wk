@@ -214,7 +214,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 ### Phase 0: Nền móng và spike (nửa đầu tuần 1)
 
 - [x] T1: Scaffold backend và frontend
-- [ ] T2: Spike yt-dlp trên WSL và độ trễ RSS
+- [x] T2: Spike yt-dlp trên WSL và độ trễ RSS
 - [ ] T3: Spike môi trường GPU và các model
 - [ ] T4: Hợp đồng C1–C5
 - [ ] T44: Bản thu mẫu

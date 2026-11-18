@@ -45,8 +45,8 @@ Script tạm đặt trong `docs/spikes/`. Spike gồm ba phần:
 
 Nghiệm thu:
 
-- [ ] `docs/spikes/ytdlp-rss.md` có kết quả đo, danh sách phần mềm cần cài thêm cho yt-dlp, và kết luận.
-- [ ] Nếu RSS trễ quá 3 phút, file ghi rõ màn 3 sẽ dùng nút Check now lúc demo.
+- [x] `docs/spikes/ytdlp-rss.md` có kết quả đo, danh sách phần mềm cần cài thêm cho yt-dlp, và kết luận.
+- [x] Nếu RSS trễ quá 3 phút, file ghi rõ màn 3 sẽ dùng nút Check now lúc demo.
 
 Kiểm tra: đọc và duyệt file kết quả.
 
