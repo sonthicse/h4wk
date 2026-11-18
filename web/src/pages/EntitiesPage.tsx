@@ -82,12 +82,12 @@ export default function EntitiesPage() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate font-medium">{e.name}</span>
-                      <Badge variant={stats.open > 0 ? 'default' : 'secondary'}>{stats.total} findings</Badge>
+                      <Badge variant={stats.open > 0 ? 'default' : 'secondary'}>{stats.total}</Badge>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {e.aliases.length} aliases · {e.abbreviations.length} abbr. ·{' '}
-                      {e.refs.filter((r) => r.kind === 'face').length} face ·{' '}
-                      {e.refs.filter((r) => r.kind === 'image').length} image
+                      {e.refs.filter((r) => r.kind === 'face').length} faces ·{' '}
+                      {e.refs.filter((r) => r.kind === 'image').length} images
                     </p>
                   </button>
                 </li>
