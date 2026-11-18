@@ -17,6 +17,7 @@ import { Switch } from '@/components/ui/switch'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { formatVnDateTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { findings } from '@/mocks/data'
 import type { CollectLevel } from '@/mocks/jobs'
 import { checkNow, levels, removeWatchItem, updateWatchItem, type WatchItem } from '@/mocks/watchlist'
 
@@ -43,6 +44,9 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
       refresh()
     },
   })
+
+  // Chỉ link khi video có trong mock; video khác chưa có trang chi tiết.
+  const knownVideo = item.latestVideo && findings.some((f) => f.videoId === item.latestVideo?.videoId)
 
   return (
     <TableRow className="align-top">
@@ -74,13 +78,19 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
       <TableCell className="max-w-64">
         {item.latestVideo ? (
           <>
-            <Link
-              to={`/cases/${item.caseId}/videos/${item.latestVideo.videoId}`}
-              className="block truncate hover:underline"
-              title={item.latestVideo.title}
-            >
-              {item.latestVideo.title}
-            </Link>
+            {knownVideo ? (
+              <Link
+                to={`/cases/${item.caseId}/videos/${item.latestVideo.videoId}`}
+                className="block truncate hover:underline"
+                title={item.latestVideo.title}
+              >
+                {item.latestVideo.title}
+              </Link>
+            ) : (
+              <span className="block truncate" title={item.latestVideo.title}>
+                {item.latestVideo.title}
+              </span>
+            )}
             <span className="text-xs text-muted-foreground">{formatVnDateTime(item.latestVideo.publishedAt)}</span>
           </>
         ) : (
@@ -95,10 +105,12 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
             {check.isSuccess && checkResultText(check.data.newVideos)}
             {check.isError && <span className="text-destructive">Check failed</span>}
           </span>
-          <Button variant="outline" size="sm" disabled={check.isPending} onClick={() => check.mutate()}>
-            {check.isPending ? <Loader2Icon className="animate-spin" /> : <RefreshCwIcon />}
-            Check now
-          </Button>
+          <span title={item.enabled ? undefined : 'Enable the channel to check it'}>
+            <Button variant="outline" size="sm" disabled={check.isPending || !item.enabled} onClick={() => check.mutate()}>
+              {check.isPending ? <Loader2Icon className="animate-spin" /> : <RefreshCwIcon />}
+              Check now
+            </Button>
+          </span>
           <Button
             variant="ghost"
             size="icon-sm"
