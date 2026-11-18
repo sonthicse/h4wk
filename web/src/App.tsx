@@ -23,6 +23,7 @@ export default function App() {
               <Route path="dashboard" element={<PlaceholderPage title="Dashboard" task="T31, T35" />} />
               <Route path="collect" element={<CollectPage />} />
               <Route path="findings" element={<FindingsPage />} />
+              <Route path="videos/:videoId" element={<PlaceholderPage title="Video detail" task="T26, T27" />} />
               <Route path="review" element={<PlaceholderPage title="Review queue" task="T28" />} />
               <Route path="watchlist" element={<PlaceholderPage title="Watchlist" task="T31" />} />
               <Route path="entities" element={<PlaceholderPage title="Entities" task="T39" />} />
