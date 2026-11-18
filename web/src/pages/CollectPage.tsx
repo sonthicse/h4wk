@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { formatVnTime } from '@/lib/format'
 import { createJob, listJobs, type CollectLevel, type Job, type JobStatus, type StepStatus } from '@/mocks/jobs'
 
 const statusVariant: Record<JobStatus, 'secondary' | 'default' | 'outline' | 'destructive'> = {
@@ -137,7 +138,7 @@ export default function CollectPage() {
                 <TableCell>
                   <Steps steps={job.steps} />
                 </TableCell>
-                <TableCell className="text-xs">{new Date(job.createdAt).toLocaleTimeString('en-GB')}</TableCell>
+                <TableCell className="text-xs">{formatVnTime(job.createdAt)}</TableCell>
               </TableRow>
             ))}
             {jobs.data?.length === 0 && (

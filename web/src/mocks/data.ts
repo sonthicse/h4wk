@@ -57,6 +57,28 @@ export const cases: Case[] = [
   },
 ]
 
+function delay<T>(value: T): Promise<T> {
+  return new Promise((r) => setTimeout(() => r(value), 150))
+}
+
+// API case giả; case mới được thêm vào mảng `cases` để sidebar cũng thấy.
+export function listCases(): Promise<Case[]> {
+  return delay([...cases])
+}
+
+export function createCase(name: string, entities: string[]): Promise<Case> {
+  const c: Case = {
+    id: `c_${Date.now()}`,
+    name,
+    entities,
+    videoCount: 0,
+    openFindings: 0,
+    updatedAt: new Date().toISOString(),
+  }
+  cases.unshift(c)
+  return delay(c)
+}
+
 const llm = { provider: 'anthropic', model: 'claude-sonnet-5-5' }
 const vlm = { provider: 'gemini', model: 'gemini-vision' }
 

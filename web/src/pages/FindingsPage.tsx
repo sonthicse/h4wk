@@ -6,39 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { findings, type Finding, type ReviewStatus, type Severity } from '@/mocks/data'
-
-const severityVariant: Record<Severity, 'destructive' | 'default' | 'secondary'> = {
-  high: 'destructive',
-  medium: 'default',
-  low: 'secondary',
-}
-
-const statusVariant: Record<ReviewStatus, 'outline' | 'default' | 'secondary' | 'destructive'> = {
-  pending: 'outline',
-  confirmed: 'default',
-  rejected: 'secondary',
-  needs_info: 'outline',
-}
-
-const severityRank: Record<Severity, number> = { high: 0, medium: 1, low: 2 }
-
-// Các nguồn có mốc thời gian trong video; nguồn còn lại (tiêu đề, mô tả, thumbnail, comment) thì không.
-const timedSources = new Set(['speech', 'ocr', 'visual'])
-
-function formatTime(s: number) {
-  const m = Math.floor(s / 60)
-  const sec = Math.floor(s % 60)
-  return `${m}:${sec.toString().padStart(2, '0')}`
-}
-
-function timeRange(f: Finding) {
-  return timedSources.has(f.sourceKind) ? `${formatTime(f.start)}–${formatTime(f.end)}` : '—'
-}
-
-function videoLink(f: Finding) {
-  return `/cases/${f.caseId}/videos/${f.videoId}?finding=${f.id}`
-}
+import { severityRank, severityVariant, statusVariant, timedSources, timeRange, videoLink } from '@/lib/findings'
+import { findings, type Finding, type Severity } from '@/mocks/data'
 
 type Filters = { q: string; severity: string; category: string; source: string; status: string }
 const emptyFilters: Filters = { q: '', severity: 'all', category: 'all', source: 'all', status: 'all' }
@@ -163,6 +132,7 @@ export default function FindingsPage() {
       <div className="flex flex-wrap items-center gap-2">
         <Input
           className="w-64"
+          aria-label="Search findings"
           placeholder="Search quote, video or entity…"
           value={filters.q}
           onChange={(e) => set('q')(e.target.value)}
@@ -212,7 +182,18 @@ export default function FindingsPage() {
         </TableHeader>
         <TableBody>
           {rows.map((f) => (
-            <TableRow key={f.id} className="cursor-pointer" onClick={() => setSelected(f)}>
+            <TableRow
+              key={f.id}
+              tabIndex={0}
+              className="cursor-pointer focus-visible:bg-muted focus-visible:outline-none"
+              onClick={() => setSelected(f)}
+              onKeyDown={(e) => {
+                if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  setSelected(f)
+                }
+              }}
+            >
               <TableCell className="max-w-48 truncate">{f.videoTitle}</TableCell>
               <TableCell className="font-mono">
                 {timedSources.has(f.sourceKind) ? (

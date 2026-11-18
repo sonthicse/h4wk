@@ -6,6 +6,7 @@ import CollectPage from '@/pages/CollectPage'
 import FindingsPage from '@/pages/FindingsPage'
 import LoginPage from '@/pages/LoginPage'
 import PlaceholderPage from '@/pages/PlaceholderPage'
+import ReviewQueuePage from '@/pages/ReviewQueuePage'
 
 const queryClient = new QueryClient()
 
@@ -24,7 +25,7 @@ export default function App() {
               <Route path="collect" element={<CollectPage />} />
               <Route path="findings" element={<FindingsPage />} />
               <Route path="videos/:videoId" element={<PlaceholderPage title="Video detail" task="T26, T27" />} />
-              <Route path="review" element={<PlaceholderPage title="Review queue" task="T28" />} />
+              <Route path="review" element={<ReviewQueuePage />} />
               <Route path="watchlist" element={<PlaceholderPage title="Watchlist" task="T31" />} />
               <Route path="entities" element={<PlaceholderPage title="Entities" task="T39" />} />
             </Route>
