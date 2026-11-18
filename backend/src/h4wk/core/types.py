@@ -33,13 +33,9 @@ def _to_vn(d: datetime) -> datetime:
     return d.astimezone(VN_TZ)
 
 
-def _iso(d: datetime) -> str:
-    return d.isoformat()
-
-
 # Thời gian luôn có múi giờ, được đổi sang giờ Việt Nam, ghi ra ISO-8601 kèm +07:00 (SPEC §6).
 VnDatetime = Annotated[
-    AwareDatetime, AfterValidator(_to_vn), PlainSerializer(_iso, return_type=str)
+    AwareDatetime, AfterValidator(_to_vn), PlainSerializer(datetime.isoformat, return_type=str)
 ]
 
 # Người thực hiện: `user:<username>` hoặc `system:<rule>`.

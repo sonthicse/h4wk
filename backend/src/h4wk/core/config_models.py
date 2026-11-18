@@ -142,4 +142,4 @@ class AnalysisConfig(Contract):
 
 def load_toml[M: BaseModel](path: Path, model: type[M]) -> M:
     """Đọc một file cấu hình và kiểm tra theo C5."""
-    return model.model_validate(tomllib.loads(path.read_text()))
+    return model.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))

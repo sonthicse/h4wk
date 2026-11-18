@@ -14,7 +14,7 @@ from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
 from h4wk.cli import export_schemas
 from h4wk.collectors.models import Cap, CollectLevel, Normalized
 from h4wk.core.config import REPO_ROOT
-from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig
+from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig, load_toml
 from h4wk.evidence.models import Manifest
 from h4wk.media.timeline import Timeline
 
@@ -454,6 +454,13 @@ def test_hits_and_findings_files_are_lists() -> None:
 def test_config_examples_load(name: str, model: type[BaseModel]) -> None:
     path = REPO_ROOT / "config" / f"{name}.toml.example"
     model.model_validate(tomllib.loads(path.read_text()))
+
+
+def test_load_toml_reads_vietnamese_as_utf8(tmp_path: Path) -> None:
+    path = tmp_path / "sources.toml"
+    path.write_text('[sources.ytdlp]\ncookies_file = "/home/thi/tài liệu/cookies.txt"\n', "utf-8")
+    cfg = load_toml(path, SourcesConfig)
+    assert cfg.sources.ytdlp.cookies_file == "/home/thi/tài liệu/cookies.txt"
 
 
 def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
