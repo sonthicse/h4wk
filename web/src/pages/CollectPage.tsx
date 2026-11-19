@@ -28,20 +28,30 @@ const stepClass: Record<StepStatus, string> = {
   failed: 'font-medium text-destructive',
 }
 
-// Ba bước lớn của job (SPEC 10.7). API cho biết bước đang chạy (`step`) và trạng thái chung.
-const STEPS = ['collect', 'media', 'analyze']
+// Các bước con của job theo mức thu (backend jobs/pipeline.py). API cho biết bước đang chạy (`step`)
+// và trạng thái chung. Bước "media" là lúc chuẩn bị, ngay trước bước con đầu tiên sau collect.
+const STEPS_BY_LEVEL: Record<string, string[]> = {
+  full: ['collect', 'transcribe', 'frames', 'ocr', 'vlm', 'analyze'],
+  text: ['collect', 'ocr', 'vlm', 'analyze'],
+  metadata: ['collect', 'analyze'],
+}
 
-function stepStatus(job: Job, i: number): StepStatus {
+function stepsOf(job: Job) {
+  return STEPS_BY_LEVEL[job.level] ?? STEPS_BY_LEVEL.full
+}
+
+function stepStatus(job: Job, steps: string[], i: number): StepStatus {
   if (job.status === 'done') return 'done'
   if (job.status === 'queued') return 'pending'
-  const current = STEPS.indexOf(job.step ?? '')
+  const current = job.step === 'media' ? 1 : steps.indexOf(job.step ?? '')
   if (i < current) return 'done'
   if (i > current) return 'pending'
   return job.status === 'failed' ? 'failed' : 'running'
 }
 
 function Steps({ job }: { job: Job }) {
-  const steps = STEPS.map((name, i) => ({ name, status: stepStatus(job, i) }))
+  const names = stepsOf(job)
+  const steps = names.map((name, i) => ({ name, status: stepStatus(job, names, i) }))
   return (
     <div className="flex flex-wrap items-center gap-1 text-xs">
       {steps.map((s, i) => (

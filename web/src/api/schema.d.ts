@@ -55,59 +55,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/cases": {
+    "/api/entities": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List Cases */
-        get: operations["list_cases_api_cases_get"];
-        put?: never;
-        /** Create Case */
-        post: operations["create_case_api_cases_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/cases/{case_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Case */
-        get: operations["get_case_api_cases__case_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/cases/{case_id}/entities": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
+        /** List Entities */
+        get: operations["list_entities_api_entities_get"];
         put?: never;
         /** Add Entity */
-        post: operations["add_entity_api_cases__case_id__entities_post"];
+        post: operations["add_entity_api_entities_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/cases/{case_id}/collect": {
+    "/api/collect": {
         parameters: {
             query?: never;
             header?: never;
@@ -117,7 +83,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Collect */
-        post: operations["collect_api_cases__case_id__collect_post"];
+        post: operations["collect_api_collect_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -158,7 +124,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/cases/{case_id}/findings": {
+    "/api/findings": {
         parameters: {
             query?: never;
             header?: never;
@@ -166,7 +132,7 @@ export interface paths {
             cookie?: never;
         };
         /** Findings */
-        get: operations["findings_api_cases__case_id__findings_get"];
+        get: operations["findings_api_findings_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -199,52 +165,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** CaseCreate */
-        CaseCreate: {
-            /** Title */
-            title: string;
-            /**
-             * Goal
-             * @default
-             */
-            goal: string;
-        };
-        /**
-         * CaseFile
-         * @description Nội dung case.json.
-         */
-        CaseFile: {
-            /** Id */
-            id: string;
-            /** Title */
-            title: string;
-            /**
-             * Goal
-             * @default
-             */
-            goal: string;
-            /** Owner */
-            owner: string;
-            /** Created At */
-            created_at: string;
-            /**
-             * Entities
-             * @default []
-             */
-            entities: components["schemas"]["Entity"][];
-        };
-        /** CaseSummary */
-        CaseSummary: {
-            /** Id */
-            id: string;
-            /** Title */
-            title: string;
-        };
         /**
          * Category
          * @enum {string}
          */
-        Category: "insult" | "unsupported_accusation" | "fabrication" | "legitimate_criticism" | "neutral";
+        Category: "insult" | "unsupported_accusation" | "fabrication" | "incitement" | "state_secret" | "legitimate_criticism" | "neutral";
         /** CollectBody */
         CollectBody: {
             /** Url */
@@ -313,8 +238,6 @@ export interface components {
             id: string;
             /** Run Id */
             run_id: string;
-            /** Case Id */
-            case_id: string;
             /** Video Id */
             video_id: string;
             /** Capture */
@@ -372,8 +295,6 @@ export interface components {
         Job: {
             /** Id */
             id: string;
-            /** Case Id */
-            case_id: string;
             /** Target */
             target: string;
             /** Video Id */
@@ -552,7 +473,7 @@ export interface operations {
             };
         };
     };
-    list_cases_api_cases_get: {
+    list_entities_api_entities_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -567,82 +488,16 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CaseSummary"][];
+                    "application/json": components["schemas"]["Entity"][];
                 };
             };
         };
     };
-    create_case_api_cases_post: {
+    add_entity_api_entities_post: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CaseCreate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CaseFile"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_case_api_cases__case_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                case_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CaseFile"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    add_entity_api_cases__case_id__entities_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                case_id: string;
-            };
             cookie?: never;
         };
         requestBody: {
@@ -671,13 +526,11 @@ export interface operations {
             };
         };
     };
-    collect_api_cases__case_id__collect_post: {
+    collect_api_collect_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                case_id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
@@ -708,9 +561,7 @@ export interface operations {
     };
     list_jobs_api_jobs_get: {
         parameters: {
-            query?: {
-                case?: string | null;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -724,15 +575,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Job"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -768,13 +610,11 @@ export interface operations {
             };
         };
     };
-    findings_api_cases__case_id__findings_get: {
+    findings_api_findings_get: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                case_id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -786,15 +626,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Finding"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
