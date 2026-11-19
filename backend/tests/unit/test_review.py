@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from h4wk.analysis.models import Finding
-from h4wk.core.db import FindingRow, get_engine
+from h4wk.core.db import finding_row, get_engine
 from h4wk.core.ids import new_ulid
 
 SAMPLE = Path(__file__).parents[1] / "fixtures" / "captures" / "h4wkDemo001"
@@ -18,18 +18,18 @@ FINDINGS = (
 )
 
 
+def _write_run(data_dir: Path, video: str, capture: str, run: str, findings: list[Finding]) -> None:
+    """findings.json là nguồn gốc để biết lần chạy mới nhất."""
+    folder = data_dir / "videos" / video / "derived" / capture / "analysis" / run
+    folder.mkdir(parents=True, exist_ok=True)
+    text = "[" + ",".join(f.model_dump_json() for f in findings) + "]"
+    (folder / "findings.json").write_text(text, encoding="utf-8")
+
+
 def _index(findings: list[Finding]) -> None:
     with Session(get_engine()) as s:
         for f in findings:
-            s.add(
-                FindingRow(
-                    id=f.id,
-                    video_id=f.video_id,
-                    capture=f.capture,
-                    run_id=f.run_id,
-                    data=f.model_dump_json(),
-                )
-            )
+            s.add(finding_row(f))
         s.commit()
 
 
@@ -106,6 +106,7 @@ def test_new_run_starts_unreviewed_and_keeps_old_decision(
     client.post(f"/api/findings/{old.id}/decision", json={"status": "confirmed"})
     rerun = old.model_copy(update={"id": f"f_{new_ulid()}", "run_id": "r_20261118T170000"})
     _index([rerun])
+    _write_run(data_dir, rerun.video_id, rerun.capture, rerun.run_id, [rerun])
     items = client.get("/api/review/queue").json()
     assert [i["status"] for i in items] == ["unreviewed"]
     assert items[0]["finding"]["id"] == rerun.id
@@ -113,7 +114,9 @@ def test_new_run_starts_unreviewed_and_keeps_old_decision(
     assert line["finding_id"] == old.id and line["run_id"] == old.run_id
 
 
-def test_latest_only_drops_older_capture_of_same_video(client: TestClient, sample) -> None:
+def test_latest_only_drops_older_capture_of_same_video(
+    client: TestClient, sample, data_dir: Path
+) -> None:
     newer = [
         f.model_copy(
             update={"id": f"f_{new_ulid()}", "capture": "20261119T090000", "run_id": "r_new"}
@@ -121,6 +124,7 @@ def test_latest_only_drops_older_capture_of_same_video(client: TestClient, sampl
         for f in sample
     ]
     _index(newer)
+    _write_run(data_dir, "h4wkDemo001", "20261119T090000", "r_new", newer)
     assert len(client.get("/api/review/queue").json()) == 2 * len(sample)
     only = client.get("/api/review/queue?latest_only=true").json()
     assert {i["finding"]["capture"] for i in only} == {"20261119T090000"}
@@ -129,10 +133,16 @@ def test_latest_only_drops_older_capture_of_same_video(client: TestClient, sampl
     assert sum(d["findings_by_severity"].values()) == len(sample)
 
 
-def test_latest_only_newer_capture_without_findings(client: TestClient, sample) -> None:
-    from h4wk.jobs import pipeline
-
-    job = pipeline.create_job("u", "h4wkDemo001", "full", False, "user:thi")
-    pipeline._update(job.id, status="done", capture="20261119T090000", run_id="r_empty")
+def test_latest_only_newer_capture_without_findings(
+    client: TestClient, sample, data_dir: Path
+) -> None:
+    _write_run(data_dir, "h4wkDemo001", "20261119T090000", "r_empty", [])
     assert client.get("/api/review/queue?latest_only=true").json() == []
     assert len(client.get("/api/review/queue").json()) == len(sample)
+
+
+def test_rerun_with_no_findings_hides_old_run(client: TestClient, sample, data_dir: Path) -> None:
+    old = sample[0]
+    _write_run(data_dir, old.video_id, old.capture, "r_20261118T170000", [])
+    assert client.get("/api/findings").json() == []
+    assert client.get("/api/review/queue").json() == []

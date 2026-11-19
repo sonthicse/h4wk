@@ -13,7 +13,7 @@ from typer.testing import CliRunner
 from h4wk.analysis.models import Finding
 from h4wk.cli import app
 from h4wk.core.auth import create_user
-from h4wk.core.db import FindingRow, get_engine
+from h4wk.core.db import finding_row, get_engine
 from h4wk.core.reindex import reindex
 
 SAMPLE = Path(__file__).parents[1] / "fixtures" / "captures" / "h4wkDemo001"
@@ -28,15 +28,7 @@ def sample(client: TestClient, data_dir: Path) -> list[Finding]:
     findings = [Finding.model_validate(f) for f in json.loads(FINDINGS.read_text("utf-8"))]
     with Session(get_engine()) as s:
         for f in findings:
-            s.add(
-                FindingRow(
-                    id=f.id,
-                    video_id=f.video_id,
-                    capture=f.capture,
-                    run_id=f.run_id,
-                    data=f.model_dump_json(),
-                )
-            )
+            s.add(finding_row(f))
         s.commit()
     return findings
 
@@ -45,10 +37,6 @@ def _relogin(client: TestClient) -> None:
     create_user(USERNAME, PASSWORD)
     r = client.post("/api/auth/login", json={"username": USERNAME, "password": PASSWORD})
     assert r.status_code == 204, r.text
-
-
-def _by_id(items: list[dict], key=lambda x: x["id"]) -> list[dict]:  # noqa: ANN001
-    return sorted(items, key=key)
 
 
 def test_reindex_restores_api_after_index_deleted(client: TestClient, sample) -> None:
@@ -60,7 +48,9 @@ def test_reindex_restores_api_after_index_deleted(client: TestClient, sample) ->
     after = {u: client.get(u).json() for u in before}
     assert after["/api/entities"] == before["/api/entities"]
     assert after["/api/videos"] == before["/api/videos"]
-    assert _by_id(after["/api/findings"]) == _by_id(before["/api/findings"])
+    assert sorted(after["/api/findings"], key=lambda f: f["id"]) == sorted(
+        before["/api/findings"], key=lambda f: f["id"]
+    )
 
 
 def test_reindex_restores_review_decisions(client: TestClient, sample) -> None:
@@ -92,6 +82,8 @@ def test_reindex_skips_broken_files(client: TestClient, sample, data_dir: Path) 
         f.write("rác\n\n")
     result = reindex()
     assert len(result.skipped) == 2
+    assert "r_broken/findings.json" in result.skipped[0]
+    assert result.skipped[1].startswith("reviews.jsonl:2:")
     assert result.findings == len(sample) and result.decisions == 1
 
 
@@ -109,3 +101,25 @@ def test_cli_asks_before_deleting(data_dir: Path) -> None:
     r = runner.invoke(app, ["reindex", "--yes"])
     assert r.exit_code == 0, r.output
     assert "findings: 0" in r.output and "h4wk user create" in r.output
+
+
+def _latest_state(client: TestClient) -> list:
+    return [
+        client.get("/api/findings?latest_only=true").json(),
+        client.get("/api/videos?latest_only=true").json(),
+        client.get("/api/review/queue?latest_only=true").json(),
+    ]
+
+
+def test_latest_only_same_before_and_after_reindex(
+    client: TestClient, sample, data_dir: Path
+) -> None:
+    # Bản thu B (mới hơn) phân tích ra 0 nghi vấn: latest_only không được hiện lại nghi vấn của A.
+    run = data_dir / "videos" / "h4wkDemo001" / "derived" / "20261119T090000" / "analysis" / "r_b"
+    run.mkdir(parents=True)
+    (run / "findings.json").write_text("[]", encoding="utf-8")
+    before = _latest_state(client)
+    assert before[0] == [] and before[2] == []
+    reindex()
+    _relogin(client)
+    assert _latest_state(client) == before

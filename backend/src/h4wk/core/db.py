@@ -4,12 +4,16 @@ database chỉ để tra cứu nhanh và dựng lại được (T45)."""
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Engine, event
 from sqlmodel import Field, Session, SQLModel, create_engine
 
 from h4wk.core.config import data_dir
 from h4wk.core.types import VN_TZ
+
+if TYPE_CHECKING:
+    from h4wk.analysis.models import Finding
 
 
 class EntityRow(SQLModel, table=True):
@@ -83,6 +87,17 @@ class FindingRow(SQLModel, table=True):
     data: str
 
 
+def finding_row(f: "Finding") -> FindingRow:
+    """Dòng chỉ mục của một nghi vấn (dùng khi phân tích và khi reindex)."""
+    return FindingRow(
+        id=f.id,
+        video_id=f.video_id,
+        capture=f.capture,
+        run_id=f.run_id,
+        data=f.model_dump_json(),
+    )
+
+
 class DecisionRow(SQLModel, table=True):
     """Chỉ mục quyết định rà soát; nguồn gốc là reviews.jsonl (chỉ ghi thêm)."""
 
@@ -154,9 +169,9 @@ def get_engine(root: Path | None = None) -> Engine:
     return _engines[path]
 
 
-def drop_index(root: Path | None = None) -> None:
+def drop_index() -> None:
     """Đóng engine đang cache (nếu có) rồi xoá index.db cùng file -wal, -shm."""
-    path = ((root or data_dir()) / "index.db").resolve()
+    path = (data_dir() / "index.db").resolve()
     engine = _engines.pop(path, None)
     if engine is not None:
         engine.dispose()

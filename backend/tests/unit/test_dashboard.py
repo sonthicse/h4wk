@@ -10,7 +10,7 @@ from sqlmodel import Session
 
 from h4wk.analysis.models import Finding
 from h4wk.collectors.providers import supadata
-from h4wk.core.db import FindingRow, get_engine
+from h4wk.core.db import finding_row, get_engine
 from h4wk.jobs import pipeline
 
 SAMPLE = Path(__file__).parents[1] / "fixtures" / "captures" / "h4wkDemo001"
@@ -24,15 +24,7 @@ def sample(client: TestClient, data_dir: Path) -> list[Finding]:
     findings = [Finding.model_validate(f) for f in json.loads(path.read_text(encoding="utf-8"))]
     with Session(get_engine()) as s:
         for f in findings:
-            s.add(
-                FindingRow(
-                    id=f.id,
-                    video_id=f.video_id,
-                    capture=f.capture,
-                    run_id=f.run_id,
-                    data=f.model_dump_json(),
-                )
-            )
+            s.add(finding_row(f))
         s.commit()
     return findings
 

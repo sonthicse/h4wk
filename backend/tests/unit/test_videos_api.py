@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from h4wk.analysis.models import Finding
-from h4wk.core.db import FindingRow, get_engine
+from h4wk.core.db import finding_row, get_engine
 
 SAMPLE = Path(__file__).parents[1] / "fixtures" / "captures" / "h4wkDemo001"
 CAP = "20261118T160000"
@@ -23,15 +23,7 @@ def sample(client: TestClient, data_dir: Path) -> None:
     with Session(get_engine()) as s:
         for raw in json.loads(path.read_text(encoding="utf-8")):
             f = Finding.model_validate(raw)
-            s.add(
-                FindingRow(
-                    id=f.id,
-                    video_id=f.video_id,
-                    capture=f.capture,
-                    run_id=f.run_id,
-                    data=f.model_dump_json(),
-                )
-            )
+            s.add(finding_row(f))
         s.commit()
 
 

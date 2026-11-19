@@ -6,7 +6,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from sqlmodel import Session, col, select
+from sqlmodel import Session, select
 
 from h4wk.analysis import runner
 from h4wk.analysis.models import Finding
@@ -16,7 +16,7 @@ from h4wk.collectors.targets import parse_target
 from h4wk.core import audit, events
 from h4wk.core.config import config_dir, data_dir
 from h4wk.core.config_models import AnalysisConfig, load_toml
-from h4wk.core.db import FindingRow, JobRow, get_engine
+from h4wk.core.db import FindingRow, JobRow, finding_row, get_engine
 from h4wk.core.entities import load_entities
 from h4wk.core.ids import new_ulid
 from h4wk.core.types import VN_TZ
@@ -199,15 +199,7 @@ def analyze(job_id: str) -> None:
         )
         with Session(get_engine()) as s:
             for f in findings:
-                s.add(
-                    FindingRow(
-                        id=f.id,
-                        video_id=f.video_id,
-                        capture=f.capture,
-                        run_id=f.run_id,
-                        data=f.model_dump_json(),
-                    )
-                )
+                s.add(finding_row(f))
             s.commit()
     except Exception as e:
         _fail(job_id, "analyze", e)
@@ -222,26 +214,31 @@ def analyze(job_id: str) -> None:
     )
 
 
+def _latest_runs(root: Path) -> dict[tuple[str, str], str]:
+    """run_id mới nhất của mỗi (video, bản thu), chỉ tính run có findings.json."""
+    latest: dict[tuple[str, str], str] = {}
+    for path in root.glob("videos/*/derived/*/analysis/*/findings.json"):
+        run = path.parent
+        key = (run.parents[3].name, run.parents[1].name)
+        latest[key] = max(latest.get(key, ""), run.name)
+    return latest
+
+
 def latest_findings(latest_only: bool = False) -> list[Finding]:
     """Nghi vấn của lần chạy mới nhất cho mỗi bản thu. latest_only=True: chỉ giữ bản thu
-    mới nhất đã phân tích của mỗi video, để thu lại cùng video không làm lặp nghi vấn."""
+    mới nhất đã phân tích của mỗi video, để thu lại cùng video không làm lặp nghi vấn.
+    "Mới nhất" xác định từ findings.json trong data/ (nguồn gốc), không từ bảng jobs, nên kết
+    quả trước và sau reindex giống nhau. Run mới nhất không có nghi vấn thì bản thu đó
+    không hiện nghi vấn nào, run cũ không hiện lại."""
+    latest = _latest_runs(data_dir())
+    newest: dict[str, str] = {}
+    for vid, cap in latest:
+        newest[vid] = max(newest.get(vid, ""), cap)
     with Session(get_engine()) as s:
         rows = s.exec(select(FindingRow)).all()
-        done = s.exec(
-            select(JobRow.video_id, JobRow.capture).where(
-                JobRow.status == "done", col(JobRow.capture).is_not(None)
-            )
-        ).all()
-    latest: dict[tuple[str, str], str] = {}
-    for r in rows:
-        key = (r.video_id, r.capture)
-        latest[key] = max(latest.get(key, ""), r.run_id)
-    newest: dict[str, str] = {}
-    for vid, cap in [*((r.video_id, r.capture) for r in rows), *done]:
-        newest[vid] = max(newest.get(vid, ""), str(cap))
     return [
         Finding.model_validate_json(r.data)
         for r in rows
-        if latest[(r.video_id, r.capture)] == r.run_id
+        if latest.get((r.video_id, r.capture)) == r.run_id
         and (not latest_only or newest[r.video_id] == r.capture)
     ]
