@@ -720,6 +720,8 @@ Nghiệm thu:
 
 - [ ] Tắt yt-dlp trên giao diện rồi thu một video thì manifest ghi yt-dlp là `disabled`.
 
+Giao diện đã nối API T32; chờ nghiệm thu thủ công.
+
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
 File: `web/src/pages/settings/Sources.tsx`.

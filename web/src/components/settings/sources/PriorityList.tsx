@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { sourceLabel, type Cap, type SourceName } from '@/mocks/sources'
+import { sourceLabel, type Cap, type SourceName } from '@/api/settings'
 
 type Props = {
   cap: Cap

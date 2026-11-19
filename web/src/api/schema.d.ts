@@ -551,6 +551,149 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/settings/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Sources */
+        get: operations["get_sources_api_settings_sources_get"];
+        /** Put Sources */
+        put: operations["put_sources_api_settings_sources_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/sources/{name}/key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Source Key */
+        put: operations["put_source_key_api_settings_sources__name__key_put"];
+        post?: never;
+        /** Delete Source Key */
+        delete: operations["delete_source_key_api_settings_sources__name__key_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/sources/{name}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test Source */
+        post: operations["test_source_api_settings_sources__name__test_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/sources/{name}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume Source */
+        post: operations["resume_source_api_settings_sources__name__resume_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/ai": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Ai */
+        get: operations["get_ai_api_settings_ai_get"];
+        /** Put Ai */
+        put: operations["put_ai_api_settings_ai_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/ai/providers/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Provider */
+        delete: operations["delete_provider_api_settings_ai_providers__name__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/ai/providers/{name}/key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Ai Key */
+        put: operations["put_ai_key_api_settings_ai_providers__name__key_put"];
+        post?: never;
+        /** Delete Ai Key */
+        delete: operations["delete_ai_key_api_settings_ai_providers__name__key_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/ai/providers/{name}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test Provider
+         * @description Gọi thật một câu ngắn tới nhà cung cấp để kiểm tra key và model.
+         */
+        post: operations["test_provider_api_settings_ai_providers__name__test_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -575,6 +718,30 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AiSettings */
+        AiSettings: {
+            /** Providers */
+            providers: components["schemas"]["ProviderInfo"][];
+            /** Tasks */
+            tasks: {
+                [key: string]: components["schemas"]["Route"][];
+            };
+        };
+        /** AiUpdate */
+        AiUpdate: {
+            /** Providers */
+            providers?: {
+                [key: string]: {
+                    [key: string]: unknown;
+                };
+            } | null;
+            /** Tasks */
+            tasks?: {
+                [key: string]: {
+                    [key: string]: string;
+                }[];
+            } | null;
+        };
         /**
          * Cap
          * @description Loại dữ liệu một nguồn thu lấy được. Giá trị dùng trong trường `what` của manifest.
@@ -720,8 +887,8 @@ export interface components {
             findings_by_status: components["schemas"]["StatusCounts"];
             /** Activity */
             activity: components["schemas"]["DayActivity"][];
-            youtube_quota: components["schemas"]["Usage"] | null;
-            supadata_credits: components["schemas"]["Usage"] | null;
+            youtube_quota: components["schemas"]["h4wk__api__dashboard__Usage"] | null;
+            supadata_credits: components["schemas"]["h4wk__api__dashboard__Usage"] | null;
             top_video: components["schemas"]["TopVideo"] | null;
         };
         /** DayActivity */
@@ -1001,6 +1168,20 @@ export interface components {
              */
             updated_at: string;
         };
+        /** KeyBody */
+        KeyBody: {
+            /** Value */
+            value: string;
+        };
+        /** KeyInfo */
+        KeyInfo: {
+            /** Set */
+            set: boolean;
+            /** Masked */
+            masked: string | null;
+            /** Origin */
+            origin: ("settings" | "env") | null;
+        };
         /** LatestVideo */
         LatestVideo: {
             /** Id */
@@ -1048,6 +1229,19 @@ export interface components {
             /** Username */
             username: string;
         };
+        /** ModelCaps */
+        ModelCaps: {
+            /**
+             * Vision
+             * @default false
+             */
+            vision: boolean;
+            /**
+             * Structured
+             * @default false
+             */
+            structured: boolean;
+        };
         /** ModelRef */
         ModelRef: {
             /** Provider */
@@ -1066,6 +1260,23 @@ export interface components {
                 number,
                 number
             ];
+        };
+        /** ProviderInfo */
+        ProviderInfo: {
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "anthropic" | "openai_compat" | "gemini";
+            /** Base Url */
+            base_url: string | null;
+            /** Models */
+            models: {
+                [key: string]: components["schemas"]["ModelCaps"];
+            };
+            key: components["schemas"]["KeyInfo"];
         };
         /** QueueItem */
         QueueItem: {
@@ -1127,6 +1338,13 @@ export interface components {
              * @default
              */
             note: string;
+        };
+        /** Route */
+        Route: {
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
         };
         /** Segment */
         Segment: {
@@ -1194,16 +1412,79 @@ export interface components {
             /** Version */
             version?: string | null;
         };
+        /** SourceInfo */
+        SourceInfo: {
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "ytdlp" | "youtube_api" | "supadata";
+            /** Enabled */
+            enabled: boolean;
+            /** Fault Injection */
+            fault_injection: boolean;
+            /** Needs Key */
+            needs_key: boolean;
+            key: components["schemas"]["KeyInfo"] | null;
+            /** Implemented */
+            implemented: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "paused";
+            /** Paused Until */
+            paused_until: string | null;
+            /** Consecutive Failures */
+            consecutive_failures: number;
+            /** Last Error */
+            last_error: string | null;
+            /** Last Error At */
+            last_error_at: string | null;
+            usage: components["schemas"]["h4wk__api__settings__Usage"] | null;
+        };
         /**
          * SourceKind
          * @enum {string}
          */
         SourceKind: "speech" | "ocr" | "visual" | "title" | "description" | "thumbnail" | "comment";
+        /** SourcePatch */
+        SourcePatch: {
+            /** Enabled */
+            enabled?: boolean | null;
+            /** Fault Injection */
+            fault_injection?: boolean | null;
+        };
         /**
          * SourceStatus
          * @enum {string}
          */
         SourceStatus: "ok" | "failed" | "blocked" | "quota_exceeded" | "not_found" | "unsupported" | "disabled" | "suspended" | "no_source";
+        /** SourcesSettings */
+        SourcesSettings: {
+            /** Sources */
+            sources: components["schemas"]["SourceInfo"][];
+            /** Priority */
+            priority: {
+                [key: string]: ("ytdlp" | "youtube_api" | "supadata")[];
+            };
+            /** Uncovered */
+            uncovered: components["schemas"]["Cap"][];
+        };
+        /** SourcesUpdate */
+        SourcesUpdate: {
+            /**
+             * Sources
+             * @default {}
+             */
+            sources: {
+                [key: string]: components["schemas"]["SourcePatch"];
+            };
+            /** Priority */
+            priority?: {
+                [key: string]: ("ytdlp" | "youtube_api" | "supadata")[];
+            } | null;
+        };
         /** StatusCounts */
         StatusCounts: {
             /**
@@ -1226,6 +1507,20 @@ export interface components {
              * @default 0
              */
             needs_info: number;
+        };
+        /** TestBody */
+        TestBody: {
+            /** Model */
+            model?: string | null;
+        };
+        /** TestResult */
+        TestResult: {
+            /** Ok */
+            ok: boolean;
+            /** Detail */
+            detail: string;
+            /** Latency Ms */
+            latency_ms?: number | null;
         };
         /** ThumbnailAnalysis */
         ThumbnailAnalysis: {
@@ -1296,13 +1591,6 @@ export interface components {
             end: number;
             /** Text */
             text: string;
-        };
-        /** Usage */
-        Usage: {
-            /** Used */
-            used: number;
-            /** Limit */
-            limit: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -1477,6 +1765,27 @@ export interface components {
             ] | null;
             /** Score */
             score?: number | null;
+        };
+        /** Usage */
+        h4wk__api__dashboard__Usage: {
+            /** Used */
+            used: number;
+            /** Limit */
+            limit: number;
+        };
+        /** Usage */
+        h4wk__api__settings__Usage: {
+            /** Used */
+            used: number;
+            /** Limit */
+            limit: number;
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "day" | "month";
+            /** Resets At */
+            resets_at: string | null;
         };
         /** Trigger */
         h4wk__evidence__models__Trigger: {
@@ -2520,6 +2829,372 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_sources_api_settings_sources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourcesSettings"];
+                };
+            };
+        };
+    };
+    put_sources_api_settings_sources_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SourcesUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourcesSettings"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_source_key_api_settings_sources__name__key_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: "ytdlp" | "youtube_api" | "supadata";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KeyBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_source_key_api_settings_sources__name__key_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: "ytdlp" | "youtube_api" | "supadata";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_source_api_settings_sources__name__test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: "ytdlp" | "youtube_api" | "supadata";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resume_source_api_settings_sources__name__resume_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: "ytdlp" | "youtube_api" | "supadata";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_ai_api_settings_ai_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSettings"];
+                };
+            };
+        };
+    };
+    put_ai_api_settings_ai_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSettings"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_provider_api_settings_ai_providers__name__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiSettings"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_ai_key_api_settings_ai_providers__name__key_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KeyBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_ai_key_api_settings_ai_providers__name__key_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_provider_api_settings_ai_providers__name__test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["TestBody"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestResult"];
                 };
             };
             /** @description Validation Error */

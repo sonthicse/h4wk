@@ -10,22 +10,25 @@ import { Skeleton } from '@/components/ui/skeleton'
 import {
   caps,
   getSourcesSettings,
-  saveSourcesSettings,
+  putSourcesSettings,
+  setSourceKey,
+  type Cap,
   type SourceName,
   type SourcesSettings,
-} from '@/mocks/sources'
+} from '@/api/settings'
 
 // Bản nháp: những gì người dùng đang sửa nhưng chưa Save.
 type Draft = {
   enabled: Record<SourceName, boolean>
-  priority: SourcesSettings['priority']
+  priority: Record<Cap, SourceName[]>
   keys: Partial<Record<SourceName, string>>
 }
 
 function toDraft(data: SourcesSettings): Draft {
   return {
     enabled: Object.fromEntries(data.sources.map((s) => [s.name, s.enabled])) as Draft['enabled'],
-    priority: structuredClone(data.priority),
+    // Loại dữ liệu mà file cấu hình không ghi thì coi là rỗng.
+    priority: Object.fromEntries(caps.map((c) => [c, [...(data.priority[c] ?? [])]])) as Draft['priority'],
     keys: {},
   }
 }
@@ -37,11 +40,21 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
   const [justSaved, setJustSaved] = useState(false)
 
   const save = useMutation({
-    mutationFn: () => saveSourcesSettings(draft),
-    onSuccess: (next) => {
-      queryClient.setQueryData(['sources-settings'], next)
-      setSaved(toDraft(next))
-      setDraft(toDraft(next))
+    mutationFn: async () => {
+      const changed = data.sources.filter((s) => draft.enabled[s.name] !== s.enabled)
+      await putSourcesSettings({
+        sources: Object.fromEntries(changed.map((s) => [s.name, { enabled: draft.enabled[s.name] }])),
+        priority: draft.priority,
+      })
+      for (const [name, value] of Object.entries(draft.keys)) {
+        if (value) await setSourceKey(name as SourceName, value)
+      }
+      await queryClient.invalidateQueries({ queryKey: ['sources-settings'] })
+    },
+    onSuccess: () => {
+      // Dữ liệu mới đã tải lại; đặt bản nháp theo giá trị vừa gửi.
+      setSaved({ ...draft, keys: {} })
+      setDraft({ ...draft, keys: {} })
       setJustSaved(true)
     },
   })
@@ -52,8 +65,8 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
     JSON.stringify(draft.enabled) !== JSON.stringify(saved.enabled) ||
     JSON.stringify(draft.priority) !== JSON.stringify(saved.priority)
 
-  const paused = Object.fromEntries(data.sources.map((s) => [s.name, s.state === 'paused'])) as Record<SourceName, boolean>
-  const emptyCaps = caps.filter((c) => draft.priority[c].every((n) => !draft.enabled[n]))
+  const paused = Object.fromEntries(data.sources.map((s) => [s.name, s.status === 'paused'])) as Record<SourceName, boolean>
+  const emptyCaps = caps.filter((c) => data.sources.some((s) => s.implemented) && draft.priority[c].filter((n) => data.sources.find((s) => s.name === n)?.implemented !== false).every((n) => !draft.enabled[n]))
 
   function edit(next: Partial<Draft>) {
     setJustSaved(false)
@@ -65,7 +78,7 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">Collection sources</h2>
         <div className="flex items-center gap-3">
-          {save.isError && <span className="text-sm text-destructive">Save failed. Try again.</span>}
+          {save.isError && <span className="text-sm text-destructive">{save.error.message}</span>}
           {dirty ? (
             <Badge variant="outline" className="border-amber-500 text-amber-600">
               Unsaved changes

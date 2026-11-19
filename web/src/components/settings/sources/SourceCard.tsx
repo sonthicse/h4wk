@@ -8,10 +8,10 @@ import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { formatVnDateTime } from '@/lib/format'
-import { resumeSource, sourceLabel, testSource, type Source } from '@/mocks/sources'
+import { resumeSource, sourceLabel, testSource, type SourceInfo } from '@/api/settings'
 
 type Props = {
-  source: Source
+  source: SourceInfo
   enabled: boolean
   onEnabledChange: (value: boolean) => void
   // Key mới đang nhập dở ('' nếu chưa nhập); chỉ gửi đi khi bấm Save.
@@ -25,13 +25,17 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
   const [editingKey, setEditingKey] = useState(false)
   const name = sourceLabel[source.name]
 
-  const test = useMutation({ mutationFn: () => testSource(source.name) })
+  // API không trả thời điểm test nên lấy giờ máy lúc nhận kết quả.
+  const test = useMutation({
+    mutationFn: async () => ({ result: await testSource(source.name), testedAt: new Date().toISOString() }),
+  })
   const resume = useMutation({
     mutationFn: () => resumeSource(source.name),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sources-settings'] }),
   })
 
   const usage = source.usage
+  const unit = source.name === 'supadata' ? 'credits' : 'units'
   const percent = usage ? Math.min(100, Math.round((usage.used / usage.limit) * 100)) : 0
 
   return (
@@ -41,7 +45,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
           {name}
           {!enabled ? (
             <Badge variant="outline">disabled</Badge>
-          ) : source.state === 'paused' ? (
+          ) : source.status === 'paused' ? (
             <Badge variant="destructive">paused</Badge>
           ) : (
             <Badge variant="secondary">active</Badge>
@@ -53,13 +57,13 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
       </CardHeader>
 
       <CardContent className="space-y-4 text-sm">
-        {source.state === 'paused' && (
+        {source.status === 'paused' && (
           <div className="space-y-2 rounded-md border border-destructive/40 p-3">
             <p>
-              Paused after {source.consecutiveFailures} failures in a row
-              {source.pausedUntil && <> until {formatVnDateTime(source.pausedUntil)}</>}.
+              Paused after {source.consecutive_failures} failures in a row
+              {source.paused_until && <> until {formatVnDateTime(source.paused_until)}</>}.
             </p>
-            {source.lastError && <p className="font-mono text-xs text-muted-foreground">{source.lastError}</p>}
+            {source.last_error && <p className="font-mono text-xs text-muted-foreground">{source.last_error}</p>}
             <Button size="sm" variant="outline" disabled={resume.isPending} onClick={() => resume.mutate()}>
               {resume.isPending && <Loader2 className="animate-spin" />}
               Resume now
@@ -67,7 +71,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
           </div>
         )}
 
-        {source.needsKey ? (
+        {source.needs_key ? (
           <div className="space-y-1.5">
             <label htmlFor={`key-${source.name}`} className="font-medium">
               API key
@@ -95,10 +99,11 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
             ) : (
               <div className="flex items-center gap-2">
                 <code id={`key-${source.name}`} className="flex-1 rounded-md border bg-muted px-3 py-1.5 font-mono">
-                  {source.maskedKey ?? 'Not set'}
+                  {source.key?.masked ?? 'Not set'}
                 </code>
+                {source.key?.origin === 'env' && <span className="text-xs text-muted-foreground">from .env</span>}
                 <Button variant="outline" onClick={() => setEditingKey(true)}>
-                  {source.maskedKey ? 'Change key' : 'Set key'}
+                  {source.key?.masked ? 'Change key' : 'Set key'}
                 </Button>
               </div>
             )}
@@ -113,13 +118,15 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
         {usage && (
           <div className="space-y-1.5">
             <div className="flex justify-between">
-              <span className="font-medium">{usage.unit === 'units' ? 'Quota today' : 'Credits this month'}</span>
+              <span className="font-medium">{usage.period === 'day' ? 'Quota today' : 'Credits this month'}</span>
               <span className="tabular-nums">
-                {usage.used.toLocaleString('en-US')} / {usage.limit.toLocaleString('en-US')} {usage.unit}
+                {usage.used.toLocaleString('en-US')} / {usage.limit.toLocaleString('en-US')} {unit}
               </span>
             </div>
             <Progress value={percent} aria-label={`${name} usage`} />
-            <p className="text-xs text-muted-foreground">Resets {formatVnDateTime(usage.resetsAt)}</p>
+            {usage.resets_at && (
+              <p className="text-xs text-muted-foreground">Resets {formatVnDateTime(usage.resets_at)}</p>
+            )}
           </div>
         )}
 
@@ -134,11 +141,13 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
           {test.data && (
             <p
               role="status"
-              className={`flex items-start gap-1.5 text-xs ${test.data.ok ? 'text-foreground' : 'text-destructive'}`}
+              className={`flex items-start gap-1.5 text-xs ${test.data.result.ok ? 'text-foreground' : 'text-destructive'}`}
             >
-              {test.data.ok ? <CircleCheck className="mt-px size-3.5 shrink-0" /> : <CircleX className="mt-px size-3.5 shrink-0" />}
+              {test.data.result.ok ? <CircleCheck className="mt-px size-3.5 shrink-0" /> : <CircleX className="mt-px size-3.5 shrink-0" />}
               <span>
-                {test.data.message} <span className="text-muted-foreground">({formatVnDateTime(test.data.testedAt)})</span>
+                {test.data.result.detail}
+                {test.data.result.latency_ms != null && <> ({test.data.result.latency_ms} ms)</>}{' '}
+                <span className="text-muted-foreground">({formatVnDateTime(test.data.testedAt)})</span>
               </span>
             </p>
           )}

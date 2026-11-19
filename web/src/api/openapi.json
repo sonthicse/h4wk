@@ -1618,6 +1618,516 @@
         }
       }
     },
+    "/api/settings/sources": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Get Sources",
+        "operationId": "get_sources_api_settings_sources_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourcesSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Put Sources",
+        "operationId": "put_sources_api_settings_sources_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SourcesUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourcesSettings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/sources/{name}/key": {
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Put Source Key",
+        "operationId": "put_source_key_api_settings_sources__name__key_put",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "ytdlp",
+                "youtube_api",
+                "supadata"
+              ],
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Delete Source Key",
+        "operationId": "delete_source_key_api_settings_sources__name__key_delete",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "ytdlp",
+                "youtube_api",
+                "supadata"
+              ],
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/sources/{name}/test": {
+      "post": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Test Source",
+        "operationId": "test_source_api_settings_sources__name__test_post",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "ytdlp",
+                "youtube_api",
+                "supadata"
+              ],
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/sources/{name}/resume": {
+      "post": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Resume Source",
+        "operationId": "resume_source_api_settings_sources__name__resume_post",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "ytdlp",
+                "youtube_api",
+                "supadata"
+              ],
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/ai": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Get Ai",
+        "operationId": "get_ai_api_settings_ai_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSettings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Put Ai",
+        "operationId": "put_ai_api_settings_ai_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSettings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/ai/providers/{name}": {
+      "delete": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Delete Provider",
+        "operationId": "delete_provider_api_settings_ai_providers__name__delete",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSettings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/ai/providers/{name}/key": {
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Put Ai Key",
+        "operationId": "put_ai_key_api_settings_ai_providers__name__key_put",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Delete Ai Key",
+        "operationId": "delete_ai_key_api_settings_ai_providers__name__key_delete",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/ai/providers/{name}/test": {
+      "post": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Test Provider",
+        "description": "G\u1ecdi th\u1eadt m\u1ed9t c\u00e2u ng\u1eafn t\u1edbi nh\u00e0 cung c\u1ea5p \u0111\u1ec3 ki\u1ec3m tra key v\u00e0 model.",
+        "operationId": "test_provider_api_settings_ai_providers__name__test_post",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/TestBody"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health": {
       "get": {
         "summary": "Health",
@@ -1644,6 +2154,74 @@
   },
   "components": {
     "schemas": {
+      "AiSettings": {
+        "properties": {
+          "providers": {
+            "items": {
+              "$ref": "#/components/schemas/ProviderInfo"
+            },
+            "type": "array",
+            "title": "Providers"
+          },
+          "tasks": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/Route"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Tasks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "providers",
+          "tasks"
+        ],
+        "title": "AiSettings"
+      },
+      "AiUpdate": {
+        "properties": {
+          "providers": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Providers"
+          },
+          "tasks": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tasks"
+          }
+        },
+        "type": "object",
+        "title": "AiUpdate"
+      },
       "Cap": {
         "type": "string",
         "enum": [
@@ -2088,7 +2666,7 @@
           "youtube_quota": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Usage"
+                "$ref": "#/components/schemas/h4wk__api__dashboard__Usage"
               },
               {
                 "type": "null"
@@ -2098,7 +2676,7 @@
           "supadata_credits": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/Usage"
+                "$ref": "#/components/schemas/h4wk__api__dashboard__Usage"
               },
               {
                 "type": "null"
@@ -2928,6 +3506,61 @@
         ],
         "title": "Job"
       },
+      "KeyBody": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "KeyBody"
+      },
+      "KeyInfo": {
+        "properties": {
+          "set": {
+            "type": "boolean",
+            "title": "Set"
+          },
+          "masked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Masked"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "settings",
+                  "env"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "set",
+          "masked",
+          "origin"
+        ],
+        "title": "KeyInfo"
+      },
       "LatestVideo": {
         "properties": {
           "id": {
@@ -3061,6 +3694,23 @@
         ],
         "title": "Me"
       },
+      "ModelCaps": {
+        "properties": {
+          "vision": {
+            "type": "boolean",
+            "title": "Vision",
+            "default": false
+          },
+          "structured": {
+            "type": "boolean",
+            "title": "Structured",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ModelCaps"
+      },
       "ModelRef": {
         "properties": {
           "provider": {
@@ -3114,6 +3764,53 @@
           "bbox"
         ],
         "title": "OcrText"
+      },
+      "ProviderInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "anthropic",
+              "openai_compat",
+              "gemini"
+            ],
+            "title": "Type"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "models": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ModelCaps"
+            },
+            "type": "object",
+            "title": "Models"
+          },
+          "key": {
+            "$ref": "#/components/schemas/KeyInfo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "base_url",
+          "models",
+          "key"
+        ],
+        "title": "ProviderInfo"
       },
       "QueueItem": {
         "properties": {
@@ -3257,6 +3954,25 @@
         ],
         "title": "ReviewDecision",
         "description": "M\u1ed9t quy\u1ebft \u0111\u1ecbnh r\u00e0 so\u00e1t (m\u1ed9t d\u00f2ng c\u1ee7a reviews.jsonl)."
+      },
+      "Route": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "provider",
+          "model"
+        ],
+        "title": "Route"
       },
       "Segment": {
         "properties": {
@@ -3421,6 +4137,116 @@
         "title": "SourceCall",
         "description": "M\u1ed9t l\u1ea7n g\u1ecdi (ho\u1eb7c b\u1ecf qua) m\u1ed9t ngu\u1ed3n cho m\u1ed9t lo\u1ea1i d\u1eef li\u1ec7u."
       },
+      "SourceInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "ytdlp",
+              "youtube_api",
+              "supadata"
+            ],
+            "title": "Name"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "fault_injection": {
+            "type": "boolean",
+            "title": "Fault Injection"
+          },
+          "needs_key": {
+            "type": "boolean",
+            "title": "Needs Key"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KeyInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "implemented": {
+            "type": "boolean",
+            "title": "Implemented"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "paused"
+            ],
+            "title": "Status"
+          },
+          "paused_until": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paused Until"
+          },
+          "consecutive_failures": {
+            "type": "integer",
+            "title": "Consecutive Failures"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "last_error_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error At"
+          },
+          "usage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/h4wk__api__settings__Usage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "enabled",
+          "fault_injection",
+          "needs_key",
+          "key",
+          "implemented",
+          "status",
+          "paused_until",
+          "consecutive_failures",
+          "last_error",
+          "last_error_at",
+          "usage"
+        ],
+        "title": "SourceInfo"
+      },
       "SourceKind": {
         "type": "string",
         "enum": [
@@ -3433,6 +4259,34 @@
           "comment"
         ],
         "title": "SourceKind"
+      },
+      "SourcePatch": {
+        "properties": {
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          },
+          "fault_injection": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fault Injection"
+          }
+        },
+        "type": "object",
+        "title": "SourcePatch"
       },
       "SourceStatus": {
         "type": "string",
@@ -3448,6 +4302,95 @@
           "no_source"
         ],
         "title": "SourceStatus"
+      },
+      "SourcesSettings": {
+        "properties": {
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceInfo"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "priority": {
+            "additionalProperties": {
+              "items": {
+                "type": "string",
+                "enum": [
+                  "ytdlp",
+                  "youtube_api",
+                  "supadata"
+                ]
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/Cap"
+            },
+            "type": "object",
+            "title": "Priority"
+          },
+          "uncovered": {
+            "items": {
+              "$ref": "#/components/schemas/Cap"
+            },
+            "type": "array",
+            "title": "Uncovered"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sources",
+          "priority",
+          "uncovered"
+        ],
+        "title": "SourcesSettings"
+      },
+      "SourcesUpdate": {
+        "properties": {
+          "sources": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SourcePatch"
+            },
+            "propertyNames": {
+              "enum": [
+                "ytdlp",
+                "youtube_api",
+                "supadata"
+              ]
+            },
+            "type": "object",
+            "title": "Sources",
+            "default": {}
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "ytdlp",
+                      "youtube_api",
+                      "supadata"
+                    ]
+                  },
+                  "type": "array"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/Cap"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          }
+        },
+        "type": "object",
+        "title": "SourcesUpdate"
       },
       "StatusCounts": {
         "properties": {
@@ -3474,6 +4417,52 @@
         },
         "type": "object",
         "title": "StatusCounts"
+      },
+      "TestBody": {
+        "properties": {
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          }
+        },
+        "type": "object",
+        "title": "TestBody"
+      },
+      "TestResult": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "detail"
+        ],
+        "title": "TestResult"
       },
       "ThumbnailAnalysis": {
         "properties": {
@@ -3678,24 +4667,6 @@
           "text"
         ],
         "title": "TranscriptSegment"
-      },
-      "Usage": {
-        "properties": {
-          "used": {
-            "type": "integer",
-            "title": "Used"
-          },
-          "limit": {
-            "type": "integer",
-            "title": "Limit"
-          }
-        },
-        "type": "object",
-        "required": [
-          "used",
-          "limit"
-        ],
-        "title": "Usage"
       },
       "ValidationError": {
         "properties": {
@@ -4290,6 +5261,63 @@
         ],
         "title": "Trigger",
         "description": "D\u1ea5u hi\u1ec7u \u0111\u00e3 k\u00e9o m\u1ed9t \u0111o\u1ea1n v\u00e0o ph\u00e2n t\u00edch."
+      },
+      "h4wk__api__dashboard__Usage": {
+        "properties": {
+          "used": {
+            "type": "integer",
+            "title": "Used"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "used",
+          "limit"
+        ],
+        "title": "Usage"
+      },
+      "h4wk__api__settings__Usage": {
+        "properties": {
+          "used": {
+            "type": "integer",
+            "title": "Used"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "day",
+              "month"
+            ],
+            "title": "Period"
+          },
+          "resets_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resets At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "used",
+          "limit",
+          "period",
+          "resets_at"
+        ],
+        "title": "Usage"
       },
       "h4wk__evidence__models__Trigger": {
         "properties": {
