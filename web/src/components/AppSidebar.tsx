@@ -7,6 +7,7 @@ import {
   ListChecksIcon,
   SettingsIcon,
   UsersIcon,
+  VideoIcon,
 } from 'lucide-react'
 import { NavLink, useMatch } from 'react-router'
 import { getHealth } from '@/api/health'
@@ -25,6 +26,7 @@ import {
 const nav = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { path: '/collect', label: 'Collect', icon: DownloadIcon },
+  { path: '/videos', label: 'Videos', icon: VideoIcon },
   { path: '/findings', label: 'Findings', icon: FlagIcon },
   { path: '/review', label: 'Review queue', icon: ListChecksIcon },
   { path: '/watchlist', label: 'Watchlist', icon: EyeIcon },

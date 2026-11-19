@@ -14,6 +14,7 @@ import AIProvidersPage from '@/pages/settings/AIProvidersPage'
 import SettingsLayout from '@/pages/settings/SettingsLayout'
 import SourcesPage from '@/pages/settings/SourcesPage'
 import VideoDetailPage from '@/pages/VideoDetailPage'
+import VideosPage from '@/pages/VideosPage'
 import WatchlistPage from '@/pages/WatchlistPage'
 
 // Phiên hết hạn giữa chừng (API trả 401): kiểm tra lại /api/auth/me để RequireLogin chuyển sang /login.
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="/review" element={<ReviewQueuePage />} />
               <Route path="/watchlist" element={<WatchlistPage />} />
               <Route path="/entities" element={<EntitiesPage />} />
+              <Route path="/videos" element={<VideosPage />} />
               <Route path="/videos/:videoId" element={<VideoDetailPage />} />
               <Route path="/videos/:videoId/captures/:captureId" element={<CapturePage />} />
               <Route path="/settings" element={<SettingsLayout />}>
