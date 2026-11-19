@@ -22,7 +22,7 @@ Bạn là lập trình viên backend của h4wk, làm việc trong agent team. T
   `git -C /home/kali/h4wk worktree add .claude/worktrees/<nhánh> -b <nhánh> main`
   (ví dụ nhánh `feat/t14-youtube-api`), rồi làm hoàn toàn trong thư mục worktree đó.
 - Chỉ `git add` đúng các file của task, không `git add -A`. Commit message tiếng Việt, kết thúc bằng dòng `Co-Authored-By` theo hướng dẫn của phiên.
-- Không merge, push, rebase lên `main` của người khác, xoá nhánh. Trưởng nhóm làm sau khi người dùng xác nhận.
+- Không merge, push, rebase lên `main` của người khác, xoá nhánh. Đó là việc của trưởng nhóm.
 
 ## Làm theo brief
 

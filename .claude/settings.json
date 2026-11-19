@@ -1,0 +1,101 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "teammateMode": "auto",
+  "modelSettings": {
+    "claude-sonnet-5-5": {
+      "effortLevel": "low"
+    }
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Bash(uv run pytest)",
+      "Bash(uv run pytest *)",
+      "Bash(LC_ALL=C PYTHONUTF8=0 uv run pytest)",
+      "Bash(uv run ruff check .)",
+      "Bash(uv run ruff format .)",
+      "Bash(uv run ruff format --check .)",
+      "Bash(uv run h4wk schema export)",
+      "Bash(uv sync)",
+      "Bash(npm install)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npm run gen:api)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git -C * status *)",
+      "Bash(git -C * diff *)",
+      "Bash(git -C * log *)",
+      "Bash(git -C * merge-base *)",
+      "Bash(git merge-base *)",
+      "Bash(git -C /home/kali/h4wk worktree add *)",
+      "Bash(git worktree add *)",
+      "Bash(git worktree list)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git rebase main)",
+      "Bash(git fetch *)",
+      "Bash(graphify query *)",
+      "Bash(graphify explain *)",
+      "Bash(graphify path *)",
+      "Bash(graphify update .)",
+      "Bash(git merge *)",
+      "Bash(git -C * merge *)",
+      "Bash(git branch -d *)",
+      "Bash(git -C * branch -d *)",
+      "Bash(git worktree remove *)",
+      "Bash(git -C * worktree remove *)"
+    ],
+    "ask": [
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(git -C * push *)",
+      "Bash(git branch -D *)",
+      "Bash(git -C * branch -D *)",
+      "Bash(git reset --hard *)",
+      "Bash(git -C * reset --hard *)",
+      "Bash(git checkout main)",
+      "Bash(git switch main)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v graphify >/dev/null 2>&1; then graphify hook-guard search; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v graphify >/dev/null 2>&1; then graphify hook-guard read; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v graphify >/dev/null 2>&1; then graphify hook-guard compact; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
