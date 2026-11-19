@@ -315,10 +315,12 @@ Người làm: Thi. Phụ thuộc: T8. Cỡ: M.
 
 Nghiệm thu:
 
-- [ ] Phần chuyển sang dữ liệu chung có test dùng response đã ghi sẵn.
-- [ ] Khi bật `fault_injection` cho yt-dlp, Supadata được gọi thay để lấy transcript, và manifest ghi đủ cả hai lần gọi.
+- [x] Phần chuyển sang dữ liệu chung có test dùng response đã ghi sẵn.
+- [x] Khi bật `fault_injection` cho yt-dlp, Supadata được gọi thay để lấy transcript, và manifest ghi đủ cả hai lần gọi.
 
 Kiểm tra: `uv run pytest tests/unit/test_supadata.py tests/unit/test_orchestrator.py`.
+
+Ghi chú: Supadata không cho biết phụ đề YouTube là uploaded hay auto, nên mọi transcript từ Supadata gắn supadata_ai. Không có phụ đề tiếng Việt thì gọi mode generate (AI, 2 credit/phút, chờ job tối đa 10 phút). Credit trong kỳ lấy từ GET /me của Supadata (nhớ 5 phút), không tự đếm; người dùng chốt 2026-11-19.
 
 File: `collectors/providers/supadata.py`, fixtures, tests.
 Người làm: Thi. Phụ thuộc: T8. Cỡ: S.
