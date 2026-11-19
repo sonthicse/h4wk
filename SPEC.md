@@ -489,7 +489,7 @@ Nghiệm thu: như màn 1 ở [phần 8](#8-tiêu-chí-thành-công).
 
 ### 10.9 `watchlist`
 
-Mỗi mục watchlist là một kênh. V1 chỉ phát hiện sự kiện video mới.
+Mỗi mục watchlist là một kênh. V1 chỉ phát hiện sự kiện video mới. `h4wk init` thêm sẵn bốn kênh làm ví dụ khi watchlist còn trống: `@VietTan`, `@bbctiengviet`, `@chantroimoimedia-u4s`, `@luat-khoa`.
 
 Khi một kênh được thêm vào watchlist (từ trang Watchlist hoặc bằng cách dán link kênh ở màn Collect):
 

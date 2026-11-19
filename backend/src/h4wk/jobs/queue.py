@@ -15,3 +15,4 @@ huey_gpu = SqliteHuey("h4wk-gpu", filename=str(_root / "queue_gpu.db"))
 
 # Đăng ký các task với consumer.
 from h4wk.jobs import pipeline  # noqa: E402, F401
+from h4wk.watchlist import tasks  # noqa: E402, F401

@@ -16,7 +16,7 @@ from h4wk.collectors.targets import parse_target
 from h4wk.core import audit
 from h4wk.core.config import CONFIG_DIR, data_dir
 from h4wk.core.config_models import AnalysisConfig, load_toml
-from h4wk.core.db import FindingRow, JobRow, get_engine
+from h4wk.core.db import EventRow, FindingRow, JobRow, get_engine
 from h4wk.core.entities import load_entities
 from h4wk.core.ids import new_ulid
 from h4wk.core.types import VN_TZ
@@ -73,8 +73,37 @@ def _video_dir(job: JobRow) -> Path:
     return data_dir() / "videos" / job.video_id
 
 
+def _event(job: JobRow, kind: str, message: str) -> None:
+    with Session(get_engine()) as s:
+        s.add(
+            EventRow(
+                at=_now(),
+                kind=kind,
+                message=message,
+                video_id=job.video_id,
+                job_id=job.id,
+                watch_item=job.trigger.removeprefix(_WATCH)
+                if job.trigger.startswith(_WATCH)
+                else None,
+            )
+        )
+        s.commit()
+
+
+_WATCH = "system:watchlist:"
+
+
+def _trigger(job: JobRow) -> Trigger:
+    if job.trigger.startswith(_WATCH):
+        return Trigger(
+            type="watchlist", watch_item=job.trigger.removeprefix(_WATCH), event="new_video"
+        )
+    return Trigger(type="manual")
+
+
 def _fail(job_id: str, step: str, e: Exception) -> None:
     job = _update(job_id, status="failed", error=f"{step}: {e}")
+    _event(job, "job_failed", f"Job failed for video {job.video_id} at {step}")
     audit.log(job.trigger, "job.run", job.id, {"step": step, "error": str(e)}, status="error")
 
 
@@ -115,7 +144,7 @@ def collect(job_id: str) -> None:
                 parse_target(job.target),
                 CollectLevel(job.level),
                 collector=job.trigger,
-                trigger=Trigger(type="manual"),
+                trigger=_trigger(job),
             )
             capture = path.name
             n = Normalized.model_validate_json((path / "normalized.json").read_text("utf-8"))
@@ -194,6 +223,7 @@ def analyze(job_id: str) -> None:
         _fail(job_id, "analyze", e)
         return
     job = _update(job_id, status="done", step=None, progress=100, run_id=run_id)
+    _event(job, "job_done", f"Processed video {job.video_id}: {len(findings)} findings")
     audit.log(
         job.trigger,
         "job.run",

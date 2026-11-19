@@ -68,6 +68,10 @@ def init() -> None:
     typer.echo(f"data dir: {d}")
     for path in created:
         typer.echo(f"created: {path}")
+    from h4wk.watchlist.service import seed_defaults
+
+    for item in seed_defaults():
+        typer.echo(f"watchlist: {item.id} {item.handle} ({item.level})")
 
 
 def export_schemas(out_dir: Path) -> list[Path]:

@@ -98,3 +98,4 @@ Ngày 2026-11-19, khi gộp phần của Bảo:
 - Đối tượng thường là lãnh đạo Đảng và Nhà nước; tầng tĩnh vẫn chỉ chạy ở vùng nhắc tên đối tượng.
 - Viết tắt của đối tượng so không phân biệt hoa thường.
 - Bỏ khái niệm case: cả hệ thống là một cuộc theo dõi duy nhất, vì demo chỉ dùng một case. Đối tượng, watchlist, video, nghi vấn và nhật ký dùng chung; C4 bỏ `case_id`.
+- Watchlist mặc định theo dõi bốn kênh ví dụ: Việt Tân, BBC News Tiếng Việt, Chân Trời Mới Media, Luật Khoa tạp chí.

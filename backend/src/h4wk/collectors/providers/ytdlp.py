@@ -119,6 +119,22 @@ def channel_from_video_info(info: dict[str, Any]) -> Channel:
     )
 
 
+def resolve_channel(url: str) -> tuple[str, str, str | None]:
+    """Đổi link kênh hoặc @handle thành (channel_id, tên kênh, handle)."""
+    opts = {"quiet": True, "no_warnings": True, "extract_flat": True, "playlist_items": "0"}
+    try:
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            info = ydl.sanitize_info(ydl.extract_info(url, download=False))
+    except (DownloadError, ExtractorError) as e:
+        raise classify_error(e) from e
+    handle = info.get("uploader_id")
+    return (
+        info.get("channel_id") or info["id"],
+        info.get("channel") or info.get("title") or "",
+        handle if handle and handle.startswith("@") else None,
+    )
+
+
 def video_ids_from_flat(info: dict[str, Any]) -> list[str]:
     return [e["id"] for e in info.get("entries") or [] if e and e.get("id")]
 

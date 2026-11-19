@@ -44,6 +44,8 @@ LEVEL_CAPS: dict[CollectLevel, list[Cap]] = {
     ],
 }
 # Loại dữ liệu → các trường của Normalized do nó cung cấp.
+CHANNEL_CAPS = [Cap.CHANNEL_METADATA, Cap.CHANNEL_VIDEOS]
+
 CAP_FIELDS: dict[Cap, list[str]] = {
     # Metadata video kèm thông tin cơ bản của kênh (tên, handle), nếu nguồn trả về.
     Cap.VIDEO_METADATA: ["video", "channel"],
@@ -145,11 +147,18 @@ class Orchestrator:
     def collect(
         self, target: Target, level: CollectLevel, *, collector: str, trigger: Trigger
     ) -> Path:
-        """Thu một video và trả về thư mục bản thu đã khoá."""
-        if target.kind != TargetKind.VIDEO:
-            raise ValueError(f"orchestrator cannot collect a {target.kind} yet; only videos")
+        """Thu một video hoặc hồ sơ kênh (theo channel_id) và trả về thư mục bản thu đã khoá.
+        Với kênh, mức thu không áp dụng: luôn lấy metadata kênh và danh sách video."""
+        if target.kind == TargetKind.VIDEO:
+            base, caps = self.root / "videos" / target.id, LEVEL_CAPS[level]
+        elif target.kind == TargetKind.CHANNEL:
+            base, caps = self.root / "channels" / target.id, CHANNEL_CAPS
+        else:
+            raise ValueError(
+                f"orchestrator cannot collect a {target.kind}; use a video or channel id"
+            )
         writer = CaptureWriter(
-            self.root / "videos" / target.id / "captures",
+            base / "captures",
             source_url=target.url,
             collector=collector,
             trigger=trigger,
@@ -159,7 +168,7 @@ class Orchestrator:
         try:
             merged: dict = {"schema": "h4wk.normalized/1", "provenance": {}}
             calls: list[SourceCall] = []
-            for cap in LEVEL_CAPS[level]:
+            for cap in caps:
                 provider, part = self._collect_cap(cap, target, writer, calls)
                 if provider and part is not None:
                     for f in CAP_FIELDS[cap]:

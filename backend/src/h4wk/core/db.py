@@ -81,6 +81,46 @@ class DecisionRow(SQLModel, table=True):
     data: str
 
 
+class WatchItemRow(SQLModel, table=True):
+    """Một kênh trong watchlist. initialized=False: chưa chạy bước thêm kênh (SPEC 10.9)."""
+
+    __tablename__ = "watch_items"
+    id: str = Field(primary_key=True)  # w_001
+    channel_id: str = Field(index=True)
+    handle: str | None = None
+    title: str = ""
+    enabled: bool = True
+    level: str = "full"
+    initialized: bool = False
+    created_at: datetime
+    last_checked_at: datetime | None = None
+    last_error: str | None = None
+
+
+class KnownVideoRow(SQLModel, table=True):
+    """Video đã biết của một mục watchlist; video mới là video chưa có ở đây."""
+
+    __tablename__ = "known_videos"
+    watch_item: str = Field(primary_key=True)
+    video_id: str = Field(primary_key=True)
+    title: str = ""
+    published_at: datetime | None = None
+    first_seen_at: datetime
+
+
+class EventRow(SQLModel, table=True):
+    """Dòng sự kiện trên dashboard: new_video, channel_added, job_done, job_failed."""
+
+    __tablename__ = "events"
+    id: int | None = Field(default=None, primary_key=True)
+    at: datetime = Field(index=True)
+    kind: str
+    message: str
+    watch_item: str | None = None
+    video_id: str | None = None
+    job_id: str | None = None
+
+
 _engines: dict[Path, Engine] = {}
 
 

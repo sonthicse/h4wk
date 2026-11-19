@@ -658,11 +658,13 @@ Một periodic task chạy mỗi 2 phút (cấu hình được), đọc RSS củ
 
 Nghiệm thu:
 
-- [ ] Thêm kênh có 15 video trong RSS giả thì tạo đúng 10 job; lần poll tiếp theo không tạo job nào.
-- [ ] Feed RSS giả thêm 1 entry thì tạo đúng 1 job; chạy lại không tạo job trùng.
+- [x] Thêm kênh có 15 video trong RSS giả thì tạo đúng 10 job; lần poll tiếp theo không tạo job nào.
+- [x] Feed RSS giả thêm 1 entry thì tạo đúng 1 job; chạy lại không tạo job trùng.
 - [ ] Thủ công: một kênh tin tức trong watchlist đăng video mới thì video được tự thu và xử lý (bấm Check now nếu chưa thấy).
 
 Kiểm tra: `uv run pytest tests/unit/test_watchlist.py` và làm thủ công màn 3.
+
+Backend xong khi chưa có T14: Check now dùng RSS cộng danh sách video của kênh lấy qua orchestrator (`channel.videos`, hiện là yt-dlp; khi T14 xong thì đặt `youtube_api` lên đầu trong `priority`). API: `GET/POST /api/watchlist`, `PATCH/DELETE /api/watchlist/{id}`, `POST /api/watchlist/{id}/check`, `GET /api/events`. Pipeline ghi thêm sự kiện `job_done`, `job_failed`.
 
 File: `src/h4wk/watchlist/{rss.py,service.py,tasks.py}`, `api/watchlist.py`, tests.
 Người làm: Thi. Phụ thuộc: T12, T14. Cỡ: M.
