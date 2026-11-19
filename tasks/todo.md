@@ -211,8 +211,8 @@ Chọn transcript chính theo thứ tự `uploaded > stt > auto > supadata_ai` (
 
 Nghiệm thu:
 
-- [ ] Timeline của bản thu mẫu (T44) validate được theo C3.
-- [ ] Mỗi đoạn dài tối đa 20 giây, trừ trường hợp một câu đơn lẻ đã dài hơn.
+- [x] Timeline của bản thu mẫu (T44) validate được theo C3.
+- [x] Mỗi đoạn dài tối đa 20 giây, trừ trường hợp một câu đơn lẻ đã dài hơn.
 
 Kiểm tra: `uv run pytest tests/unit/test_timeline.py`.
 
@@ -221,16 +221,16 @@ Người làm: Bảo. Phụ thuộc: T44. Cỡ: S.
 
 ### T11: `analysis`: dấu hiệu tên và tầng tĩnh
 
-Văn bản được chuẩn hoá trước khi so: chuẩn NFC, bỏ dấu, chuyển chữ thường, gộp khoảng trắng. Bộ khớp tìm tên đầy đủ và biệt danh theo ranh giới từ; mỗi từ dài từ 4 ký tự được sai tối đa 1 ký tự, từ ngắn hơn phải khớp chính xác. Viết tắt phải khớp chính xác theo ranh giới từ. Bộ khớp quét `speech`, `ocr`, tiêu đề, mô tả, comment và chữ OCR trên thumbnail, ghi các dấu hiệu tên vào `analysis/<run_id>/hits.json`.
+Văn bản được chuẩn hoá trước khi so: chuẩn NFC, bỏ dấu, chuyển chữ thường, gộp khoảng trắng. Bộ khớp tìm tên đầy đủ và biệt danh theo ranh giới từ; mỗi từ dài từ 4 ký tự được sai tối đa 1 ký tự, từ ngắn hơn phải khớp chính xác. Viết tắt phải khớp đủ ký tự theo ranh giới từ, không phân biệt hoa thường. Bộ khớp quét `speech`, `ocr`, tiêu đề, mô tả, comment và chữ OCR trên thumbnail, ghi các dấu hiệu tên vào `analysis/<run_id>/hits.json`.
 
-Từ điển từ ngữ xúc phạm ban đầu nằm ở `analysis/lexicon/vi_insults.txt`. Vùng văn bản có dấu hiệu tên mà có từ xúc phạm thì sinh nghi vấn `analyzer: "static"`, category `insult`, severity `medium`, ghi vào `findings.json`. Dấu hiệu tên đơn thuần không sinh nghi vấn.
+Từ điển ban đầu nằm ở `analysis/lexicon/vi_insults.txt`, chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia, mỗi nhóm gắn một category của C4. Vùng văn bản có dấu hiệu tên mà có cụm từ trong từ điển thì sinh nghi vấn `analyzer: "static"`, category của nhóm, severity `medium`, ghi vào `findings.json`. Dấu hiệu tên đơn thuần không sinh nghi vấn.
 
 Nghiệm thu, với đối tượng "Nguyễn Văn Hùng", viết tắt "NVH":
 
-- [ ] Khớp: "nguyen van hung", "NGUYỄN VĂN HÙNG", "Nguyễn Văn Hùnh" và "Nguyễnn Văn Hùng" (sai 1 ký tự ở từ dài từ 4 ký tự), "NVH".
-- [ ] Không khớp: "Nguyễn Văn Hà", "Nguyễn Văn Hoàng", "Nguyễn Vn Hùng" (từ ngắn "Văn" bị sai), "NVHA" và "ANVH" (viết tắt dính chữ khác), "Nguyễn Văn" (thiếu từ).
-- [ ] Giới hạn đã biết, có test ghi nhận: "Nguyễn Văn Hưng" vẫn khớp vì bỏ dấu cho ra cùng một chuỗi.
-- [ ] Chỉ nhắc tên thì có dấu hiệu trong `hits.json` nhưng không có nghi vấn.
+- [x] Khớp: "nguyen van hung", "NGUYỄN VĂN HÙNG", "Nguyễn Văn Hùnh" và "Nguyễnn Văn Hùng" (sai 1 ký tự ở từ dài từ 4 ký tự), "NVH".
+- [x] Không khớp: "Nguyễn Văn Hà", "Nguyễn Văn Hoàng", "Nguyễn Vn Hùng" (từ ngắn "Văn" bị sai), "NVHA" và "ANVH" (viết tắt dính chữ khác), "Nguyễn Văn" (thiếu từ).
+- [x] Giới hạn đã biết, có test ghi nhận: "Nguyễn Văn Hưng" vẫn khớp vì bỏ dấu cho ra cùng một chuỗi.
+- [x] Chỉ nhắc tên thì có dấu hiệu trong `hits.json` nhưng không có nghi vấn.
 
 Kiểm tra: `uv run pytest tests/unit/test_static_match.py`.
 
@@ -257,7 +257,7 @@ Nghiệm thu:
 Kiểm tra: `uv run pytest tests/integration/test_pipeline.py`; thủ công: chạy hai `huey_consumer` rồi gọi API với một link thật.
 
 File: `src/h4wk/jobs/{queue.py,pipeline.py}`, `api/jobs.py`, `api/findings.py`, tests.
-Bước media và analyze hiện là bản tạm trong `jobs/placeholder.py` (gom phụ đề thành đoạn 8–20 giây; khớp nguyên văn tên và hai từ xúc phạm mẫu). T10 và T11 thay hai bước này.
+Bước media dùng timeline từ phụ đề của T10, bước analyze dùng tầng tĩnh của T11. Proxy, keyframe, OCR, STT và VLM được nối vào ở T22.
 
 Người làm: Thi. Phụ thuộc: T7, T9, T44. Tích hợp sau: T10, T11. Cỡ: M.
 

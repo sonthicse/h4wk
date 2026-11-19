@@ -90,3 +90,8 @@ Cùng ngày, khi duyệt hợp đồng C1–C5:
 - Phân tích lại một video thì phải rà soát lại toàn bộ nghi vấn; bỏ cơ chế giữ quyết định cũ theo `key`.
 - `id` của nghi vấn có dạng `f_<ULID>`, duy nhất trong cả case, để quyết định rà soát trỏ đúng nghi vấn.
 - Hợp đồng C4 từ chối quyết định Reject không có lý do.
+
+Ngày 2026-11-19, khi gộp phần của Bảo:
+
+- Từ điển tầng tĩnh chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia; mỗi nhóm gắn một category có sẵn của C4.
+- Viết tắt của đối tượng so không phân biệt hoa thường.

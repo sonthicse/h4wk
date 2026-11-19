@@ -1,25 +1,27 @@
 """Luồng collect → media → analyze (T12). Mỗi bước là một task Huey; media chạy trên hàng
 đợi gpu. Mỗi bước cập nhật trạng thái và tiến độ của job trong chỉ mục."""
 
-import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
 from sqlmodel import Session, select
 
+from h4wk.analysis import runner
 from h4wk.analysis.models import Finding
 from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import parse_target
 from h4wk.core import audit
 from h4wk.core.cases import case_dir, load_case
+from h4wk.core.config import CONFIG_DIR
+from h4wk.core.config_models import AnalysisConfig, load_toml
 from h4wk.core.db import FindingRow, JobRow, get_engine
 from h4wk.core.ids import new_ulid
 from h4wk.core.types import VN_TZ
-from h4wk.evidence.models import Manifest, Trigger
+from h4wk.evidence.models import Trigger
 from h4wk.evidence.writer import CAPTURE_TS_FORMAT, list_captures
-from h4wk.jobs import placeholder
 from h4wk.jobs.queue import huey, huey_gpu
+from h4wk.media import transcripts
 from h4wk.media.timeline import Timeline
 
 RECENT = timedelta(minutes=10)
@@ -83,6 +85,11 @@ def _recent_capture(job: JobRow) -> str | None:
     return caps[-1] if _now() - at < RECENT else None
 
 
+def _analysis_config() -> AnalysisConfig:
+    path = CONFIG_DIR / "analysis.toml"
+    return load_toml(path, AnalysisConfig) if path.exists() else AnalysisConfig()
+
+
 def start(job_id: str) -> None:
     collect(job_id)
 
@@ -117,13 +124,10 @@ def media(job_id: str) -> None:
     job = _update(job_id, step="media", progress=45)
     try:
         cap_dir = _video_dir(job) / "captures" / str(job.capture)
-        n = Normalized.model_validate_json((cap_dir / "normalized.json").read_text("utf-8"))
-        m = Manifest.model_validate_json((cap_dir / "manifest.json").read_text("utf-8"))
-        video_sha = next((m.files[f.file].sha256 for f in n.media if f.file in m.files), None)
-        timeline = placeholder.build_timeline(n, job.video_id, str(job.capture), video_sha)
         out = _video_dir(job) / "derived" / str(job.capture)
         out.mkdir(parents=True, exist_ok=True)
-        (out / "timeline.json").write_text(timeline.model_dump_json(indent=2), "utf-8")
+        # T10: timeline từ phụ đề. Proxy, keyframe, OCR, STT, VLM được nối ở T22.
+        transcripts.process_capture(cap_dir, out, _analysis_config())
     except Exception as e:
         _fail(job_id, "media", e)
         return
@@ -142,12 +146,11 @@ def analyze(job_id: str) -> None:
             (_video_dir(job) / "captures" / cap / "normalized.json").read_text("utf-8")
         )
         run_id = f"r_{new_ulid()}"
-        hits, findings = placeholder.analyze(load_case(job.case_id), n, timeline, run_id)
-        run_dir = derived / "analysis" / run_id
-        run_dir.mkdir(parents=True)
-        for name, items in [("hits.json", hits), ("findings.json", findings)]:
-            data = [x.model_dump(mode="json") for x in items]
-            (run_dir / name).write_text(json.dumps(data, ensure_ascii=False, indent=2), "utf-8")
+        case = load_case(job.case_id)
+        # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
+        _hits, findings = runner.analyze(
+            n, timeline, case.entities, None, job.case_id, run_id, derived / "analysis" / run_id
+        )
         with Session(get_engine()) as s:
             for f in findings:
                 s.add(

@@ -226,8 +226,8 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T7: `case-core`: đăng nhập 2 tài khoản
 - [x] T8: `collectors`: hợp đồng adapter và orchestrator
 - [x] T9: Adapter yt-dlp
-- [ ] T10: `media`: timeline từ phụ đề YouTube
-- [ ] T11: `analysis`: dấu hiệu tên và tầng tĩnh
+- [x] T10: `media`: timeline từ phụ đề YouTube
+- [x] T11: `analysis`: dấu hiệu tên và tầng tĩnh
 - [x] T12: `jobs`: luồng collect → media → analyze
 - [ ] T13: UI tối giản: login, cases, collect, danh sách nghi vấn
 

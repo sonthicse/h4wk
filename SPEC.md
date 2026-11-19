@@ -383,13 +383,13 @@ V1 chỉ có bộ phân tích cho K1 (bôi nhọ đối tượng). Đầu vào g
 
 Bước 1 tìm dấu hiệu đối tượng (`hits`). Mỗi dấu hiệu ghi đối tượng, nơi tìm thấy (`via`), vị trí (đoạn, khung hình, comment), bbox và điểm số nếu có.
 
-- Tên (`via`: `speech`, `ocr`, `title`, `description`, `comment`, `thumbnail`). Văn bản được chuẩn hoá NFC, bỏ dấu, chuyển chữ thường. Tên đầy đủ và biệt danh được so theo ranh giới từ; mỗi từ dài từ 4 ký tự trở lên được sai tối đa 1 ký tự, từ ngắn hơn phải khớp chính xác. Viết tắt phải khớp chính xác theo ranh giới từ. Bỏ dấu làm một số tên trùng nhau (An và Ân); tầng LLM xử lý các trường hợp này.
+- Tên (`via`: `speech`, `ocr`, `title`, `description`, `comment`, `thumbnail`). Văn bản được chuẩn hoá NFC, bỏ dấu, chuyển chữ thường. Tên đầy đủ và biệt danh được so theo ranh giới từ; mỗi từ dài từ 4 ký tự trở lên được sai tối đa 1 ký tự, từ ngắn hơn phải khớp chính xác. Viết tắt phải khớp đủ ký tự theo ranh giới từ, không phân biệt hoa thường. Bỏ dấu làm một số tên trùng nhau (An và Ân); tầng LLM xử lý các trường hợp này.
 - Khuôn mặt (`via: face`). Model chạy trên máy phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng trong case. Giới hạn bắt buộc: chỉ so với đối tượng của case; không đặt tên hay xác định danh tính bất kỳ người nào khác; đặc trưng của khuôn mặt không khớp không được lưu. Có thể tắt bằng `analysis.toml`.
 - Ảnh mẫu (`via: ref_image`). Embedding của keyframe, thumbnail và các ô cắt theo lưới được so với embedding của ảnh mẫu, để bắt trường hợp ảnh gốc bị cắt, ghép hay đổi màu.
 
 Một video được coi là liên quan tới đối tượng khi có ít nhất một dấu hiệu ở bất kỳ đâu.
 
-Bước 2 là tầng tĩnh. Từ điển từ ngữ xúc phạm tiếng Việt chạy trên các vùng văn bản có dấu hiệu tên. Có từ xúc phạm thì sinh nghi vấn `analyzer: "static"`. Dấu hiệu tên đơn thuần chỉ được ghi vào `hits.json`, không vào hàng đợi.
+Bước 2 là tầng tĩnh. Từ điển tiếng Việt (`analysis/lexicon/vi_insults.txt`) chạy trên các vùng văn bản có dấu hiệu tên. Từ điển chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia (xúc phạm, phỉ báng; cáo buộc không bằng chứng; xuyên tạc, bịa đặt, giả mạo; kích động, chia rẽ, bạo lực; bí mật nhà nước), mỗi nhóm gắn một `category` của C4. Có cụm từ trong từ điển thì sinh nghi vấn `analyzer: "static"` với `category` của nhóm, và `reason` ghi nhóm cùng cụm từ khớp. Dấu hiệu tên đơn thuần chỉ được ghi vào `hits.json`, không vào hàng đợi.
 
 Bước 3 là tầng LLM, qua tác vụ AI `analysis.classify`. Các phần được gửi đi:
 
