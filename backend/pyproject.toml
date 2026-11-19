@@ -25,6 +25,7 @@ h4wk = "h4wk.cli:main"
 
 [project.optional-dependencies]
 stt = [
+    "av==16.1.0",
     "faster-whisper>=1.2.1",
 ]
 

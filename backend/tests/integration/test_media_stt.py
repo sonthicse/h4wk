@@ -202,11 +202,25 @@ def test_stt_retry_preserves_ocr(clip, tmp_path, monkeypatch):
 
 
 @pytest.mark.gpu
-def test_real_stt_on_sample_capture(tmp_path):
+def test_real_stt_on_sample_capture(tmp_path, caplog):
     model = os.getenv("H4WK_STT_MODEL")
     capture = os.getenv("H4WK_T44_CAPTURE")
     if not model or not capture:
         pytest.skip("Cần H4WK_STT_MODEL và H4WK_T44_CAPTURE để chạy nghiệm thu GPU")
-    process_full_capture(Path(capture), tmp_path, AnalysisConfig(), SttWorker(model))
-    transcript = Transcript.model_validate_json((tmp_path / "transcripts/stt.vi.json").read_bytes())
-    assert any(s.text.strip() and 0 <= s.start < s.end for s in transcript.segments)
+    worker = SttWorker(model)
+    caplog.set_level("INFO", logger=stt.__name__)
+    for i in range(2):
+        output = tmp_path / str(i)
+        process_full_capture(Path(capture), output, AnalysisConfig(), worker)
+        transcript = Transcript.model_validate_json(
+            (output / "transcripts/stt.vi.json").read_bytes()
+        )
+        assert any(s.text.strip() and 0 <= s.start < s.end for s in transcript.segments)
+    assert sum("Đã nạp model STT" in r.getMessage() for r in caplog.records) == 1
+
+
+def test_whisper_can_decode_prepared_audio(clip, tmp_path):
+    audio = pytest.importorskip("faster_whisper.audio")
+    _, wav = prepare_media(clip, tmp_path / "derived")
+    samples = audio.decode_audio(str(wav), sampling_rate=16000)
+    assert samples.size > 0
