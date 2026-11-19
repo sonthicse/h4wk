@@ -120,12 +120,12 @@ export default function DashboardPage() {
   const d = stats.data
 
   // Bố cục kiểu bảng điều khiển: cột trái (video nổi bật + activity) đứng yên, không cuộn;
-  // chỉ cột phải tự cuộn. Cột trái rộng theo bề ngang cửa sổ (45vw) nên mở/đóng sidebar
-  // không làm hai thẻ đổi kích thước; trình phát co theo chiều cao còn lại để vừa màn hình.
+  // chỉ cột phải tự cuộn. Cột trái 9 phần, cột phải 11 phần để Events và Review đủ rộng.
+  // Trình phát co theo chiều cao còn lại để vừa màn hình.
   // Chiều cao = màn hình trừ thanh trên (3rem) và lề của <main> (2 × 1.5rem).
   return (
     <div className="flex h-[calc(100svh-6rem)] flex-col gap-4">
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,45vw)_minmax(0,1fr)] gap-4">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,9fr)_minmax(0,11fr)] gap-4">
         <div className="-m-1 flex min-h-0 flex-col gap-4 p-1">
           <div className="min-h-0 flex-1">
             <FeaturedVideoCard topVideoId={d.top_video?.id ?? null} />

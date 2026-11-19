@@ -42,7 +42,6 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   const live = findings.data?.filter((it) => it.status !== 'rejected').map((it) => it.finding)
   const list = live && topVideoId ? videoFindings(live, topVideoId) : []
   const top = topVideoId && list.length > 0 ? { videoId: topVideoId, findings: list } : null
-  const video = findings.data?.find((it) => it.finding.video_id === top?.videoId)?.video
   const [picked, setPicked] = useState<string | null>(null)
 
   if (!top) {
@@ -70,12 +69,7 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   return (
     <Card className="flex h-full min-h-0 flex-col">
       <CardHeader>
-        <CardDescription>Top video · most serious findings</CardDescription>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <CardTitle className="line-clamp-2 text-lg">{video?.title ?? top.videoId}</CardTitle>
-            {video?.channel && <p className="text-sm text-muted-foreground">{video.channel}</p>}
-          </div>
+        <div className="flex items-center justify-between gap-4">
           <div className="flex shrink-0 items-center gap-2 text-sm">
             {(['high', 'medium', 'low'] as const).map(
               (s) =>
@@ -85,15 +79,15 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
                   </Badge>
                 ),
             )}
-            <a
-              href={`https://www.youtube.com/watch?v=${encodeURIComponent(top.videoId)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-primary hover:underline"
-            >
-              YouTube <ExternalLinkIcon className="size-3.5" />
-            </a>
           </div>
+          <a
+            href={`https://www.youtube.com/watch?v=${encodeURIComponent(top.videoId)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-primary hover:underline"
+          >
+            YouTube <ExternalLinkIcon className="size-3.5" />
+          </a>
         </div>
       </CardHeader>
       <CardContent className="flex min-h-0 flex-1 flex-col gap-3">
