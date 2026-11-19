@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router'
 import ActivityChart from '@/components/dashboard/ActivityChart'
 import EventFeed from '@/components/dashboard/EventFeed'
 import FeaturedVideoCard from '@/components/dashboard/FeaturedVideoCard'
@@ -27,33 +28,42 @@ function StatCard({ label, value, hint }: { label: string; value: number; hint: 
   )
 }
 
+// Thẻ đếm theo nhóm; cả thẻ là link sang trang tương ứng.
 function Breakdown<K extends string>({
   title,
+  to,
   keys,
   counts,
   variant,
 }: {
   title: string
+  to: string
   keys: K[]
   counts: Record<K, number>
   variant: Record<K, 'destructive' | 'default' | 'secondary' | 'outline'>
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="space-y-2">
-          {keys.map((k) => (
-            <li key={k} className="flex items-center justify-between">
-              <Badge variant={variant[k]}>{k}</Badge>
-              <span className="text-lg font-medium tabular-nums">{counts[k]}</span>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
+    <Link
+      to={to}
+      aria-label={`${title}: open the ${title.toLowerCase()} page`}
+      className="block rounded-xl transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none [&>*]:hover:bg-muted/40"
+    >
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2">
+            {keys.map((k) => (
+              <li key={k} className="flex items-center justify-between">
+                <Badge variant={variant[k]}>{k}</Badge>
+                <span className="text-lg font-medium tabular-nums">{counts[k]}</span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
 
@@ -92,7 +102,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4">
+      <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-start gap-4">
         <div className="space-y-4">
           <FeaturedVideoCard />
           <div className="grid grid-cols-3 gap-4">
@@ -101,8 +111,8 @@ export default function DashboardPage() {
             <StatCard label="Captures" value={d.captureCount} hint="Collection runs; one video can be collected again" />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Breakdown title="Findings by severity" keys={severities} counts={d.findingsBySeverity} variant={severityVariant} />
-            <Breakdown title="Findings by review status" keys={statuses} counts={d.findingsByStatus} variant={statusVariant} />
+            <Breakdown title="Findings" to="/findings" keys={severities} counts={d.findingsBySeverity} variant={severityVariant} />
+            <Breakdown title="Review" to="/review" keys={statuses} counts={d.findingsByStatus} variant={statusVariant} />
           </div>
           <ActivityChart data={d.activity} />
           <UsageCard youtubeQuota={d.youtubeQuota} supadataCredits={d.supadataCredits} />

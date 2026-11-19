@@ -64,6 +64,9 @@ function EventItem({ event }: { event: FeedEvent }) {
 }
 
 // Dòng sự kiện (T31): poll mỗi 5 giây.
+// Chỉ hiện vài sự kiện mới nhất cho vừa một màn hình, không cuộn.
+const MAX_EVENTS = 6
+
 export default function EventFeed() {
   const events = useQuery({
     queryKey: ['events'],
@@ -72,25 +75,23 @@ export default function EventFeed() {
   })
 
   return (
-    <Card className="h-full">
+    <Card>
       <CardHeader>
         <CardTitle>Events</CardTitle>
         <CardDescription>Watchlist, jobs and review decisions · refreshes every 5 s</CardDescription>
       </CardHeader>
-      <CardContent className="min-h-0 flex-1">
+      <CardContent>
         {events.error && <p className="text-sm text-destructive">Could not load events.</p>}
         {events.isPending && <p className="text-sm text-muted-foreground">Loading events…</p>}
         {events.data && events.data.length === 0 && (
           <p className="text-sm text-muted-foreground">No events yet. Add a channel to the watchlist or collect a video.</p>
         )}
         {events.data && events.data.length > 0 && (
-          <div className="h-full overflow-y-auto pr-3">
-            <ol aria-live="polite" className="divide-y">
-              {events.data.map((e) => (
-                <EventItem key={e.id} event={e} />
-              ))}
-            </ol>
-          </div>
+          <ol aria-live="polite" className="divide-y">
+            {events.data.slice(0, MAX_EVENTS).map((e) => (
+              <EventItem key={e.id} event={e} />
+            ))}
+          </ol>
         )}
       </CardContent>
     </Card>
