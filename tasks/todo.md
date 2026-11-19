@@ -286,10 +286,10 @@ Người làm: Thi. Phụ thuộc: T12. Cỡ: M.
 
 Gồm các task: T13.
 
-- [ ] `uv run pytest` và `npm run build` đều pass.
-- [ ] Luồng tối giản chạy trọn với 1 video thật, thao tác từ trình duyệt.
-- [ ] Hai người duyệt lại C1–C5 và chốt hợp đồng. Sau mốc này, mọi thay đổi hợp đồng phải được Thi đồng ý.
-- [ ] Đã đọc kết quả spike T2 và T3, và cập nhật SPEC nếu cần.
+- [x] `uv run pytest` và `npm run build` đều pass.
+- [x] Luồng tối giản chạy trọn với 1 video thật, thao tác từ trình duyệt.
+- [x] Hai người duyệt lại C1–C5 và chốt hợp đồng. Sau mốc này, mọi thay đổi hợp đồng phải được Thi đồng ý.
+- [x] Đã đọc kết quả spike T2 và T3, và cập nhật SPEC nếu cần.
 
 ## Phase 2: Nguồn thu, AI và hoàn thiện luồng xử lý
 

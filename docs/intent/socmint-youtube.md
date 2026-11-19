@@ -100,3 +100,4 @@ Ngày 2026-11-19, khi gộp phần của Bảo:
 - Bỏ khái niệm case: cả hệ thống là một cuộc theo dõi duy nhất, vì demo chỉ dùng một case. Đối tượng, watchlist, video, nghi vấn và nhật ký dùng chung; C4 bỏ `case_id`.
 - Watchlist mặc định theo dõi bốn kênh ví dụ ở mức `metadata`: Việt Tân, BBC News Tiếng Việt, Chân Trời Mới Media, Luật Khoa tạp chí.
 - C2: comment có thêm `author_name` (tên hiển thị lúc thu).
+- Chốt model theo spike T3: Whisper large-v3, PaddleOCR PP-OCRv5 chạy CPU, DINOv2 ViT-S/14, InsightFace buffalo_l. Đạt Checkpoint A; từ đây mọi thay đổi hợp đồng C1–C5 phải được người phụ trách chính đồng ý.

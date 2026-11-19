@@ -231,7 +231,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T12: `jobs`: luồng collect → media → analyze
 - [ ] T13: UI tối giản: login, đối tượng, collect, danh sách nghi vấn (giao diện đã merge; còn nghiệm thu trọn luồng từ trình duyệt)
 
-### Checkpoint A (cuối tuần 1): luồng tối giản chạy trọn, chốt C1–C5
+### Checkpoint A (cuối tuần 1): luồng tối giản chạy trọn, chốt C1–C5 — đã đạt (2026-11-19)
 
 ### Phase 2: Nguồn thu, AI và hoàn thiện luồng xử lý (tuần 2)
 

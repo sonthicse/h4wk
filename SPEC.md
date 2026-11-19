@@ -55,15 +55,15 @@ Một số từ dùng thống nhất trong các tài liệu:
 | Tác vụ nền và lập lịch | Huey, lưu hàng đợi bằng SQLite | Không cần Redis. Hai hàng đợi: `default` và `gpu` (1 worker). Kiểm tra RSS chạy bằng periodic task |
 | Thu thập | `yt-dlp` (thư viện Python), `google-api-python-client`, HTTP client cho Supadata | Phiên bản yt-dlp được ghi vào manifest. yt-dlp có thể cần thêm JS runtime (ví dụ Deno); spike T2 xác nhận |
 | Media | `ffmpeg`, PySceneDetect, `imagehash` | |
-| Speech-to-text | `faster-whisper` chạy trên GPU | Model chốt ở spike T3 (whisper large-v3 hoặc PhoWhisper) |
-| OCR | PaddleOCR (tiếng Việt) | Nếu bản GPU xung đột với thư viện khác thì chạy bằng CPU |
-| Khớp khuôn mặt | Ứng viên: InsightFace qua `onnxruntime-gpu` | Chốt model và kiểm tra giấy phép ở spike T3 |
-| Khớp ảnh mẫu | Ứng viên: CLIP (`open_clip`) hoặc DINOv2, cần `torch` | Chốt ở spike T3 |
+| Speech-to-text | `faster-whisper` chạy trên GPU | Whisper large-v3 (chốt ở spike T3: WER 12,7% trên FLEURS tiếng Việt). Đổi model bằng `H4WK_STT_MODEL` |
+| OCR | PaddleOCR PP-OCRv5 (phát hiện mobile, nhận dạng tiếng Việt vi-latin-rec-v4) | Chạy bằng worker CPU riêng. Bộ nhận dạng tiếng Việt có giấy phép CC BY-NC 4.0 (phi thương mại) |
+| Khớp khuôn mặt | InsightFace buffalo_l qua `onnxruntime-gpu` | Trọng số chỉ dùng cho nghiên cứu phi thương mại. Chưa đánh giá chất lượng khớp (chờ ảnh thành viên) |
+| Khớp ảnh mẫu | DINOv2 ViT-S/14, cần `torch` | Giấy phép Apache-2.0. Spike T3: ảnh cắt 10% mỗi cạnh và ảnh giảm bão hoà còn cosine 0,91 và 0,96 so với ảnh gốc |
 | LLM/VLM | Lớp riêng với 3 loại adapter: Anthropic SDK, OpenAI-compatible (OpenAI, DeepSeek, Qwen/DashScope, Zhipu GLM, Moonshot Kimi, OpenRouter…), Google GenAI | Tên model đặt trong file cấu hình |
 | Frontend | React, Vite, TypeScript, React Router, TanStack Query, Tailwind và shadcn/ui | Giao diện tiếng Anh. Trình phát dùng thẻ `<video>` với lớp phủ tự viết |
 | Chất lượng code | `ruff` (lint và format), `pytest`; `oxlint` và `tsc` cho frontend | |
 
-Máy chạy cần WSL2 với GPU NVIDIA và CUDA, `ffmpeg` trong PATH, Node 20 trở lên. Không dùng Docker.
+Máy chạy cần WSL2 với GPU NVIDIA và CUDA, `ffmpeg` trong PATH, Node 20 trở lên. Không dùng Docker. Spike T3 đã đo trên RTX 3050 Laptop 4 GB; môi trường GPU thử nghiệm ở `docs/spikes/gpu-env/`, kết quả ở `docs/spikes/gpu-models.md`. Hai model có giấy phép phi thương mại (OCR tiếng Việt, khuôn mặt) phù hợp với bài tập lớn; báo cáo môn học ghi rõ điều này.
 
 Rủi ro lớn nhất về cài đặt là bốn thư viện GPU (ctranslate2 cho faster-whisper, paddlepaddle-gpu, onnxruntime-gpu, torch) phải cùng chạy trong một môi trường, mỗi thư viện đòi một bộ phiên bản CUDA/cuDNN riêng. Spike T3 kiểm tra việc này trước tiên. Phương án dự phòng là chạy PaddleOCR bằng CPU, hoặc tách worker `gpu` thành nhiều môi trường riêng.
 
