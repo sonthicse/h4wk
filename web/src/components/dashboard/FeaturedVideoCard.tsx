@@ -1,13 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
 import { Link } from 'react-router'
 import type { Finding } from '@/api/findings'
 import { listQueue } from '@/api/review'
 import { getVideo } from '@/api/videos'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatTime, severityVariant } from '@/lib/findings'
-import { cn } from '@/lib/utils'
 
 type Severity = Finding['severity']
 
@@ -42,13 +38,11 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   const live = findings.data?.filter((it) => it.status !== 'rejected').map((it) => it.finding)
   const list = live && topVideoId ? videoFindings(live, topVideoId) : []
   const top = topVideoId && list.length > 0 ? { videoId: topVideoId, findings: list } : null
-  const video = findings.data?.find((it) => it.finding.video_id === top?.videoId)?.video
   const detail = useQuery({
     queryKey: ['video', topVideoId],
     queryFn: () => getVideo(topVideoId!),
     enabled: topVideoId != null,
   })
-  const [picked, setPicked] = useState<string | null>(null)
 
   if (!top) {
     return (
@@ -67,9 +61,8 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
     )
   }
 
-  // Nghi vấn đang phát: mặc định là nghi vấn nặng nhất; bấm nghi vấn khác để nhảy tới đó.
-  const current = top.findings.find((f) => f.id === picked) ?? top.findings[0]
-  const start = Math.max(0, Math.floor((current.start ?? 0) - LEAD_S))
+  // Phát từ nghi vấn nặng nhất (danh sách đã sắp nặng trước).
+  const start = Math.max(0, Math.floor((top.findings[0].start ?? 0) - LEAD_S))
 
   return (
     <Card>
@@ -78,36 +71,11 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
       </CardHeader>
       <CardContent className="space-y-3">
         <EmbeddedPlayer videoId={top.videoId} start={start} />
-        <div className="space-y-1">
-          <p className="text-sm font-medium">{video?.title ?? top.videoId}</p>
-          {detail.data?.video.description && (
-            <p className="line-clamp-3 text-sm whitespace-pre-line text-muted-foreground">
-              {detail.data.video.description}
-            </p>
-          )}
-        </div>
-        <ul className="space-y-1">
-          {top.findings.map((f) => (
-            <li key={f.id}>
-              <button
-                type="button"
-                onClick={() => setPicked(f.id)}
-                aria-current={f.id === current.id ? 'true' : undefined}
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted/60',
-                  f.id === current.id && 'bg-muted',
-                )}
-              >
-                <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
-                <span className="w-24 shrink-0 font-mono text-xs text-muted-foreground">
-                  {f.start == null ? f.source_kind : `${formatTime(f.start)} · ${f.source_kind}`}
-                </span>
-                <span className="truncate">{f.quote}</span>
-                <span className="ml-auto shrink-0 text-xs text-muted-foreground">{f.category}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        {detail.data?.video.description && (
+          <p className="line-clamp-3 text-sm whitespace-pre-line text-muted-foreground">
+            {detail.data.video.description}
+          </p>
+        )}
         <Link to="/findings" className="text-sm text-muted-foreground underline">
           All findings
         </Link>

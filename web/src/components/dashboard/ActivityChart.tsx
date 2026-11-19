@@ -23,13 +23,13 @@ function dayLabel(date: string) {
 
 export default function ActivityChart({ data }: { data: DayActivity[] }) {
   return (
-    <Card>
+    <Card className="flex h-full min-h-0 flex-col">
       <CardHeader>
         <CardTitle>Activity</CardTitle>
         <CardDescription>Captures and new findings per day, last 14 days</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={config} className="aspect-auto h-56 w-full">
+      <CardContent className="flex min-h-0 flex-1 flex-col">
+        <ChartContainer config={config} className="aspect-auto min-h-0 w-full flex-1">
           <BarChart data={data} accessibilityLayer>
             <CartesianGrid vertical={false} />
             <XAxis dataKey="date" tickFormatter={dayLabel} tickLine={false} axisLine={false} tickMargin={8} />
