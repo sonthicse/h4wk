@@ -67,7 +67,7 @@ Ghi lại giấy phép sử dụng của model khuôn mặt và model embedding.
 Nghiệm thu:
 
 - [x] `docs/spikes/gpu-models.md` ghi: phiên bản từng thư viện cài được cùng nhau; model được chọn cho từng việc; thời gian xử lý 5 phút audio; thời gian nạp mỗi model; WER của STT trên 1 phút audio gán nhãn tay; OCR có giữ được dấu tiếng Việt không.
-- [ ] Nếu không cài chung được, file ghi phương án dự phòng đã thử được (PaddleOCR chạy CPU, hoặc tách môi trường cho worker `gpu`).
+- [x] Nếu không cài chung được, file ghi phương án dự phòng đã thử được (PaddleOCR chạy CPU, hoặc tách môi trường cho worker `gpu`). Không áp dụng: bốn thư viện cài chung được bằng một lần uv sync và chạy chung một process (xem mục "Kiểm tra môi trường chung" trong file kết quả).
 
 Kiểm tra: đọc và duyệt file kết quả.
 
