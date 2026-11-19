@@ -28,7 +28,8 @@ export default function PriorityList({ cap, order, enabled, paused, changed, onC
   const [dragOver, setDragOver] = useState<number | null>(null)
   const [announce, setAnnounce] = useState('')
 
-  const noSource = order.every((name) => !enabled[name])
+  const isEmpty = order.length === 0 // file cấu hình không ghi loại này; backend thử mọi nguồn theo thứ tự mặc định
+  const noSource = !isEmpty && order.every((name) => !enabled[name])
   const allPaused = !noSource && order.filter((name) => enabled[name]).every((name) => paused[name])
 
   function moveBy(index: number, step: -1 | 1) {
@@ -116,6 +117,9 @@ export default function PriorityList({ cap, order, enabled, paused, changed, onC
         ))}
       </ol>
 
+      {isEmpty && (
+        <p className="text-xs text-muted-foreground">Not set: all sources are tried in default order</p>
+      )}
       {noSource && (
         <p className="flex items-start gap-1.5 text-xs text-destructive">
           <TriangleAlert className="mt-px size-3.5 shrink-0" aria-hidden />

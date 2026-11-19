@@ -12,6 +12,7 @@ import {
   getSourcesSettings,
   putSourcesSettings,
   setSourceKey,
+  sourceLabel,
   type Cap,
   type SourceName,
   type SourcesSettings,
@@ -46,17 +47,23 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
         sources: Object.fromEntries(changed.map((s) => [s.name, { enabled: draft.enabled[s.name] }])),
         priority: draft.priority,
       })
+      // Bật/tắt và thứ tự đã lưu; key mới (nếu có) vẫn là thay đổi chưa lưu.
+      setSaved({ ...draft, keys: saved.keys })
       for (const [name, value] of Object.entries(draft.keys)) {
-        if (value) await setSourceKey(name as SourceName, value)
+        if (!value) continue
+        try {
+          await setSourceKey(name as SourceName, value)
+        } catch (e) {
+          throw new Error(
+            `Settings saved, but the ${sourceLabel[name as SourceName]} key was not: ${e instanceof Error ? e.message : e}`,
+          )
+        }
+        // Key đã lưu thì bỏ khỏi bản nháp, để lần Save sau không gửi lại.
+        setDraft((d) => ({ ...d, keys: { ...d.keys, [name]: '' } }))
       }
-      await queryClient.invalidateQueries({ queryKey: ['sources-settings'] })
     },
-    onSuccess: () => {
-      // Dữ liệu mới đã tải lại; đặt bản nháp theo giá trị vừa gửi.
-      setSaved({ ...draft, keys: {} })
-      setDraft({ ...draft, keys: {} })
-      setJustSaved(true)
-    },
+    onSuccess: () => setJustSaved(true),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['sources-settings'] }),
   })
 
   const hasNewKey = Object.values(draft.keys).some(Boolean)
@@ -66,7 +73,13 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
     JSON.stringify(draft.priority) !== JSON.stringify(saved.priority)
 
   const paused = Object.fromEntries(data.sources.map((s) => [s.name, s.status === 'paused'])) as Record<SourceName, boolean>
-  const emptyCaps = caps.filter((c) => data.sources.some((s) => s.implemented) && draft.priority[c].filter((n) => data.sources.find((s) => s.name === n)?.implemented !== false).every((n) => !draft.enabled[n]))
+  const implemented = Object.fromEntries(data.sources.map((s) => [s.name, s.implemented])) as Record<SourceName, boolean>
+  // Danh sách rỗng nghĩa là file cấu hình không ghi; backend tự thử mọi nguồn, chỉ báo khi API báo `uncovered`.
+  const emptyCaps = caps.filter((c) =>
+    draft.priority[c].length > 0
+      ? draft.priority[c].every((n) => !draft.enabled[n] || !implemented[n])
+      : data.uncovered.includes(c),
+  )
 
   function edit(next: Partial<Draft>) {
     setJustSaved(false)

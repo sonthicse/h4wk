@@ -35,7 +35,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
   })
 
   const usage = source.usage
-  const unit = source.name === 'supadata' ? 'credits' : 'units'
+  const unit = usage?.period === 'day' ? 'units' : 'credits'
   const percent = usage ? Math.min(100, Math.round((usage.used / usage.limit) * 100)) : 0
 
   return (
@@ -68,6 +68,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
               {resume.isPending && <Loader2 className="animate-spin" />}
               Resume now
             </Button>
+            {resume.isError && <p className="text-xs text-destructive">{resume.error.message}</p>}
           </div>
         )}
 
@@ -138,6 +139,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
             </Button>
             {newKey && <span className="text-xs text-muted-foreground">Tests the saved key, not the new one. Save first.</span>}
           </div>
+          {test.isError && <p className="text-xs text-destructive">{test.error.message}</p>}
           {test.data && (
             <p
               role="status"
