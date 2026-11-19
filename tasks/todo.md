@@ -274,8 +274,8 @@ Toàn bộ giao diện viết bằng tiếng Anh.
 
 Nghiệm thu:
 
-- [ ] Từ trình duyệt làm trọn được luồng: đăng nhập, thêm đối tượng, dán link, chờ job chạy xong, thấy nghi vấn.
-- [ ] Job lỗi hiện thông báo lỗi trên trang Collect.
+- [x] Từ trình duyệt làm trọn được luồng: đăng nhập, thêm đối tượng, dán link, chờ job chạy xong, thấy nghi vấn. (Nghiệm thu 19/11 trên Chrome: đăng nhập, thêm đối tượng "Tô Lâm", dán link `8VB-P9Wk7v4` mức metadata, job xong, nghi vấn `unsupported_accusation` medium hiện ở Findings.)
+- [x] Job lỗi hiện thông báo lỗi trên trang Collect. (Nghiệm thu 19/11 trên Chrome: thông báo đỏ `vlm: media.vision: no valid result (Gemini API error)`.)
 
 Kiểm tra: `npm run build && npx tsc --noEmit`, rồi thao tác thủ công đúng luồng trên.
 
@@ -568,6 +568,8 @@ Nghiệm thu:
 - [ ] Duyệt 10 nghi vấn liên tiếp mà không phải rời trang.
 - [ ] Mỗi quyết định có một dòng tương ứng trong audit.
 
+Ghi chú: 19/11: quyết định bằng phím tắt và dòng audit `review.decide` đã kiểm với 1 nghi vấn; chưa đủ 10 nghi vấn để kiểm duyệt liên tiếp.
+
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
 File: `web/src/pages/ReviewQueue.tsx`, `web/src/components/FindingPanel.tsx`.
@@ -579,7 +581,7 @@ Backend có API liệt kê các bản thu của một video. Trang Capture hiể
 
 Nghiệm thu:
 
-- [ ] Sửa 1 byte trên đĩa thì giao diện báo FAIL đúng file đó.
+- [x] Sửa 1 byte trên đĩa thì giao diện báo FAIL đúng file đó. (Nghiệm thu 19/11 trên Chrome: sửa 1 bit trong `sources/youtube_api/UCPK…channel.json` thì giao diện báo FAIL đúng file kèm SHA thực tế; đã khôi phục, `h4wk verify` OK.)
 
 Kiểm tra: `npm run build`; thủ công: sửa 1 byte rồi bấm Verify integrity.
 
@@ -595,7 +597,7 @@ Backend cho tải lên, xem và xoá ảnh mẫu của từng đối tượng, g
 Nghiệm thu:
 
 - [x] Tải ảnh lên thì file nằm đúng thư mục và có dòng audit.
-- [ ] Trang Entities hiện ảnh mẫu theo hai nhóm.
+- [x] Trang Entities hiện ảnh mẫu theo hai nhóm. (Nghiệm thu 19/11 trên Chrome: Face images và Reused images hiện đúng ảnh; ảnh thử tải lên qua API vì công cụ trình duyệt không chọn được file.)
 
 Kiểm tra: `uv run pytest tests/unit/test_entities.py`, `npm run build` và kiểm tra thủ công.
 
@@ -685,6 +687,8 @@ Nghiệm thu:
 
 - [ ] Làm trọn màn 3 chỉ bằng giao diện, và thấy sự kiện trên dashboard.
 
+Ghi chú: 19/11: Check now và poll RSS chạy (BBC có 1 video mới, sự kiện `new upload` hiện trên dashboard); chưa thêm kênh bằng giao diện.
+
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
 File: `web/src/pages/Watchlist.tsx`, `web/src/pages/Dashboard.tsx`, `web/src/components/EventFeed.tsx`.
@@ -720,7 +724,7 @@ Trang làm mục 1–5 của Settings (SPEC 10.10): bật/tắt nguồn, ô nh�
 
 Nghiệm thu:
 
-- [ ] Tắt yt-dlp trên giao diện rồi thu một video thì manifest ghi yt-dlp là `disabled`.
+- [x] Tắt yt-dlp trên giao diện rồi thu một video thì manifest ghi yt-dlp là `disabled`. (Nghiệm thu 19/11 trên Chrome: tắt yt-dlp trên giao diện rồi thu `8VB-P9Wk7v4` mức full, manifest ghi `ytdlp … disabled` cho mọi cap.)
 
 Giao diện đã nối API T32; chờ nghiệm thu thủ công.
 
@@ -751,8 +755,8 @@ Hoàn thiện trang dashboard đã có từ T31: số kênh, số video, số l�
 
 Nghiệm thu:
 
-- [ ] Số liệu khớp với chỉ mục.
-- [ ] Trang tải dưới 1 giây với dữ liệu demo.
+- [x] Số liệu khớp với chỉ mục. (Nghiệm thu 19/11 trên Chrome: 4 kênh, 41 video, 45 bản thu, 1 nghi vấn medium, needs_info 1, khớp thư mục `data/` và `index.db`.)
+- [ ] Trang tải dưới 1 giây với dữ liệu demo. (19/11: API `/api/dashboard` mất 0,02 s nhưng chưa đo trang ở bản build production.)
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 

@@ -229,7 +229,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T10: `media`: timeline từ phụ đề YouTube
 - [x] T11: `analysis`: dấu hiệu tên và tầng tĩnh
 - [x] T12: `jobs`: luồng collect → media → analyze
-- [ ] T13: UI tối giản: login, đối tượng, collect, danh sách nghi vấn (giao diện đã merge; còn nghiệm thu trọn luồng từ trình duyệt)
+- [x] T13: UI tối giản: login, đối tượng, collect, danh sách nghi vấn
 
 ### Checkpoint A (cuối tuần 1): luồng tối giản chạy trọn, chốt C1–C5 — đã đạt (2026-11-19)
 
@@ -262,8 +262,8 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [ ] T26: UI Video detail: trình phát, transcript, thanh thời gian (API ở `api/videos.py` và giao diện đã nối; chờ nghiệm thu)
 - [ ] T27: UI Video detail: dải khung hình, comment, lịch sử bản thu (giao diện đã nối API; chờ nghiệm thu)
 - [ ] T28: UI Review queue (giao diện đã nối API T25; chờ nghiệm thu)
-- [ ] T29: UI Evidence và Verify integrity (backend xong, giao diện đã nối; chờ nghiệm thu sửa 1 byte)
-- [ ] T39: Đối tượng và ảnh mẫu (backend xong, giao diện đã nối; chờ nghiệm thu trang Entities)
+- [x] T29: UI Evidence và Verify integrity
+- [x] T39: Đối tượng và ảnh mẫu
 - [ ] T40: `analysis`: khớp ảnh mẫu
 - [ ] T41: `analysis`: khớp khuôn mặt
 - [ ] T42: Checklist demo
@@ -280,9 +280,9 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 ### Phase 6: Settings và dashboard (tuần 5)
 
 - [x] T32: Backend settings và lưu secret
-- [ ] T33: UI Settings → Sources (giao diện đã nối API T32; chờ nghiệm thu)
+- [x] T33: UI Settings → Sources
 - [ ] T34: UI Settings → AI providers (giao diện đã nối API T32; nghiệm thu chờ T17, T23)
-- [ ] T35: UI Dashboard (backend và giao diện đã nối; chờ nghiệm thu, quota và credit chờ T14, T15)
+- [ ] T35: UI Dashboard (số liệu đã khớp; còn đo thời gian tải trang với dữ liệu demo)
 
 ### Checkpoint F: đạt toàn bộ tiêu chí thành công ở SPEC §8
 
