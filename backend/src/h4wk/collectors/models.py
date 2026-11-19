@@ -83,6 +83,7 @@ class Comment(Contract):
     id: str
     parent_id: str | None = None  # None là comment gốc; có giá trị là reply
     author_channel_id: str | None = None
+    author_name: str | None = None  # tên hiển thị (thường là @handle) lúc thu
     text: str
     published_at: VnDatetime | None = None
     like_count: NonNegInt | None = None

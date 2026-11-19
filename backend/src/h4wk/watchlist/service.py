@@ -105,7 +105,8 @@ def seed_defaults() -> list[WatchItemRow]:
     with Session(get_engine()) as s:
         if s.exec(select(WatchItemRow.id)).first():
             return []
-    return [create_item(c, h, title, CollectLevel.FULL) for c, h, title in DEFAULT_CHANNELS]
+    # Mức metadata cho nhẹ (40 job full cần GPU và key AI); khi demo đổi kênh cần dùng sang full.
+    return [create_item(c, h, title, CollectLevel.METADATA) for c, h, title in DEFAULT_CHANNELS]
 
 
 def get_item(item_id: str) -> WatchItemRow:

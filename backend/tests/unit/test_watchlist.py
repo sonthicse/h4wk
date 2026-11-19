@@ -126,4 +126,5 @@ def test_seed_defaults_once(data_dir) -> None:
         "@chantroimoimedia-u4s",
         "@luat-khoa",
     ]
+    assert {i.level for i in items} == {"metadata"}
     assert service.seed_defaults() == []

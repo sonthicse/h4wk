@@ -145,6 +145,7 @@ def comments_from_info(info: dict[str, Any]) -> list[Comment]:
             id=c["id"],
             parent_id=None if c.get("parent", "root") == "root" else c["parent"],
             author_channel_id=c.get("author_id"),
+            author_name=c.get("author"),
             text=c.get("text") or "",
             published_at=_ts(c.get("timestamp")),
             like_count=c.get("like_count"),

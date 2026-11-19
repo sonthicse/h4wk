@@ -47,6 +47,7 @@ def test_comments_keep_replies(info: dict) -> None:
     ]
     assert cs[0].author_channel_id == "UCcommenter000000000001" and cs[0].like_count == 4
     assert cs[2].published_at is None
+    assert cs[0].author_name == "@nguoi1"
 
 
 def test_subtitle_languages_only_vietnamese(info: dict) -> None:

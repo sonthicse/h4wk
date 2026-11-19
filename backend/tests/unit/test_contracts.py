@@ -90,7 +90,14 @@ NORMALIZED: dict[str, Any] = {
         }
     ],
     "comments": [
-        {"id": "c1", "parent_id": None, "author_channel_id": "UCx", "text": "hay", "like_count": 3},
+        {
+            "id": "c1",
+            "parent_id": None,
+            "author_channel_id": "UCx",
+            "author_name": "@nguoi1",
+            "text": "hay",
+            "like_count": 3,
+        },
         {"id": "c1.r1", "parent_id": "c1", "author_channel_id": "UCy", "text": "đồng ý"},
     ],
     "thumbnails": [{"name": "maxres", "file": "sources/ytdlp/maxres.jpg", "width": 1280}],
@@ -320,6 +327,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Normalized, _set("provenance", {"video.all": "ytdlp"})(NORMALIZED), "provenance key lạ"),
     (Normalized, _set("media.0.kind", "subtitle")(NORMALIZED), "loại media lạ"),
     (Normalized, _set("comments.0.parent_id", "c1")(NORMALIZED), "comment tự trả lời chính nó"),
+    (Normalized, _set("comments.0.author_name", 123)(NORMALIZED), "author_name không phải chuỗi"),
     (Normalized, _set("video.views", 1)(NORMALIZED), "trường lạ"),
     # C3
     (Timeline, _set("segments.0.end", 90.0)(TIMELINE), "end < start"),

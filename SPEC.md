@@ -291,7 +291,7 @@ Hợp đồng C2 là mô hình dữ liệu chung viết bằng Pydantic, lưu th
 - `Video`: id, channel_id, title, description, tags, category, duration_s, published_at, view/like/comment_count, availability, is_live
 - `Channel`: id, handle, title, description, country, created_at, sub/view/video_count, avatar/banner, links
 - `Transcript`: kind (`uploaded|auto|supadata_ai|stt`), lang, segments[{start, end, text}]
-- `Comment`: id, parent_id, author_channel_id, text, published_at, like_count
+- `Comment`: id, parent_id, author_channel_id, author_name, text, published_at, like_count
 - `Thumbnail`, `MediaFile`
 - `provenance`: {nhóm dữ liệu → provider}, ghi ở mức từng lần gọi nguồn
 - Enum `Cap` (loại dữ liệu): `VIDEO_METADATA`, `CHANNEL_METADATA`, `CHANNEL_VIDEOS`, `PLAYLIST_VIDEOS`, `TRANSCRIPTS`, `COMMENTS`, `THUMBNAILS`, `MEDIA`
@@ -489,7 +489,7 @@ Nghiệm thu: như màn 1 ở [phần 8](#8-tiêu-chí-thành-công).
 
 ### 10.9 `watchlist`
 
-Mỗi mục watchlist là một kênh. V1 chỉ phát hiện sự kiện video mới. `h4wk init` thêm sẵn bốn kênh làm ví dụ khi watchlist còn trống: `@VietTan`, `@bbctiengviet`, `@chantroimoimedia-u4s`, `@luat-khoa`.
+Mỗi mục watchlist là một kênh. V1 chỉ phát hiện sự kiện video mới. `h4wk init` thêm sẵn bốn kênh làm ví dụ khi watchlist còn trống: `@VietTan`, `@bbctiengviet`, `@chantroimoimedia-u4s`, `@luat-khoa`, ở mức thu `metadata` (khi demo đổi kênh cần dùng sang `full`).
 
 Khi một kênh được thêm vào watchlist (từ trang Watchlist hoặc bằng cách dán link kênh ở màn Collect):
 

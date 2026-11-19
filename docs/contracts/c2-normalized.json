@@ -162,6 +162,18 @@
           "default": null,
           "title": "Author Channel Id"
         },
+        "author_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Author Name"
+        },
         "id": {
           "title": "Id",
           "type": "string"
