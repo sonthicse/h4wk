@@ -33,7 +33,7 @@ export default function ActivityChart({ data }: { data: DayActivity[] }) {
             <CartesianGrid vertical={false} />
             <XAxis dataKey="date" tickFormatter={dayLabel} tickLine={false} axisLine={false} tickMargin={8} />
             <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={24} />
-            <ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => dayLabel(payload[0]?.payload.date)} />} />
+            <ChartTooltip isAnimationActive={false} content={<ChartTooltipContent labelFormatter={(_, payload) => dayLabel(payload[0]?.payload.date)} />} />
             <ChartLegend content={<ChartLegendContent />} />
             <Bar dataKey="captures" fill="var(--color-captures)" radius={3} isAnimationActive={false} />
             <Bar dataKey="findings" fill="var(--color-findings)" radius={3} isAnimationActive={false} />
