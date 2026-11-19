@@ -6,9 +6,9 @@ Người review: Thi. Ngày: 2026-11-19. Commit được review: `47e51a7` (T10,
 
 Nhánh tốt. Chạy riêng thì 142 test pass; gộp với `main` thì 235 test pass. Tên file phái sinh đúng C1, timeline, hits, findings validate được theo C3, C4, nhật ký AI ghi giờ Việt Nam.
 
-Một số chỗ chưa thống nhất với `main`, Thi đã sửa trên nhánh `review/bao-t10-t20` (tách từ nhánh của Bảo và đã gộp `main`). Bảo chỉ cần đọc phần "Đã sửa" để biết code thay đổi ra sao, rồi làm phần "Bảo cần làm".
+Một số chỗ chưa thống nhất với `main`, Thi đã sửa và đẩy thẳng lên nhánh này (đã gộp `main`). Bảo chạy `git pull` trước khi làm tiếp, đọc phần "Đã sửa" để biết code thay đổi ra sao, rồi làm phần "Bảo cần làm".
 
-## Đã sửa trên nhánh `review/bao-t10-t20`
+## Đã sửa trên nhánh `feat/bao-ai-media-t10-t20`
 
 | Commit | Thay đổi | Lý do |
 |---|---|---|
