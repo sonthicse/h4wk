@@ -72,12 +72,12 @@ function Breakdown<K extends string>({
         <CardHeader>
           <CardTitle>{title}</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center gap-5">
+        <CardContent className="flex flex-wrap items-center justify-center gap-4">
           <Donut
             centerLabel={centerLabel}
             slices={keys.map((k) => ({ key: k, label: k, value: counts[k], color: sliceColor[k] ?? 'var(--muted-foreground)' }))}
           />
-          <ul className="min-w-0 flex-1 space-y-2">
+          <ul className="min-w-36 flex-1 space-y-2">
             {keys.map((k) => (
               <li key={k} className="flex items-center justify-between gap-2">
                 <span className="flex items-center gap-2">
@@ -120,33 +120,40 @@ export default function DashboardPage() {
   const d = stats.data
   const totalFindings = severities.reduce((sum, s) => sum + d.findings_by_severity[s], 0)
 
+  // Bố cục kiểu bảng điều khiển: cột trái (video nổi bật) đứng yên, cột phải gồm các ô tự cuộn.
+  // Chiều cao = màn hình trừ thanh trên (3rem) và lề của <main> (2 × 1.5rem).
   return (
-    <div className="space-y-4">
+    <div className="flex h-[calc(100svh-6rem)] flex-col gap-4">
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <div className="flex gap-2 text-sm">
-          <Badge variant="outline">{totalFindings} {totalFindings === 1 ? 'finding' : 'findings'}</Badge>
-        </div>
+        <Badge variant="outline">
+          {totalFindings} {totalFindings === 1 ? 'finding' : 'findings'}
+        </Badge>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-start gap-4">
-        <div className="space-y-4">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,11fr)_minmax(0,9fr)] gap-4">
+        <div className="min-h-0 space-y-4 overflow-y-auto">
           <FeaturedVideoCard topVideoId={d.top_video?.id ?? null} />
-          <div className="grid grid-cols-3 gap-4">
-            <StatCard label="Watched channels" value={d.channel_count} to="/watchlist" />
-            <StatCard label="Videos collected" value={d.video_count} to="/videos" />
-            <StatCard label="Captures" value={d.capture_count} to="/collect" />
-          </div>
+        </div>
+        <div className="min-h-0 overflow-y-auto pr-1">
           <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2 grid grid-cols-3 gap-4">
+              <StatCard label="Watched channels" value={d.channel_count} to="/watchlist" />
+              <StatCard label="Videos collected" value={d.video_count} to="/videos" />
+              <StatCard label="Captures" value={d.capture_count} to="/collect" />
+            </div>
             <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findings_by_severity} variant={severityVariant} />
             <Breakdown title="Review" to="/review" centerLabel="findings" keys={statuses} counts={d.findings_by_status} variant={statusVariant} />
+            <div className="col-span-2">
+              <EventFeed />
+            </div>
+            <div className="col-span-2">
+              <ActivityChart data={d.activity} />
+            </div>
+            <div className="col-span-2">
+              <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} />
+            </div>
           </div>
-        </div>
-        {/* Cột phải: sự kiện, hoạt động và mức dùng nguồn, cho hai cột cao gần bằng nhau. */}
-        <div className="space-y-4">
-          <EventFeed />
-          <ActivityChart data={d.activity} />
-          <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} />
         </div>
       </div>
     </div>

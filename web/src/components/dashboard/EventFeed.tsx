@@ -24,18 +24,22 @@ const kindIcon: Record<string, typeof PlusCircleIcon> = {
   review: GavelIcon,
 }
 
-// Câu ngắn dễ đọc theo loại sự kiện; tên kênh/video lấy thẳng từ sự kiện, không hiện mã.
-function headline(event: WatchEvent) {
-  const channel = event.channel_title
+// Dòng chính là thứ người dùng cần nắm: tên video (hoặc tên kênh khi thêm kênh). Dòng phụ nhỏ: kênh và chuyện gì xảy ra.
+function mainLine(event: WatchEvent) {
+  if (event.kind === 'channel_added') return event.channel_title ?? 'A new channel'
+  return event.video_title ?? event.channel_title ?? event.message
+}
+
+function whatHappened(event: WatchEvent) {
   switch (event.kind) {
     case 'channel_added':
-      return channel ? `Started watching ${channel}` : 'Started watching a channel'
+      return 'now on the watchlist'
     case 'new_video':
-      return channel ? `New video on ${channel}` : 'New video detected'
+      return 'new upload'
     case 'job_done':
-      return 'Video analyzed'
+      return 'analyzed'
     case 'job_failed':
-      return 'Collection failed'
+      return 'collection failed'
     default:
       return event.message
   }
@@ -45,39 +49,48 @@ function EventItem({ event }: { event: WatchEvent }) {
   const Icon = kindIcon[event.kind] ?? RadioTowerIcon
   const found = event.kind === 'job_done' ? (event.findings ?? null) : null
   const status = event.job?.status
+  const failed = event.kind === 'job_failed'
+  const title = mainLine(event)
+  const sub = [event.kind !== 'channel_added' ? event.channel_title : null, whatHappened(event)].filter(Boolean).join(' · ')
   return (
-    <li className="flex gap-3 py-3">
-      <Icon className={event.kind === 'job_failed' ? 'mt-0.5 size-4 shrink-0 text-destructive' : 'mt-0.5 size-4 shrink-0 text-muted-foreground'} />
-      <div className="min-w-0 flex-1 space-y-1">
+    <li className="flex gap-3 py-2.5">
+      <Icon className={failed ? 'mt-1 size-4 shrink-0 text-destructive' : 'mt-1 size-4 shrink-0 text-muted-foreground'} />
+      <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium">{headline(event)}</p>
-          <time dateTime={event.at} className="shrink-0 text-xs text-muted-foreground tabular-nums">
-            {formatVnDateTime(event.at)}
-          </time>
-        </div>
-        {event.video_id && (
-          <Link to={`/videos/${event.video_id}`} className="block truncate text-sm text-muted-foreground hover:text-foreground hover:underline">
-            {event.video_title ?? 'Untitled video (still collecting)'}
-          </Link>
-        )}
-        <div className="flex items-center gap-2">
-          {found !== null && (
-            <Badge variant={found > 0 ? 'destructive' : 'outline'}>
-              {found === 0 ? 'No findings' : `${found} ${found === 1 ? 'finding' : 'findings'}`}
+          {event.video_id ? (
+            <Link to={`/videos/${event.video_id}`} className="line-clamp-2 text-sm font-medium hover:underline">
+              {title}
+            </Link>
+          ) : (
+            <p className="line-clamp-2 text-sm font-medium">{title}</p>
+          )}
+          {found !== null && found > 0 && (
+            <Badge variant="destructive" className="shrink-0">
+              {found} {found === 1 ? 'finding' : 'findings'}
             </Badge>
           )}
-          {/* Chỉ hiện trạng thái job khi còn đang chạy; xong/lỗi đã thể hiện qua biểu tượng. */}
-          {status && status !== 'done' && status !== 'failed' && <Badge variant={jobVariant[status] ?? 'outline'}>{status}</Badge>}
+          {/* Trạng thái job chỉ hiện khi còn đang chạy; xong/lỗi đã thể hiện qua biểu tượng. */}
+          {status && status !== 'done' && status !== 'failed' && (
+            <Badge variant={jobVariant[status] ?? 'outline'} className="shrink-0">
+              {status}
+            </Badge>
+          )}
         </div>
-        {event.kind === 'job_failed' && event.error && <p className="text-xs text-destructive">{event.error}</p>}
+        <p className="mt-0.5 flex justify-between gap-2 text-xs text-muted-foreground">
+          <span className={failed ? 'text-destructive' : undefined}>{sub}</span>
+          <time dateTime={event.at} className="shrink-0 tabular-nums">
+            {formatVnDateTime(event.at)}
+          </time>
+        </p>
+        {failed && event.error && <p className="mt-1 text-xs text-destructive">{event.error}</p>}
       </div>
     </li>
   )
 }
 
 // Dòng sự kiện (T31): poll mỗi 5 giây.
-// Chỉ hiện vài sự kiện mới nhất cho vừa một màn hình, không cuộn.
-const MAX_EVENTS = 6
+// Cột phải đã tự cuộn nên hiện nhiều hơn.
+const MAX_EVENTS = 15
 
 export default function EventFeed() {
   const events = useQuery({
