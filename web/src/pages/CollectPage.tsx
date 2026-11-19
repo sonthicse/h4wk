@@ -44,8 +44,10 @@ function stepsOf(job: Job) {
 
 function stepStatus(job: Job, steps: string[], i: number): StepStatus {
   if (job.status === 'done') return 'done'
-  if (job.status === 'queued') return 'pending'
+  if (job.status === 'queued' && !job.step) return 'pending'
   const current = job.step === 'media' ? 1 : steps.indexOf(job.step ?? '')
+  // Job đang chờ ở hàng đợi kế tiếp: `step` là bước sắp chạy, các bước trước đã xong.
+  if (job.status === 'queued') return i < current ? 'done' : 'pending'
   if (i < current) return 'done'
   if (i > current) return 'pending'
   return job.status === 'failed' ? 'failed' : 'running'
@@ -79,19 +81,24 @@ export default function CollectPage() {
   })
 
   const [channelAdded, setChannelAdded] = useState(false)
+  const [queuedCount, setQueuedCount] = useState(0) // số job vừa tạo từ link playlist
 
   // Link kênh đi vào watchlist (kênh tự thu 10 video mới nhất); link video tạo job collect như cũ.
   const create = useMutation({
     mutationFn: async () => {
       const channel = isChannelInput(input)
-      if (channel) await addWatchItem(input, level)
-      else await collect(input.trim(), level, force)
-      return channel
+      if (channel) {
+        await addWatchItem(input, level)
+        return { channel, jobs: 0 }
+      }
+      const jobs = await collect(input.trim(), level, force)
+      return { channel, jobs: jobs.length }
     },
-    onSuccess: (channel) => {
+    onSuccess: ({ channel, jobs }) => {
       setInput('')
       setForce(false)
       setChannelAdded(channel)
+      setQueuedCount(jobs)
       queryClient.invalidateQueries({ queryKey: [channel ? 'watchlist' : 'jobs'] })
     },
   })
@@ -146,6 +153,11 @@ export default function CollectPage() {
                 Collect again even if this video was collected in the last 10 minutes
               </Label>
             </div>
+            {queuedCount > 1 && (
+              <p role="status" className="text-sm text-muted-foreground">
+                Queued {queuedCount} videos from the playlist.
+              </p>
+            )}
             {channelAdded && (
               <p role="status" className="text-sm text-muted-foreground">
                 Channel added to the watchlist.{' '}
