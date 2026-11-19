@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { CircleCheckIcon, CircleXIcon, GavelIcon, PlusCircleIcon, RadioTowerIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatVnDateTime } from '@/lib/format'
 import { listEvents, type WatchEvent } from '@/api/watchlist'
 
@@ -103,7 +103,6 @@ export default function EventFeed() {
     <Card>
       <CardHeader>
         <CardTitle className="text-xl">Events</CardTitle>
-        <CardDescription>Watchlist, jobs and review decisions · refreshes every 5 s</CardDescription>
       </CardHeader>
       <CardContent>
         {events.error && <p className="text-sm text-destructive">Could not load events.</p>}
