@@ -23,6 +23,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
+// end={false}: trang con (ví dụ /videos/:id, /videos/:id/captures/:capture) vẫn tô sáng mục cha.
 const nav = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { path: '/collect', label: 'Collect', icon: DownloadIcon },
@@ -79,7 +80,7 @@ export default function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {nav.map((item) => (
-                <NavItem key={item.path} to={item.path} label={item.label} icon={item.icon} />
+                <NavItem key={item.path} to={item.path} label={item.label} icon={item.icon} end={false} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
