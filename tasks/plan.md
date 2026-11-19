@@ -229,7 +229,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T10: `media`: timeline từ phụ đề YouTube
 - [x] T11: `analysis`: dấu hiệu tên và tầng tĩnh
 - [x] T12: `jobs`: luồng collect → media → analyze
-- [ ] T13: UI tối giản: login, đối tượng, collect, danh sách nghi vấn
+- [ ] T13: UI tối giản: login, đối tượng, collect, danh sách nghi vấn (giao diện đã merge; còn nghiệm thu trọn luồng từ trình duyệt)
 
 ### Checkpoint A (cuối tuần 1): luồng tối giản chạy trọn, chốt C1–C5
 
@@ -240,17 +240,17 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [ ] T45: `core`: dựng lại database chỉ mục
 - [ ] T46: `jobs`: chạy lại job bị treo và xử lý playlist
 - [x] T16: `ai-gateway`: lõi
-- [ ] T17: `ai-gateway`: provider anthropic, openai_compat, gemini
+- [ ] T17: `ai-gateway`: provider anthropic, openai_compat, gemini (còn chạy live, cần API key)
 
 ### Checkpoint B: chuyển nguồn khi lỗi chạy được, đổi nhà cung cấp AI bằng cấu hình
 
 ### Phase 3: Media đa phương thức (tuần 2–3)
 
-- [ ] T18: Proxy 480p, audio, STT
+- [ ] T18: Proxy 480p, audio, STT (còn transcript từ video mẫu thật, chờ T44)
 - [x] T19: Keyframe theo mức thay đổi
 - [x] T20: OCR trên keyframe và thumbnail
-- [ ] T21: VLM mô tả keyframe và thumbnail
-- [ ] T22: Timeline đầy đủ
+- [ ] T21: VLM mô tả keyframe và thumbnail (còn test live, cần API key)
+- [ ] T22: Timeline đầy đủ (còn màn Collect hiện đủ các bước)
 
 ### Checkpoint C: đo thời gian màn 2, kiểm tra timeline của video thật
 
@@ -258,12 +258,12 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 - [ ] T23: `analysis`: tầng LLM
 - [ ] T24: `analysis`: comment
-- [ ] T25: `review`: backend hàng đợi và quyết định
-- [ ] T26: UI Video detail: trình phát, transcript, thanh thời gian
-- [ ] T27: UI Video detail: dải khung hình, comment, lịch sử bản thu
-- [ ] T28: UI Review queue
-- [ ] T29: UI Evidence và Verify integrity
-- [ ] T39: Đối tượng và ảnh mẫu
+- [ ] T25: `review`: backend hàng đợi và quyết định (backend xong; còn giữ trạng thái sau reindex, chờ T45)
+- [ ] T26: UI Video detail: trình phát, transcript, thanh thời gian (API ở `api/videos.py` và giao diện đã nối; chờ nghiệm thu)
+- [ ] T27: UI Video detail: dải khung hình, comment, lịch sử bản thu (giao diện đã nối API; chờ nghiệm thu)
+- [ ] T28: UI Review queue (giao diện đã nối API T25; chờ nghiệm thu)
+- [ ] T29: UI Evidence và Verify integrity (backend xong, giao diện đã nối; chờ nghiệm thu sửa 1 byte)
+- [ ] T39: Đối tượng và ảnh mẫu (backend xong, giao diện đã nối; chờ nghiệm thu trang Entities)
 - [ ] T40: `analysis`: khớp ảnh mẫu
 - [ ] T41: `analysis`: khớp khuôn mặt
 - [ ] T42: Checklist demo
@@ -272,17 +272,17 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 5: Watchlist (tuần 4)
 
-- [ ] T30: `watchlist` backend: RSS, Check now, sự kiện
-- [ ] T31: UI Watchlist và dòng sự kiện
+- [ ] T30: `watchlist` backend: RSS, Check now, sự kiện (backend xong; còn chạy thủ công màn 3)
+- [ ] T31: UI Watchlist và dòng sự kiện (giao diện đã nối API T30; chờ nghiệm thu)
 
 ### Checkpoint E (cuối tuần 4): ba màn demo chạy trọn
 
 ### Phase 6: Settings và dashboard (tuần 5)
 
-- [ ] T32: Backend settings và lưu secret
-- [ ] T33: UI Settings → Sources
-- [ ] T34: UI Settings → AI providers
-- [ ] T35: UI Dashboard
+- [x] T32: Backend settings và lưu secret
+- [ ] T33: UI Settings → Sources (giao diện còn dữ liệu giả; API T32 đã có)
+- [ ] T34: UI Settings → AI providers (giao diện còn dữ liệu giả; API T32 đã có)
+- [ ] T35: UI Dashboard (backend và giao diện đã nối; chờ nghiệm thu, quota và credit chờ T14, T15)
 
 ### Checkpoint F: đạt toàn bộ tiêu chí thành công ở SPEC §8
 
