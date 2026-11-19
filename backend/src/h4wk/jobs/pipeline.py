@@ -152,7 +152,8 @@ def collect(job_id: str) -> None:
     except Exception as e:
         _fail(job_id, "collect", e)
         return
-    _update(job_id, capture=capture, progress=40)
+    # "queued" trong lúc chờ hàng đợi tiếp theo: running chỉ còn nghĩa là đang chạy thật.
+    _update(job_id, status="queued", capture=capture, progress=40)
     media(job_id)
 
 
@@ -188,7 +189,7 @@ def media(job_id: str) -> None:
     except Exception as e:
         _fail(job_id, job.step or "media", e)
         return
-    _update(job_id, progress=70)
+    _update(job_id, status="queued", progress=70)
     analyze(job_id)
 
 

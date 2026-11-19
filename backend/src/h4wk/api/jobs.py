@@ -63,7 +63,7 @@ def collect(body: CollectBody, actor: ActorDep) -> list[Job]:
         raise reject(400, str(e)) from None
     if target.kind == TargetKind.VIDEO:
         videos = [(target.url, target.id)]
-        extra: dict = {}
+        extra: dict[str, str] = {}
     elif target.kind == TargetKind.PLAYLIST:
         try:
             ids = pipeline.playlist_video_ids(target.id)

@@ -57,7 +57,11 @@ def test_stopped_between_collect_and_media(
         m.setattr(pipeline, "media", lambda job_id: None)
         _post(client)
     job = _only_job()
-    assert (job.status, job.step) == ("running", "collect") and job.capture
+    # Đang chờ ở hàng đợi gpu: status queued, recover không đụng tới.
+    assert (job.status, job.step) == ("queued", "collect") and job.capture
+    assert recovery.recover("gpu") == []
+    # Giả lập job đã chạy dở nhưng mất dấu (running ở bước collect, đã có bản thu).
+    pipeline._update(job.id, status="running")
     calls, captures = len(fetched), _captures(data_dir)
 
     assert recovery.recover("default") == []
@@ -112,3 +116,31 @@ def test_recover_does_not_enqueue_twice_and_audits(
     rec = [json.loads(x) for x in lines if '"job.recover"' in x]
     assert len(rec) == 1 and rec[0]["target"] == job.id
     assert rec[0]["actor"] == "system:recovery"
+
+
+def test_recover_does_not_duplicate_pending_huey_task(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from huey import SqliteHuey
+
+    gpu = SqliteHuey("t46-gpu", filename=str(tmp_path / "q.db"))
+    media_task = gpu.task()(lambda job_id: None)
+    monkeypatch.setattr(pipeline, "media", media_task)
+    job = pipeline.create_job(VIDEO, "h4wkDemo001", "text", False, "user:thi")
+    pipeline._update(job.id, status="queued", capture="20261118T160000", progress=40)
+    media_task(job.id)
+    assert gpu.pending_count() == 1
+    assert recovery.recover("gpu") == []
+    assert gpu.pending_count() == 1
+
+
+def test_startup_hook_recovers_once_per_process(monkeypatch: pytest.MonkeyPatch) -> None:
+    from h4wk.jobs import queue
+
+    calls: list[str] = []
+    monkeypatch.setattr(recovery, "recover", lambda q: calls.append(q) or [])
+    monkeypatch.setattr(queue, "_recovered", set())
+    queue._recover("gpu")
+    queue._recover("gpu")
+    queue._recover("default")
+    assert calls == ["gpu", "default"]

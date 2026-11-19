@@ -7,6 +7,7 @@ Khi consumer khởi động, job đang running được đưa lại vào hàng �
 """
 
 import logging
+import threading
 
 from huey import SqliteHuey
 
@@ -24,9 +25,18 @@ from h4wk.watchlist import tasks  # noqa: E402, F401
 _log = logging.getLogger(__name__)
 
 
+_recover_lock = threading.Lock()
+_recovered: set[str] = set()
+
+
 def _recover(queue: str) -> None:
+    """Mỗi hàng đợi chỉ recover một lần mỗi tiến trình: Huey gọi on_startup ở từng worker."""
     from h4wk.jobs import recovery
 
+    with _recover_lock:
+        if queue in _recovered:
+            return
+        _recovered.add(queue)
     try:
         recovery.recover(queue)  # type: ignore[arg-type]
     except Exception:
