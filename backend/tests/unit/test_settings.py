@@ -219,3 +219,61 @@ def test_delete_provider_deletes_its_key(client: TestClient, cfg, data_dir: Path
     assert client.delete("/api/settings/ai/providers/local-llm").status_code == 200
     assert "LOCAL_LLM_API_KEY" not in _stored(data_dir)
     assert _key_deletes(data_dir) == ["LOCAL_LLM_API_KEY"]
+
+
+def _twins(client: TestClient, data_dir: Path) -> dict:
+    """Hai provider a-b và a_b cùng ra tên key A_B_API_KEY, key đã lưu."""
+    providers = _providers(client)
+    for name in ("a-b", "a_b"):
+        providers[name] = {
+            "type": "openai_compat",
+            "base_url": "http://localhost:8080/v1",
+            "models": {"m1": {"vision": False, "structured": True}},
+        }
+    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
+    client.put("/api/settings/ai/providers/a-b/key", json={"value": AI_KEY})
+    assert "A_B_API_KEY" in _stored(data_dir)
+    return providers
+
+
+def test_shared_key_name_survives_removing_one_provider(
+    client: TestClient, cfg, data_dir: Path
+) -> None:
+    providers = _twins(client, data_dir)
+    del providers["a_b"]
+    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
+    assert "A_B_API_KEY" in _stored(data_dir) and _key_deletes(data_dir) == []
+
+
+def test_shared_key_name_survives_delete_endpoint(client: TestClient, cfg, data_dir: Path) -> None:
+    _twins(client, data_dir)
+    assert client.delete("/api/settings/ai/providers/a_b").status_code == 200
+    assert "A_B_API_KEY" in _stored(data_dir) and _key_deletes(data_dir) == []
+
+
+def test_rename_in_one_put_keeps_key(client: TestClient, cfg, data_dir: Path) -> None:
+    providers = _providers(client)
+    providers["a_b"] = {
+        "type": "openai_compat",
+        "base_url": "http://localhost:8080/v1",
+        "models": {"m1": {"vision": False, "structured": True}},
+    }
+    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
+    client.put("/api/settings/ai/providers/a_b/key", json={"value": AI_KEY})
+    providers["a-b"] = providers.pop("a_b")
+    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
+    assert "A_B_API_KEY" in _stored(data_dir) and _key_deletes(data_dir) == []
+
+
+def test_removing_provider_without_key_writes_no_audit(
+    client: TestClient, cfg, data_dir: Path
+) -> None:
+    providers = _providers(client)
+    providers["local-llm"] = {
+        "type": "openai_compat",
+        "base_url": "http://localhost:8080/v1",
+        "models": {"m1": {"vision": False, "structured": True}},
+    }
+    client.put("/api/settings/ai", json={"providers": providers})
+    assert client.delete("/api/settings/ai/providers/local-llm").status_code == 200
+    assert _key_deletes(data_dir) == []

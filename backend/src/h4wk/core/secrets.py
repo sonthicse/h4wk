@@ -60,10 +60,13 @@ def put(name: str, value: str) -> None:
     _save(values)
 
 
-def delete(name: str) -> None:
+def delete(name: str) -> bool:
+    """Xoá khỏi secrets.json; trả True nếu thật sự có key để xoá."""
     values = _load()
-    if values.pop(name, None) is not None:
-        _save(values)
+    if values.pop(name, None) is None:
+        return False
+    _save(values)
+    return True
 
 
 def mask(value: str) -> str:

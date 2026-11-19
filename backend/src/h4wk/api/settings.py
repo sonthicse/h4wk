@@ -260,8 +260,8 @@ def get_ai() -> AiSettings:
 def _drop_key(provider: str, actor: str) -> None:
     """Xoá key trong secrets.json của provider đã gỡ (key từ .env không xoá được)."""
     key = key_name(provider)
-    secrets.delete(key)
-    audit.log(actor, "settings.key.delete", key)
+    if secrets.delete(key):
+        audit.log(actor, "settings.key.delete", key)
 
 
 @router.put("/ai")
@@ -285,8 +285,10 @@ def put_ai(body: AiUpdate, actor: ActorDep) -> AiSettings:
         raise _invalid(e) from None
     settings.save_ai(cfg)
     audit.log(actor, "settings.ai", None, {"providers": list(cfg.providers)})
+    kept = {key_name(n) for n in cfg.providers}
     for name in old.providers.keys() - cfg.providers.keys():
-        _drop_key(name, actor)
+        if key_name(name) not in kept:  # tên khác nhau có thể cùng ra một tên key
+            _drop_key(name, actor)
     return _ai_view()
 
 
@@ -302,7 +304,8 @@ def delete_provider(name: str, actor: ActorDep) -> AiSettings:
     del data["providers"][name]
     settings.save_ai(AiConfig.model_validate(data))
     audit.log(actor, "settings.ai.delete_provider", name)
-    _drop_key(name, actor)
+    if key_name(name) not in {key_name(n) for n in data["providers"]}:
+        _drop_key(name, actor)
     return _ai_view()
 
 
