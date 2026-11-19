@@ -72,6 +72,15 @@ class FindingRow(SQLModel, table=True):
     data: str
 
 
+class DecisionRow(SQLModel, table=True):
+    """Chỉ mục quyết định rà soát; nguồn gốc là reviews.jsonl (chỉ ghi thêm)."""
+
+    __tablename__ = "decisions"
+    id: int | None = Field(default=None, primary_key=True)
+    finding_id: str = Field(index=True)
+    data: str
+
+
 _engines: dict[Path, Engine] = {}
 
 

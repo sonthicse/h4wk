@@ -511,11 +511,13 @@ API hàng đợi chỉ trả nghi vấn của lần chạy mới nhất cho mỗ
 
 Nghiệm thu:
 
-- [ ] Bác nghi vấn mà không có lý do thì nhận 422.
+- [x] Bác nghi vấn mà không có lý do thì nhận 422.
 - [ ] Sau `reindex`, trạng thái rà soát vẫn giữ nguyên.
-- [ ] Chạy phân tích lại thì nghi vấn của lần chạy mới ở trạng thái chưa rà soát; quyết định của lần chạy trước vẫn còn trong `reviews.jsonl`.
+- [x] Chạy phân tích lại thì nghi vấn của lần chạy mới ở trạng thái chưa rà soát; quyết định của lần chạy trước vẫn còn trong `reviews.jsonl`.
 
 Kiểm tra: `uv run pytest tests/unit/test_review.py`.
+
+API: `GET /api/review/queue?video=&source_kind=&status=` trả `{finding, status, video: {id, title, channel}, decisions[]}`; `POST /api/findings/{id}/decision`; `GET /api/findings/{id}/decisions` (mới nhất trước). Mục giữ trạng thái sau `reindex` chờ T45.
 
 File: `src/h4wk/review/{queue.py,decisions.py}`, `api/review.py`, tests.
 Người làm: Thi. Phụ thuộc: T12, T44, T45. Tích hợp sau: T11, T23. Cỡ: S.
