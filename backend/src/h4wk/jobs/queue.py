@@ -2,7 +2,11 @@
 
 uv run huey_consumer h4wk.jobs.queue.huey -w 2
 uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1
+
+Khi consumer khởi động, job đang running được đưa lại vào hàng đợi (xem recovery.py).
 """
+
+import logging
 
 from huey import SqliteHuey
 
@@ -16,3 +20,24 @@ huey_gpu = SqliteHuey("h4wk-gpu", filename=str(_root / "queue_gpu.db"))
 # Đăng ký các task với consumer.
 from h4wk.jobs import pipeline  # noqa: E402, F401
 from h4wk.watchlist import tasks  # noqa: E402, F401
+
+_log = logging.getLogger(__name__)
+
+
+def _recover(queue: str) -> None:
+    from h4wk.jobs import recovery
+
+    try:
+        recovery.recover(queue)  # type: ignore[arg-type]
+    except Exception:
+        _log.exception("Không chạy lại được job bị treo (hàng đợi %s)", queue)
+
+
+@huey.on_startup()
+def _recover_default() -> None:
+    _recover("default")
+
+
+@huey_gpu.on_startup()
+def _recover_gpu() -> None:
+    _recover("gpu")

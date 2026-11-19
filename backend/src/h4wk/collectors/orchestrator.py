@@ -1,11 +1,13 @@
 """Điều phối thu thập (SPEC 10.3): mỗi loại dữ liệu lấy từ một nguồn, thử các nguồn đang bật
 theo thứ tự ưu tiên, chuyển nguồn khi lỗi, rồi ghi bản thu qua CaptureWriter."""
 
+import tempfile
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Protocol
 
 from sqlmodel import Session
 
@@ -119,6 +121,22 @@ class SourceState:
             s.commit()
 
 
+class _Workdirs(Protocol):
+    def workdir(self, name: str) -> Path: ...
+
+
+class _TempWorkdirs:
+    """Thư mục tạm cho dữ liệu thô khi không lưu bản thu."""
+
+    def __init__(self, root: Path) -> None:
+        self.root = root
+
+    def workdir(self, name: str) -> Path:
+        path = self.root / name
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+
 class Orchestrator:
     def __init__(
         self,
@@ -182,8 +200,21 @@ class Orchestrator:
             raise
         return writer.finalize(normalized, calls)
 
+    def list_video_ids(self, target: Target) -> list[str]:
+        """ID video của một playlist, không lưu bản thu (người dùng đã quyết). Thử nguồn theo
+        thứ tự ưu tiên của Cap.PLAYLIST_VIDEOS; dữ liệu thô ghi vào thư mục tạm rồi bỏ."""
+        if target.kind != TargetKind.PLAYLIST:
+            raise ValueError(f"list_video_ids needs a playlist, got a {target.kind}")
+        with tempfile.TemporaryDirectory() as tmp:
+            _provider, part = self._collect_cap(
+                Cap.PLAYLIST_VIDEOS, target, _TempWorkdirs(Path(tmp)), []
+            )
+        if part is None:
+            raise RuntimeError("no source returned the playlist videos")
+        return list(dict.fromkeys(part.video_ids))
+
     def _collect_cap(
-        self, cap: Cap, target: Target, writer: CaptureWriter, calls: list[SourceCall]
+        self, cap: Cap, target: Target, writer: _Workdirs, calls: list[SourceCall]
     ) -> tuple[str | None, Normalized | None]:
         candidates = [
             n
@@ -206,7 +237,7 @@ class Orchestrator:
         return None, None
 
     def _try_source(
-        self, name: str, cap: Cap, target: Target, writer: CaptureWriter, calls: list[SourceCall]
+        self, name: str, cap: Cap, target: Target, writer: _Workdirs, calls: list[SourceCall]
     ) -> tuple[Normalized | None, bool]:
         """Trả về (dữ liệu, dừng hẳn loại dữ liệu này hay không)."""
         source = self.collectors[name]

@@ -238,7 +238,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T14: Adapter YouTube Data API và quota
 - [x] T15: Adapter Supadata và credit
 - [x] T45: `core`: dựng lại database chỉ mục
-- [ ] T46: `jobs`: chạy lại job bị treo và xử lý playlist
+- [x] T46: `jobs`: chạy lại job bị treo và xử lý playlist
 - [x] T16: `ai-gateway`: lõi
 - [ ] T17: `ai-gateway`: provider anthropic, openai_compat, gemini (còn chạy live, cần API key)
 

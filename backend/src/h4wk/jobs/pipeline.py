@@ -12,10 +12,10 @@ from h4wk.analysis import runner
 from h4wk.analysis.models import Finding
 from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
-from h4wk.collectors.targets import parse_target
+from h4wk.collectors.targets import Target, TargetKind, parse_target
 from h4wk.core import audit, events
 from h4wk.core.config import config_dir, data_dir
-from h4wk.core.config_models import AnalysisConfig, load_toml
+from h4wk.core.config_models import AnalysisConfig, SourcesConfig, load_toml
 from h4wk.core.db import FindingRow, JobRow, finding_row, get_engine
 from h4wk.core.entities import load_entities
 from h4wk.core.ids import new_ulid
@@ -108,6 +108,16 @@ def _recent_capture(job: JobRow) -> str | None:
     return caps[-1] if manifest.level == job.level else None
 
 
+def playlist_video_ids(playlist_id: str) -> list[str]:
+    """ID video của playlist, cắt theo collect.playlist_max_videos trong sources.toml."""
+    path = config_dir() / "sources.toml"
+    cfg = load_toml(path, SourcesConfig) if path.exists() else SourcesConfig()
+    ids = Orchestrator.from_config(root=data_dir()).list_video_ids(
+        Target(TargetKind.PLAYLIST, playlist_id)
+    )
+    return ids[: cfg.collect.playlist_max_videos]
+
+
 def _analysis_config() -> AnalysisConfig:
     path = config_dir() / "analysis.toml"
     return load_toml(path, AnalysisConfig) if path.exists() else AnalysisConfig()
@@ -148,7 +158,7 @@ def collect(job_id: str) -> None:
 
 @huey_gpu.task()
 def media(job_id: str) -> None:
-    job = _update(job_id, step="media", progress=45)
+    job = _update(job_id, status="running", step="media", progress=45)
     try:
         cap_dir = _video_dir(job) / "captures" / str(job.capture)
         out = _video_dir(job) / "derived" / str(job.capture)
@@ -184,7 +194,7 @@ def media(job_id: str) -> None:
 
 @huey.task()
 def analyze(job_id: str) -> None:
-    job = _update(job_id, step="analyze", progress=75)
+    job = _update(job_id, status="running", step="analyze", progress=75)
     try:
         cap = str(job.capture)
         derived = _video_dir(job) / "derived" / cap

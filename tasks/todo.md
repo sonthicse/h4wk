@@ -347,8 +347,10 @@ Khi worker khởi động, job đang ở trạng thái `running` được đưa 
 
 Nghiệm thu:
 
-- [ ] Integration test tắt worker giữa chừng rồi bật lại; job chạy tiếp tới `done` và không làm lại bước đã xong.
-- [ ] Dán link một playlist có 3 video (dùng adapter giả) thì tạo đúng 3 job.
+- [x] Integration test tắt worker giữa chừng rồi bật lại; job chạy tiếp tới `done` và không làm lại bước đã xong.
+- [x] Dán link một playlist có 3 video (dùng adapter giả) thì tạo đúng 3 job.
+
+Ghi chú: playlist không lưu bản thu (người dùng quyết); `POST /api/collect` trả `list[Job]`; mỗi hàng đợi chỉ nhận lại bước của mình khi khởi động.
 
 Kiểm tra: `uv run pytest tests/integration/test_recovery.py tests/unit/test_playlist.py`.
 

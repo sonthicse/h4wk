@@ -50,7 +50,9 @@ class Job(BaseModel):
 
 
 @router.post("/api/collect", status_code=status.HTTP_202_ACCEPTED)
-def collect(body: CollectBody, actor: ActorDep) -> Job:
+def collect(body: CollectBody, actor: ActorDep) -> list[Job]:
+    """Link video: một job. Link playlist: mỗi video một job (tối đa playlist_max_videos)."""
+
     def reject(code: int, msg: str) -> HTTPException:
         audit.log(actor, "job.create", body.url, {"error": msg}, status="error")
         return HTTPException(code, msg)
@@ -59,16 +61,33 @@ def collect(body: CollectBody, actor: ActorDep) -> Job:
         target = parse_target(body.url)
     except ValueError as e:
         raise reject(400, str(e)) from None
-    if target.kind != TargetKind.VIDEO:
-        # Kênh và @handle chuyển cho watchlist (T30); playlist xử lý ở T46.
-        raise reject(400, f"collecting a {target.kind} is not supported yet; only single videos")
-    job = pipeline.create_job(target.url, target.id, body.level, body.force, actor)
-    audit.log(actor, "job.create", job.id, {"url": target.url, "level": body.level})
-    pipeline.start(job.id)
-    with Session(pipeline.get_engine()) as s:
-        row = s.get(JobRow, job.id)
-        assert row is not None
-        return Job.of(row)
+    if target.kind == TargetKind.VIDEO:
+        videos = [(target.url, target.id)]
+        extra: dict = {}
+    elif target.kind == TargetKind.PLAYLIST:
+        try:
+            ids = pipeline.playlist_video_ids(target.id)
+        except Exception as e:
+            raise reject(502, f"could not list playlist videos: {e}") from None
+        if not ids:
+            raise reject(400, "playlist has no videos")
+        videos = [(parse_target(i).url, i) for i in ids]
+        extra = {"playlist": target.id}
+    else:
+        raise reject(
+            400,
+            f"collecting a {target.kind} is not supported here; add the channel to the watchlist",
+        )
+    jobs = []
+    for url, video_id in videos:
+        job = pipeline.create_job(url, video_id, body.level, body.force, actor)
+        audit.log(actor, "job.create", job.id, {"url": url, "level": body.level, **extra})
+        pipeline.start(job.id)
+        with Session(pipeline.get_engine()) as s:
+            row = s.get(JobRow, job.id)
+            assert row is not None
+            jobs.append(Job.of(row))
+    return jobs
 
 
 @router.get("/api/jobs")
