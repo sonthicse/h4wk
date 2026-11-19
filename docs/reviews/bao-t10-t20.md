@@ -19,10 +19,11 @@ Một số chỗ chưa thống nhất với `main`, Thi đã sửa trên nhánh 
 | `400249e` | `encoding="utf-8"` cho mọi lệnh đọc/ghi trong test; `ruff format` | Quy ước trong `CLAUDE.md`; trước đó 3 test hỏng khi locale không phải UTF-8 |
 | `e6b39fc` | Luồng chạy nền dùng `media.transcripts.process_capture` và `analysis.runner.analyze`; xoá `jobs/placeholder.py` | Nối T10, T11 vào T12 |
 | `e6b39fc` | Đánh dấu T10, T11 xong. SPEC ghi viết tắt không phân biệt hoa thường (giữ hành vi của Bảo) | Code và test đã đạt nghiệm thu |
+| `76f50e7` | C4 thêm category `incitement` (kích động, chia rẽ, bạo lực) và `state_secret` (bí mật nhà nước); từ điển gắn hai nhóm này vào category mới; JSON Schema sinh lại | Hai nhóm không khớp category nào có sẵn |
 
-Định dạng từ điển mới (`analysis/lexicon/vi_insults.txt`): dòng `[tên nhóm: category]` mở một nhóm, các dòng sau là cụm từ. `category` chỉ được là `insult`, `unsupported_accusation` hoặc `fabrication`; giá trị khác bị từ chối khi nạp.
+Định dạng từ điển mới (`analysis/lexicon/vi_insults.txt`): dòng `[tên nhóm: category]` mở một nhóm, các dòng sau là cụm từ. `category` phải là giá trị của C4; giá trị khác bị từ chối khi nạp. Năm nhóm gắn lần lượt `insult`, `unsupported_accusation`, `fabrication`, `incitement`, `state_secret`.
 
-Kết quả sau khi sửa: 235 test pass ở cả locale thường lẫn `LC_ALL=C PYTHONUTF8=0`; ruff sạch. Trên bản thu mẫu T44, tầng tĩnh ra 4 nghi vấn (lời nói, hai chữ trên hình, comment).
+Kết quả sau khi sửa: 237 test pass ở cả locale thường lẫn `LC_ALL=C PYTHONUTF8=0`; ruff sạch. Trên bản thu mẫu T44, tầng tĩnh ra 4 nghi vấn (lời nói, hai chữ trên hình, comment).
 
 ## Bảo cần làm
 
@@ -40,6 +41,9 @@ Kết quả sau khi sửa: 235 test pass ở cả locale thường lẫn `LC_ALL
 
 ## Câu hỏi còn mở
 
-- **Category cho nhóm kích động và bí mật nhà nước.** C4 chỉ có `insult`, `unsupported_accusation`, `fabrication`, `legitimate_criticism`, `neutral`. Hai nhóm "kích động, chia rẽ, bạo lực" và "bí mật nhà nước" không có category tương ứng nên tạm gắn `insult`; nhóm thật ghi trong `reason`. Muốn có category riêng thì phải đổi C4.
-- **Tầng tĩnh chỉ chạy ở vùng có tên đối tượng.** Nội dung xâm phạm an ninh quốc gia thường không nhắc một người cụ thể. Nếu cần bắt cả trường hợp này thì đối tượng của case có thể là tổ chức (ví dụ tên cơ quan), hoặc phải đổi quy tắc ở SPEC 10.6.
 - **Đường dẫn khung hình của thumbnail.** Với dấu hiệu `via: thumbnail`, `frame` là đường dẫn tính từ thư mục bản thu (`sources/ytdlp/maxres.jpg`), còn khung hình video tính từ thư mục phái sinh (`frames/…`). Cần thống nhất một quy ước trong C3/C4.
+
+## Đã chốt
+
+- C4 có thêm `incitement` và `state_secret`. Prompt của tầng LLM (T17), nếu liệt kê category bằng lời, và giao diện cần có thêm hai category này.
+- Tầng tĩnh vẫn chỉ chạy ở vùng nhắc tên đối tượng. Đối tượng của case thường là lãnh đạo Đảng và Nhà nước, nên quy tắc này đủ cho K1.
