@@ -758,6 +758,525 @@
         }
       }
     },
+    "/api/videos": {
+      "get": {
+        "tags": [
+          "videos"
+        ],
+        "summary": "List Videos",
+        "operationId": "list_videos_api_videos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/VideoSummary"
+                  },
+                  "type": "array",
+                  "title": "Response List Videos Api Videos Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}": {
+      "get": {
+        "tags": [
+          "videos"
+        ],
+        "summary": "Get Video",
+        "operationId": "get_video_api_videos__video_id__get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/timeline": {
+      "get": {
+        "tags": [
+          "videos"
+        ],
+        "summary": "Get Timeline",
+        "description": "Timeline (C3) c\u1ee7a b\u1ea3n thu ch\u1ec9 \u0111\u1ecbnh, m\u1eb7c \u0111\u1ecbnh l\u00e0 b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 c\u00f3 timeline.",
+        "operationId": "get_timeline_api_videos__video_id__timeline_get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "capture",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Capture"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Timeline"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/transcripts": {
+      "get": {
+        "tags": [
+          "videos"
+        ],
+        "summary": "Get Transcripts",
+        "operationId": "get_transcripts_api_videos__video_id__transcripts_get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "capture",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Capture"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Transcript"
+                  },
+                  "title": "Response Get Transcripts Api Videos  Video Id  Transcripts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/comments": {
+      "get": {
+        "tags": [
+          "videos"
+        ],
+        "summary": "Get Comments",
+        "description": "Comment ph\u1eb3ng theo C2; reply c\u00f3 parent_id tr\u1ecf v\u1ec1 comment g\u1ed1c.",
+        "operationId": "get_comments_api_videos__video_id__comments_get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "capture",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Capture"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Comment"
+                  },
+                  "title": "Response Get Comments Api Videos  Video Id  Comments Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/media": {
+      "get": {
+        "tags": [
+          "videos"
+        ],
+        "summary": "Get Media",
+        "description": "B\u1ea3n proxy 480p n\u1ebfu \u0111\u00e3 c\u00f3, n\u1ebfu kh\u00f4ng th\u00ec file video g\u1ed1c. H\u1ed7 tr\u1ee3 Range.",
+        "operationId": "get_media_api_videos__video_id__media_get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "capture",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Capture"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/frames/{file}": {
+      "get": {
+        "tags": [
+          "videos"
+        ],
+        "summary": "Get Frame",
+        "operationId": "get_frame_api_videos__video_id__frames__file__get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "file",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File"
+            }
+          },
+          {
+            "name": "capture",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Capture"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/captures/{capture}": {
+      "get": {
+        "tags": [
+          "captures"
+        ],
+        "summary": "Get Capture",
+        "operationId": "get_capture_api_videos__video_id__captures__capture__get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "capture",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Capture"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/captures/{capture}/verify": {
+      "post": {
+        "tags": [
+          "captures"
+        ],
+        "summary": "Verify Capture",
+        "operationId": "verify_capture_api_videos__video_id__captures__capture__verify_post",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "capture",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Capture"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/captures/{capture}/files/{path}": {
+      "get": {
+        "tags": [
+          "captures"
+        ],
+        "summary": "Get File",
+        "description": "T\u1ea3i file g\u1ed1c; ch\u1ec9 file c\u00f3 trong manifest (ho\u1eb7c ch\u00ednh manifest.json).",
+        "operationId": "get_file_api_videos__video_id__captures__capture__files__path__get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "capture",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Capture"
+            }
+          },
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health": {
       "get": {
         "summary": "Health",
@@ -784,6 +1303,105 @@
   },
   "components": {
     "schemas": {
+      "Cap": {
+        "type": "string",
+        "enum": [
+          "video.metadata",
+          "channel.metadata",
+          "channel.videos",
+          "playlist.videos",
+          "video.transcripts",
+          "video.comments",
+          "video.thumbnails",
+          "video.media"
+        ],
+        "title": "Cap",
+        "description": "Lo\u1ea1i d\u1eef li\u1ec7u m\u1ed9t ngu\u1ed3n thu l\u1ea5y \u0111\u01b0\u1ee3c. Gi\u00e1 tr\u1ecb d\u00f9ng trong tr\u01b0\u1eddng `what` c\u1ee7a manifest."
+      },
+      "CaptureDetail": {
+        "properties": {
+          "manifest": {
+            "$ref": "#/components/schemas/Manifest"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/CaptureFile"
+            },
+            "type": "array",
+            "title": "Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "manifest",
+          "files"
+        ],
+        "title": "CaptureDetail"
+      },
+      "CaptureFile": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "bytes": {
+            "type": "integer",
+            "title": "Bytes"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "bytes",
+          "sha256"
+        ],
+        "title": "CaptureFile"
+      },
+      "CaptureSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "collected_at": {
+            "type": "string",
+            "title": "Collected At"
+          },
+          "transcript_kinds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Transcript Kinds"
+          },
+          "comment_count": {
+            "type": "integer",
+            "title": "Comment Count"
+          },
+          "keyframe_count": {
+            "type": "integer",
+            "title": "Keyframe Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "level",
+          "collected_at",
+          "transcript_kinds",
+          "comment_count",
+          "keyframe_count"
+        ],
+        "title": "CaptureSummary"
+      },
       "Category": {
         "type": "string",
         "enum": [
@@ -796,6 +1414,129 @@
           "neutral"
         ],
         "title": "Category"
+      },
+      "Channel": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "handle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handle"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "subscriber_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subscriber Count"
+          },
+          "view_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "View Count"
+          },
+          "video_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Count"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "banner_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Banner Url"
+          },
+          "links": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Links",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "Channel"
       },
       "CollectBody": {
         "properties": {
@@ -829,6 +1570,70 @@
         "title": "CollectLevel",
         "description": "M\u1ee9c thu (SPEC 10.7)."
       },
+      "Comment": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "author_channel_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Channel Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "like_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Like Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "text"
+        ],
+        "title": "Comment"
+      },
       "Confidence": {
         "type": "string",
         "enum": [
@@ -838,6 +1643,37 @@
         ],
         "title": "Confidence",
         "description": "M\u1ee9c tin c\u1eady vi\u1ebft b\u1eb1ng ch\u1eef, kh\u00f4ng d\u00f9ng ph\u1ea7n tr\u0103m."
+      },
+      "Cost": {
+        "properties": {
+          "quota_units": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quota Units"
+          },
+          "credits": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credits"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Cost"
       },
       "DecisionBody": {
         "properties": {
@@ -1017,6 +1853,76 @@
         "type": "object",
         "title": "EntityUpdate"
       },
+      "FileEntry": {
+        "properties": {
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Bytes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sha256",
+          "bytes"
+        ],
+        "title": "FileEntry"
+      },
+      "FileResult": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FileStatus"
+          },
+          "expected_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Sha256"
+          },
+          "actual_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Sha256"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "status"
+        ],
+        "title": "FileResult"
+      },
+      "FileStatus": {
+        "type": "string",
+        "enum": [
+          "OK",
+          "FAIL",
+          "missing",
+          "unexpected"
+        ],
+        "title": "FileStatus"
+      },
       "Finding": {
         "properties": {
           "id": {
@@ -1064,7 +1970,7 @@
           },
           "triggers": {
             "items": {
-              "$ref": "#/components/schemas/Trigger"
+              "$ref": "#/components/schemas/h4wk__analysis__models__Trigger"
             },
             "type": "array",
             "title": "Triggers",
@@ -1195,6 +2101,95 @@
         ],
         "title": "Finding",
         "description": "M\u1ed9t nghi v\u1ea5n (m\u1ed9t ph\u1ea7n t\u1eed c\u1ee7a findings.json)."
+      },
+      "FrameOcr": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "bbox": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 4,
+            "title": "Bbox"
+          },
+          "frame": {
+            "type": "string",
+            "title": "Frame"
+          },
+          "t": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "T"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "bbox",
+          "frame",
+          "t"
+        ],
+        "title": "FrameOcr"
+      },
+      "FrameVisual": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "offensive_cues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Offensive Cues",
+            "default": []
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "frame": {
+            "type": "string",
+            "title": "Frame"
+          },
+          "t": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "T"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "description",
+          "provider",
+          "model",
+          "frame",
+          "t"
+        ],
+        "title": "FrameVisual"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1330,6 +2325,78 @@
         ],
         "title": "LoginBody"
       },
+      "Manifest": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "h4wk.manifest/1",
+            "title": "Schema"
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url"
+          },
+          "collected_at": {
+            "type": "string",
+            "title": "Collected At"
+          },
+          "collector": {
+            "type": "string",
+            "pattern": "^(user|system):\\S+$",
+            "title": "Collector"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/h4wk__evidence__models__Trigger"
+          },
+          "level": {
+            "$ref": "#/components/schemas/CollectLevel"
+          },
+          "tool_version": {
+            "type": "string",
+            "title": "Tool Version"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceCall"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "files": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FileEntry"
+            },
+            "type": "object",
+            "title": "Files"
+          },
+          "previous_capture": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{8}T\\d{6}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Capture"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "source_url",
+          "collected_at",
+          "collector",
+          "trigger",
+          "level",
+          "tool_version",
+          "sources",
+          "files"
+        ],
+        "title": "Manifest"
+      },
       "Me": {
         "properties": {
           "username": {
@@ -1361,6 +2428,41 @@
           "model"
         ],
         "title": "ModelRef"
+      },
+      "OcrText": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "bbox": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 4,
+            "title": "Bbox"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "text",
+          "bbox"
+        ],
+        "title": "OcrText"
       },
       "QueueItem": {
         "properties": {
@@ -1505,6 +2607,54 @@
         "title": "ReviewDecision",
         "description": "M\u1ed9t quy\u1ebft \u0111\u1ecbnh r\u00e0 so\u00e1t (m\u1ed9t d\u00f2ng c\u1ee7a reviews.jsonl)."
       },
+      "Segment": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^seg_\\d{4,}$",
+            "title": "Id"
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Start"
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "End"
+          },
+          "speech": {
+            "type": "string",
+            "title": "Speech",
+            "default": ""
+          },
+          "ocr": {
+            "items": {
+              "$ref": "#/components/schemas/FrameOcr"
+            },
+            "type": "array",
+            "title": "Ocr",
+            "default": []
+          },
+          "visual": {
+            "items": {
+              "$ref": "#/components/schemas/FrameVisual"
+            },
+            "type": "array",
+            "title": "Visual",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "start",
+          "end"
+        ],
+        "title": "Segment"
+      },
       "Severity": {
         "type": "string",
         "enum": [
@@ -1513,6 +2663,112 @@
           "high"
         ],
         "title": "Severity"
+      },
+      "SeverityCounts": {
+        "properties": {
+          "high": {
+            "type": "integer",
+            "title": "High",
+            "default": 0
+          },
+          "medium": {
+            "type": "integer",
+            "title": "Medium",
+            "default": 0
+          },
+          "low": {
+            "type": "integer",
+            "title": "Low",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "SeverityCounts"
+      },
+      "SourceCall": {
+        "properties": {
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider"
+          },
+          "what": {
+            "$ref": "#/components/schemas/Cap"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SourceStatus"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "cost": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Cost"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "provider",
+          "what",
+          "status"
+        ],
+        "title": "SourceCall",
+        "description": "M\u1ed9t l\u1ea7n g\u1ecdi (ho\u1eb7c b\u1ecf qua) m\u1ed9t ngu\u1ed3n cho m\u1ed9t lo\u1ea1i d\u1eef li\u1ec7u."
       },
       "SourceKind": {
         "type": "string",
@@ -1527,7 +2783,545 @@
         ],
         "title": "SourceKind"
       },
-      "Trigger": {
+      "SourceStatus": {
+        "type": "string",
+        "enum": [
+          "ok",
+          "failed",
+          "blocked",
+          "quota_exceeded",
+          "not_found",
+          "unsupported",
+          "disabled",
+          "suspended",
+          "no_source"
+        ],
+        "title": "SourceStatus"
+      },
+      "ThumbnailAnalysis": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "title": "File"
+          },
+          "ocr": {
+            "items": {
+              "$ref": "#/components/schemas/OcrText"
+            },
+            "type": "array",
+            "title": "Ocr",
+            "default": []
+          },
+          "visual": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Visual"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "ThumbnailAnalysis"
+      },
+      "Timeline": {
+        "properties": {
+          "schema": {
+            "type": "string",
+            "const": "h4wk.timeline/1",
+            "title": "Schema"
+          },
+          "video_id": {
+            "type": "string",
+            "title": "Video Id"
+          },
+          "capture": {
+            "type": "string",
+            "pattern": "^\\d{8}T\\d{6}$",
+            "title": "Capture"
+          },
+          "source_video_sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Video Sha256"
+          },
+          "transcript_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TranscriptKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "thumbnails": {
+            "items": {
+              "$ref": "#/components/schemas/ThumbnailAnalysis"
+            },
+            "type": "array",
+            "title": "Thumbnails",
+            "default": []
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/Segment"
+            },
+            "type": "array",
+            "title": "Segments",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema",
+          "video_id",
+          "capture"
+        ],
+        "title": "Timeline"
+      },
+      "Transcript": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/TranscriptKind"
+          },
+          "lang": {
+            "type": "string",
+            "title": "Lang"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/TranscriptSegment"
+            },
+            "type": "array",
+            "title": "Segments"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "lang",
+          "segments"
+        ],
+        "title": "Transcript"
+      },
+      "TranscriptKind": {
+        "type": "string",
+        "enum": [
+          "uploaded",
+          "auto",
+          "supadata_ai",
+          "stt"
+        ],
+        "title": "TranscriptKind"
+      },
+      "TranscriptSegment": {
+        "properties": {
+          "start": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Start"
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "End"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "text"
+        ],
+        "title": "TranscriptSegment"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VerifyResult": {
+        "properties": {
+          "checked_at": {
+            "type": "string",
+            "title": "Checked At"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/FileResult"
+            },
+            "type": "array",
+            "title": "Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "checked_at",
+          "ok",
+          "files"
+        ],
+        "title": "VerifyResult"
+      },
+      "Via": {
+        "type": "string",
+        "enum": [
+          "speech",
+          "ocr",
+          "title",
+          "description",
+          "comment",
+          "thumbnail",
+          "face",
+          "ref_image"
+        ],
+        "title": "Via"
+      },
+      "Video": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "default": []
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "duration_s": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration S"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "view_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "View Count"
+          },
+          "like_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Like Count"
+          },
+          "comment_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment Count"
+          },
+          "availability": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Availability"
+          },
+          "is_live": {
+            "type": "boolean",
+            "title": "Is Live",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "channel_id",
+          "title"
+        ],
+        "title": "Video"
+      },
+      "VideoDetail": {
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/Video"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Channel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "captures": {
+            "items": {
+              "$ref": "#/components/schemas/CaptureSummary"
+            },
+            "type": "array",
+            "title": "Captures"
+          }
+        },
+        "type": "object",
+        "required": [
+          "video",
+          "channel",
+          "captures"
+        ],
+        "title": "VideoDetail"
+      },
+      "VideoRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "VideoRef"
+      },
+      "VideoSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "view_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "View Count"
+          },
+          "findings": {
+            "$ref": "#/components/schemas/SeverityCounts"
+          },
+          "latest_capture": {
+            "type": "string",
+            "title": "Latest Capture"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "channel",
+          "published_at",
+          "view_count",
+          "findings",
+          "latest_capture"
+        ],
+        "title": "VideoSummary"
+      },
+      "Visual": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "offensive_cues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Offensive Cues",
+            "default": []
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "description",
+          "provider",
+          "model"
+        ],
+        "title": "Visual",
+        "description": "M\u00f4 t\u1ea3 c\u1ee7a VLM. Kh\u00f4ng ch\u1ee9a danh t\u00ednh ng\u01b0\u1eddi trong \u1ea3nh."
+      },
+      "h4wk__analysis__models__Trigger": {
         "properties": {
           "via": {
             "$ref": "#/components/schemas/Via"
@@ -1612,94 +3406,45 @@
         "title": "Trigger",
         "description": "D\u1ea5u hi\u1ec7u \u0111\u00e3 k\u00e9o m\u1ed9t \u0111o\u1ea1n v\u00e0o ph\u00e2n t\u00edch."
       },
-      "ValidationError": {
+      "h4wk__evidence__models__Trigger": {
         "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
           "type": {
             "type": "string",
-            "title": "Error Type"
+            "enum": [
+              "manual",
+              "watchlist"
+            ],
+            "title": "Type"
           },
-          "input": {
-            "title": "Input"
+          "watch_item": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Watch Item"
           },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
+          "event": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
-          "loc",
-          "msg",
           "type"
         ],
-        "title": "ValidationError"
-      },
-      "Via": {
-        "type": "string",
-        "enum": [
-          "speech",
-          "ocr",
-          "title",
-          "description",
-          "comment",
-          "thumbnail",
-          "face",
-          "ref_image"
-        ],
-        "title": "Via"
-      },
-      "VideoRef": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "title": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Title"
-          },
-          "channel": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Channel"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id"
-        ],
-        "title": "VideoRef"
+        "title": "Trigger"
       }
     }
   }

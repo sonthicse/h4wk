@@ -264,6 +264,188 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/videos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Videos */
+        get: operations["list_videos_api_videos_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Video */
+        get: operations["get_video_api_videos__video_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Timeline
+         * @description Timeline (C3) của bản thu chỉ định, mặc định là bản thu mới nhất đã có timeline.
+         */
+        get: operations["get_timeline_api_videos__video_id__timeline_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/transcripts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Transcripts */
+        get: operations["get_transcripts_api_videos__video_id__transcripts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Comments
+         * @description Comment phẳng theo C2; reply có parent_id trỏ về comment gốc.
+         */
+        get: operations["get_comments_api_videos__video_id__comments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Media
+         * @description Bản proxy 480p nếu đã có, nếu không thì file video gốc. Hỗ trợ Range.
+         */
+        get: operations["get_media_api_videos__video_id__media_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/frames/{file}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Frame */
+        get: operations["get_frame_api_videos__video_id__frames__file__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/captures/{capture}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Capture */
+        get: operations["get_capture_api_videos__video_id__captures__capture__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/captures/{capture}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify Capture */
+        post: operations["verify_capture_api_videos__video_id__captures__capture__verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/captures/{capture}/files/{path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get File
+         * @description Tải file gốc; chỉ file có trong manifest (hoặc chính manifest.json).
+         */
+        get: operations["get_file_api_videos__video_id__captures__capture__files__path__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -289,10 +471,79 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * Cap
+         * @description Loại dữ liệu một nguồn thu lấy được. Giá trị dùng trong trường `what` của manifest.
+         * @enum {string}
+         */
+        Cap: "video.metadata" | "channel.metadata" | "channel.videos" | "playlist.videos" | "video.transcripts" | "video.comments" | "video.thumbnails" | "video.media";
+        /** CaptureDetail */
+        CaptureDetail: {
+            manifest: components["schemas"]["Manifest"];
+            /** Files */
+            files: components["schemas"]["CaptureFile"][];
+        };
+        /** CaptureFile */
+        CaptureFile: {
+            /** Path */
+            path: string;
+            /** Bytes */
+            bytes: number;
+            /** Sha256 */
+            sha256: string;
+        };
+        /** CaptureSummary */
+        CaptureSummary: {
+            /** Id */
+            id: string;
+            /** Level */
+            level: string;
+            /** Collected At */
+            collected_at: string;
+            /** Transcript Kinds */
+            transcript_kinds: string[];
+            /** Comment Count */
+            comment_count: number;
+            /** Keyframe Count */
+            keyframe_count: number;
+        };
+        /**
          * Category
          * @enum {string}
          */
         Category: "insult" | "unsupported_accusation" | "fabrication" | "incitement" | "state_secret" | "legitimate_criticism" | "neutral";
+        /** Channel */
+        Channel: {
+            /** Id */
+            id: string;
+            /** Handle */
+            handle?: string | null;
+            /** Title */
+            title: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Country */
+            country?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Subscriber Count */
+            subscriber_count?: number | null;
+            /** View Count */
+            view_count?: number | null;
+            /** Video Count */
+            video_count?: number | null;
+            /** Avatar Url */
+            avatar_url?: string | null;
+            /** Banner Url */
+            banner_url?: string | null;
+            /**
+             * Links
+             * @default []
+             */
+            links: string[];
+        };
         /** CollectBody */
         CollectBody: {
             /** Url */
@@ -311,12 +562,34 @@ export interface components {
          * @enum {string}
          */
         CollectLevel: "metadata" | "text" | "full";
+        /** Comment */
+        Comment: {
+            /** Id */
+            id: string;
+            /** Parent Id */
+            parent_id?: string | null;
+            /** Author Channel Id */
+            author_channel_id?: string | null;
+            /** Text */
+            text: string;
+            /** Published At */
+            published_at?: string | null;
+            /** Like Count */
+            like_count?: number | null;
+        };
         /**
          * Confidence
          * @description Mức tin cậy viết bằng chữ, không dùng phần trăm.
          * @enum {string}
          */
         Confidence: "unverified" | "likely" | "highly_likely";
+        /** Cost */
+        Cost: {
+            /** Quota Units */
+            quota_units?: number | null;
+            /** Credits */
+            credits?: number | null;
+        };
         /** DecisionBody */
         DecisionBody: {
             /**
@@ -392,6 +665,28 @@ export interface components {
             /** Abbreviations */
             abbreviations?: string[] | null;
         };
+        /** FileEntry */
+        FileEntry: {
+            /** Sha256 */
+            sha256: string;
+            /** Bytes */
+            bytes: number;
+        };
+        /** FileResult */
+        FileResult: {
+            /** Path */
+            path: string;
+            status: components["schemas"]["FileStatus"];
+            /** Expected Sha256 */
+            expected_sha256?: string | null;
+            /** Actual Sha256 */
+            actual_sha256?: string | null;
+        };
+        /**
+         * FileStatus
+         * @enum {string}
+         */
+        FileStatus: "OK" | "FAIL" | "missing" | "unexpected";
         /**
          * Finding
          * @description Một nghi vấn (một phần tử của findings.json).
@@ -418,7 +713,7 @@ export interface components {
              * Triggers
              * @default []
              */
-            triggers: components["schemas"]["Trigger"][];
+            triggers: components["schemas"]["h4wk__analysis__models__Trigger"][];
             /** Segment Id */
             segment_id?: string | null;
             /** Comment Id */
@@ -448,6 +743,40 @@ export interface components {
             confidence: components["schemas"]["Confidence"];
             /** Reason */
             reason: string;
+        };
+        /** FrameOcr */
+        FrameOcr: {
+            /** Text */
+            text: string;
+            /** Bbox */
+            bbox: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Frame */
+            frame: string;
+            /** T */
+            t: number;
+        };
+        /** FrameVisual */
+        FrameVisual: {
+            /** Description */
+            description: string;
+            /**
+             * Offensive Cues
+             * @default []
+             */
+            offensive_cues: string[];
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /** Frame */
+            frame: string;
+            /** T */
+            t: number;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -496,6 +825,32 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** Manifest */
+        Manifest: {
+            /**
+             * Schema
+             * @constant
+             */
+            schema: "h4wk.manifest/1";
+            /** Source Url */
+            source_url: string;
+            /** Collected At */
+            collected_at: string;
+            /** Collector */
+            collector: string;
+            trigger: components["schemas"]["h4wk__evidence__models__Trigger"];
+            level: components["schemas"]["CollectLevel"];
+            /** Tool Version */
+            tool_version: string;
+            /** Sources */
+            sources: components["schemas"]["SourceCall"][];
+            /** Files */
+            files: {
+                [key: string]: components["schemas"]["FileEntry"];
+            };
+            /** Previous Capture */
+            previous_capture?: string | null;
+        };
         /** Me */
         Me: {
             /** Username */
@@ -507,6 +862,18 @@ export interface components {
             provider: string;
             /** Model */
             model: string;
+        };
+        /** OcrText */
+        OcrText: {
+            /** Text */
+            text: string;
+            /** Bbox */
+            bbox: [
+                number,
+                number,
+                number,
+                number
+            ];
         };
         /** QueueItem */
         QueueItem: {
@@ -569,21 +936,259 @@ export interface components {
              */
             note: string;
         };
+        /** Segment */
+        Segment: {
+            /** Id */
+            id: string;
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+            /**
+             * Speech
+             * @default
+             */
+            speech: string;
+            /**
+             * Ocr
+             * @default []
+             */
+            ocr: components["schemas"]["FrameOcr"][];
+            /**
+             * Visual
+             * @default []
+             */
+            visual: components["schemas"]["FrameVisual"][];
+        };
         /**
          * Severity
          * @enum {string}
          */
         Severity: "low" | "medium" | "high";
+        /** SeverityCounts */
+        SeverityCounts: {
+            /**
+             * High
+             * @default 0
+             */
+            high: number;
+            /**
+             * Medium
+             * @default 0
+             */
+            medium: number;
+            /**
+             * Low
+             * @default 0
+             */
+            low: number;
+        };
+        /**
+         * SourceCall
+         * @description Một lần gọi (hoặc bỏ qua) một nguồn cho một loại dữ liệu.
+         */
+        SourceCall: {
+            /** Provider */
+            provider: string | null;
+            what: components["schemas"]["Cap"];
+            status: components["schemas"]["SourceStatus"];
+            /** Started At */
+            started_at?: string | null;
+            /** Duration Ms */
+            duration_ms?: number | null;
+            cost?: components["schemas"]["Cost"] | null;
+            /** Error */
+            error?: string | null;
+            /** Version */
+            version?: string | null;
+        };
         /**
          * SourceKind
          * @enum {string}
          */
         SourceKind: "speech" | "ocr" | "visual" | "title" | "description" | "thumbnail" | "comment";
         /**
+         * SourceStatus
+         * @enum {string}
+         */
+        SourceStatus: "ok" | "failed" | "blocked" | "quota_exceeded" | "not_found" | "unsupported" | "disabled" | "suspended" | "no_source";
+        /** ThumbnailAnalysis */
+        ThumbnailAnalysis: {
+            /** File */
+            file: string;
+            /**
+             * Ocr
+             * @default []
+             */
+            ocr: components["schemas"]["OcrText"][];
+            visual?: components["schemas"]["Visual"] | null;
+        };
+        /** Timeline */
+        Timeline: {
+            /**
+             * Schema
+             * @constant
+             */
+            schema: "h4wk.timeline/1";
+            /** Video Id */
+            video_id: string;
+            /** Capture */
+            capture: string;
+            /** Source Video Sha256 */
+            source_video_sha256?: string | null;
+            transcript_kind?: components["schemas"]["TranscriptKind"] | null;
+            /**
+             * Thumbnails
+             * @default []
+             */
+            thumbnails: components["schemas"]["ThumbnailAnalysis"][];
+            /**
+             * Segments
+             * @default []
+             */
+            segments: components["schemas"]["Segment"][];
+        };
+        /** Transcript */
+        Transcript: {
+            kind: components["schemas"]["TranscriptKind"];
+            /** Lang */
+            lang: string;
+            /** Segments */
+            segments: components["schemas"]["TranscriptSegment"][];
+        };
+        /**
+         * TranscriptKind
+         * @enum {string}
+         */
+        TranscriptKind: "uploaded" | "auto" | "supadata_ai" | "stt";
+        /** TranscriptSegment */
+        TranscriptSegment: {
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+            /** Text */
+            text: string;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
+        };
+        /** VerifyResult */
+        VerifyResult: {
+            /** Checked At */
+            checked_at: string;
+            /** Ok */
+            ok: boolean;
+            /** Files */
+            files: components["schemas"]["FileResult"][];
+        };
+        /**
+         * Via
+         * @enum {string}
+         */
+        Via: "speech" | "ocr" | "title" | "description" | "comment" | "thumbnail" | "face" | "ref_image";
+        /** Video */
+        Video: {
+            /** Id */
+            id: string;
+            /** Channel Id */
+            channel_id: string;
+            /** Title */
+            title: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Tags
+             * @default []
+             */
+            tags: string[];
+            /** Category */
+            category?: string | null;
+            /** Duration S */
+            duration_s?: number | null;
+            /** Published At */
+            published_at?: string | null;
+            /** View Count */
+            view_count?: number | null;
+            /** Like Count */
+            like_count?: number | null;
+            /** Comment Count */
+            comment_count?: number | null;
+            /** Availability */
+            availability?: string | null;
+            /**
+             * Is Live
+             * @default false
+             */
+            is_live: boolean;
+        };
+        /** VideoDetail */
+        VideoDetail: {
+            video: components["schemas"]["Video"];
+            channel: components["schemas"]["Channel"] | null;
+            /** Captures */
+            captures: components["schemas"]["CaptureSummary"][];
+        };
+        /** VideoRef */
+        VideoRef: {
+            /** Id */
+            id: string;
+            /** Title */
+            title?: string | null;
+            /** Channel */
+            channel?: string | null;
+        };
+        /** VideoSummary */
+        VideoSummary: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+            /** Channel */
+            channel: string | null;
+            /** Published At */
+            published_at: string | null;
+            /** View Count */
+            view_count: number | null;
+            findings: components["schemas"]["SeverityCounts"];
+            /** Latest Capture */
+            latest_capture: string;
+        };
+        /**
+         * Visual
+         * @description Mô tả của VLM. Không chứa danh tính người trong ảnh.
+         */
+        Visual: {
+            /** Description */
+            description: string;
+            /**
+             * Offensive Cues
+             * @default []
+             */
+            offensive_cues: string[];
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+        };
+        /**
          * Trigger
          * @description Dấu hiệu đã kéo một đoạn vào phân tích.
          */
-        Trigger: {
+        h4wk__analysis__models__Trigger: {
             via: components["schemas"]["Via"];
             /** Segment Id */
             segment_id?: string | null;
@@ -601,32 +1206,17 @@ export interface components {
             /** Score */
             score?: number | null;
         };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-            /** Input */
-            input?: unknown;
-            /** Context */
-            ctx?: Record<string, never>;
-        };
-        /**
-         * Via
-         * @enum {string}
-         */
-        Via: "speech" | "ocr" | "title" | "description" | "comment" | "thumbnail" | "face" | "ref_image";
-        /** VideoRef */
-        VideoRef: {
-            /** Id */
-            id: string;
-            /** Title */
-            title?: string | null;
-            /** Channel */
-            channel?: string | null;
+        /** Trigger */
+        h4wk__evidence__models__Trigger: {
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "manual" | "watchlist";
+            /** Watch Item */
+            watch_item?: string | null;
+            /** Event */
+            event?: string | null;
         };
     };
     responses: never;
@@ -1118,6 +1708,314 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReviewDecision"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_videos_api_videos_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoSummary"][];
+                };
+            };
+        };
+    };
+    get_video_api_videos__video_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_timeline_api_videos__video_id__timeline_get: {
+        parameters: {
+            query?: {
+                capture?: string | null;
+            };
+            header?: never;
+            path: {
+                video_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Timeline"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_transcripts_api_videos__video_id__transcripts_get: {
+        parameters: {
+            query?: {
+                capture?: string | null;
+            };
+            header?: never;
+            path: {
+                video_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Transcript"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_comments_api_videos__video_id__comments_get: {
+        parameters: {
+            query?: {
+                capture?: string | null;
+            };
+            header?: never;
+            path: {
+                video_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Comment"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_media_api_videos__video_id__media_get: {
+        parameters: {
+            query?: {
+                capture?: string | null;
+            };
+            header?: never;
+            path: {
+                video_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_frame_api_videos__video_id__frames__file__get: {
+        parameters: {
+            query?: {
+                capture?: string | null;
+            };
+            header?: never;
+            path: {
+                video_id: string;
+                file: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_capture_api_videos__video_id__captures__capture__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                capture: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaptureDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_capture_api_videos__video_id__captures__capture__verify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                capture: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_file_api_videos__video_id__captures__capture__files__path__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+                capture: string;
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
