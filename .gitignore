@@ -36,3 +36,8 @@ Thumbs.db
 
 # Cài đặt Claude Code riêng của từng máy
 .claude/settings.local.json
+# Worktree của từng phiên và thành viên agent team
+.claude/worktrees/
+
+# Knowledge graph của graphify, dựng lại trên từng máy
+graphify-out/

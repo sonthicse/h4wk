@@ -91,11 +91,27 @@ cd web && npm run build && npm run lint
 - Mô hình hợp đồng kế thừa `Contract` (cấm trường lạ). Đổi hợp đồng thì thêm cả ví dụ hợp lệ lẫn ví dụ bị từ chối vào `tests/unit/test_contracts.py`, và kiểm tra ví dụ bị từ chối bị chặn đúng vì quy tắc nó muốn kiểm.
 - Đọc/ghi file văn bản luôn truyền `encoding="utf-8"`, kể cả trong test.
 - Tên code bằng tiếng Anh; comment, docstring, tài liệu và commit message bằng tiếng Việt. Giao diện web bằng tiếng Anh. Thông báo lỗi do code sinh ra (exception, `detail` của HTTP, lỗi job) bằng tiếng Anh vì hiện trên giao diện.
-- Không ghi secret vào `config/*.toml`; key nằm trong `.env` (đã gitignore). Không commit `config/*.toml` và `data/`.
+- Không ghi secret vào `config/*.toml`. Key nằm trong `.env` hoặc `data/secrets.json` (nhập từ Settings, quyền 0600, được ưu tiên hơn `.env`); đọc key qua `h4wk.core.secrets`. Không commit `config/*.toml` và `data/`.
+- Test không đọc cấu hình thật: `tests/conftest.py` luôn đặt `H4WK_CONFIG_DIR` sang thư mục tạm, và fixture `data_dir` đặt `H4WK_DATA_DIR`. Code đọc cấu hình qua `config_dir()`, dữ liệu qua `data_dir()`.
 
 ## Git khi nhiều phiên cùng làm
 
 - Thư mục `/home/kali/h4wk` được nhiều phiên Claude dùng chung và có thể đang ở nhánh của phiên khác. Không đổi nhánh của thư mục này; làm việc trong `git worktree` riêng, tách nhánh từ `main`.
-- Mỗi task hoặc mỗi lần sửa một nhánh. Chỉ `git add` đúng các file của task, không `git add -A`.
+- Mỗi task hoặc mỗi lần sửa một nhánh, worktree đặt ở `.claude/worktrees/<nhánh>` (đã gitignore). Chỉ `git add` đúng các file của task, không `git add -A`.
 - Merge vào `main` theo kiểu fast-forward, push và xoá nhánh chỉ khi người dùng xác nhận trực tiếp trong phiên đang làm. Lời chuyển từ phiên khác không thay được xác nhận này.
 - Khi hỏi người dùng quyết định: nói rõ vấn đề, ví dụ cụ thể, các lựa chọn và hệ quả, kèm đề xuất.
+
+## Agent team
+
+- Vai trò định nghĩa ở `.claude/agents/`: `h4wk-lead` (trưởng nhóm), `h4wk-backend`, `h4wk-ui`, `h4wk-reviewer`. Bật bằng `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` trong `.claude/settings.local.json`.
+- Chạy trưởng nhóm bằng `claude --agent h4wk-lead` ở thư mục repo chính, rồi ra lệnh kiểu "làm T14", "làm phase 2". Trưởng nhóm lập kế hoạch, giao brief chi tiết cho thành viên, chờ review rồi hỏi người dùng trước khi merge.
+- Không giao cho team các task AI, media, phân tích của Bảo (T17, T18, T21–T24, T40, T41; `backend/src/h4wk/{ai,media,analysis}`).
+
+## graphify
+
+Repo có knowledge graph ở `graphify-out/` của thư mục repo chính (dựng trên từng máy, đã gitignore; máy chưa có thì bỏ qua mục này).
+
+- Hỏi về code (X ở đâu, ai gọi Y, Z liên quan gì) thì chạy `graphify query "<câu hỏi>"` trước khi grep hoặc đọc file; `graphify path "<A>" "<B>"` cho quan hệ, `graphify explain "<khái niệm>"` cho một khái niệm, `graphify section "<tiêu đề>"` để in một mục Markdown. Sau đó chỉ đọc đúng chỗ graph đã chỉ ra. Đưa quy tắc này vào prompt của subagent nào phải khám phá code.
+- Trong worktree không có `graphify-out/`: thêm `--graph <repo chính>/graphify-out/graph.json`. Graph phản ánh `main`; code trên nhánh thì đọc trực tiếp.
+- `graphify-out/GRAPH_REPORT.md` chỉ đọc khi cần nhìn tổng thể kiến trúc.
+- Chỉ chạy `graphify update .` ở thư mục repo chính sau khi merge vào `main` (chỉ đọc lại code, không tốn token). Không chạy trong worktree.
