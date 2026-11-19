@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Trash2Icon, UploadIcon } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -13,19 +13,16 @@ import {
 } from '@/components/ui/dialog'
 import RefThumb from '@/components/entities/RefThumb'
 import { formatVnDateTime } from '@/lib/format'
-import type { Entity } from '@/api/entities'
-import { addRefImages, deleteRefImage, type RefImage, type RefKind } from '@/mocks/entities'
+import { deleteRef, listRefs, uploadRef, type Entity, type RefImage, type RefKind } from '@/api/entities'
 
 // Một nhóm ảnh mẫu (khuôn mặt hoặc ảnh hay bị dùng lại) của một đối tượng: tải lên, xem lớn, xoá.
 export default function RefImageGroup({
   entity,
-  refs,
   kind,
   title,
   description,
 }: {
   entity: Entity
-  refs: RefImage[]
   kind: RefKind
   title: string
   description: string
@@ -35,15 +32,23 @@ export default function RefImageGroup({
   const [viewing, setViewing] = useState<RefImage | null>(null)
   const [deleting, setDeleting] = useState<RefImage | null>(null)
 
-  const images = refs.filter((r) => r.entityId === entity.id && r.kind === kind)
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ['refImages'] })
+  const refs = useQuery({ queryKey: ['refs', entity.id], queryFn: () => listRefs(entity.id) })
+  const images = refs.data?.[kind] ?? []
+  // Đổi ảnh thì số ảnh trong danh sách đối tượng cũng đổi.
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['refs', entity.id] }),
+      queryClient.invalidateQueries({ queryKey: ['entities'] }),
+    ])
 
   const upload = useMutation({
-    mutationFn: (files: File[]) => addRefImages(entity.id, kind, files),
+    mutationFn: async (files: File[]) => {
+      for (const f of files) await uploadRef(entity.id, kind, f)
+    },
     onSuccess: refresh,
   })
   const remove = useMutation({
-    mutationFn: (ref: RefImage) => deleteRefImage(ref.id),
+    mutationFn: (ref: RefImage) => deleteRef(ref),
     onSuccess: async () => {
       await refresh()
       setDeleting(null)
@@ -63,7 +68,7 @@ export default function RefImageGroup({
         <input
           ref={fileInput}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           multiple
           hidden
           onChange={(e) => {
@@ -78,7 +83,8 @@ export default function RefImageGroup({
         </Button>
       </div>
 
-      {upload.isError && <p className="text-sm text-destructive">Could not upload the images.</p>}
+      {upload.error && <p className="text-sm text-destructive">Could not upload: {upload.error.message}</p>}
+      {refs.error && <p className="text-sm text-destructive">Could not load images: {refs.error.message}</p>}
 
       {images.length === 0 ? (
         <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
@@ -87,26 +93,26 @@ export default function RefImageGroup({
       ) : (
         <ul className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-3">
           {images.map((img) => (
-            <li key={img.id} className="group relative">
+            <li key={img.file} className="group relative">
               <button
                 type="button"
                 className="block w-full overflow-hidden rounded-lg border focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
                 onClick={() => setViewing(img)}
-                aria-label={`View ${img.filename}`}
+                aria-label={`View ${img.file}`}
               >
-                <RefThumb image={img} entityName={entity.name} className="w-full" />
+                <RefThumb image={img} className="w-full" />
               </button>
               <Button
                 variant="secondary"
                 size="icon-xs"
                 className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                aria-label={`Delete ${img.filename}`}
+                aria-label={`Delete ${img.file}`}
                 onClick={() => setDeleting(img)}
               >
                 <Trash2Icon />
               </Button>
-              <p className="mt-1 truncate text-xs text-muted-foreground" title={img.filename}>
-                {img.filename}
+              <p className="mt-1 truncate text-xs text-muted-foreground" title={img.file}>
+                {img.file}
               </p>
             </li>
           ))}
@@ -119,12 +125,12 @@ export default function RefImageGroup({
           {viewing && (
             <>
               <DialogHeader>
-                <DialogTitle>{viewing.filename}</DialogTitle>
+                <DialogTitle className="truncate">{viewing.file}</DialogTitle>
                 <DialogDescription>
-                  {entity.name} · {title} · uploaded {formatVnDateTime(viewing.uploadedAt)}
+                  {entity.name} · {title} · uploaded {formatVnDateTime(viewing.uploaded_at)} · {(viewing.bytes / 1024).toFixed(0)} KB
                 </DialogDescription>
               </DialogHeader>
-              <RefThumb image={viewing} entityName={entity.name} large className="w-full max-h-[60vh] rounded-lg" />
+              <RefThumb image={viewing} large className="w-full max-h-[60vh] rounded-lg" />
               <DialogFooter>
                 <Button variant="destructive" onClick={() => setDeleting(viewing)}>
                   <Trash2Icon />
@@ -147,11 +153,11 @@ export default function RefImageGroup({
               <DialogHeader>
                 <DialogTitle>Delete reference image?</DialogTitle>
                 <DialogDescription>
-                  {deleting.filename} will be removed from {entity.name}. Later analysis runs will no longer match
+                  {deleting.file} will be removed from {entity.name}. Later analysis runs will no longer match
                   against it.
                 </DialogDescription>
               </DialogHeader>
-              {remove.isError && <p className="text-sm text-destructive">Could not delete the image.</p>}
+              {remove.error && <p className="text-sm text-destructive">Could not delete: {remove.error.message}</p>}
               <DialogFooter>
                 <DialogClose asChild>
                   <Button variant="outline">Cancel</Button>

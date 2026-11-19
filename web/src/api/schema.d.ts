@@ -73,6 +73,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/entities/{entity_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Entity */
+        patch: operations["update_entity_api_entities__entity_id__patch"];
+        trace?: never;
+    };
+    "/api/entities/{entity_id}/refs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Refs */
+        get: operations["list_refs_api_entities__entity_id__refs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/entities/{entity_id}/refs/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Ref
+         * @description Thân request là bytes của ảnh (không dùng multipart).
+         */
+        post: operations["add_ref_api_entities__entity_id__refs__kind__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/entities/{entity_id}/refs/{kind}/{file}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Ref */
+        get: operations["get_ref_api_entities__entity_id__refs__kind___file__get"];
+        put?: never;
+        post?: never;
+        /** Delete Ref */
+        delete: operations["delete_ref_api_entities__entity_id__refs__kind___file__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/collect": {
         parameters: {
             query?: never;
@@ -141,6 +213,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/review/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Review Queue */
+        get: operations["review_queue_api_review_queue_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/findings/{finding_id}/decisions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Finding Decisions */
+        get: operations["finding_decisions_api_findings__finding_id__decisions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/findings/{finding_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide */
+        post: operations["decide_api_findings__finding_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -194,6 +317,19 @@ export interface components {
          * @enum {string}
          */
         Confidence: "unverified" | "likely" | "highly_likely";
+        /** DecisionBody */
+        DecisionBody: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "confirmed" | "rejected" | "needs_info";
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
         /**
          * Entity
          * @description Đối tượng cần bảo vệ. Ảnh mẫu nằm ở entities/<id>/refs/{face,image}/.
@@ -228,6 +364,33 @@ export interface components {
              * @default []
              */
             abbreviations: string[];
+        };
+        /** EntityOut */
+        EntityOut: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Aliases
+             * @default []
+             */
+            aliases: string[];
+            /**
+             * Abbreviations
+             * @default []
+             */
+            abbreviations: string[];
+            ref_counts: components["schemas"]["RefCounts"];
+        };
+        /** EntityUpdate */
+        EntityUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Aliases */
+            aliases?: string[] | null;
+            /** Abbreviations */
+            abbreviations?: string[] | null;
         };
         /**
          * Finding
@@ -345,6 +508,67 @@ export interface components {
             /** Model */
             model: string;
         };
+        /** QueueItem */
+        QueueItem: {
+            finding: components["schemas"]["Finding"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "unreviewed" | "confirmed" | "rejected" | "needs_info";
+            video: components["schemas"]["VideoRef"];
+            /** Decisions */
+            decisions: components["schemas"]["ReviewDecision"][];
+        };
+        /** RefCounts */
+        RefCounts: {
+            /** Face */
+            face: number;
+            /** Image */
+            image: number;
+        };
+        /** RefImage */
+        RefImage: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "face" | "image";
+            /** File */
+            file: string;
+            /** Bytes */
+            bytes: number;
+            /** Sha256 */
+            sha256: string;
+            /** Uploaded At */
+            uploaded_at: string;
+            /** Url */
+            url: string;
+        };
+        /**
+         * ReviewDecision
+         * @description Một quyết định rà soát (một dòng của reviews.jsonl).
+         */
+        ReviewDecision: {
+            /** Finding Id */
+            finding_id: string;
+            /** Run Id */
+            run_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "confirmed" | "rejected" | "needs_info";
+            /** By */
+            by: string;
+            /** At */
+            at: string;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
         /**
          * Severity
          * @enum {string}
@@ -395,6 +619,15 @@ export interface components {
          * @enum {string}
          */
         Via: "speech" | "ocr" | "title" | "description" | "comment" | "thumbnail" | "face" | "ref_image";
+        /** VideoRef */
+        VideoRef: {
+            /** Id */
+            id: string;
+            /** Title */
+            title?: string | null;
+            /** Channel */
+            channel?: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -488,7 +721,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Entity"][];
+                    "application/json": components["schemas"]["EntityOut"][];
                 };
             };
         };
@@ -514,6 +747,174 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Entity"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_entity_api_entities__entity_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntityUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Entity"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_refs_api_entities__entity_id__refs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: components["schemas"]["RefImage"][];
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_ref_api_entities__entity_id__refs__kind__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_id: string;
+                kind: "face" | "image";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "image/jpeg": string;
+                "image/png": string;
+                "image/webp": string;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefImage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_ref_api_entities__entity_id__refs__kind___file__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_id: string;
+                kind: "face" | "image";
+                file: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_ref_api_entities__entity_id__refs__kind___file__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entity_id: string;
+                kind: "face" | "image";
+                file: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -626,6 +1027,105 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Finding"][];
+                };
+            };
+        };
+    };
+    review_queue_api_review_queue_get: {
+        parameters: {
+            query?: {
+                video?: string | null;
+                source_kind?: components["schemas"]["SourceKind"] | null;
+                status?: ("unreviewed" | "confirmed" | "rejected" | "needs_info") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueueItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    finding_decisions_api_findings__finding_id__decisions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                finding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewDecision"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_api_findings__finding_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                finding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewDecision"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

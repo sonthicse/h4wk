@@ -88,7 +88,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/Entity"
+                    "$ref": "#/components/schemas/EntityOut"
                   },
                   "type": "array",
                   "title": "Response List Entities Api Entities Get"
@@ -124,6 +124,304 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entities/{entity_id}": {
+      "patch": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Update Entity",
+        "operationId": "update_entity_api_entities__entity_id__patch",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entity"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entities/{entity_id}/refs": {
+      "get": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "List Refs",
+        "operationId": "list_refs_api_entities__entity_id__refs_get",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RefImage"
+                    }
+                  },
+                  "propertyNames": {
+                    "enum": [
+                      "face",
+                      "image"
+                    ]
+                  },
+                  "title": "Response List Refs Api Entities  Entity Id  Refs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entities/{entity_id}/refs/{kind}": {
+      "post": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Add Ref",
+        "description": "Th\u00e2n request l\u00e0 bytes c\u1ee7a \u1ea3nh (kh\u00f4ng d\u00f9ng multipart).",
+        "operationId": "add_ref_api_entities__entity_id__refs__kind__post",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "face",
+                "image"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefImage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "image/jpeg": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/png": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            },
+            "image/webp": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entities/{entity_id}/refs/{kind}/{file}": {
+      "get": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Get Ref",
+        "operationId": "get_ref_api_entities__entity_id__refs__kind___file__get",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "face",
+                "image"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "file",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "entities"
+        ],
+        "summary": "Delete Ref",
+        "operationId": "delete_ref_api_entities__entity_id__refs__kind___file__delete",
+        "parameters": [
+          {
+            "name": "entity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Entity Id"
+            }
+          },
+          {
+            "name": "kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "enum": [
+                "face",
+                "image"
+              ],
+              "type": "string",
+              "title": "Kind"
+            }
+          },
+          {
+            "name": "file",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
           },
           "422": {
             "description": "Validation Error",
@@ -271,6 +569,195 @@
         }
       }
     },
+    "/api/review/queue": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Review Queue",
+        "operationId": "review_queue_api_review_queue_get",
+        "parameters": [
+          {
+            "name": "video",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Video"
+            }
+          },
+          {
+            "name": "source_kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/SourceKind"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source Kind"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "unreviewed",
+                    "confirmed",
+                    "rejected",
+                    "needs_info"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/QueueItem"
+                  },
+                  "title": "Response Review Queue Api Review Queue Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/findings/{finding_id}/decisions": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Finding Decisions",
+        "operationId": "finding_decisions_api_findings__finding_id__decisions_get",
+        "parameters": [
+          {
+            "name": "finding_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finding Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewDecision"
+                  },
+                  "title": "Response Finding Decisions Api Findings  Finding Id  Decisions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/findings/{finding_id}/decision": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Decide",
+        "operationId": "decide_api_findings__finding_id__decision_post",
+        "parameters": [
+          {
+            "name": "finding_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finding Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDecision"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health": {
       "get": {
         "summary": "Health",
@@ -352,6 +839,29 @@
         "title": "Confidence",
         "description": "M\u1ee9c tin c\u1eady vi\u1ebft b\u1eb1ng ch\u1eef, kh\u00f4ng d\u00f9ng ph\u1ea7n tr\u0103m."
       },
+      "DecisionBody": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "rejected",
+              "needs_info"
+            ],
+            "title": "Status"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "DecisionBody"
+      },
       "Entity": {
         "properties": {
           "id": {
@@ -419,6 +929,93 @@
           "name"
         ],
         "title": "EntityCreate"
+      },
+      "EntityOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^e_\\d{2,}$",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "aliases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Aliases",
+            "default": []
+          },
+          "abbreviations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Abbreviations",
+            "default": []
+          },
+          "ref_counts": {
+            "$ref": "#/components/schemas/RefCounts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "ref_counts"
+        ],
+        "title": "EntityOut"
+      },
+      "EntityUpdate": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "aliases": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aliases"
+          },
+          "abbreviations": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abbreviations"
+          }
+        },
+        "type": "object",
+        "title": "EntityUpdate"
       },
       "Finding": {
         "properties": {
@@ -765,6 +1362,149 @@
         ],
         "title": "ModelRef"
       },
+      "QueueItem": {
+        "properties": {
+          "finding": {
+            "$ref": "#/components/schemas/Finding"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "unreviewed",
+              "confirmed",
+              "rejected",
+              "needs_info"
+            ],
+            "title": "Status"
+          },
+          "video": {
+            "$ref": "#/components/schemas/VideoRef"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewDecision"
+            },
+            "type": "array",
+            "title": "Decisions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "finding",
+          "status",
+          "video",
+          "decisions"
+        ],
+        "title": "QueueItem"
+      },
+      "RefCounts": {
+        "properties": {
+          "face": {
+            "type": "integer",
+            "title": "Face"
+          },
+          "image": {
+            "type": "integer",
+            "title": "Image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "face",
+          "image"
+        ],
+        "title": "RefCounts"
+      },
+      "RefImage": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "face",
+              "image"
+            ],
+            "title": "Kind"
+          },
+          "file": {
+            "type": "string",
+            "title": "File"
+          },
+          "bytes": {
+            "type": "integer",
+            "title": "Bytes"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          },
+          "uploaded_at": {
+            "type": "string",
+            "title": "Uploaded At"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "file",
+          "bytes",
+          "sha256",
+          "uploaded_at",
+          "url"
+        ],
+        "title": "RefImage"
+      },
+      "ReviewDecision": {
+        "properties": {
+          "finding_id": {
+            "type": "string",
+            "pattern": "^f_[0-9A-HJKMNP-TV-Z]{26}$",
+            "title": "Finding Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "rejected",
+              "needs_info"
+            ],
+            "title": "Status"
+          },
+          "by": {
+            "type": "string",
+            "pattern": "^(user|system):\\S+$",
+            "title": "By"
+          },
+          "at": {
+            "type": "string",
+            "title": "At"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "finding_id",
+          "run_id",
+          "status",
+          "by",
+          "at"
+        ],
+        "title": "ReviewDecision",
+        "description": "M\u1ed9t quy\u1ebft \u0111\u1ecbnh r\u00e0 so\u00e1t (m\u1ed9t d\u00f2ng c\u1ee7a reviews.jsonl)."
+      },
       "Severity": {
         "type": "string",
         "enum": [
@@ -925,6 +1665,41 @@
           "ref_image"
         ],
         "title": "Via"
+      },
+      "VideoRef": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "VideoRef"
       }
     }
   }

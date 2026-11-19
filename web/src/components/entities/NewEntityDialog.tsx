@@ -7,8 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-// Tạo đối tượng qua POST /api/entities. Backend chưa có API sửa đối tượng,
-// nên biệt danh và viết tắt phải nhập ngay lúc tạo.
+// Tạo đối tượng qua POST /api/entities, có thể nhập luôn biệt danh và viết tắt.
 export default function NewEntityDialog({
   open,
   onOpenChange,

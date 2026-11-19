@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { listEntities } from '@/api/entities'
-import { listFindings, type Finding } from '@/api/findings'
+import type { Finding } from '@/api/findings'
+import { listQueue, type ReviewStatus } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,8 +12,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatTime, severityRank, severityVariant } from '@/lib/findings'
 
 type Severity = Finding['severity']
-type Filters = { q: string; severity: string; category: string; source: string }
-const emptyFilters: Filters = { q: '', severity: 'all', category: 'all', source: 'all' }
+type Filters = { q: string; severity: string; category: string; source: string; status: string }
+const emptyFilters: Filters = { q: '', severity: 'all', category: 'all', source: 'all', status: 'all' }
+
+const statusVariant: Record<ReviewStatus, 'outline' | 'default' | 'secondary'> = {
+  unreviewed: 'outline',
+  confirmed: 'default',
+  rejected: 'secondary',
+  needs_info: 'outline',
+}
 
 function timeRange(f: Finding) {
   return f.start == null ? '—' : `${formatTime(f.start)}–${formatTime(f.end ?? f.start)}`
@@ -123,17 +131,20 @@ export default function FindingsPage() {
   const [filters, setFilters] = useState<Filters>(emptyFilters)
   const [selected, setSelected] = useState<Finding | null>(null)
 
-  const findings = useQuery({ queryKey: ['findings'], queryFn: listFindings })
+  // Dùng hàng đợi rà soát để có trạng thái của từng nghi vấn (chỉ lần phân tích mới nhất mỗi bản thu).
+  const findings = useQuery({ queryKey: ['review-queue'], queryFn: () => listQueue() })
+  const statusOf = (f: Finding): ReviewStatus => findings.data?.find((it) => it.finding.id === f.id)?.status ?? 'unreviewed'
   const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
   // Nghi vấn chỉ ghi id đối tượng (e_01); tên lấy từ danh sách đối tượng.
   const entityName = (id: string) => entities.data?.find((e) => e.id === id)?.name ?? id
 
-  const allFindings = findings.data ?? []
+  const allFindings = (findings.data ?? []).map((it) => it.finding)
   const q = filters.q.trim().toLowerCase()
   const rows = allFindings
     .filter((f) => filters.severity === 'all' || f.severity === filters.severity)
     .filter((f) => filters.category === 'all' || f.category === filters.category)
     .filter((f) => filters.source === 'all' || f.source_kind === filters.source)
+    .filter((f) => filters.status === 'all' || statusOf(f) === filters.status)
     .filter((f) => !q || `${f.quote} ${f.video_id} ${entityName(f.entity)}`.toLowerCase().includes(q))
     .sort(
       (a, b) =>
@@ -178,6 +189,12 @@ export default function FindingsPage() {
           options={['speech', 'ocr', 'visual', 'title', 'description', 'thumbnail', 'comment']}
           onChange={set('source')}
         />
+        <FilterSelect
+          label="Statuses"
+          value={filters.status}
+          options={['unreviewed', 'confirmed', 'rejected', 'needs_info']}
+          onChange={set('status')}
+        />
         {isFiltered && (
           <Button variant="ghost" onClick={() => setFilters(emptyFilters)}>
             Clear
@@ -200,6 +217,7 @@ export default function FindingsPage() {
             <TableHead>Category</TableHead>
             <TableHead>Severity</TableHead>
             <TableHead>Confidence</TableHead>
+            <TableHead>Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -240,18 +258,21 @@ export default function FindingsPage() {
                 <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
               </TableCell>
               <TableCell>{f.confidence}</TableCell>
+              <TableCell>
+                <Badge variant={statusVariant[statusOf(f)]}>{statusOf(f)}</Badge>
+              </TableCell>
             </TableRow>
           ))}
           {findings.isPending && (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground">
+              <TableCell colSpan={9} className="text-center text-muted-foreground">
                 Loading…
               </TableCell>
             </TableRow>
           )}
           {findings.data && rows.length === 0 && (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground">
+              <TableCell colSpan={9} className="text-center text-muted-foreground">
                 {allFindings.length === 0 ? 'No findings yet. Collect a video to analyze it.' : 'No findings match these filters.'}
               </TableCell>
             </TableRow>

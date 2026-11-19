@@ -1,21 +1,39 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { listEntities } from '@/api/entities'
+import { decide as postDecision, listQueue, type DecisionStatus, type QueueItem, type ReviewStatus } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { severityRank, severityVariant, statusVariant, timeRange, videoLink } from '@/lib/findings'
+import { formatTime, severityVariant } from '@/lib/findings'
 import { formatVnDateTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { findings, type Finding, type ReviewStatus } from '@/mocks/data'
 
-// Quyết định rà soát theo hợp đồng C4 (reviews.jsonl). Ở bản dữ liệu giả, quyết định chỉ nằm trong state của trang.
-type Decision = { status: Exclude<ReviewStatus, 'pending'>; by: string; at: string; note: string }
-type View = 'pending' | 'needs_info' | 'all'
+// Hàng đợi và quyết định lấy từ API rà soát (T25); quyết định ghi vào reviews.jsonl ở backend.
+type View = 'unreviewed' | 'needs_info' | 'all'
 
-const CURRENT_USER = 'user:thi'
+const statusVariant: Record<ReviewStatus, 'outline' | 'default' | 'secondary'> = {
+  unreviewed: 'outline',
+  confirmed: 'default',
+  rejected: 'secondary',
+  needs_info: 'outline',
+}
+
+function timeRange(item: QueueItem) {
+  const f = item.finding
+  return f.start == null ? '—' : `${formatTime(f.start)}–${formatTime(f.end ?? f.start)}`
+}
+
+// Trang Video detail còn là dữ liệu giả (T26), nên tạm mở video gốc trên YouTube tại start − 2s.
+function youtubeLink(item: QueueItem) {
+  const f = item.finding
+  const t = f.start == null ? '' : `&t=${Math.max(0, Math.floor(f.start) - 2)}s`
+  return `https://www.youtube.com/watch?v=${encodeURIComponent(f.video_id)}${t}`
+}
+
 const views: { id: View; label: string }[] = [
-  { id: 'pending', label: 'Pending' },
+  { id: 'unreviewed', label: 'Unreviewed' },
   { id: 'needs_info', label: 'Needs info' },
   { id: 'all', label: 'All' },
 ]
@@ -34,27 +52,34 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 }
 
 export default function ReviewQueuePage() {
-  const [decisions, setDecisions] = useState<Record<string, Decision[]>>({})
-  const [view, setView] = useState<View>('pending')
+  const queryClient = useQueryClient()
+  const queueQuery = useQuery({ queryKey: ['review-queue'], queryFn: () => listQueue() })
+  const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
+  const entityName = (id: string) => entities.data?.find((e) => e.id === id)?.name ?? id
+  const [view, setView] = useState<View>('unreviewed')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [rejecting, setRejecting] = useState(false)
   const [note, setNote] = useState('')
   const noteRef = useRef<HTMLTextAreaElement>(null)
 
-  const statusOf = (f: Finding): ReviewStatus => decisions[f.id]?.at(-1)?.status ?? f.status
-  const caseFindings = findings
-    .sort((a, b) => severityRank[a.severity] - severityRank[b.severity] || a.videoTitle.localeCompare(b.videoTitle) || a.start - b.start)
-  const queue = caseFindings.filter((f) => view === 'all' || statusOf(f) === view)
-  const selected = queue.find((f) => f.id === selectedId) ?? queue[0] ?? null
+  // Backend đã sắp theo mức độ rồi thời gian.
+  const all = queueQuery.data ?? []
+  const queue = all.filter((it) => view === 'all' || it.status === view)
+  const selected = queue.find((it) => it.finding.id === selectedId) ?? queue[0] ?? null
   const counts = {
-    pending: caseFindings.filter((f) => statusOf(f) === 'pending').length,
-    needs_info: caseFindings.filter((f) => statusOf(f) === 'needs_info').length,
-    all: caseFindings.length,
+    unreviewed: all.filter((it) => it.status === 'unreviewed').length,
+    needs_info: all.filter((it) => it.status === 'needs_info').length,
+    all: all.length,
   }
 
-  function select(f: Finding | undefined) {
-    if (!f) return
-    setSelectedId(f.id)
+  const save = useMutation({
+    mutationFn: ({ id, status, note }: { id: string; status: DecisionStatus; note: string }) => postDecision(id, status, note),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['review-queue'] }),
+  })
+
+  function select(it: QueueItem | undefined) {
+    if (!it) return
+    setSelectedId(it.finding.id)
     setRejecting(false)
     setNote('')
   }
@@ -64,20 +89,25 @@ export default function ReviewQueuePage() {
     select(queue[queue.indexOf(selected) + step])
   }
 
-  function decide(status: Decision['status']) {
-    if (!selected) return
+  function decide(status: DecisionStatus) {
+    if (!selected || save.isPending) return
     if (status === 'rejected' && !note.trim()) {
       setRejecting(true)
       return
     }
-    const decision: Decision = { status, by: CURRENT_USER, at: new Date().toISOString(), note: note.trim() }
-    setDecisions((d) => ({ ...d, [selected.id]: [...(d[selected.id] ?? []), decision] }))
     // Sang nghi vấn kế tiếp trong hàng đợi để duyệt liên tục không phải rời trang.
     const i = queue.indexOf(selected)
     const next = queue[i + 1] ?? (i > 0 ? queue[i - 1] : undefined)
-    setSelectedId(next?.id ?? null)
-    setRejecting(false)
-    setNote('')
+    save.mutate(
+      { id: selected.finding.id, status, note: note.trim() },
+      {
+        onSuccess: () => {
+          setSelectedId(next?.finding.id ?? null)
+          setRejecting(false)
+          setNote('')
+        },
+      },
+    )
   }
 
   useEffect(() => {
@@ -108,7 +138,8 @@ export default function ReviewQueuePage() {
     return () => window.removeEventListener('keydown', onKey)
   })
 
-  const history = selected ? (decisions[selected.id] ?? []) : []
+  const history = selected?.decisions ?? []
+  const f = selected?.finding
 
   return (
     <div className="flex h-[calc(100svh-3rem-3rem)] flex-col gap-4">
@@ -138,45 +169,50 @@ export default function ReviewQueuePage() {
 
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4">
         <ul className="min-h-0 space-y-1 overflow-y-auto pr-1">
-          {queue.map((f) => (
-            <li key={f.id}>
+          {queue.map((it) => (
+            <li key={it.finding.id}>
               <button
                 type="button"
-                onClick={() => select(f)}
-                aria-current={selected?.id === f.id ? 'true' : undefined}
+                onClick={() => select(it)}
+                aria-current={selected === it ? 'true' : undefined}
                 className={cn(
                   'w-full rounded-md border p-3 text-left transition-colors hover:bg-muted/50',
-                  selected?.id === f.id && 'border-primary bg-muted',
+                  selected === it && 'border-primary bg-muted',
                 )}
               >
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
-                  <span>{f.sourceKind}</span>
-                  <span className="font-mono">{timeRange(f)}</span>
-                  <Badge variant={statusVariant[statusOf(f)]} className="ml-auto">{statusOf(f)}</Badge>
+                  <Badge variant={severityVariant[it.finding.severity]}>{it.finding.severity}</Badge>
+                  <span>{it.finding.source_kind}</span>
+                  <span className="font-mono">{timeRange(it)}</span>
+                  <Badge variant={statusVariant[it.status]} className="ml-auto">{it.status}</Badge>
                 </div>
-                <p className="mt-2 line-clamp-2 text-sm">{f.quote}</p>
-                <p className="mt-1 truncate text-xs text-muted-foreground">{f.videoTitle}</p>
+                <p className="mt-2 line-clamp-2 text-sm">{it.finding.quote}</p>
+                <p className="mt-1 truncate text-xs text-muted-foreground">{it.video.title ?? it.video.id}</p>
               </button>
             </li>
           ))}
-          {queue.length === 0 && (
+          {queueQuery.isPending && <li className="p-6 text-center text-sm text-muted-foreground">Loading…</li>}
+          {queueQuery.error && (
+            <li className="p-6 text-center text-sm text-destructive">Could not load the queue: {queueQuery.error.message}</li>
+          )}
+          {queueQuery.data && queue.length === 0 && (
             <li className="p-6 text-center text-sm text-muted-foreground">Nothing left to review here.</li>
           )}
         </ul>
 
         {/* key theo nghi vấn để panel cuộn lại về đầu mỗi khi chuyển nghi vấn. */}
-        <section key={selected?.id} className="min-h-0 overflow-y-auto rounded-md border p-4">
-          {selected ? (
+        <section key={f?.id} className="min-h-0 overflow-y-auto rounded-md border p-4">
+          {selected && f ? (
             <div className="space-y-4">
               <div>
-                <h2 className="font-semibold">{selected.videoTitle}</h2>
+                <h2 className="font-semibold">{selected.video.title ?? selected.video.id}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {selected.channel} · {selected.sourceKind} · {timeRange(selected)}
+                  {selected.video.channel && `${selected.video.channel} · `}
+                  {f.source_kind} · {timeRange(selected)}
                 </p>
               </div>
 
-              {['ocr', 'visual', 'thumbnail'].includes(selected.sourceKind) && (
+              {['ocr', 'visual', 'thumbnail'].includes(f.source_kind) && (
                 <div className="flex h-40 items-center justify-center rounded-md bg-muted text-sm text-muted-foreground">
                   Frame preview (T27)
                 </div>
@@ -184,34 +220,37 @@ export default function ReviewQueuePage() {
 
               <dl className="space-y-4">
                 <Detail label="Quote">
-                  <blockquote className="border-l-2 pl-3 italic">{selected.quote}</blockquote>
+                  <blockquote className="border-l-2 pl-3 italic">{f.quote}</blockquote>
                 </Detail>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant={severityVariant[selected.severity]}>{selected.severity}</Badge>
-                  <Badge variant="outline">{selected.category}</Badge>
-                  <Badge variant="outline">{selected.confidence}</Badge>
+                  <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
+                  <Badge variant="outline">{f.category}</Badge>
+                  <Badge variant="outline">{f.confidence}</Badge>
                 </div>
-                <Detail label="Entity">{selected.entity}</Detail>
-                <Detail label="Reason">{selected.reason}</Detail>
+                <Detail label="Entity">{entityName(f.entity)}</Detail>
+                <Detail label="Reason">{f.reason}</Detail>
                 <Detail label="Triggers">
                   <ul className="space-y-1">
-                    {selected.triggers.map((t) => (
-                      <li key={t.via} className="font-mono text-xs">
-                        {t.via} · score {t.score.toFixed(2)}
+                    {(f.triggers ?? []).map((t, i) => (
+                      <li key={i} className="font-mono text-xs">
+                        {t.via}
+                        {t.score != null && ` · score ${t.score.toFixed(2)}`}
                       </li>
                     ))}
                   </ul>
                 </Detail>
                 <Detail label="Analyzer">
-                  {selected.analyzer}
-                  {selected.model && (
-                    <span className="text-muted-foreground"> · {selected.model.provider}/{selected.model.model}</span>
+                  {f.analyzer} {f.analyzer_version}
+                  {f.model && (
+                    <span className="text-muted-foreground"> · {f.model.provider}/{f.model.model}</span>
                   )}
                 </Detail>
               </dl>
 
               <Button asChild variant="outline" size="sm">
-                <Link to={videoLink(selected)}>Open in video</Link>
+                <a href={youtubeLink(selected)} target="_blank" rel="noreferrer">
+                  Open on YouTube
+                </a>
               </Button>
 
               <div className="space-y-3 border-t pt-4">
@@ -234,18 +273,23 @@ export default function ReviewQueuePage() {
                     </p>
                   </div>
                 )}
+                {save.error && (
+                  <p role="alert" className="text-sm text-destructive">
+                    Could not save the decision: {save.error.message}
+                  </p>
+                )}
                 <div className="flex gap-2">
-                  <Button onClick={() => decide('confirmed')}>
+                  <Button disabled={save.isPending} onClick={() => decide('confirmed')}>
                     Confirm <Kbd>c</Kbd>
                   </Button>
                   <Button
                     variant="destructive"
-                    disabled={rejecting && !note.trim()}
+                    disabled={save.isPending || (rejecting && !note.trim())}
                     onClick={() => decide('rejected')}
                   >
                     {rejecting ? 'Submit reject' : 'Reject'} <Kbd>r</Kbd>
                   </Button>
-                  <Button variant="outline" onClick={() => decide('needs_info')}>
+                  <Button variant="outline" disabled={save.isPending} onClick={() => decide('needs_info')}>
                     Needs info <Kbd>n</Kbd>
                   </Button>
                 </div>
@@ -256,7 +300,7 @@ export default function ReviewQueuePage() {
                   <h3 className="text-xs text-muted-foreground">Decisions</h3>
                   <ul className="space-y-1 text-sm">
                     {history.map((d) => (
-                      <li key={d.at}>
+                      <li key={`${d.at}-${d.status}`}>
                         <Badge variant={statusVariant[d.status]}>{d.status}</Badge>{' '}
                         <span className="text-muted-foreground">
                           {d.by} · {formatVnDateTime(d.at)}

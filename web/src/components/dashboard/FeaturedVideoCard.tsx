@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { ExternalLinkIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { listFindings, type Finding } from '@/api/findings'
+import type { Finding } from '@/api/findings'
+import { listQueue } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatTime, severityVariant } from '@/lib/findings'
@@ -13,9 +14,9 @@ type Severity = Finding['severity']
 const WEIGHT: Record<Severity, number> = { high: 3, medium: 2, low: 1 }
 const LEAD_S = 2
 
-// Video nổi bật nhất, tính từ nghi vấn thật (GET /api/findings): mỗi nghi vấn high = 3, medium = 2, low = 1 điểm,
-// video tổng điểm cao nhất đứng đầu. Chưa có API rà soát nên chưa bỏ được nghi vấn đã Reject; khi có
-// API dashboard (T35) thì việc chấm điểm chuyển sang backend.
+// Video nổi bật nhất, tính từ hàng đợi rà soát thật: mỗi nghi vấn high = 3, medium = 2, low = 1 điểm,
+// bỏ nghi vấn đã Reject; video tổng điểm cao nhất đứng đầu. Khi có API dashboard (T35) thì việc chấm điểm
+// chuyển sang backend.
 function pickTopVideo(findings: Finding[]) {
   const score = new Map<string, number>()
   for (const f of findings) score.set(f.video_id, (score.get(f.video_id) ?? 0) + WEIGHT[f.severity])
@@ -24,9 +25,7 @@ function pickTopVideo(findings: Finding[]) {
   const list = findings
     .filter((f) => f.video_id === top[0])
     .sort((a, b) => WEIGHT[b.severity] - WEIGHT[a.severity] || (a.start ?? 0) - (b.start ?? 0))
-  // Chưa có API video (T26) nên lấy tiêu đề từ nghi vấn ở tiêu đề, nếu có.
-  const title = findings.find((f) => f.video_id === top[0] && f.source_kind === 'title')?.quote ?? top[0]
-  return { videoId: top[0], title, findings: list }
+  return { videoId: top[0], findings: list }
 }
 
 // Trình phát nhúng của YouTube (bản nocookie), tự phát không tiếng từ giây `start`.
@@ -46,8 +45,10 @@ function EmbeddedPlayer({ videoId, start }: { videoId: string; start: number }) 
 }
 
 export default function FeaturedVideoCard() {
-  const findings = useQuery({ queryKey: ['findings'], queryFn: listFindings, refetchInterval: 30_000 })
-  const top = findings.data ? pickTopVideo(findings.data) : null
+  const findings = useQuery({ queryKey: ['review-queue'], queryFn: () => listQueue(), refetchInterval: 30_000 })
+  const live = findings.data?.filter((it) => it.status !== 'rejected').map((it) => it.finding)
+  const top = live ? pickTopVideo(live) : null
+  const video = findings.data?.find((it) => it.finding.video_id === top?.videoId)?.video
   const [picked, setPicked] = useState<string | null>(null)
 
   if (!top) {
@@ -77,7 +78,10 @@ export default function FeaturedVideoCard() {
       <CardHeader>
         <CardDescription>Top video · most serious findings</CardDescription>
         <div className="flex items-start justify-between gap-4">
-          <CardTitle className="line-clamp-2 text-lg">{top.title}</CardTitle>
+          <div>
+            <CardTitle className="line-clamp-2 text-lg">{video?.title ?? top.videoId}</CardTitle>
+            {video?.channel && <p className="text-sm text-muted-foreground">{video.channel}</p>}
+          </div>
           <div className="flex shrink-0 items-center gap-2 text-sm">
             {(['high', 'medium', 'low'] as const).map(
               (s) =>
