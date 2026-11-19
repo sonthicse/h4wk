@@ -132,7 +132,6 @@ export default function DashboardPage() {
               <StatCard label="Watched channels" value={d.channel_count} to="/watchlist" />
               <StatCard label="Videos collected" value={d.video_count} to="/videos" />
               <StatCard label="Captures" value={d.capture_count} to="/collect" />
-              <StatCard label="Pending review" value={d.findings_by_status.unreviewed} to="/review" />
             </div>
           </div>
           <div className="min-h-0 flex-1">

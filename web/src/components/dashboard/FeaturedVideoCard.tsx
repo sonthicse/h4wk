@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router'
 import type { Finding } from '@/api/findings'
 import { listQueue } from '@/api/review'
 import { getVideo } from '@/api/videos'
@@ -42,17 +43,18 @@ function stripRepeatedTitle(description: string, title?: string | null) {
 }
 
 // Trình phát nhúng của YouTube (bản nocookie), tự phát không tiếng từ giây `start`.
+// Ẩn hết nút điều khiển của YouTube; thẻ bọc ngoài là link nên iframe không nhận chuột.
 // Khi backend có luồng video proxy (T26) thì thay bằng <video> phát từ bản thu.
 function EmbeddedPlayer({ videoId, start }: { videoId: string; start: number }) {
-  const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&mute=1&start=${start}&rel=0`
+  const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&mute=1&start=${start}&rel=0&controls=0&disablekb=1&fs=0&modestbranding=1&iv_load_policy=3`
   return (
     <iframe
       key={`${videoId}-${start}`}
       src={src}
-      title="Top video"
-      className="aspect-video w-full rounded-lg bg-black"
-      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-      allowFullScreen
+      title="Most serious video"
+      tabIndex={-1}
+      className="pointer-events-none aspect-video w-full rounded-lg bg-black"
+      allow="autoplay; encrypted-media; picture-in-picture"
     />
   )
 }
@@ -91,19 +93,25 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   const description = stripRepeatedTitle(detail.data?.video.description ?? '', video?.title)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">Most serious</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <EmbeddedPlayer videoId={top.videoId} start={start} />
-        <div className="space-y-1">
-          <p className="text-lg font-semibold">{video?.title ?? top.videoId}</p>
-          {description && (
-            <p className="line-clamp-3 text-sm whitespace-pre-line text-muted-foreground">{description}</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <Link
+      to={`/videos/${encodeURIComponent(top.videoId)}`}
+      aria-label={video?.title ?? top.videoId}
+      className="block rounded-xl transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none [&>*]:hover:bg-muted/40"
+    >
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Most serious</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <EmbeddedPlayer videoId={top.videoId} start={start} />
+          <div className="space-y-1">
+            <p className="text-lg font-semibold">{video?.title ?? top.videoId}</p>
+            {description && (
+              <p className="line-clamp-3 text-sm whitespace-pre-line text-muted-foreground">{description}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
