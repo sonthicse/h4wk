@@ -13,7 +13,7 @@ from sqlmodel import Session
 from h4wk.ai.base import ProviderError, ProviderRequest
 from h4wk.ai.providers import key_name, make_provider
 from h4wk.api.deps import current_actor
-from h4wk.collectors import registry
+from h4wk.collectors import quota, registry
 from h4wk.collectors.models import Cap
 from h4wk.collectors.orchestrator import Settings as RouteSettings
 from h4wk.core import audit, secrets, settings
@@ -47,7 +47,7 @@ class SourceInfo(BaseModel):
     consecutive_failures: int
     last_error: str | None
     last_error_at: VnDatetime | None
-    usage: Usage | None  # có khi làm T14, T15
+    usage: Usage | None  # có với youtube_api; supadata ở T15
 
 
 class SourcesSettings(BaseModel):
@@ -102,6 +102,13 @@ def _invalid(e: ValidationError) -> HTTPException:
 # ------------------------------------------------------------------- nguồn thu
 
 
+def _usage(name: str, now: datetime) -> Usage | None:
+    if name != "youtube_api":
+        return None
+    u = quota.usage(now)
+    return Usage(used=u.used, limit=u.limit, period="day", resets_at=u.resets_at)
+
+
 def _sources_view() -> SourcesSettings:
     cfg = settings.load_sources()
     sections = cfg.sources.model_dump()
@@ -129,7 +136,7 @@ def _sources_view() -> SourcesSettings:
                 consecutive_failures=st.consecutive_failures if st else 0,
                 last_error=st.last_error if st else None,
                 last_error_at=as_aware(st.last_error_at) if st and st.last_error_at else None,
-                usage=None,
+                usage=_usage(name, now),
             )
         )
     uncovered = [

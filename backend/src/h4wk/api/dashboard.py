@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from sqlmodel import Session, func, select
 
+from h4wk.collectors import quota
 from h4wk.core.config import data_dir
 from h4wk.core.db import WatchItemRow, get_engine
 from h4wk.core.types import VN_TZ
@@ -60,7 +61,7 @@ class Dashboard(BaseModel):
     findings_by_severity: SeverityCounts
     findings_by_status: StatusCounts
     activity: list[DayActivity]  # 14 ngày, cũ trước, theo giờ Việt Nam
-    youtube_quota: Usage | None  # có khi làm T14
+    youtube_quota: Usage | None  # quota YouTube API hôm nay
     supadata_credits: Usage | None  # có khi làm T15
     top_video: TopVideo | None
 
@@ -117,6 +118,7 @@ def dashboard(latest_only: bool = False) -> Dashboard:
             findings=SeverityCounts(**per_video[best]),
         )
 
+    u = quota.usage(datetime.now(VN_TZ))
     return Dashboard(
         channel_count=channel_count,
         video_count=len(captures_by_video),
@@ -126,7 +128,7 @@ def dashboard(latest_only: bool = False) -> Dashboard:
         activity=[
             DayActivity(date=d, captures=capture_days[d], findings=finding_days[d]) for d in days
         ],
-        youtube_quota=None,
+        youtube_quota=Usage(used=u.used, limit=u.limit),
         supadata_credits=None,
         top_video=top,
     )

@@ -12,8 +12,10 @@ from sqlmodel import Session
 from h4wk.ai import providers as ai_providers
 from h4wk.ai.base import ProviderReply
 from h4wk.ai.fake import FakeProvider
+from h4wk.collectors.base import Health
 from h4wk.collectors.models import Cap
 from h4wk.collectors.orchestrator import Orchestrator
+from h4wk.collectors.providers.youtube_api import YouTubeApiCollector
 from h4wk.core.db import SourceStateRow, get_engine
 from h4wk.core.types import VN_TZ
 
@@ -29,7 +31,10 @@ def cfg(config_dir: Path) -> Path:
     return config_dir
 
 
-def test_no_response_contains_full_secret(client: TestClient, cfg) -> None:
+def test_no_response_contains_full_secret(
+    client: TestClient, cfg, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(YouTubeApiCollector, "health_check", lambda self: Health(True, "ok"))
     bodies = [
         client.put("/api/settings/sources/youtube_api/key", json={"value": YT_KEY}),
         client.put("/api/settings/ai/providers/anthropic/key", json={"value": AI_KEY}),
@@ -51,6 +56,20 @@ def test_no_response_contains_full_secret(client: TestClient, cfg) -> None:
 
     log = (data_dir() / "log" / "audit.jsonl").read_text(encoding="utf-8")
     assert YT_KEY not in log and AI_KEY not in log
+
+
+def test_sources_show_youtube_quota_usage(client: TestClient, cfg) -> None:
+    sources = {s["name"]: s for s in client.get("/api/settings/sources").json()["sources"]}
+    yt = sources["youtube_api"]
+    assert yt["implemented"] is True
+    usage = yt["usage"]
+    assert {k: usage[k] for k in ("used", "limit", "period")} == {
+        "used": 0,
+        "limit": 10000,
+        "period": "day",
+    }
+    assert usage["resets_at"].endswith("+07:00")
+    assert sources["ytdlp"]["usage"] is None
 
 
 def test_priority_change_is_used_by_next_job(client: TestClient, cfg) -> None:

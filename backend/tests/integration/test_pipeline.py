@@ -222,3 +222,41 @@ def test_channel_and_playlist_not_supported_yet(client: TestClient, url: str) ->
     _entity(client)
     r = client.post("/api/collect", json={"url": url})
     assert r.status_code == 400 and "not supported" in r.json()["detail"]
+
+
+def test_ytdlp_disabled_still_collects_text(
+    client: TestClient,
+    fake_source: dict,
+    data_dir: Path,
+    config_dir: Path,
+    ytapi,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    (config_dir / "sources.toml").write_text("[sources.ytdlp]\nenabled = false\n", encoding="utf-8")
+    monkeypatch.setattr(
+        registry,
+        "COLLECTORS",
+        {"ytdlp": lambda: SampleCollector(), "youtube_api": ytapi.collector},
+    )
+    _entity(client)
+    r = client.post("/api/collect", json={"url": VIDEO})
+    job = client.get(f"/api/jobs/{r.json()['id']}").json()
+    assert job["status"] == "done", job["error"]
+    cap = data_dir / "videos" / "h4wkDemo001" / "captures" / job["capture"]
+    sources = json.loads((cap / "manifest.json").read_bytes())["sources"]
+    by_what = {}
+    for s in sources:
+        by_what.setdefault(s["what"], []).append(s)
+    assert all(s["status"] == "disabled" for s in sources if s["provider"] == "ytdlp")
+    assert [(s["provider"], s["status"]) for s in by_what["video.media"]] == [
+        ("ytdlp", "disabled"),
+        (None, "no_source"),
+    ]
+    for what in ("video.metadata", "video.comments", "video.thumbnails"):
+        ok = [s for s in by_what[what] if s["status"] == "ok"]
+        assert [s["provider"] for s in ok] == ["youtube_api"], what
+        # thumbnails dùng lại video đã lấy ở bước metadata nên không tốn thêm quota
+        assert ok[0]["cost"]["quota_units"] >= (0 if what == "video.thumbnails" else 1), what
+    normalized = json.loads((cap / "normalized.json").read_bytes())
+    assert normalized["video"]["id"] == "h4wkDemo001" and normalized["media"] == []
+    assert normalized["comments"] and any(t["name"] == "maxres" for t in normalized["thumbnails"])

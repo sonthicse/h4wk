@@ -55,7 +55,7 @@ def test_dashboard_counts_match_index(client: TestClient, sample) -> None:
 def test_empty_dashboard(client: TestClient) -> None:
     d = client.get("/api/dashboard").json()
     assert d["video_count"] == 0 and d["top_video"] is None
-    assert d["youtube_quota"] is None
+    assert d["youtube_quota"] == {"used": 0, "limit": 10000}
 
 
 def test_events_have_titles_findings_error_and_review(client: TestClient, sample) -> None:

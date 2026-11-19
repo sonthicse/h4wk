@@ -156,7 +156,9 @@ def media(job_id: str) -> None:
         data = Normalized.model_validate_json((cap_dir / "normalized.json").read_bytes())
         frames = []
         source_hash = None
-        if job.level == CollectLevel.FULL:
+        has_video = any(m.kind == "video" for m in data.media)
+        # Bản thu full không có video (vd yt-dlp bị tắt): bỏ STT và keyframe, vẫn phân tích văn bản.
+        if job.level == CollectLevel.FULL and has_video:
             job = _update(job_id, step="transcribe", progress=48)
             video_file = stt.transcribe_capture(cap_dir, out, _stt_worker)
             manifest = Manifest.model_validate_json((cap_dir / "manifest.json").read_bytes())
