@@ -29,7 +29,7 @@ SourceName = Literal["ytdlp", "youtube_api", "supadata"]
 PROVIDER_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
 
 
-class Usage(BaseModel):
+class SourceUsage(BaseModel):
     used: int
     limit: int
     period: Literal["day", "month"]
@@ -48,7 +48,7 @@ class SourceInfo(BaseModel):
     consecutive_failures: int
     last_error: str | None
     last_error_at: VnDatetime | None
-    usage: Usage | None  # youtube_api (theo ngày), supadata (theo kỳ thanh toán)
+    usage: SourceUsage | None  # youtube_api (theo ngày), supadata (theo kỳ thanh toán)
 
 
 class SourcesSettings(BaseModel):
@@ -103,14 +103,16 @@ def _invalid(e: ValidationError) -> HTTPException:
 # ------------------------------------------------------------------- nguồn thu
 
 
-def _usage(name: str, now: datetime) -> Usage | None:
+def _usage(name: str, now: datetime) -> SourceUsage | None:
     if name == "supadata":
         c = supadata.credits_usage()
-        return Usage(used=c.used, limit=c.limit, period="month", resets_at=None) if c else None
+        return (
+            SourceUsage(used=c.used, limit=c.limit, period="month", resets_at=None) if c else None
+        )
     if name != "youtube_api":
         return None
     u = quota.usage(now)
-    return Usage(used=u.used, limit=u.limit, period="day", resets_at=u.resets_at)
+    return SourceUsage(used=u.used, limit=u.limit, period="day", resets_at=u.resets_at)
 
 
 def _sources_view() -> SourcesSettings:
