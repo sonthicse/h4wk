@@ -52,7 +52,7 @@ def test_scan_all_sources_and_create_findings_only_for_insults(tmp_path):
 
     from h4wk.analysis.runner import analyze
     from h4wk.collectors.models import Comment, Normalized, Video
-    from h4wk.core.cases import Entity
+    from h4wk.core.entities import Entity
     from h4wk.media.timeline import FrameOcr, OcrText, Segment, ThumbnailAnalysis, Timeline
 
     timeline = Timeline(
@@ -78,7 +78,7 @@ def test_scan_all_sources_and_create_findings_only_for_insults(tmp_path):
         comments=[Comment(id="c1", text="NVH đồ ngốc")],
     )
     entity = Entity(id="e_01", name="Nguyễn Văn Hùng", abbreviations=["NVH"])
-    hits, findings = analyze(data, timeline, [entity], _lex("đồ ngốc"), "case", "run", tmp_path)
+    hits, findings = analyze(data, timeline, [entity], _lex("đồ ngốc"), "run", tmp_path)
     assert {h.via for h in hits} == {
         "speech",
         "ocr",
@@ -102,7 +102,7 @@ def test_scan_all_sources_and_create_findings_only_for_insults(tmp_path):
 def test_aliases_are_matched(tmp_path):
     from h4wk.analysis.runner import analyze
     from h4wk.collectors.models import Normalized, Video
-    from h4wk.core.cases import Entity
+    from h4wk.core.entities import Entity
     from h4wk.media.timeline import Timeline
 
     data = Normalized(
@@ -110,7 +110,7 @@ def test_aliases_are_matched(tmp_path):
     )
     timeline = Timeline(schema="h4wk.timeline/1", video_id="v", capture="20261118T154530")
     entity = Entity(id="e_01", name="Trần Văn Mẫu", aliases=["Mẫu Ca"])
-    hits, findings = analyze(data, timeline, [entity], None, "case", "run", tmp_path)
+    hits, findings = analyze(data, timeline, [entity], None, "run", tmp_path)
     assert [h.via for h in hits] == ["title"] and len(findings) == 1
 
 
@@ -148,7 +148,7 @@ def test_sample_capture_t44_gives_findings(tmp_path):
 
     from h4wk.analysis.runner import analyze
     from h4wk.collectors.models import Normalized
-    from h4wk.core.cases import Entity
+    from h4wk.core.entities import Entity
     from h4wk.media.timeline import Timeline
 
     root = Path(__file__).resolve().parents[1] / "fixtures/captures/h4wkDemo001"
@@ -158,7 +158,7 @@ def test_sample_capture_t44_gives_findings(tmp_path):
         (root / "derived/20261118T160000/timeline.json").read_text(encoding="utf-8")
     )
     entity = Entity(id="e_01", name="Trần Văn Mẫu", aliases=["Mẫu Ca"], abbreviations=["TVM"])
-    hits, findings = analyze(data, timeline, [entity], None, "2026-11_case-demo", "r_x", tmp_path)
+    hits, findings = analyze(data, timeline, [entity], None, "r_x", tmp_path)
     kinds = sorted(f.source_kind for f in findings)
     # lời nói nhắc tên kèm "lừa đảo", chữ trên hình "TRẦN VĂN MẪU LỪA ĐẢO",
     # chữ góc "TVM đồ hèn", comment "Trần Văn Mẫu đúng là lừa đảo"

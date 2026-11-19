@@ -11,7 +11,7 @@ from h4wk.analysis.models import Finding
 from h4wk.api.deps import current_actor
 from h4wk.collectors.models import CollectLevel
 from h4wk.collectors.targets import TargetKind, parse_target
-from h4wk.core import audit, cases
+from h4wk.core import audit
 from h4wk.core.db import JobRow, as_aware, get_session
 from h4wk.jobs import pipeline
 
@@ -28,7 +28,6 @@ class CollectBody(BaseModel):
 
 class Job(BaseModel):
     id: str
-    case_id: str
     target: str
     video_id: str
     level: str
@@ -50,23 +49,12 @@ class Job(BaseModel):
         return cls.model_validate(data)
 
 
-@router.post("/api/cases/{case_id}/collect", status_code=status.HTTP_202_ACCEPTED)
-def collect(case_id: str, body: CollectBody, actor: ActorDep) -> Job:
+@router.post("/api/collect", status_code=status.HTTP_202_ACCEPTED)
+def collect(body: CollectBody, actor: ActorDep) -> Job:
     def reject(code: int, msg: str) -> HTTPException:
-        audit.log(
-            case_id if code != 404 else None,
-            actor,
-            "job.create",
-            body.url,
-            {"error": msg},
-            status="error",
-        )
+        audit.log(actor, "job.create", body.url, {"error": msg}, status="error")
         return HTTPException(code, msg)
 
-    try:
-        cases.load_case(case_id)
-    except cases.NotFound:
-        raise reject(404, "case not found") from None
     try:
         target = parse_target(body.url)
     except ValueError as e:
@@ -74,8 +62,8 @@ def collect(case_id: str, body: CollectBody, actor: ActorDep) -> Job:
     if target.kind != TargetKind.VIDEO:
         # Kênh và @handle chuyển cho watchlist (T30); playlist xử lý ở T46.
         raise reject(400, f"chưa hỗ trợ thu {target.kind}; hiện chỉ thu từng video")
-    job = pipeline.create_job(case_id, target.url, target.id, body.level, body.force, actor)
-    audit.log(case_id, actor, "job.create", job.id, {"url": target.url, "level": body.level})
+    job = pipeline.create_job(target.url, target.id, body.level, body.force, actor)
+    audit.log(actor, "job.create", job.id, {"url": target.url, "level": body.level})
     pipeline.start(job.id)
     with Session(pipeline.get_engine()) as s:
         row = s.get(JobRow, job.id)
@@ -84,10 +72,8 @@ def collect(case_id: str, body: CollectBody, actor: ActorDep) -> Job:
 
 
 @router.get("/api/jobs")
-def list_jobs(session: SessionDep, case: str | None = None) -> list[Job]:
+def list_jobs(session: SessionDep) -> list[Job]:
     q = select(JobRow).order_by(JobRow.created_at.desc())  # type: ignore[union-attr]
-    if case:
-        q = q.where(JobRow.case_id == case)
     return [Job.of(r) for r in session.exec(q).all()]
 
 
@@ -99,6 +85,6 @@ def get_job(job_id: str, session: SessionDep) -> Job:
     return Job.of(row)
 
 
-@router.get("/api/cases/{case_id}/findings")
-def findings(case_id: str) -> list[Finding]:
-    return pipeline.latest_findings(case_id)
+@router.get("/api/findings")
+def findings() -> list[Finding]:
+    return pipeline.latest_findings()

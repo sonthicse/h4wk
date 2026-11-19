@@ -154,7 +154,6 @@ def _finding(**over: Any) -> dict[str, Any]:
     f: dict[str, Any] = {
         "id": FID,
         "run_id": "r_20261118T160000",
-        "case_id": "2026-11_case-0007",
         "video_id": "abc123",
         "capture": "20261118T154530",
         "analyzer": "llm",
@@ -345,6 +344,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Finding, _finding(analyzer="llm", model=None), "llm thiếu model"),
     (Finding, _finding(confidence="87%"), "mức tin cậy dạng phần trăm"),
     (Finding, _finding(category="spam"), "category lạ"),
+    (Finding, _finding(case_id="2026-11_case-0007"), "case_id đã bỏ"),
     (Finding, _finding(id="f_0001"), "id không phải ULID"),
     (Finding, _finding(source_kind="speech", segment_id=None), "speech thiếu segment_id"),
     (Finding, _finding(source_kind="ocr", start=None), "ocr thiếu start"),

@@ -83,13 +83,13 @@ def _unlock_after(data_dir: Path) -> Iterator[None]:
 
 
 def _orch(
-    collectors: list[FakeCollector], clock: Clock, case_dir: Path, **settings: object
+    collectors: list[FakeCollector], clock: Clock, root: Path, **settings: object
 ) -> Orchestrator:
     priority = {c: [x.name for x in collectors] for c in Cap}
     return Orchestrator(
         collectors={c.name: c for c in collectors},
         settings=Settings(priority=priority, **settings),  # type: ignore[arg-type]
-        case_dir=case_dir,
+        root=root,
         now=clock,
         sleep=lambda _s: None,
     )
@@ -103,7 +103,7 @@ def _collect(orch: Orchestrator, level: CollectLevel = CollectLevel.TEXT) -> Man
 
 
 def _norm(m: Manifest, data_dir: Path) -> Normalized:
-    d = data_dir / "cases" / "c" / "videos" / VID / "captures"
+    d = data_dir / "videos" / VID / "captures"
     latest = sorted(p for p in d.iterdir())[-1]
     return Normalized.model_validate_json((latest / "normalized.json").read_text("utf-8"))
 
@@ -113,83 +113,83 @@ def _calls(m: Manifest, cap: Cap) -> list[tuple[str | None, str]]:
 
 
 @pytest.fixture
-def case_root(data_dir: Path) -> Path:
-    return data_dir / "cases" / "c"
+def root(data_dir: Path) -> Path:
+    return data_dir
 
 
-def test_success_uses_first_source(clock: Clock, case_root: Path, data_dir: Path) -> None:
+def test_success_uses_first_source(clock: Clock, root: Path, data_dir: Path) -> None:
     a, b = FakeCollector("a", ALL), FakeCollector("b", ALL)
-    m = _collect(_orch([a, b], clock, case_dir=case_root), CollectLevel.FULL)
+    m = _collect(_orch([a, b], clock, root=root), CollectLevel.FULL)
     assert b.calls == []
     assert _calls(m, Cap.VIDEO_METADATA) == [("a", "ok")]
     n = _norm(m, data_dir)
     assert n.video and n.video.title == "t-a"
     assert n.provenance[Cap.MEDIA] == "a"
-    cap_dir = sorted((case_root / "videos" / VID / "captures").iterdir())[-1]
+    cap_dir = sorted((root / "videos" / VID / "captures").iterdir())[-1]
     assert all(r.status == FileStatus.OK for r in verify(cap_dir))
     assert "sources/a/v.mp4" in m.files
 
 
-def test_level_decides_caps(clock: Clock, case_root: Path) -> None:
+def test_level_decides_caps(clock: Clock, root: Path) -> None:
     a = FakeCollector("a", ALL)
-    m = _collect(_orch([a], clock, case_dir=case_root), CollectLevel.METADATA)
+    m = _collect(_orch([a], clock, root=root), CollectLevel.METADATA)
     assert {c.what for c in m.sources} == {Cap.VIDEO_METADATA, Cap.THUMBNAILS}
 
 
-def test_blocked_switches_immediately(clock: Clock, case_root: Path, data_dir: Path) -> None:
+def test_blocked_switches_immediately(clock: Clock, root: Path, data_dir: Path) -> None:
     a = FakeCollector("a", ALL, {Cap.COMMENTS: [Blocked("bot check")]})
     b = FakeCollector("b", ALL)
-    m = _collect(_orch([a, b], clock, case_dir=case_root))
+    m = _collect(_orch([a, b], clock, root=root))
     assert _calls(m, Cap.COMMENTS) == [("a", "blocked"), ("b", "ok")]
     assert _norm(m, data_dir).comments[0].text == "c-b"
     assert next(c for c in m.sources if c.status == "blocked").error == "bot check"
 
 
-def test_transient_retries_three_times_then_switches(clock: Clock, case_root: Path) -> None:
+def test_transient_retries_three_times_then_switches(clock: Clock, root: Path) -> None:
     a = FakeCollector("a", ALL, {Cap.COMMENTS: [Transient("timeout")] * 4})
     b = FakeCollector("b", ALL)
-    m = _collect(_orch([a, b], clock, case_dir=case_root))
+    m = _collect(_orch([a, b], clock, root=root))
     assert _calls(m, Cap.COMMENTS) == [("a", "failed")] * 4 + [("b", "ok")]
 
 
-def test_transient_then_success(clock: Clock, case_root: Path) -> None:
+def test_transient_then_success(clock: Clock, root: Path) -> None:
     a = FakeCollector("a", ALL, {Cap.COMMENTS: [Transient("x"), Transient("x")]})
-    m = _collect(_orch([a], clock, case_dir=case_root))
+    m = _collect(_orch([a], clock, root=root))
     assert _calls(m, Cap.COMMENTS) == [("a", "failed"), ("a", "failed"), ("a", "ok")]
 
 
-def test_quota_exceeded_switches(clock: Clock, case_root: Path) -> None:
+def test_quota_exceeded_switches(clock: Clock, root: Path) -> None:
     a = FakeCollector("a", ALL, {Cap.VIDEO_METADATA: [QuotaExceeded("quota")]})
     b = FakeCollector("b", ALL)
-    m = _collect(_orch([a, b], clock, case_dir=case_root))
+    m = _collect(_orch([a, b], clock, root=root))
     assert _calls(m, Cap.VIDEO_METADATA) == [("a", "quota_exceeded"), ("b", "ok")]
 
 
-def test_unsupported_and_not_found(clock: Clock, case_root: Path) -> None:
+def test_unsupported_and_not_found(clock: Clock, root: Path) -> None:
     a = FakeCollector(
         "a", ALL, {Cap.VIDEO_METADATA: [Unsupported("no")], Cap.COMMENTS: [NotFound("gone")]}
     )
     b = FakeCollector("b", ALL)
-    m = _collect(_orch([a, b], clock, case_dir=case_root))
+    m = _collect(_orch([a, b], clock, root=root))
     assert _calls(m, Cap.VIDEO_METADATA) == [("a", "unsupported"), ("b", "ok")]
     # Video không tồn tại thì không thử nguồn khác.
     assert _calls(m, Cap.COMMENTS) == [("a", "not_found")]
 
 
-def test_disabled_source_and_no_source(clock: Clock, case_root: Path, data_dir: Path) -> None:
+def test_disabled_source_and_no_source(clock: Clock, root: Path, data_dir: Path) -> None:
     a = FakeCollector("a", ALL)
     b = FakeCollector("b", ALL - {Cap.MEDIA})
-    m = _collect(_orch([a, b], clock, case_dir=case_root, enabled={"a": False}), CollectLevel.FULL)
+    m = _collect(_orch([a, b], clock, root=root, enabled={"a": False}), CollectLevel.FULL)
     assert a.calls == []
     assert _calls(m, Cap.COMMENTS) == [("a", "disabled"), ("b", "ok")]
     assert _calls(m, Cap.MEDIA) == [("a", "disabled"), (None, "no_source")]
     assert _norm(m, data_dir).media == []
 
 
-def test_all_sources_fail_records_every_call(clock: Clock, case_root: Path) -> None:
+def test_all_sources_fail_records_every_call(clock: Clock, root: Path) -> None:
     a = FakeCollector("a", ALL, {Cap.COMMENTS: [Blocked("x")]})
     b = FakeCollector("b", ALL, {Cap.COMMENTS: [QuotaExceeded("y")]})
-    m = _collect(_orch([a, b], clock, case_dir=case_root))
+    m = _collect(_orch([a, b], clock, root=root))
     assert _calls(m, Cap.COMMENTS) == [
         ("a", "blocked"),
         ("b", "quota_exceeded"),
@@ -197,14 +197,14 @@ def test_all_sources_fail_records_every_call(clock: Clock, case_root: Path) -> N
     ]
 
 
-def test_fault_injection_blocks_without_calling(clock: Clock, case_root: Path) -> None:
+def test_fault_injection_blocks_without_calling(clock: Clock, root: Path) -> None:
     a, b = FakeCollector("a", ALL), FakeCollector("b", ALL)
-    m = _collect(_orch([a, b], clock, case_dir=case_root, fault_injection={"a"}))
+    m = _collect(_orch([a, b], clock, root=root, fault_injection={"a"}))
     assert a.calls == []
     assert _calls(m, Cap.VIDEO_METADATA) == [("a", "blocked"), ("b", "ok")]
 
 
-def test_source_suspended_after_five_consecutive_failures(clock: Clock, case_root: Path) -> None:
+def test_source_suspended_after_five_consecutive_failures(clock: Clock, root: Path) -> None:
     blocked = [Blocked("x")]
     a = FakeCollector(
         "a",
@@ -217,7 +217,7 @@ def test_source_suspended_after_five_consecutive_failures(clock: Clock, case_roo
         },
     )
     b = FakeCollector("b", ALL)
-    orch = _orch([a, b], clock, case_dir=case_root)
+    orch = _orch([a, b], clock, root=root)
     _collect(orch)  # a lỗi 4 lần liên tiếp (mức text có 4 loại dữ liệu)
     m2 = _collect(orch)  # lần lỗi thứ 5 ở metadata, sau đó a bị tạm ngưng
     assert _calls(m2, Cap.VIDEO_METADATA) == [("a", "blocked"), ("b", "ok")]
@@ -227,10 +227,10 @@ def test_source_suspended_after_five_consecutive_failures(clock: Clock, case_roo
     assert _calls(m3, Cap.COMMENTS) == [("a", "ok")]
 
 
-def test_success_resets_failure_count(clock: Clock, case_root: Path) -> None:
+def test_success_resets_failure_count(clock: Clock, root: Path) -> None:
     a = FakeCollector("a", ALL, {Cap.VIDEO_METADATA: [Blocked("x")] * 4})
     b = FakeCollector("b", ALL)
-    orch = _orch([a, b], clock, case_dir=case_root)
+    orch = _orch([a, b], clock, root=root)
     for _ in range(4):
         _collect(orch)  # mỗi lần: metadata lỗi, comments thành công
     m = _collect(orch)
@@ -238,26 +238,26 @@ def test_success_resets_failure_count(clock: Clock, case_root: Path) -> None:
 
 
 def test_new_adapter_needs_one_file_and_one_registry_line(
-    clock: Clock, case_root: Path, monkeypatch: pytest.MonkeyPatch
+    clock: Clock, root: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # "Một file" là lớp FakeCollector ở trên; "một dòng" là mục trong registry.COLLECTORS.
     monkeypatch.setattr(registry, "COLLECTORS", {"fake": lambda: FakeCollector("fake", ALL)})
     orch = Orchestrator.from_config(
-        case_dir=case_root, sources=SourcesConfig(), now=clock, sleep=lambda _s: None
+        root=root, sources=SourcesConfig(), now=clock, sleep=lambda _s: None
     )
     m = _collect(orch)
     assert _calls(m, Cap.VIDEO_METADATA) == [("fake", "ok")]
 
 
-def test_previous_capture_on_recollect(clock: Clock, case_root: Path) -> None:
-    orch = _orch([FakeCollector("a", ALL)], clock, case_dir=case_root)
+def test_previous_capture_on_recollect(clock: Clock, root: Path) -> None:
+    orch = _orch([FakeCollector("a", ALL)], clock, root=root)
     first = _collect(orch)
     second = _collect(orch)
     assert first.previous_capture is None and second.previous_capture is not None
 
 
-def test_manifest_json_has_vietnam_time(clock: Clock, case_root: Path) -> None:
-    orch = _orch([FakeCollector("a", ALL)], clock, case_dir=case_root)
+def test_manifest_json_has_vietnam_time(clock: Clock, root: Path) -> None:
+    orch = _orch([FakeCollector("a", ALL)], clock, root=root)
     cap_dir = orch.collect(
         parse_target(VID),
         CollectLevel.METADATA,

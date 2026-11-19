@@ -27,7 +27,6 @@ HERE = Path(__file__).resolve().parent
 VIDEO_ID = "h4wkDemo001"
 CAPTURE = "20261118T160000"
 RUN_ID = "r_20261118T160500"
-CASE_ID = "2026-11_case-demo"
 ENTITY = "e_01"
 CHANNEL_ID = "UCh4wkDemoChannel000000"
 YTDLP_VERSION = "2026.10.26"
@@ -440,7 +439,6 @@ def hits() -> list[EntityHit]:
 def findings() -> list[Finding]:
     base = {
         "run_id": RUN_ID,
-        "case_id": CASE_ID,
         "video_id": VIDEO_ID,
         "capture": CAPTURE,
         "analyzer_version": "0.1.0",

@@ -1,4 +1,4 @@
-"""Phân tích tĩnh văn bản theo đối tượng của case."""
+"""Phân tích tĩnh văn bản theo các đối tượng cần bảo vệ."""
 
 import json
 from pathlib import Path
@@ -7,7 +7,7 @@ from h4wk.analysis.models import EntityHit, Finding, Trigger
 from h4wk.analysis.normalize import matches_name
 from h4wk.analysis.static import LexiconEntry, find_insult, load_lexicon
 from h4wk.collectors.models import Normalized
-from h4wk.core.cases import Entity
+from h4wk.core.entities import Entity
 from h4wk.core.ids import new_ulid
 from h4wk.media.timeline import Timeline
 
@@ -17,7 +17,6 @@ def analyze(
     timeline: Timeline,
     entities: list[Entity],
     lexicon: list[LexiconEntry] | None,
-    case_id: str,
     run_id: str,
     output_dir: Path,
 ) -> tuple[list[EntityHit], list[Finding]]:
@@ -45,7 +44,6 @@ def analyze(
                     Finding(
                         id=f"f_{new_ulid()}",
                         run_id=run_id,
-                        case_id=case_id,
                         video_id=timeline.video_id,
                         capture=timeline.capture,
                         analyzer="static",

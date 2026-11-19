@@ -20,7 +20,7 @@ class Me(BaseModel):
 @router.post("/login", status_code=status.HTTP_204_NO_CONTENT)
 def login(body: LoginBody, response: Response) -> None:
     if not auth.authenticate(body.username, body.password):
-        audit.log(None, f"user:{body.username or '?'}", "auth.login", None, status="error")
+        audit.log(f"user:{body.username or '?'}", "auth.login", None, status="error")
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "invalid username or password")
     token = auth.start_session(body.username)
     response.set_cookie(
@@ -30,7 +30,7 @@ def login(body: LoginBody, response: Response) -> None:
         httponly=True,
         samesite="lax",
     )
-    audit.log(None, f"user:{body.username}", "auth.login", None)
+    audit.log(f"user:{body.username}", "auth.login", None)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
@@ -40,7 +40,7 @@ def logout(request: Request, response: Response) -> None:
     auth.end_session(token)
     response.delete_cookie(auth.SESSION_COOKIE)
     if user:
-        audit.log(None, f"user:{user}", "auth.logout", None)
+        audit.log(f"user:{user}", "auth.logout", None)
 
 
 @router.get("/me")

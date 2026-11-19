@@ -9,20 +9,14 @@ from h4wk.core.types import VN_TZ
 
 
 def log(
-    case_id: str | None,
     actor: str,
     action: str,
     target: str | None,
     detail: dict[str, Any] | None = None,
     status: Literal["ok", "error"] = "ok",
 ) -> None:
-    """Ghi vào audit của case; thao tác không thuộc case nào ghi vào system audit."""
-    root = data_dir()
-    path = (
-        root / "cases" / case_id / "log" / "audit.jsonl"
-        if case_id
-        else root / "log" / "system_audit.jsonl"
-    )
+    """Ghi một dòng vào data/log/audit.jsonl."""
+    path = data_dir() / "log" / "audit.jsonl"
     path.parent.mkdir(parents=True, exist_ok=True)
     line = {
         "at": datetime.now(VN_TZ).isoformat(),

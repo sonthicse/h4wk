@@ -72,10 +72,6 @@
           "title": "Capture",
           "type": "string"
         },
-        "case_id": {
-          "title": "Case Id",
-          "type": "string"
-        },
         "category": {
           "$ref": "#/$defs/Category"
         },
@@ -199,7 +195,6 @@
       "required": [
         "id",
         "run_id",
-        "case_id",
         "video_id",
         "capture",
         "analyzer",

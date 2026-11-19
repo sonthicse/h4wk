@@ -21,7 +21,7 @@ def test_ytdlp_collects_full_video(data_dir: Path) -> None:
     orch = Orchestrator(
         {"ytdlp": YtDlpCollector()},
         Settings(priority={c: ["ytdlp"] for c in Cap}),
-        case_dir=data_dir / "cases" / "live",
+        root=data_dir,
     )
     cap = orch.collect(
         parse_target(VIDEO),

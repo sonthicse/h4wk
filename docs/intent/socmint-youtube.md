@@ -33,7 +33,7 @@ Hai thành viên nhóm trong vai analyst, Thi là người chịu trách nhiệm
 
 Demo chạy được là tiêu chí chính; báo cáo phương pháp đứng thứ hai. Buổi demo gồm ba màn:
 
-1. Case chuẩn bị sẵn với 10–20 video thật. Video phát nhảy đúng tới đoạn bị nghi. Hàng đợi có nghi vấn từ lời nói, từ chữ trên hình và từ hình ảnh, trong đó có ít nhất một nghi vấn hình ảnh ở đoạn không ai nhắc tên. Analyst duyệt nghi vấn ngay trên giao diện.
+1. Dữ liệu chuẩn bị sẵn với 10–20 video thật. Video phát nhảy đúng tới đoạn bị nghi. Hàng đợi có nghi vấn từ lời nói, từ chữ trên hình và từ hình ảnh, trong đó có ít nhất một nghi vấn hình ảnh ở đoạn không ai nhắc tên. Analyst duyệt nghi vấn ngay trên giao diện.
 2. Dán link trực tiếp: hệ thống xử lý ngay tại chỗ một video ngắn.
 3. Watchlist: một kênh tin tức đang theo dõi đăng video mới, hệ thống tự phát hiện và tự xử lý video đó, mục tiêu là trong khoảng 10 phút.
 
@@ -45,7 +45,7 @@ Buổi demo cũng trình diễn giao diện chỉnh nguồn để cho thấy ki�
 - Tiền API (LLM, VLM, speech-to-text, Supadata) không giới hạn.
 - Backend Python (FastAPI), frontend React, giao diện tiếng Anh. Cả hai thành viên thạo Python nhưng yếu frontend, nên cần đọc lại code do agent sinh ra để trả lời được câu hỏi của người chấm.
 - Chạy trực tiếp trên máy, không dùng Docker.
-- Khớp khuôn mặt chỉ so với đối tượng của case, chạy trên máy, không lưu đặc trưng của khuôn mặt không khớp, và khi demo dùng khuôn mặt của thành viên nhóm.
+- Khớp khuôn mặt chỉ so với các đối tượng đã khai báo, chạy trên máy, không lưu đặc trưng của khuôn mặt không khớp, và khi demo dùng khuôn mặt của thành viên nhóm.
 - Comment được gửi nguyên văn cho nhà cung cấp AI. Settings chỉ cho chọn nhà cung cấp, không chọn theo quốc gia.
 
 ## Ngoài phạm vi
@@ -95,5 +95,6 @@ Ngày 2026-11-19, khi gộp phần của Bảo:
 
 - Từ điển tầng tĩnh chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia; mỗi nhóm gắn một category của C4.
 - C4 thêm hai category `incitement` (kích động, chia rẽ, bạo lực) và `state_secret` (bí mật nhà nước).
-- Đối tượng của case thường là lãnh đạo Đảng và Nhà nước; tầng tĩnh vẫn chỉ chạy ở vùng nhắc tên đối tượng.
+- Đối tượng thường là lãnh đạo Đảng và Nhà nước; tầng tĩnh vẫn chỉ chạy ở vùng nhắc tên đối tượng.
 - Viết tắt của đối tượng so không phân biệt hoa thường.
+- Bỏ khái niệm case: cả hệ thống là một cuộc theo dõi duy nhất, vì demo chỉ dùng một case. Đối tượng, watchlist, video, nghi vấn và nhật ký dùng chung; C4 bỏ `case_id`.

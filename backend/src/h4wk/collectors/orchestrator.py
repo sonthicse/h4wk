@@ -119,27 +119,27 @@ class Orchestrator:
         self,
         collectors: dict[str, Collector],
         settings: Settings,
-        case_dir: Path,
+        root: Path,
         now: Callable[[], datetime] = lambda: datetime.now(VN_TZ),
         sleep: Callable[[float], None] = time.sleep,
     ) -> None:
         self.collectors = collectors
         self.settings = settings
-        self.case_dir = case_dir
+        self.root = root
         self.now = now
         self.sleep = sleep
         self.state = SourceState(now)
 
     @classmethod
     def from_config(
-        cls, case_dir: Path, sources: SourcesConfig | None = None, **kwargs: object
+        cls, root: Path, sources: SourcesConfig | None = None, **kwargs: object
     ) -> "Orchestrator":
         if sources is None:
             path = CONFIG_DIR / "sources.toml"
             sources = load_toml(path, SourcesConfig) if path.exists() else SourcesConfig()
         collectors = {name: make() for name, make in registry.COLLECTORS.items()}
         settings = Settings.from_sources(sources, list(collectors))
-        return cls(collectors, settings, case_dir, **kwargs)  # type: ignore[arg-type]
+        return cls(collectors, settings, root, **kwargs)  # type: ignore[arg-type]
 
     def collect(
         self, target: Target, level: CollectLevel, *, collector: str, trigger: Trigger
@@ -148,7 +148,7 @@ class Orchestrator:
         if target.kind != TargetKind.VIDEO:
             raise ValueError(f"orchestrator chưa thu {target.kind}; chỉ thu video")
         writer = CaptureWriter(
-            self.case_dir / "videos" / target.id / "captures",
+            self.root / "videos" / target.id / "captures",
             source_url=target.url,
             collector=collector,
             trigger=trigger,

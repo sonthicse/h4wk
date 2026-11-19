@@ -84,7 +84,7 @@ class ModelRef(Contract):
     model: str
 
 
-# id của nghi vấn: `f_` + ULID (26 ký tự Crockford base32), duy nhất trong cả case.
+# id của nghi vấn: `f_` + ULID (26 ký tự Crockford base32), duy nhất trong toàn hệ thống.
 FindingId = Annotated[str, StringConstraints(pattern=r"^f_[0-9A-HJKMNP-TV-Z]{26}$")]
 
 
@@ -97,7 +97,6 @@ class Finding(Contract):
 
     id: FindingId
     run_id: str
-    case_id: str
     video_id: str
     capture: CaptureTs
     analyzer: Literal["static", "llm"]

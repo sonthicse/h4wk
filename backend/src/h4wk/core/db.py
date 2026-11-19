@@ -12,16 +12,8 @@ from h4wk.core.config import data_dir
 from h4wk.core.types import VN_TZ
 
 
-class CaseRow(SQLModel, table=True):
-    __tablename__ = "cases"
-    id: str = Field(primary_key=True)
-    title: str
-    created_at: datetime
-
-
 class EntityRow(SQLModel, table=True):
     __tablename__ = "entities"
-    case_id: str = Field(primary_key=True, foreign_key="cases.id")
     id: str = Field(primary_key=True)
     name: str
 
@@ -54,7 +46,6 @@ class JobRow(SQLModel, table=True):
 
     __tablename__ = "jobs"
     id: str = Field(primary_key=True)
-    case_id: str = Field(foreign_key="cases.id", index=True)
     target: str
     video_id: str
     level: str
@@ -75,7 +66,6 @@ class FindingRow(SQLModel, table=True):
 
     __tablename__ = "findings"
     id: str = Field(primary_key=True)
-    case_id: str = Field(foreign_key="cases.id", index=True)
     video_id: str
     capture: str
     run_id: str

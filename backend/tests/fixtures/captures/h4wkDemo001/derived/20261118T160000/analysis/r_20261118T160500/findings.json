@@ -2,7 +2,6 @@
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3A",
     "run_id": "r_20261118T160500",
-    "case_id": "2026-11_case-demo",
     "video_id": "h4wkDemo001",
     "capture": "20261118T160000",
     "analyzer": "static",
@@ -35,7 +34,6 @@
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3B",
     "run_id": "r_20261118T160500",
-    "case_id": "2026-11_case-demo",
     "video_id": "h4wkDemo001",
     "capture": "20261118T160000",
     "analyzer": "static",
@@ -78,7 +76,6 @@
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3C",
     "run_id": "r_20261118T160500",
-    "case_id": "2026-11_case-demo",
     "video_id": "h4wkDemo001",
     "capture": "20261118T160000",
     "analyzer": "llm",
@@ -124,7 +121,6 @@
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3D",
     "run_id": "r_20261118T160500",
-    "case_id": "2026-11_case-demo",
     "video_id": "h4wkDemo001",
     "capture": "20261118T160000",
     "analyzer": "static",
@@ -167,7 +163,6 @@
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3E",
     "run_id": "r_20261118T160500",
-    "case_id": "2026-11_case-demo",
     "video_id": "h4wkDemo001",
     "capture": "20261118T160000",
     "analyzer": "llm",

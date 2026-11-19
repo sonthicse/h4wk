@@ -110,14 +110,12 @@ def _immediate(data_dir: Path) -> Iterator[None]:
             os.chmod(Path(root) / d, 0o755)
 
 
-def _case(client: TestClient) -> str:
-    case = client.post("/api/cases", json={"title": "Demo"}).json()
+def _entity(client: TestClient) -> None:
     r = client.post(
-        f"/api/cases/{case['id']}/entities",
+        "/api/entities",
         json={"name": "Trần Văn Mẫu", "aliases": ["Mẫu Ca"], "abbreviations": ["TVM"]},
     )
     assert r.status_code == 201
-    return case["id"]
 
 
 def _lines(path: Path) -> list[dict]:
@@ -127,19 +125,19 @@ def _lines(path: Path) -> list[dict]:
 def test_full_flow_ends_with_findings(
     client: TestClient, data_dir: Path, fake_source: dict
 ) -> None:
-    case_id = _case(client)
-    r = client.post(f"/api/cases/{case_id}/collect", json={"url": VIDEO})
+    _entity(client)
+    r = client.post("/api/collect", json={"url": VIDEO})
     assert r.status_code == 202, r.text
     job = client.get(f"/api/jobs/{r.json()['id']}").json()
     assert job["status"] == "done", job["error"]
     assert job["progress"] == 100 and job["trigger"] == "user:thi"
     assert job["video_id"] == "h4wkDemo001" and job["capture"]
-    assert [j["id"] for j in client.get(f"/api/jobs?case={case_id}").json()] == [job["id"]]
-    findings = client.get(f"/api/cases/{case_id}/findings").json()
+    assert [j["id"] for j in client.get("/api/jobs").json()] == [job["id"]]
+    findings = client.get("/api/findings").json()
     assert findings, "phải có ít nhất một nghi vấn"
     assert {f["video_id"] for f in findings} == {"h4wkDemo001"}
     assert any("lừa đảo" in f["quote"] for f in findings)
-    derived = data_dir / "cases" / case_id / "videos" / job["video_id"] / "derived" / job["capture"]
+    derived = data_dir / "videos" / job["video_id"] / "derived" / job["capture"]
     timeline = Timeline.model_validate_json((derived / "timeline.json").read_bytes())
     manifest = json.loads(
         (derived.parents[1] / "captures" / job["capture"] / "manifest.json").read_bytes()
@@ -158,16 +156,12 @@ def test_full_flow_ends_with_findings(
 
 
 def test_text_after_metadata_processes_only_thumbnails(client, fake_source, data_dir):
-    case_id = _case(client)
+    _entity(client)
     for level in ["metadata", "text"]:
-        response = client.post(
-            f"/api/cases/{case_id}/collect", json={"url": VIDEO, "level": level}
-        ).json()
+        response = client.post("/api/collect", json={"url": VIDEO, "level": level}).json()
         job = client.get(f"/api/jobs/{response['id']}").json()
         assert job["status"] == "done", job["error"]
-        derived = (
-            data_dir / "cases" / case_id / "videos" / job["video_id"] / "derived" / job["capture"]
-        )
+        derived = data_dir / "videos" / job["video_id"] / "derived" / job["capture"]
         timeline = Timeline.model_validate_json((derived / "timeline.json").read_bytes())
         assert timeline.source_video_sha256 is None
         assert not (derived / "proxy_480p.mp4").exists()
@@ -190,15 +184,15 @@ def test_recent_capture_is_not_collected_again(
     client: TestClient, fake_source: dict, data_dir: Path, caplog
 ) -> None:
     caplog.set_level("INFO", logger=stt.__name__)
-    case_id = _case(client)
-    first = client.post(f"/api/cases/{case_id}/collect", json={"url": VIDEO}).json()
+    _entity(client)
+    first = client.post("/api/collect", json={"url": VIDEO}).json()
     initial_calls = (data_dir / "ai_calls.jsonl").read_bytes()
-    second = client.post(f"/api/cases/{case_id}/collect", json={"url": VIDEO}).json()
+    second = client.post("/api/collect", json={"url": VIDEO}).json()
     j1 = client.get(f"/api/jobs/{first['id']}").json()
     j2 = client.get(f"/api/jobs/{second['id']}").json()
     assert j2["status"] == "done" and j2["capture"] == j1["capture"]
     assert (data_dir / "ai_calls.jsonl").read_bytes() == initial_calls
-    forced = client.post(f"/api/cases/{case_id}/collect", json={"url": VIDEO, "force": True})
+    forced = client.post("/api/collect", json={"url": VIDEO, "force": True})
     j3 = client.get(f"/api/jobs/{forced.json()['id']}").json()
     assert j3["status"] == "done", j3["error"]
     assert j3["capture"] != j1["capture"]
@@ -208,12 +202,12 @@ def test_recent_capture_is_not_collected_again(
 def test_failed_step_marks_job_failed_and_audits(
     client: TestClient, fake_source: dict, data_dir: Path
 ) -> None:
-    case_id = _case(client)
+    _entity(client)
     fake_source["fail"] = True
-    r = client.post(f"/api/cases/{case_id}/collect", json={"url": VIDEO})
+    r = client.post("/api/collect", json={"url": VIDEO})
     job = client.get(f"/api/jobs/{r.json()['id']}").json()
     assert job["status"] == "failed" and job["error"]
-    audit = _lines(data_dir / "cases" / case_id / "log" / "audit.jsonl")
+    audit = _lines(data_dir / "log" / "audit.jsonl")
     assert audit[-1]["action"] == "job.run" and audit[-1]["status"] == "error"
 
 
@@ -225,11 +219,6 @@ def test_failed_step_marks_job_failed_and_audits(
     ],
 )
 def test_channel_and_playlist_not_supported_yet(client: TestClient, url: str) -> None:
-    case_id = _case(client)
-    r = client.post(f"/api/cases/{case_id}/collect", json={"url": url})
+    _entity(client)
+    r = client.post("/api/collect", json={"url": url})
     assert r.status_code == 400 and "chưa hỗ trợ" in r.json()["detail"]
-
-
-def test_collect_unknown_case_404(client: TestClient) -> None:
-    r = client.post("/api/cases/2026-11_case-9999/collect", json={"url": VIDEO})
-    assert r.status_code == 404

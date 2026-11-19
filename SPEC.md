@@ -16,12 +16,12 @@ Dự án đang ở giai đoạn thử nghiệm. Một số hạn chế được 
 
 | Module id | Trách nhiệm | Phụ thuộc | Hợp đồng cung cấp |
 |---|---|---|---|
-| `case-core` | Case, đối tượng và ảnh mẫu của đối tượng, 2 tài khoản, nhật ký, database chỉ mục, cấu hình và lưu secret | không có | Mô hình Case/Đối tượng, `audit.log()`, C5: định dạng file cấu hình |
-| `evidence-store` | Bản thu được khoá chống sửa nhầm, manifest, SHA-256, tách dữ liệu gốc và phái sinh, kiểm tra toàn vẹn | `case-core` | C1: cấu trúc bản thu |
+| `core` | Đối tượng và ảnh mẫu của đối tượng, 2 tài khoản, nhật ký, database chỉ mục, cấu hình và lưu secret | không có | Mô hình Đối tượng, `audit.log()`, C5: định dạng file cấu hình |
+| `evidence-store` | Bản thu được khoá chống sửa nhầm, manifest, SHA-256, tách dữ liệu gốc và phái sinh, kiểm tra toàn vẹn | `core` | C1: cấu trúc bản thu |
 | `collectors` | Hợp đồng adapter, danh sách nguồn thu, điều phối theo thứ tự ưu tiên và chuyển nguồn khi lỗi; adapter yt-dlp, YouTube API, Supadata | `evidence-store` | C2: mô hình dữ liệu chung, giao diện `Collector` |
-| `ai-gateway` | Nhiều nhà cung cấp LLM/VLM, định tuyến theo tác vụ AI, kiểm tra đầu ra có cấu trúc, chuyển nhà cung cấp khi lỗi, ghi chi phí | `case-core` | Giao diện `AIGateway` |
+| `ai-gateway` | Nhiều nhà cung cấp LLM/VLM, định tuyến theo tác vụ AI, kiểm tra đầu ra có cấu trúc, chuyển nhà cung cấp khi lỗi, ghi chi phí | `core` | Giao diện `AIGateway` |
 | `media-pipeline` | Bản 480p, tách audio, speech-to-text, keyframe theo mức thay đổi, OCR, VLM, ghép timeline | `evidence-store`, `ai-gateway` | C3: cấu trúc timeline |
-| `analysis` | Tìm dấu hiệu đối tượng (tên, khuôn mặt, ảnh mẫu), lọc tĩnh rồi LLM trên timeline, tiêu đề, mô tả, thumbnail và comment | `media-pipeline`, `ai-gateway`, `case-core` | C4: dấu hiệu, nghi vấn và quyết định rà soát |
+| `analysis` | Tìm dấu hiệu đối tượng (tên, khuôn mặt, ảnh mẫu), lọc tĩnh rồi LLM trên timeline, tiêu đề, mô tả, thumbnail và comment | `media-pipeline`, `ai-gateway`, `core` | C4: dấu hiệu, nghi vấn và quyết định rà soát |
 | `jobs` | Chạy tác vụ nền, nối luồng thu → xử lý → phân tích, tiến độ, thử lại khi lỗi | `collectors`, `media-pipeline`, `analysis` | API gửi job và xem tiến độ |
 | `review` | Hàng đợi rà soát, quyết định kèm nhật ký | `analysis`, `evidence-store` | không có |
 | `watchlist` | Kiểm tra RSS của kênh, phát hiện video mới, nút Check now, dòng sự kiện | `collectors`, `jobs` | không có |
@@ -104,7 +104,7 @@ h4wk/
 ├── backend/
 │   ├── pyproject.toml
 │   ├── src/h4wk/
-│   │   ├── core/               ← config, db, cases, entities, auth, audit, secrets
+│   │   ├── core/               ← config, db, entities, auth, audit, secrets
 │   │   ├── evidence/           ← capture writer, manifest, verify
 │   │   ├── collectors/         ← base.py, models.py (C2), orchestrator.py, providers/{ytdlp,youtube_api,supadata}.py
 │   │   ├── ai/                 ← gateway.py, providers/{anthropic,openai_compat,gemini}.py
@@ -166,12 +166,12 @@ Không đặt ngưỡng coverage. Các phần bắt buộc có test: `evidence-s
 
 Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải điều kiện bắt buộc.
 
-### Màn 1: case chuẩn bị sẵn
+### Màn 1: dữ liệu chuẩn bị sẵn
 
-- [ ] Một case có ít nhất 10 video thật đã xử lý xong. Hàng đợi có ít nhất một nghi vấn từ lời nói, một từ chữ OCR và một từ hình ảnh (`visual`).
+- [ ] Hệ thống có sẵn ít nhất 10 video thật đã xử lý xong. Hàng đợi có ít nhất một nghi vấn từ lời nói, một từ chữ OCR và một từ hình ảnh (`visual`).
 - [ ] Có ít nhất một nghi vấn từ hình ảnh nằm ở đoạn không ai nhắc tên đối tượng, được tìm ra nhờ khuôn mặt mẫu, ảnh mẫu hoặc ngữ cảnh của cả video.
 - [ ] Bấm vào một nghi vấn thì video phát từ `start − 2s`. Đoạn bị nghi được tô màu trên thanh thời gian, transcript chạy theo, và khung hình hiện ra kèm khung bao của chữ OCR, khuôn mặt hoặc ảnh mẫu đã khớp.
-- [ ] Thao tác Confirm, Reject (bắt buộc ghi lý do) và Needs info được ghi vào nhật ký case cùng người làm, thời điểm và lý do. Nghi vấn chỉ chuyển sang confirmed khi analyst bấm Confirm.
+- [ ] Thao tác Confirm, Reject (bắt buộc ghi lý do) và Needs info được ghi vào nhật ký cùng người làm, thời điểm và lý do. Nghi vấn chỉ chuyển sang confirmed khi analyst bấm Confirm.
 
 ### Màn 2: dán link trực tiếp
 
@@ -180,7 +180,7 @@ Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải 
 
 ### Màn 3: watchlist
 
-- [ ] Một kênh tin tức trong watchlist (ví dụ HTV Tin Tức, VTV24) đăng video mới. Hệ thống tự phát hiện, tự thu và tự xử lý video đó, và video hiện trong case. Nhóm không có kênh riêng để tự đăng video, và video của kênh tin tức thường không nhắc tới đối tượng demo, nên màn 3 không yêu cầu có nghi vấn mới.
+- [ ] Một kênh tin tức trong watchlist (ví dụ HTV Tin Tức, VTV24) đăng video mới. Hệ thống tự phát hiện, tự thu và tự xử lý video đó, và video hiện trong danh sách video. Nhóm không có kênh riêng để tự đăng video, và video của kênh tin tức thường không nhắc tới đối tượng demo, nên màn 3 không yêu cầu có nghi vấn mới.
 - [ ] Dòng sự kiện trên dashboard hiện `New video detected on <channel>`.
 - [ ] Mục tiêu: video được xử lý xong trong khoảng 10 phút sau khi được phát hiện. Spike T2 cho thấy RSS bị cache tới 15 phút, nên lúc demo bấm nút Check now để phát hiện ngay.
 
@@ -210,23 +210,23 @@ Checkpoint là mốc để cả nhóm kiểm tra lại, không chặn việc b�
 
 ## 10. Đặc tả từng module
 
-### 10.1 `case-core`
+### 10.1 `core`
 
-Module quản lý case, đối tượng cần bảo vệ, hai tài khoản, nhật ký thao tác, cấu hình và secret.
+Cả hệ thống là một cuộc theo dõi duy nhất, không có khái niệm case: đối tượng, watchlist, video, nghi vấn và nhật ký đều dùng chung. Module quản lý đối tượng cần bảo vệ, hai tài khoản, nhật ký thao tác, cấu hình và secret.
 
-Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh mẫu: ảnh khuôn mặt (dùng cho khớp khuôn mặt) và ảnh hay bị dùng lại như ảnh chân dung quen thuộc hoặc logo (dùng cho khớp ảnh mẫu). Ảnh mẫu lưu ở `data/cases/<case>/entities/<entity_id>/refs/{face,image}/`.
+Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh mẫu: ảnh khuôn mặt (dùng cho khớp khuôn mặt) và ảnh hay bị dùng lại như ảnh chân dung quen thuộc hoặc logo (dùng cho khớp ảnh mẫu). Ảnh mẫu lưu ở `data/entities/<entity_id>/refs/{face,image}/`; danh sách đối tượng nằm trong `data/entities.json`.
 
-`audit.log(case_id, actor, action, target, detail, status)` ghi thêm một dòng vào `data/cases/<case>/log/audit.jsonl`. Thao tác không thuộc case nào (đăng nhập, đổi Settings) ghi vào `data/log/system_audit.jsonl`. Secret nằm trong `data/secrets.json` (quyền 0600) hoặc trong `.env`, và API chỉ trả về giá trị đã che.
+`audit.log(actor, action, target, detail, status)` ghi thêm một dòng vào `data/log/audit.jsonl`, kể cả đăng nhập và đổi Settings. Secret nằm trong `data/secrets.json` (quyền 0600) hoặc trong `.env`, và API chỉ trả về giá trị đã che.
 
-Hợp đồng C5 là định dạng của `config/sources.toml`, `config/ai.toml` và `config/analysis.toml`, viết bằng Pydantic. C5 nằm trong `case-core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
+Hợp đồng C5 là định dạng của `config/sources.toml`, `config/ai.toml` và `config/analysis.toml`, viết bằng Pydantic. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
 
-Hạn chế được chấp nhận: tài khoản, watchlist, danh sách video đã biết và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại case, video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên.
+Hạn chế được chấp nhận: tài khoản, watchlist, danh sách video đã biết và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại đối tượng, video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên.
 
 Nghiệm thu:
 
 - Đăng nhập bằng session cookie.
 - Mọi API ghi dữ liệu đều để lại một dòng nhật ký, kể cả khi thao tác thất bại.
-- `h4wk reindex` dựng lại được danh sách case, video, nghi vấn và quyết định rà soát từ `data/`.
+- `h4wk reindex` dựng lại được danh sách đối tượng, video, nghi vấn và quyết định rà soát từ `data/`.
 
 ### 10.2 `evidence-store`
 
@@ -234,23 +234,21 @@ Hợp đồng C1 gồm cấu trúc thư mục và định dạng manifest dướ
 
 ```
 data/
-├── log/system_audit.jsonl
-└── cases/<case_id>/                     ← case_id ví dụ: 2026-11_case-0007
-    ├── case.json                        ← mục tiêu, đối tượng, người phụ trách
-    ├── log/audit.jsonl
-    ├── entities/<entity_id>/refs/{face,image}/
-    ├── channels/<channel_id>/captures/<YYYYMMDDTHHMMSS>/...
-    ├── videos/<video_id>/               ← để phẳng theo video ID, không lồng dưới kênh
-    │   ├── captures/<YYYYMMDDTHHMMSS>/ ← khoá chỉ đọc sau khi ghi manifest
-    │   │   ├── sources/<provider>/...   ← dữ liệu thô nguyên văn
-    │   │   ├── normalized.json          ← C2
-    │   │   └── manifest.json
-    │   └── derived/<capture_ts>/        ← tạo lại được
-    │       ├── proxy_480p.mp4, audio_16k.wav, frames/, ocr.json, vision.json
-    │       ├── transcripts/<kind>.<lang>.json
-    │       ├── timeline.json            ← C3
-    │       └── analysis/<run_id>/{hits.json,findings.json}   ← C4
-    └── reviews.jsonl                    ← quyết định rà soát, chỉ ghi thêm
+├── entities.json                        ← danh sách đối tượng
+├── log/audit.jsonl
+├── entities/<entity_id>/refs/{face,image}/
+├── channels/<channel_id>/captures/<YYYYMMDDTHHMMSS>/...
+├── videos/<video_id>/                   ← để phẳng theo video ID, không lồng dưới kênh
+│   ├── captures/<YYYYMMDDTHHMMSS>/     ← khoá chỉ đọc sau khi ghi manifest
+│   │   ├── sources/<provider>/...       ← dữ liệu thô nguyên văn
+│   │   ├── normalized.json              ← C2
+│   │   └── manifest.json
+│   └── derived/<capture_ts>/            ← tạo lại được
+│       ├── proxy_480p.mp4, audio_16k.wav, frames/, ocr.json, vision.json
+│       ├── transcripts/<kind>.<lang>.json
+│       ├── timeline.json                ← C3
+│       └── analysis/<run_id>/{hits.json,findings.json}   ← C4
+└── reviews.jsonl                        ← quyết định rà soát, chỉ ghi thêm
 ```
 
 ```json
@@ -334,7 +332,7 @@ Nghiệm thu: sau khi đổi `analysis.classify` hoặc `media.vision` sang nhà
 
 ### 10.5 `media-pipeline`
 
-Module chỉ xử lý media; mọi việc liên quan tới đối tượng của case nằm ở `analysis`. Các bước:
+Module chỉ xử lý media; mọi việc liên quan tới đối tượng nằm ở `analysis`. Các bước:
 
 1. Tạo bản proxy 480p (mp4, H.264, dùng cả để phát trên trình duyệt) và audio 16 kHz một kênh.
 2. Speech-to-text có mốc thời gian (`kind=stt`). Ở mức thu `full`, bước này luôn chạy, kể cả khi đã có phụ đề.
@@ -379,17 +377,17 @@ Nghiệm thu:
 
 ### 10.6 `analysis`
 
-V1 chỉ có bộ phân tích cho K1 (bôi nhọ đối tượng). Đầu vào gồm đối tượng của case cùng ảnh mẫu, timeline, tiêu đề, mô tả và comment. Việc phân tích có ba bước.
+V1 chỉ có bộ phân tích cho K1 (bôi nhọ đối tượng). Đầu vào gồm các đối tượng cùng ảnh mẫu, timeline, tiêu đề, mô tả và comment. Việc phân tích có ba bước.
 
 Bước 1 tìm dấu hiệu đối tượng (`hits`). Mỗi dấu hiệu ghi đối tượng, nơi tìm thấy (`via`), vị trí (đoạn, khung hình, comment), bbox và điểm số nếu có.
 
 - Tên (`via`: `speech`, `ocr`, `title`, `description`, `comment`, `thumbnail`). Văn bản được chuẩn hoá NFC, bỏ dấu, chuyển chữ thường. Tên đầy đủ và biệt danh được so theo ranh giới từ; mỗi từ dài từ 4 ký tự trở lên được sai tối đa 1 ký tự, từ ngắn hơn phải khớp chính xác. Viết tắt phải khớp đủ ký tự theo ranh giới từ, không phân biệt hoa thường. Bỏ dấu làm một số tên trùng nhau (An và Ân); tầng LLM xử lý các trường hợp này.
-- Khuôn mặt (`via: face`). Model chạy trên máy phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng trong case. Giới hạn bắt buộc: chỉ so với đối tượng của case; không đặt tên hay xác định danh tính bất kỳ người nào khác; đặc trưng của khuôn mặt không khớp không được lưu. Có thể tắt bằng `analysis.toml`.
+- Khuôn mặt (`via: face`). Model chạy trên máy phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng. Giới hạn bắt buộc: chỉ so với các đối tượng đã khai báo; không đặt tên hay xác định danh tính bất kỳ người nào khác; đặc trưng của khuôn mặt không khớp không được lưu. Có thể tắt bằng `analysis.toml`.
 - Ảnh mẫu (`via: ref_image`). Embedding của keyframe, thumbnail và các ô cắt theo lưới được so với embedding của ảnh mẫu, để bắt trường hợp ảnh gốc bị cắt, ghép hay đổi màu.
 
 Một video được coi là liên quan tới đối tượng khi có ít nhất một dấu hiệu ở bất kỳ đâu.
 
-Bước 2 là tầng tĩnh. Từ điển tiếng Việt (`analysis/lexicon/vi_insults.txt`) chạy trên các vùng văn bản có dấu hiệu tên. Đối tượng của case thường là lãnh đạo Đảng và Nhà nước, vì nội dung xâm phạm an ninh quốc gia khi nhắc tên một người cụ thể thường nhắm vào những người này. Từ điển chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia (xúc phạm, phỉ báng; cáo buộc không bằng chứng; xuyên tạc, bịa đặt, giả mạo; kích động, chia rẽ, bạo lực; bí mật nhà nước), mỗi nhóm gắn một `category` của C4 (lần lượt `insult`, `unsupported_accusation`, `fabrication`, `incitement`, `state_secret`). Có cụm từ trong từ điển thì sinh nghi vấn `analyzer: "static"` với `category` của nhóm, và `reason` ghi nhóm cùng cụm từ khớp. Dấu hiệu tên đơn thuần chỉ được ghi vào `hits.json`, không vào hàng đợi.
+Bước 2 là tầng tĩnh. Từ điển tiếng Việt (`analysis/lexicon/vi_insults.txt`) chạy trên các vùng văn bản có dấu hiệu tên. Đối tượng thường là lãnh đạo Đảng và Nhà nước, vì nội dung xâm phạm an ninh quốc gia khi nhắc tên một người cụ thể thường nhắm vào những người này. Từ điển chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia (xúc phạm, phỉ báng; cáo buộc không bằng chứng; xuyên tạc, bịa đặt, giả mạo; kích động, chia rẽ, bạo lực; bí mật nhà nước), mỗi nhóm gắn một `category` của C4 (lần lượt `insult`, `unsupported_accusation`, `fabrication`, `incitement`, `state_secret`). Có cụm từ trong từ điển thì sinh nghi vấn `analyzer: "static"` với `category` của nhóm, và `reason` ghi nhóm cùng cụm từ khớp. Dấu hiệu tên đơn thuần chỉ được ghi vào `hits.json`, không vào hàng đợi.
 
 Bước 3 là tầng LLM, qua tác vụ AI `analysis.classify`. Các phần được gửi đi:
 
@@ -410,7 +408,7 @@ Nghi vấn (`findings.json`):
 
 ```json
 {
-  "id": "f_…", "run_id": "…", "case_id": "…", "video_id": "…", "capture": "…",
+  "id": "f_…", "run_id": "…", "video_id": "…", "capture": "…",
   "analyzer": "static|llm", "analyzer_version": "0.1.0",
   "model": {"provider": "…", "model": "…"},
   "source_kind": "speech|ocr|visual|title|description|thumbnail|comment",
@@ -431,7 +429,7 @@ Quyết định rà soát (một dòng trong `reviews.jsonl`):
 {"finding_id": "f_…", "run_id": "…", "status": "confirmed|rejected|needs_info", "by": "user:thi", "at": "…", "note": "…"}
 ```
 
-`id` của nghi vấn có dạng `f_<ULID>` (26 ký tự Crockford base32) và duy nhất trong cả case, vì `reviews.jsonl` ghi chung cho cả case và quyết định rà soát chỉ trỏ tới nghi vấn qua `finding_id`. Mỗi lần chạy phân tích sinh nghi vấn với `id` mới. Nghi vấn của lần chạy mới luôn bắt đầu ở trạng thái chưa rà soát, kể cả khi giống một nghi vấn đã được quyết định ở lần chạy trước. Quyết định cũ vẫn nằm trong `reviews.jsonl`, gắn với `finding_id` và `run_id` cũ.
+`id` của nghi vấn có dạng `f_<ULID>` (26 ký tự Crockford base32) và duy nhất trong toàn hệ thống, vì `reviews.jsonl` ghi chung và quyết định rà soát chỉ trỏ tới nghi vấn qua `finding_id`. Mỗi lần chạy phân tích sinh nghi vấn với `id` mới. Nghi vấn của lần chạy mới luôn bắt đầu ở trạng thái chưa rà soát, kể cả khi giống một nghi vấn đã được quyết định ở lần chạy trước. Quyết định cũ vẫn nằm trong `reviews.jsonl`, gắn với `finding_id` và `run_id` cũ.
 
 Quy tắc:
 
@@ -462,7 +460,7 @@ Mức thu quyết định những gì được thu và xử lý. Mặc định l
 Đầu vào ở màn Collect:
 
 - Link hoặc ID video: một job.
-- Link kênh hoặc `@handle`: thêm kênh vào watchlist của case (xem 10.9).
+- Link kênh hoặc `@handle`: thêm kênh vào watchlist (xem 10.9).
 - Link playlist: mỗi video trong playlist một job, tối đa 50 video (cấu hình được).
 
 Một video đã có bản thu trong 10 phút trước sẽ không bị thu lại, trừ khi analyst chọn buộc chạy lại.
@@ -491,7 +489,7 @@ Nghiệm thu: như màn 1 ở [phần 8](#8-tiêu-chí-thành-công).
 
 ### 10.9 `watchlist`
 
-Mỗi mục watchlist là một kênh thuộc một case. V1 chỉ phát hiện sự kiện video mới.
+Mỗi mục watchlist là một kênh. V1 chỉ phát hiện sự kiện video mới.
 
 Khi một kênh được thêm vào watchlist (từ trang Watchlist hoặc bằng cách dán link kênh ở màn Collect):
 
@@ -499,13 +497,13 @@ Khi một kênh được thêm vào watchlist (từ trang Watchlist hoặc bằn
 2. 10 video mới nhất (cấu hình được) được xử lý ngay ở mức thu của mục.
 3. Mọi video đang có trong RSS được đánh dấu là đã biết, để lần kiểm tra sau không xử lý lại.
 
-Một periodic task đọc RSS của từng kênh đang bật, mặc định mỗi 2 phút. Có video mới thì hệ thống tạo job theo mức thu của mục đó. Nút Check now kiểm tra ngay, dùng cả RSS lẫn uploads playlist của YouTube API. Mỗi sự kiện được ghi vào nhật ký và hiện trên dòng sự kiện ở dashboard của case.
+Một periodic task đọc RSS của từng kênh đang bật, mặc định mỗi 2 phút. Có video mới thì hệ thống tạo job theo mức thu của mục đó. Nút Check now kiểm tra ngay, dùng cả RSS lẫn uploads playlist của YouTube API. Mỗi sự kiện được ghi vào nhật ký và hiện trên dòng sự kiện ở dashboard.
 
 Nghiệm thu: như màn 3 ở [phần 8](#8-tiêu-chí-thành-công).
 
 ### 10.10 `web-ui`
 
-Các màn hình: Login, Cases, Case dashboard (kèm dòng sự kiện), Collect, Watchlist, Entities (đối tượng và ảnh mẫu), Video detail, Review queue, Capture/Evidence, Settings. Toàn bộ giao diện viết bằng tiếng Anh; nội dung tiếng Việt lấy từ YouTube giữ nguyên.
+Các màn hình: Login, Dashboard (kèm dòng sự kiện), Collect, Watchlist, Entities (đối tượng và ảnh mẫu), Video detail, Review queue, Capture/Evidence, Settings. Toàn bộ giao diện viết bằng tiếng Anh; nội dung tiếng Việt lấy từ YouTube giữ nguyên.
 
 Settings gồm 7 mục:
 
@@ -542,7 +540,7 @@ Không bao giờ:
 - Trả API key về trình duyệt.
 - Sửa hoặc xoá file trong `captures/` ngoài `CaptureWriter`.
 - Tự động chuyển nghi vấn sang trạng thái confirmed.
-- Dùng khớp khuôn mặt để xác định danh tính người không phải đối tượng của case, hoặc lưu đặc trưng của khuôn mặt không khớp.
+- Dùng khớp khuôn mặt để xác định danh tính người không phải đối tượng đã khai báo, hoặc lưu đặc trưng của khuôn mặt không khớp.
 - Gửi ảnh khuôn mặt mẫu cho nhà cung cấp AI bên ngoài; khớp khuôn mặt chỉ chạy trên máy.
 - Làm màn hình hay chức năng lập hồ sơ từng người bình luận.
 
@@ -560,7 +558,7 @@ Không bao giờ:
 | InnerTube, Streamlink, upload file thủ công | Đã có yt-dlp, YouTube API và Supadata |
 | Tìm kiếm toàn văn và ngữ nghĩa | Không có trong 3 màn demo |
 | Đánh giá precision/recall chính thức | Chỉ làm bảng so sánh nhỏ nếu còn thời gian |
-| Nhận diện danh tính người bất kỳ qua khuôn mặt | V1 chỉ so với đối tượng của case |
+| Nhận diện danh tính người bất kỳ qua khuôn mặt | V1 chỉ so với các đối tượng đã khai báo |
 
 ## 13. Quyết định đã chốt và việc còn treo
 
@@ -573,7 +571,7 @@ Các quyết định đã chốt:
 - Chỉ thu phụ đề tiếng Việt: bản người đăng tải lên (`vi*`) và bản tự động gốc (`vi-orig`). Không thu bản dịch máy, vì lấy mọi ngôn ngữ kéo theo hơn 100 bản dịch và bị YouTube trả HTTP 429 (spike T2).
 - Giữ mức thu, mặc định là `full`.
 - Mọi thời gian trong dữ liệu, nhật ký và giao diện dùng giờ Việt Nam (UTC+07:00).
-- `id` của nghi vấn là `f_<ULID>`, duy nhất trong cả case. Quyết định Reject bắt buộc có lý do, kiểm tra ngay trong hợp đồng C4.
+- `id` của nghi vấn là `f_<ULID>`, duy nhất trong toàn hệ thống. Không có khái niệm case; cả hệ thống là một cuộc theo dõi. Quyết định Reject bắt buộc có lý do, kiểm tra ngay trong hợp đồng C4.
 - Phân tích lại một video thì mọi nghi vấn của lần chạy mới phải được rà soát lại; quyết định cũ không tự áp dụng.
 - Comment được gửi nguyên văn cho nhà cung cấp AI, kể cả tên và ID người bình luận.
 - `config/ai.toml.example` cấu hình sẵn nhiều nhà cung cấp: Anthropic, OpenAI, Gemini và các nhà OpenAI-compatible như DeepSeek, Qwen, GLM, Kimi. Settings chỉ cho chọn nhà cung cấp và model, không có lựa chọn theo quốc gia.

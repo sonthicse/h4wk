@@ -14,10 +14,10 @@ from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import parse_target
 from h4wk.core import audit
-from h4wk.core.cases import case_dir, load_case
-from h4wk.core.config import CONFIG_DIR
+from h4wk.core.config import CONFIG_DIR, data_dir
 from h4wk.core.config_models import AnalysisConfig, load_toml
 from h4wk.core.db import FindingRow, JobRow, get_engine
+from h4wk.core.entities import load_entities
 from h4wk.core.ids import new_ulid
 from h4wk.core.types import VN_TZ
 from h4wk.evidence.models import Manifest, Trigger
@@ -37,13 +37,10 @@ def _now() -> datetime:
     return datetime.now(VN_TZ)
 
 
-def create_job(
-    case_id: str, target: str, video_id: str, level: str, force: bool, trigger: str
-) -> JobRow:
+def create_job(target: str, video_id: str, level: str, force: bool, trigger: str) -> JobRow:
     now = _now()
     job = JobRow(
         id=f"j_{new_ulid()}",
-        case_id=case_id,
         target=target,
         video_id=video_id,
         level=level,
@@ -73,14 +70,12 @@ def _update(job_id: str, **fields: object) -> JobRow:
 
 
 def _video_dir(job: JobRow) -> Path:
-    return case_dir(job.case_id) / "videos" / job.video_id
+    return data_dir() / "videos" / job.video_id
 
 
 def _fail(job_id: str, step: str, e: Exception) -> None:
     job = _update(job_id, status="failed", error=f"{step}: {e}")
-    audit.log(
-        job.case_id, job.trigger, "job.run", job.id, {"step": step, "error": str(e)}, status="error"
-    )
+    audit.log(job.trigger, "job.run", job.id, {"step": step, "error": str(e)}, status="error")
 
 
 def _recent_capture(job: JobRow) -> str | None:
@@ -115,7 +110,7 @@ def collect(job_id: str) -> None:
             now = _now()
             if (_video_dir(job) / "captures" / now.strftime(CAPTURE_TS_FORMAT)).exists():
                 time.sleep(1 - now.microsecond / 1_000_000)
-            orch = Orchestrator.from_config(case_dir=case_dir(job.case_id))
+            orch = Orchestrator.from_config(root=data_dir())
             path = orch.collect(
                 parse_target(job.target),
                 CollectLevel(job.level),
@@ -179,17 +174,15 @@ def analyze(job_id: str) -> None:
             (_video_dir(job) / "captures" / cap / "normalized.json").read_text("utf-8")
         )
         run_id = f"r_{new_ulid()}"
-        case = load_case(job.case_id)
         # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
         _hits, findings = runner.analyze(
-            n, timeline, case.entities, None, job.case_id, run_id, derived / "analysis" / run_id
+            n, timeline, load_entities(), None, run_id, derived / "analysis" / run_id
         )
         with Session(get_engine()) as s:
             for f in findings:
                 s.add(
                     FindingRow(
                         id=f.id,
-                        case_id=f.case_id,
                         video_id=f.video_id,
                         capture=f.capture,
                         run_id=f.run_id,
@@ -202,7 +195,6 @@ def analyze(job_id: str) -> None:
         return
     job = _update(job_id, status="done", step=None, progress=100, run_id=run_id)
     audit.log(
-        job.case_id,
         job.trigger,
         "job.run",
         job.id,
@@ -210,10 +202,10 @@ def analyze(job_id: str) -> None:
     )
 
 
-def latest_findings(case_id: str) -> list[Finding]:
+def latest_findings() -> list[Finding]:
     """Nghi vấn của lần chạy mới nhất cho mỗi bản thu."""
     with Session(get_engine()) as s:
-        rows = s.exec(select(FindingRow).where(FindingRow.case_id == case_id)).all()
+        rows = s.exec(select(FindingRow)).all()
     latest: dict[tuple[str, str], str] = {}
     for r in rows:
         key = (r.video_id, r.capture)

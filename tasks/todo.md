@@ -138,20 +138,20 @@ Kiểm tra: `uv run pytest tests/unit/test_evidence.py`.
 File: `src/h4wk/evidence/{writer.py,verify.py}`, `cli.py`, `tests/unit/test_evidence.py`.
 Người làm: Thi. Phụ thuộc: T4. Cỡ: M.
 
-### T6: `case-core`: case, đối tượng, nhật ký, chỉ mục
+### T6: `core`: đối tượng, nhật ký, chỉ mục
 
-SQLite (chế độ WAL, qua SQLModel) làm chỉ mục cho case, đối tượng, video, bản thu, nghi vấn và job. Module ghi `case.json`, `audit.jsonl` của case và `data/log/system_audit.jsonl`. Có API tạo, liệt kê và xem case, và API thêm đối tượng (tên, biệt danh, viết tắt). Lệnh dựng lại chỉ mục làm ở T45.
+SQLite (chế độ WAL, qua SQLModel) làm chỉ mục cho đối tượng, video, bản thu, nghi vấn và job. Module ghi `data/entities.json` và `data/log/audit.jsonl`. Có API liệt kê và thêm đối tượng (tên, biệt danh, viết tắt). Không có khái niệm case (quyết định 2026-11-19). Lệnh dựng lại chỉ mục làm ở T45.
 
 Nghiệm thu:
 
-- [x] Tạo case qua API thì có `case.json` và một dòng trong audit.
+- [x] Thêm đối tượng qua API thì có `entities.json` và một dòng trong audit.
 - [x] Một thao tác thất bại cũng để lại dòng audit với `status` lỗi.
 Kiểm tra: `uv run pytest tests/unit/test_cases.py`.
 
-File: `src/h4wk/core/{db.py,cases.py,audit.py}`, `api/cases.py`, tests.
+File: `src/h4wk/core/{db.py,entities.py,audit.py}`, `api/entities.py`, tests.
 Người làm: Thi. Phụ thuộc: T4. Cỡ: M.
 
-### T7: `case-core`: đăng nhập 2 tài khoản
+### T7: `core`: đăng nhập 2 tài khoản
 
 Lệnh `h4wk user create` lưu mật khẩu dạng hash (argon2 hoặc bcrypt). Đăng nhập và đăng xuất bằng session cookie. Mọi API trừ `/api/health` và `/api/auth/*` đều yêu cầu đăng nhập. `actor` trong audit lấy từ session theo dạng `user:<username>`. Đăng nhập sai được ghi vào system audit.
 
@@ -239,7 +239,7 @@ Người làm: Bảo. Phụ thuộc: T4, T6. Cỡ: M.
 
 ### T12: `jobs`: luồng collect → media → analyze
 
-Huey dùng một file SQLite riêng làm nơi lưu, với hai hàng đợi: `default` và `gpu` (1 worker). `pipeline.run(case_id, target, level, trigger)` chạy lần lượt các bước; mỗi bước cập nhật trạng thái và phần trăm tiến độ vào chỉ mục. Trong lúc chờ T10 và T11, bước media và analyze dùng bản giả đọc từ bản thu mẫu của T44.
+Huey dùng một file SQLite riêng làm nơi lưu, với hai hàng đợi: `default` và `gpu` (1 worker). `pipeline.run(target, level, trigger)` chạy lần lượt các bước; mỗi bước cập nhật trạng thái và phần trăm tiến độ vào chỉ mục. Trong lúc chờ T10 và T11, bước media và analyze dùng bản giả đọc từ bản thu mẫu của T44.
 
 Các quy tắc:
 
@@ -247,7 +247,7 @@ Các quy tắc:
 - Mỗi job ghi lại người hoặc quy tắc đã kích hoạt nó.
 - Kênh và `@handle` được chuyển cho watchlist ở T30, playlist được xử lý ở T46. Trước khi có các task đó, API trả lỗi rõ ràng.
 
-API gồm `POST /api/cases/{id}/collect`, `GET /api/jobs?case=`, `GET /api/jobs/{id}` và `GET /api/cases/{id}/findings` (nghi vấn của lần chạy mới nhất cho mỗi bản thu).
+API gồm `POST /api/collect`, `GET /api/jobs`, `GET /api/jobs/{id}` và `GET /api/findings` (nghi vấn của lần chạy mới nhất cho mỗi bản thu).
 
 Nghiệm thu:
 
@@ -261,25 +261,25 @@ Bước media dùng timeline từ phụ đề của T10, bước analyze dùng t
 
 Người làm: Thi. Phụ thuộc: T7, T9, T44. Tích hợp sau: T10, T11. Cỡ: M.
 
-### T13: UI tối giản: login, cases, collect, danh sách nghi vấn
+### T13: UI tối giản: login, đối tượng, collect, danh sách nghi vấn
 
 Kiểu TypeScript được sinh từ OpenAPI bằng `npm run gen:api`. Các trang cần có:
 
 - Login.
-- Cases: danh sách case, tạo case kèm đối tượng.
+- Entities: danh sách và thêm đối tượng. Đăng nhập xong vào thẳng Dashboard; không có màn Cases.
 - Collect: dán link, chọn mức thu (mặc định `full`), danh sách job với tiến độ poll mỗi 2 giây và thông báo lỗi nếu job thất bại.
-- Findings: bảng nghi vấn của case gồm video, mốc thời gian, trích dẫn và category.
+- Findings: bảng nghi vấn gồm video, mốc thời gian, trích dẫn và category.
 
 Toàn bộ giao diện viết bằng tiếng Anh.
 
 Nghiệm thu:
 
-- [ ] Từ trình duyệt làm trọn được luồng: đăng nhập, tạo case, dán link, chờ job chạy xong, thấy nghi vấn.
+- [ ] Từ trình duyệt làm trọn được luồng: đăng nhập, thêm đối tượng, dán link, chờ job chạy xong, thấy nghi vấn.
 - [ ] Job lỗi hiện thông báo lỗi trên trang Collect.
 
 Kiểm tra: `npm run build && npx tsc --noEmit`, rồi thao tác thủ công đúng luồng trên.
 
-File: `web/src/{api/,pages/Login.tsx,pages/Cases.tsx,pages/Collect.tsx,pages/Findings.tsx}`.
+File: `web/src/{api/,pages/Login.tsx,pages/Entities.tsx,pages/Collect.tsx,pages/Findings.tsx}`.
 Người làm: Thi. Phụ thuộc: T12. Cỡ: M.
 
 ### Checkpoint A (cuối tuần 1)
@@ -321,13 +321,13 @@ Kiểm tra: `uv run pytest tests/unit/test_supadata.py tests/unit/test_orchestra
 File: `collectors/providers/supadata.py`, fixtures, tests.
 Người làm: Thi. Phụ thuộc: T8. Cỡ: S.
 
-### T45: `case-core`: dựng lại database chỉ mục
+### T45: `core`: dựng lại database chỉ mục
 
-`h4wk reindex` xoá chỉ mục cũ rồi dựng lại từ `data/`: case, đối tượng, video, bản thu, nghi vấn của lần chạy mới nhất, và quyết định rà soát trong `reviews.jsonl`. Tài khoản, watchlist và lịch sử job không được dựng lại; đây là hạn chế đã chấp nhận ở SPEC 10.1.
+`h4wk reindex` xoá chỉ mục cũ rồi dựng lại từ `data/`: đối tượng, video, bản thu, nghi vấn của lần chạy mới nhất, và quyết định rà soát trong `reviews.jsonl`. Tài khoản, watchlist và lịch sử job không được dựng lại; đây là hạn chế đã chấp nhận ở SPEC 10.1.
 
 Nghiệm thu:
 
-- [ ] Xoá `index.db` rồi chạy `reindex` thì API trả về case, video và nghi vấn như trước.
+- [ ] Xoá `index.db` rồi chạy `reindex` thì API trả về đối tượng, video và nghi vấn như trước.
 - [ ] Quyết định rà soát trong một `reviews.jsonl` mẫu được nạp lại đúng.
 
 Kiểm tra: `uv run pytest tests/integration/test_reindex.py`.
@@ -576,7 +576,7 @@ Người làm: Thi. Phụ thuộc: T5, T13. Cỡ: S.
 
 ### T39: Đối tượng và ảnh mẫu
 
-Backend cho tải lên, xem và xoá ảnh mẫu của từng đối tượng, gồm hai loại: ảnh khuôn mặt và ảnh hay bị dùng lại (chân dung quen thuộc, logo). Ảnh lưu ở `data/cases/<case>/entities/<entity_id>/refs/{face,image}/`. Trang Entities cho sửa tên, biệt danh, viết tắt và quản lý ảnh mẫu.
+Backend cho tải lên, xem và xoá ảnh mẫu của từng đối tượng, gồm hai loại: ảnh khuôn mặt và ảnh hay bị dùng lại (chân dung quen thuộc, logo). Ảnh lưu ở `data/entities/<entity_id>/refs/{face,image}/`. Trang Entities cho sửa tên, biệt danh, viết tắt và quản lý ảnh mẫu.
 
 Nghiệm thu:
 
@@ -604,7 +604,7 @@ Người làm: Bảo. Phụ thuộc: T39, T19, T23. Cỡ: M.
 
 ### T41: `analysis`: khớp khuôn mặt
 
-Model khuôn mặt chọn ở T3, chạy trên máy qua hàng đợi `gpu`, phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng trong case. Khuôn mặt khớp sinh dấu hiệu `via: face` có frame, bbox và điểm số. Đặc trưng của khuôn mặt không khớp chỉ nằm trong bộ nhớ và không được ghi ra đĩa. Tính năng có thể tắt bằng `analysis.toml`.
+Model khuôn mặt chọn ở T3, chạy trên máy qua hàng đợi `gpu`, phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng. Khuôn mặt khớp sinh dấu hiệu `via: face` có frame, bbox và điểm số. Đặc trưng của khuôn mặt không khớp chỉ nằm trong bộ nhớ và không được ghi ra đĩa. Tính năng có thể tắt bằng `analysis.toml`.
 
 Nghiệm thu:
 
@@ -640,13 +640,13 @@ Người làm: Thi. Phụ thuộc: T13. Cỡ: S.
 
 ### T30: `watchlist` backend: RSS, Check now, sự kiện
 
-Mỗi mục watchlist là một kênh thuộc một case, có bật/tắt và mức thu riêng (mặc định `full`), quản lý qua CRUD. Khi thêm một kênh, từ API watchlist hoặc khi dán link kênh, `@handle` ở màn Collect:
+Mỗi mục watchlist là một kênh, có bật/tắt và mức thu riêng (mặc định `full`), quản lý qua CRUD. Khi thêm một kênh, từ API watchlist hoặc khi dán link kênh, `@handle` ở màn Collect:
 
 1. tạo bản thu hồ sơ kênh trong `channels/<channel_id>/captures/`;
 2. tạo job cho 10 video mới nhất (cấu hình được);
 3. đánh dấu mọi video đang có trong RSS là đã biết.
 
-Một periodic task chạy mỗi 2 phút (cấu hình được), đọc RSS của các kênh đang bật và so với danh sách video đã biết. Gặp video mới thì task tạo job với trigger `system:watchlist:<id>` và ghi sự kiện `new_video`. `POST /api/watchlist/{id}/check` kiểm tra ngay, dùng cả RSS lẫn uploads playlist của YouTube API. Một API khác trả về danh sách sự kiện của case.
+Một periodic task chạy mỗi 2 phút (cấu hình được), đọc RSS của các kênh đang bật và so với danh sách video đã biết. Gặp video mới thì task tạo job với trigger `system:watchlist:<id>` và ghi sự kiện `new_video`. `POST /api/watchlist/{id}/check` kiểm tra ngay, dùng cả RSS lẫn uploads playlist của YouTube API. Một API khác trả về danh sách sự kiện.
 
 Nghiệm thu:
 
@@ -661,7 +661,7 @@ Người làm: Thi. Phụ thuộc: T12, T14. Cỡ: M.
 
 ### T31: UI Watchlist và dòng sự kiện
 
-Trang Watchlist cho thêm kênh, bật/tắt, chọn mức thu, bấm Check now và xem thời điểm kiểm tra gần nhất. Task tạo trang Case dashboard ở dạng khung, chứa component dòng sự kiện (poll mỗi 5 giây) hiện `New video detected on <channel>` cùng trạng thái job đi kèm. Các số liệu khác của dashboard làm ở T35.
+Trang Watchlist cho thêm kênh, bật/tắt, chọn mức thu, bấm Check now và xem thời điểm kiểm tra gần nhất. Task tạo trang Dashboard ở dạng khung, chứa component dòng sự kiện (poll mỗi 5 giây) hiện `New video detected on <channel>` cùng trạng thái job đi kèm. Các số liệu khác của dashboard làm ở T35.
 
 Nghiệm thu:
 
@@ -669,7 +669,7 @@ Nghiệm thu:
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
-File: `web/src/pages/Watchlist.tsx`, `web/src/pages/CaseDashboard.tsx`, `web/src/components/EventFeed.tsx`.
+File: `web/src/pages/Watchlist.tsx`, `web/src/pages/Dashboard.tsx`, `web/src/components/EventFeed.tsx`.
 Người làm: Thi. Phụ thuộc: T30, T13. Cỡ: S.
 
 ### Checkpoint E (cuối tuần 4)
@@ -721,18 +721,18 @@ Kiểm tra: `npm run build` và kiểm tra thủ công.
 File: `web/src/pages/settings/AIProviders.tsx`.
 Người làm: Bảo. Phụ thuộc: T32, T13, T17, T23. Cỡ: M.
 
-### T35: UI Case dashboard
+### T35: UI Dashboard
 
 Hoàn thiện trang dashboard đã có từ T31: số kênh, số video, số lần thu; số nghi vấn theo severity và theo trạng thái rà soát; biểu đồ hoạt động theo ngày; lượng quota và credit đã dùng. Dòng sự kiện giữ nguyên.
 
 Nghiệm thu:
 
 - [ ] Số liệu khớp với chỉ mục.
-- [ ] Trang tải dưới 1 giây với case demo.
+- [ ] Trang tải dưới 1 giây với dữ liệu demo.
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
-File: `api/dashboard.py`, `web/src/pages/CaseDashboard.tsx`.
+File: `api/dashboard.py`, `web/src/pages/Dashboard.tsx`.
 Người làm: Thi. Phụ thuộc: T31, T32, T25, T15, T13. Cỡ: M.
 
 ### Checkpoint F
@@ -744,13 +744,13 @@ Gồm các task: T15, T24, T27, T28, T29, T33, T34, T35, T40, T41, T45, T46.
 
 ## Phase 7: Demo
 
-### T36: Dữ liệu case demo
+### T36: Dữ liệu demo
 
-Thu và xử lý 10–20 video thật cho case demo, tạo đối tượng demo kèm ảnh mẫu. Đối tượng demo dùng khuôn mặt của một thành viên nhóm. Case phải có ít nhất một video mà nghi vấn hình ảnh nằm ở đoạn không ai nhắc tên. Chuẩn bị sẵn video ngắn cho màn 2, và chọn kênh tin tức cho watchlist ở màn 3.
+Thu và xử lý 10–20 video thật cho demo, tạo đối tượng demo kèm ảnh mẫu. Đối tượng demo dùng khuôn mặt của một thành viên nhóm. Dữ liệu demo phải có ít nhất một video mà nghi vấn hình ảnh nằm ở đoạn không ai nhắc tên. Chuẩn bị sẵn video ngắn cho màn 2, và chọn kênh tin tức cho watchlist ở màn 3.
 
 Nghiệm thu:
 
-- [ ] Case demo có ít nhất một nghi vấn speech, một ocr, một visual, và một nghi vấn visual ở đoạn không nhắc tên.
+- [ ] Dữ liệu demo có ít nhất một nghi vấn speech, một ocr, một visual, và một nghi vấn visual ở đoạn không nhắc tên.
 - [ ] Chạy theo checklist (T42) từ đầu đến cuối không gặp lỗi.
 
 Kiểm tra: chạy theo checklist.
