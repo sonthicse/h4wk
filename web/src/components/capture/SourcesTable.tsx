@@ -2,12 +2,12 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatVnTime } from '@/lib/format'
-import type { SourceCall } from '@/mocks/captures'
+import type { SourceCall } from '@/api/videos'
 import { sourceStatusVariant } from './helpers'
 
 function formatCost(cost: SourceCall['cost']) {
   const parts = []
-  if (cost?.quotaUnits) parts.push(`${cost.quotaUnits} quota ${cost.quotaUnits === 1 ? 'unit' : 'units'}`)
+  if (cost?.quota_units) parts.push(`${cost.quota_units} quota ${cost.quota_units === 1 ? 'unit' : 'units'}`)
   if (cost?.credits) parts.push(`${cost.credits} ${cost.credits === 1 ? 'credit' : 'credits'}`)
   if (parts.length) return parts.join(', ')
   return cost ? 'free' : '—' // có ghi chi phí nhưng bằng 0: miễn phí
@@ -45,8 +45,8 @@ export default function SourcesTable({ sources }: { sources: SourceCall[] }) {
                 <TableCell>
                   <Badge variant={sourceStatusVariant(s.status)}>{s.status}</Badge>
                 </TableCell>
-                <TableCell>{s.startedAt ? formatVnTime(s.startedAt) : '—'}</TableCell>
-                <TableCell className="text-right">{s.durationMs !== undefined ? `${s.durationMs} ms` : '—'}</TableCell>
+                <TableCell>{s.started_at ? formatVnTime(s.started_at) : '—'}</TableCell>
+                <TableCell className="text-right">{s.duration_ms != null ? `${s.duration_ms} ms` : '—'}</TableCell>
                 <TableCell>{formatCost(s.cost)}</TableCell>
                 <TableCell className="max-w-xs whitespace-normal break-words text-xs text-destructive">{s.error}</TableCell>
               </TableRow>

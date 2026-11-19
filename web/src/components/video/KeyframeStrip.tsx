@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { formatTime } from '@/lib/findings'
 import { cn } from '@/lib/utils'
-import type { Finding } from '@/mocks/data'
-import { FRAME_H, FRAME_W, type Bbox, type Keyframe } from '@/mocks/videos'
+import { frameUrl, type VideoFinding } from '@/api/videos'
+import type { Bbox, Keyframe } from './keyframes'
 import type { PlayerControls } from './usePlayer'
 
 // Ba loại khung bao, mỗi loại một màu (có chú giải bên dưới ảnh).
@@ -16,24 +16,48 @@ const boxStyle = {
 // Chiều cao (px khung 480p) tối thiểu phía trên box để đặt nhãn.
 const LABEL_ROOM = 28
 
-// Ảnh giả của một khung hình: nền màu theo hue, kèm các khung bao nếu `boxes`.
-function FrameImage({ frame, boxes = false, className }: { frame: Keyframe; boxes?: boolean; className?: string }) {
+// Kích thước khung khi chưa đọc được ảnh (bản proxy 480p).
+const DEFAULT_SIZE = { w: 854, h: 480 }
+
+// Ảnh keyframe thật, kèm các khung bao nếu `boxes`. Bbox tính theo pixel của ảnh nên quy về % theo kích thước thật.
+function FrameImage({
+  frame,
+  src,
+  boxes = false,
+  className,
+}: {
+  frame: Keyframe
+  src: string
+  boxes?: boolean
+  className?: string
+}) {
+  const [size, setSize] = useState(DEFAULT_SIZE)
+  const [broken, setBroken] = useState(false)
   const all = [
     ...frame.ocr.map((b) => ({ ...b, kind: 'ocr' as const })),
     ...frame.faces.map((b) => ({ ...b, text: b.label, kind: 'face' as const })),
     ...frame.refImages.map((b) => ({ ...b, text: b.label, kind: 'ref' as const })),
   ]
   const pos = ([x, y, w, h]: Bbox) => ({
-    left: `${(x / FRAME_W) * 100}%`,
-    top: `${(y / FRAME_H) * 100}%`,
-    width: `${(w / FRAME_W) * 100}%`,
-    height: `${(h / FRAME_H) * 100}%`,
+    left: `${(x / size.w) * 100}%`,
+    top: `${(y / size.h) * 100}%`,
+    width: `${(w / size.w) * 100}%`,
+    height: `${(h / size.h) * 100}%`,
   })
   return (
-    <div
-      className={cn('relative aspect-video overflow-hidden rounded', className)}
-      style={{ background: `linear-gradient(135deg, hsl(${frame.hue} 45% 28%), hsl(${frame.hue + 40} 40% 14%))` }}
-    >
+    <div className={cn('relative aspect-video overflow-hidden rounded bg-zinc-800', className)}>
+      {broken ? (
+        <span className="absolute inset-0 flex items-center justify-center text-xs text-zinc-400">Image unavailable</span>
+      ) : (
+        <img
+          src={src}
+          alt={`Keyframe at ${formatTime(frame.t)}`}
+          loading="lazy"
+          className="size-full object-fill"
+          onLoad={(e) => setSize({ w: e.currentTarget.naturalWidth || DEFAULT_SIZE.w, h: e.currentTarget.naturalHeight || DEFAULT_SIZE.h })}
+          onError={() => setBroken(true)}
+        />
+      )}
       <span className="absolute right-1 bottom-1 font-mono text-[10px] text-white/60">frame @ {formatTime(frame.t)}</span>
       {boxes &&
         all.map((b, i) => (
@@ -55,20 +79,26 @@ function FrameImage({ frame, boxes = false, className }: { frame: Keyframe; boxe
 
 // Dải keyframe. Bấm một khung: seek tới khung đó và hiện ảnh lớn kèm khung bao và mô tả.
 export default function KeyframeStrip({
+  videoId,
+  capture,
   keyframes,
   findings,
   player,
   activeFinding,
 }: {
+  videoId: string
+  capture?: string
   keyframes: Keyframe[]
-  findings: Finding[]
+  findings: VideoFinding[]
   player: PlayerControls
-  activeFinding: Finding | null
+  activeFinding: VideoFinding | null
 }) {
+  const src = (k: Keyframe) => frameUrl(videoId, k.id, capture)
+  const inRange = (k: Keyframe, f: VideoFinding) => f.start !== null && f.end !== null && f.end > f.start && k.t >= f.start && k.t <= f.end
   const [pickedId, setPickedId] = useState<string | null>(null)
 
   // Khi mở bằng ?finding= thì mặc định chọn khung nằm trong đoạn nghi vấn đó.
-  const inFinding = activeFinding && keyframes.find((k) => k.t >= activeFinding.start && k.t <= activeFinding.end)
+  const inFinding = activeFinding && (keyframes.find((k) => k.id === activeFinding.frame) ?? keyframes.find((k) => inRange(k, activeFinding)))
   const selected = keyframes.find((k) => k.id === pickedId) ?? inFinding ?? null
   const playing = [...keyframes].reverse().find((k) => k.t <= player.currentTime)
 
@@ -76,7 +106,7 @@ export default function KeyframeStrip({
     return (
       <section className="space-y-2">
         <h2 className="text-sm font-medium">Keyframes</h2>
-        <p className="text-sm text-muted-foreground">No keyframes. They are only extracted at capture level full.</p>
+        <p className="text-sm text-muted-foreground">No keyframes. They are only extracted at capture level full, once the video has been analysed.</p>
       </section>
     )
   }
@@ -86,7 +116,7 @@ export default function KeyframeStrip({
       <h2 className="text-sm font-medium">Keyframes</h2>
       <div className="flex gap-2 overflow-x-auto pb-2">
         {keyframes.map((k) => {
-          const flagged = findings.some((f) => k.t >= f.start && k.t <= f.end && f.end > f.start)
+          const flagged = findings.some((f) => f.frame === k.id || inRange(k, f))
           return (
             <button
               key={k.id}
@@ -101,7 +131,7 @@ export default function KeyframeStrip({
                 k.id === selected?.id && 'bg-muted ring-2 ring-primary',
               )}
             >
-              <FrameImage frame={k} />
+              <FrameImage frame={k} src={src(k)} />
               <span className="flex items-center justify-between font-mono text-xs text-muted-foreground">
                 {formatTime(k.t)}
                 {flagged && <Badge variant="destructive" className="h-4 text-[10px]">flagged</Badge>}
@@ -115,7 +145,7 @@ export default function KeyframeStrip({
       {selected ? (
         <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 rounded-lg border p-3">
           <div className="space-y-2">
-            <FrameImage frame={selected} boxes className="w-full" />
+            <FrameImage frame={selected} src={src(selected)} boxes className="w-full" />
             <ul className="flex flex-wrap gap-3 text-xs">
               {Object.values(boxStyle).map((s) => (
                 <li key={s.label} className="flex items-center gap-1">

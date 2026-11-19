@@ -4,7 +4,7 @@ import FilesTable from '@/components/capture/FilesTable'
 import ManifestCard from '@/components/capture/ManifestCard'
 import SourcesTable from '@/components/capture/SourcesTable'
 import { Badge } from '@/components/ui/badge'
-import { getCapture } from '@/mocks/captures'
+import { getCapture, getVideo } from '@/api/videos'
 
 export default function CapturePage() {
   const { videoId = '', captureId = '' } = useParams()
@@ -12,6 +12,8 @@ export default function CapturePage() {
     queryKey: ['capture', videoId, captureId],
     queryFn: () => getCapture(videoId, captureId),
   })
+  // Chỉ để lấy tiêu đề; lỗi hay không có thì hiện mã video.
+  const video = useQuery({ queryKey: ['video', videoId], queryFn: () => getVideo(videoId) })
   const videoUrl = `/videos/${videoId}`
 
   if (capture.isLoading) return <p className="text-sm text-muted-foreground">Loading capture…</p>
@@ -39,18 +41,18 @@ export default function CapturePage() {
           <Link className="text-sm text-muted-foreground underline" to={videoUrl}>
             ← Back to video
           </Link>
-          <h1 className="text-2xl font-semibold">{c.videoTitle}</h1>
+          <h1 className="text-2xl font-semibold">{video.data?.video.title ?? videoId}</h1>
         </div>
         <div className="flex gap-2 text-sm">
           <Badge variant="outline">
-            <code>{c.id}</code>
+            <code>{captureId}</code>
           </Badge>
           <Badge variant="outline">{c.manifest.level}</Badge>
         </div>
       </div>
       <ManifestCard manifest={c.manifest} />
       <SourcesTable sources={c.manifest.sources} />
-      <FilesTable capture={c} />
+      <FilesTable videoId={videoId} captureId={captureId} capture={c} />
     </div>
   )
 }

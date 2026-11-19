@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { listEntities } from '@/api/entities'
 import type { Finding } from '@/api/findings'
 import { listQueue, type ReviewStatus } from '@/api/review'
@@ -26,10 +27,9 @@ function timeRange(f: Finding) {
   return f.start == null ? '—' : `${formatTime(f.start)}–${formatTime(f.end ?? f.start)}`
 }
 
-// Trang Video detail vẫn dùng dữ liệu giả (T26), nên tạm mở video gốc trên YouTube tại đúng giây.
-function youtubeLink(f: Finding) {
-  const t = f.start == null ? '' : `&t=${Math.max(0, Math.floor(f.start) - 2)}s`
-  return `https://www.youtube.com/watch?v=${encodeURIComponent(f.video_id)}${t}`
+// Mở trang Video detail tại đúng nghi vấn (trang tự nhảy tới start − 2s).
+function videoLink(f: Finding) {
+  return `/videos/${encodeURIComponent(f.video_id)}?finding=${encodeURIComponent(f.id)}`
 }
 
 function FilterSelect({
@@ -115,9 +115,7 @@ function FindingSheet({
                 )}
               </Detail>
               <Button asChild className="w-full">
-                <a href={youtubeLink(finding)} target="_blank" rel="noreferrer">
-                  Open on YouTube
-                </a>
+                <Link to={videoLink(finding)}>Open in video</Link>
               </Button>
             </dl>
           </>
@@ -239,15 +237,9 @@ export default function FindingsPage() {
                 {f.start == null ? (
                   '—'
                 ) : (
-                  <a
-                    href={youtubeLink(f)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="hover:underline"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <Link to={videoLink(f)} className="hover:underline" onClick={(e) => e.stopPropagation()}>
                     {timeRange(f)}
-                  </a>
+                  </Link>
                 )}
               </TableCell>
               <TableCell>{f.source_kind}</TableCell>

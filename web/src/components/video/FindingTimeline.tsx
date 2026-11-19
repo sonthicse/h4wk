@@ -1,9 +1,13 @@
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { severityVariant, timedSources, timeRange } from '@/lib/findings'
+import type { Severity, VideoFinding } from '@/api/videos'
+import { formatTime, severityVariant, timedSources } from '@/lib/findings'
 import { cn } from '@/lib/utils'
-import type { Finding, Severity } from '@/mocks/data'
 import type { PlayerControls } from './usePlayer'
+
+// Mốc thời gian của nghi vấn; nguồn không có mốc (tiêu đề, mô tả, thumbnail, comment) thì '—'.
+const isTimed = (f: VideoFinding) => timedSources.has(f.sourceKind) && f.start !== null
+const timeRange = (f: VideoFinding) => (isTimed(f) ? `${formatTime(f.start!)}–${formatTime(f.end ?? f.start!)}` : '—')
 
 const severityColor: Record<Severity, string> = {
   high: 'bg-red-500',
@@ -18,14 +22,14 @@ export default function FindingTimeline({
   activeId,
   onOpen,
 }: {
-  findings: Finding[]
+  findings: VideoFinding[]
   player: PlayerControls
   activeId: string | null
-  onOpen: (f: Finding) => void
+  onOpen: (f: VideoFinding) => void
 }) {
   const { duration, currentTime } = player
-  const timed = findings.filter((f) => timedSources.has(f.sourceKind))
-  const untimed = findings.filter((f) => !timedSources.has(f.sourceKind))
+  const timed = findings.filter(isTimed)
+  const untimed = findings.filter((f) => !isTimed(f))
 
   return (
     <div className="space-y-3">
@@ -45,10 +49,10 @@ export default function FindingTimeline({
         className="relative h-8 cursor-pointer rounded bg-muted"
         onClick={(e) => {
           const box = e.currentTarget.getBoundingClientRect()
-          player.seek(((e.clientX - box.left) / box.width) * duration)
+          if (duration > 0) player.seek(((e.clientX - box.left) / box.width) * duration)
         }}
       >
-        {timed.map((f) => (
+        {duration > 0 && timed.map((f) => (
           <Tooltip key={f.id}>
             <TooltipTrigger asChild>
               <button
@@ -59,7 +63,10 @@ export default function FindingTimeline({
                   severityColor[f.severity],
                   f.id === activeId && 'opacity-100 ring-2 ring-foreground',
                 )}
-                style={{ left: `${(f.start / duration) * 100}%`, width: `${((f.end - f.start) / duration) * 100}%` }}
+                style={{
+                  left: `${(f.start! / duration) * 100}%`,
+                  width: `${(((f.end ?? f.start!) - f.start!) / duration) * 100}%`,
+                }}
                 onClick={(e) => {
                   e.stopPropagation()
                   onOpen(f)
@@ -74,7 +81,7 @@ export default function FindingTimeline({
         ))}
         <div
           className="pointer-events-none absolute inset-y-[-3px] w-0.5 bg-foreground"
-          style={{ left: `${(currentTime / duration) * 100}%` }}
+          style={{ left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
         />
       </div>
 

@@ -1,21 +1,46 @@
 import { Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import type { VideoFinding } from '@/api/videos'
 import { formatTime } from '@/lib/findings'
-import type { Finding } from '@/mocks/data'
-import type { PlayerControls } from './usePlayer'
+import type { PlayerControls, VideoProps } from './usePlayer'
 
-// Trình phát giả: khung 16:9 placeholder, nút play/pause và thanh seek.
-export default function Player({ player, activeFinding }: { player: PlayerControls; activeFinding: Finding | null }) {
+// Trình phát thật trên <video>; không có media (hoặc nạp lỗi) thì hiện khung trống, thanh seek vẫn dùng được cho transcript/timeline.
+export default function Player({
+  player,
+  videoProps,
+  src,
+  failed,
+  activeFinding,
+}: {
+  player: PlayerControls
+  videoProps: VideoProps
+  src: string | null
+  failed: boolean
+  activeFinding: VideoFinding | null
+}) {
   const { currentTime, duration, playing } = player
-  const inFinding = activeFinding && activeFinding.end > activeFinding.start && currentTime >= activeFinding.start && currentTime <= activeFinding.end
+  const hasMedia = src !== null && !failed
+  const inFinding =
+    activeFinding &&
+    activeFinding.start !== null &&
+    activeFinding.end !== null &&
+    activeFinding.end > activeFinding.start &&
+    currentTime >= activeFinding.start &&
+    currentTime <= activeFinding.end
 
   return (
     <div className="space-y-2">
       <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-zinc-900 text-zinc-400">
-        <div className="text-center">
-          <p className="font-mono text-5xl text-zinc-200">{formatTime(currentTime)}</p>
-          <p className="mt-2 text-xs">Simulated player · proxy 480p</p>
-        </div>
+        {hasMedia ? (
+          <video {...videoProps} src={src} preload="metadata" playsInline className="size-full bg-black object-contain" />
+        ) : (
+          <div className="px-4 text-center text-sm">
+            <p className="text-zinc-200">No video file</p>
+            <p className="mt-1 text-xs">
+              {failed ? 'The media file could not be loaded.' : 'Media is only stored at capture level full.'}
+            </p>
+          </div>
+        )}
         {inFinding && (
           <p className="absolute inset-x-3 bottom-3 rounded bg-black/70 px-3 py-2 text-sm text-white">
             {activeFinding.quote}
@@ -27,6 +52,7 @@ export default function Player({ player, activeFinding }: { player: PlayerContro
           size="icon"
           variant="outline"
           aria-label={playing ? 'Pause' : 'Play'}
+          disabled={!hasMedia}
           onClick={playing ? player.pause : player.play}
         >
           {playing ? <Pause /> : <Play />}
@@ -38,7 +64,8 @@ export default function Player({ player, activeFinding }: { player: PlayerContro
           min={0}
           max={duration}
           step={0.5}
-          value={currentTime}
+          disabled={duration <= 0}
+          value={Math.min(currentTime, duration)}
           onChange={(e) => player.seek(Number(e.target.value))}
         />
         <span className="w-24 text-right font-mono text-sm text-muted-foreground">

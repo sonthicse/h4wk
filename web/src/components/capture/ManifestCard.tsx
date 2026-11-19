@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatVnDateTime } from '@/lib/format'
-import type { Manifest } from '@/mocks/captures'
+import type { Manifest } from '@/api/videos'
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -26,11 +26,11 @@ export default function ManifestCard({ manifest }: { manifest: Manifest }) {
               <code>{manifest.schema}</code>
             </Row>
             <Row label="Source URL">
-              <a className="underline" href={manifest.sourceUrl} target="_blank" rel="noreferrer">
-                {manifest.sourceUrl}
+              <a className="underline" href={manifest.source_url} target="_blank" rel="noreferrer">
+                {manifest.source_url}
               </a>
             </Row>
-            <Row label="Collected at">{formatVnDateTime(manifest.collectedAt)} (GMT+7)</Row>
+            <Row label="Collected at">{formatVnDateTime(manifest.collected_at)} (GMT+7)</Row>
             <Row label="Collector">
               <code>{manifest.collector}</code>
             </Row>
@@ -38,15 +38,15 @@ export default function ManifestCard({ manifest }: { manifest: Manifest }) {
           <div>
             <Row label="Trigger">
               <Badge variant="outline">{trigger.type}</Badge>
-              {trigger.watchItem && <span className="ml-2 text-muted-foreground">{trigger.watchItem}</span>}
+              {trigger.watch_item && <span className="ml-2 text-muted-foreground">{trigger.watch_item}</span>}
               {trigger.event && <span className="ml-2 text-muted-foreground">({trigger.event})</span>}
             </Row>
             <Row label="Level">
               <Badge variant="outline">{manifest.level}</Badge>
             </Row>
-            <Row label="Tool version">{manifest.toolVersion}</Row>
+            <Row label="Tool version">{manifest.tool_version}</Row>
             <Row label="Previous capture">
-              {manifest.previousCapture ? <code>{manifest.previousCapture}</code> : <span className="text-muted-foreground">none</span>}
+              {manifest.previous_capture ? <code>{manifest.previous_capture}</code> : <span className="text-muted-foreground">none</span>}
             </Row>
           </div>
         </dl>

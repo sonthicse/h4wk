@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import type { Transcript, VideoFinding } from '@/api/videos'
 import { formatTime } from '@/lib/findings'
 import { cn } from '@/lib/utils'
-import type { Finding } from '@/mocks/data'
-import type { Transcript } from '@/mocks/videos'
 import type { PlayerControls } from './usePlayer'
 
 // Transcript tự cuộn theo thời gian phát; bấm một đoạn để seek.
@@ -15,7 +14,7 @@ export default function TranscriptPane({
   activeId,
 }: {
   transcripts: Transcript[]
-  findings: Finding[]
+  findings: VideoFinding[]
   player: PlayerControls
   activeId: string | null
 }) {
@@ -56,7 +55,9 @@ export default function TranscriptPane({
       ) : (
         <div ref={listRef} className="relative min-h-0 flex-1 overflow-y-auto p-2">
           {transcript.segments.map((s, i) => {
-            const flagged = findings.filter((f) => f.start < s.end && f.end > s.start && f.end > f.start)
+            const flagged = findings.filter(
+              (f) => f.start !== null && f.end !== null && f.start < s.end && f.end > s.start && f.end > f.start,
+            )
             const isActive = i === activeIndex
             const isTarget = flagged.some((f) => f.id === activeId)
             return (

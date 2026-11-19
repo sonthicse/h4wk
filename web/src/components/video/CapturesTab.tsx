@@ -2,10 +2,10 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatVnDateTime } from '@/lib/format'
-import type { VideoCapture } from '@/mocks/videos'
+import type { CaptureSummary } from '@/api/videos'
 
 // Lịch sử các lần thu của video, mới nhất ở trên; bấm mã để mở trang Capture.
-export default function CapturesTab({ captures, videoId }: { captures: VideoCapture[]; videoId: string }) {
+export default function CapturesTab({ captures, videoId }: { captures: CaptureSummary[]; videoId: string }) {
   if (captures.length === 0) return <p className="py-4 text-sm text-muted-foreground">No captures yet.</p>
 
   return (
@@ -30,12 +30,12 @@ export default function CapturesTab({ captures, videoId }: { captures: VideoCapt
               {i === 0 && <Badge variant="secondary" className="ml-2">latest</Badge>}
             </TableCell>
             <TableCell><Badge variant="outline">{c.level}</Badge></TableCell>
-            <TableCell>{formatVnDateTime(c.capturedAt)}</TableCell>
+            <TableCell>{formatVnDateTime(c.collected_at)}</TableCell>
             <TableCell className="space-x-1">
-              {c.transcriptKinds.length === 0 ? '—' : c.transcriptKinds.map((k) => <Badge key={k} variant="outline">{k}</Badge>)}
+              {c.transcript_kinds.length === 0 ? '—' : c.transcript_kinds.map((k) => <Badge key={k} variant="outline">{k}</Badge>)}
             </TableCell>
-            <TableCell className="text-right">{c.commentCount}</TableCell>
-            <TableCell className="text-right">{c.keyframeCount}</TableCell>
+            <TableCell className="text-right">{c.comment_count}</TableCell>
+            <TableCell className="text-right">{c.keyframe_count}</TableCell>
           </TableRow>
         ))}
       </TableBody>

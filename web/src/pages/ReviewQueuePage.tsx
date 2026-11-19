@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router'
 import { listEntities } from '@/api/entities'
 import { decide as postDecision, listQueue, type DecisionStatus, type QueueItem, type ReviewStatus } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
@@ -25,11 +26,10 @@ function timeRange(item: QueueItem) {
   return f.start == null ? '—' : `${formatTime(f.start)}–${formatTime(f.end ?? f.start)}`
 }
 
-// Trang Video detail còn là dữ liệu giả (T26), nên tạm mở video gốc trên YouTube tại start − 2s.
-function youtubeLink(item: QueueItem) {
+// Mở trang Video detail tại đúng nghi vấn (trang tự nhảy tới start − 2s).
+function videoLink(item: QueueItem) {
   const f = item.finding
-  const t = f.start == null ? '' : `&t=${Math.max(0, Math.floor(f.start) - 2)}s`
-  return `https://www.youtube.com/watch?v=${encodeURIComponent(f.video_id)}${t}`
+  return `/videos/${encodeURIComponent(f.video_id)}?finding=${encodeURIComponent(f.id)}`
 }
 
 const views: { id: View; label: string }[] = [
@@ -248,9 +248,7 @@ export default function ReviewQueuePage() {
               </dl>
 
               <Button asChild variant="outline" size="sm">
-                <a href={youtubeLink(selected)} target="_blank" rel="noreferrer">
-                  Open on YouTube
-                </a>
+                <Link to={videoLink(selected)}>Open in video</Link>
               </Button>
 
               <div className="space-y-3 border-t pt-4">

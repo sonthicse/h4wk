@@ -1,4 +1,4 @@
-import type { SourceStatus, VerifyStatus } from '@/mocks/captures'
+import type { SourceStatus, VerifyStatus } from '@/api/videos'
 
 // Kích thước dễ đọc: 1536 -> "1.5 KB".
 export function formatBytes(bytes: number) {

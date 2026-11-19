@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatVnDateTime } from '@/lib/format'
-import { type Capture, type VerifyFile, verifyCapture } from '@/mocks/captures'
+import { captureFileUrl, type CaptureDetail, type VerifyFile, verifyCapture } from '@/api/videos'
 import { formatBytes, shortHash, verifyStatusVariant } from './helpers'
 
 function CopyHash({ sha256 }: { sha256: string }) {
@@ -30,27 +30,17 @@ function CopyHash({ sha256 }: { sha256: string }) {
   )
 }
 
-// Bản demo: tải một blob nhỏ thay cho file thật trên đĩa.
-function downloadDemo(path: string, sha256: string) {
-  const blob = new Blob([`Demo content for ${path}\nsha256: ${sha256}\n`], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = path.split('/').pop() ?? 'file'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-export default function FilesTable({ capture }: { capture: Capture }) {
+export default function FilesTable({ videoId, captureId, capture }: { videoId: string; captureId: string; capture: CaptureDetail }) {
   const verify = useMutation({
-    mutationFn: () => verifyCapture(capture.videoId, capture.id),
+    mutationFn: () => verifyCapture(videoId, captureId),
   })
+  const sizes = new Map(capture.files.map((f) => [f.path, f.bytes]))
 
   // Danh sách hiển thị: theo manifest; sau khi verify thì theo kết quả (có thêm file `unexpected`).
   const result = verify.data
   const rows: VerifyFile[] =
     result?.files ??
-    Object.entries(capture.manifest.files).map(([path, expected]) => ({ path, status: 'OK', expected }))
+    capture.files.map((f) => ({ path: f.path, status: 'OK', expected_sha256: f.sha256, actual_sha256: f.sha256 }))
   const counts = { OK: 0, FAIL: 0, missing: 0, unexpected: 0 }
   for (const f of result?.files ?? []) counts[f.status]++
   const allOk = result && counts.FAIL + counts.missing + counts.unexpected === 0
@@ -58,7 +48,7 @@ export default function FilesTable({ capture }: { capture: Capture }) {
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
-        <CardTitle>Files ({Object.keys(capture.manifest.files).length})</CardTitle>
+        <CardTitle>Files ({capture.files.length})</CardTitle>
         <Button onClick={() => verify.mutate()} disabled={verify.isPending}>
           {verify.isPending ? 'Verifying…' : 'Verify integrity'}
         </Button>
@@ -70,7 +60,7 @@ export default function FilesTable({ capture }: { capture: Capture }) {
             {allOk
               ? `All ${counts.OK} files match the manifest.`
               : `${counts.OK} OK, ${counts.FAIL} FAIL, ${counts.missing} missing, ${counts.unexpected} unexpected.`}{' '}
-            <span className="text-muted-foreground">Checked {formatVnDateTime(result.checkedAt)}</span>
+            <span className="text-muted-foreground">Checked {formatVnDateTime(result.checked_at)}</span>
           </p>
         )}
         <Table>
@@ -85,18 +75,19 @@ export default function FilesTable({ capture }: { capture: Capture }) {
           </TableHeader>
           <TableBody>
             {rows.map((f) => {
-              const entry = f.expected ?? f.actual!
+              const sha256 = f.expected_sha256 ?? f.actual_sha256 ?? ''
+              const bytes = sizes.get(f.path)
               return (
                 <TableRow key={f.path}>
                   <TableCell>
                     <code className="break-all">{f.path}</code>
                   </TableCell>
-                  <TableCell className="text-right">{formatBytes(entry.bytes)}</TableCell>
+                  <TableCell className="text-right">{bytes === undefined ? '—' : formatBytes(bytes)}</TableCell>
                   <TableCell>
-                    <CopyHash sha256={entry.sha256} />
-                    {f.status === 'FAIL' && f.actual && (
-                      <div className="px-2 font-mono text-xs text-destructive" title={f.actual.sha256}>
-                        actual {shortHash(f.actual.sha256)}
+                    {sha256 && <CopyHash sha256={sha256} />}
+                    {f.status === 'FAIL' && f.actual_sha256 && (
+                      <div className="px-2 font-mono text-xs text-destructive" title={f.actual_sha256}>
+                        actual {shortHash(f.actual_sha256)}
                       </div>
                     )}
                   </TableCell>
@@ -107,13 +98,14 @@ export default function FilesTable({ capture }: { capture: Capture }) {
                   )}
                   <TableCell>
                     {f.status !== 'unexpected' && f.status !== 'missing' && (
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={`Download ${f.path}`}
-                        onClick={() => downloadDemo(f.path, entry.sha256)}
-                      >
-                        <Download />
+                      <Button asChild variant="ghost" size="icon-sm">
+                        <a
+                          href={captureFileUrl(videoId, captureId, f.path)}
+                          download={f.path.split('/').pop()}
+                          aria-label={`Download ${f.path}`}
+                        >
+                          <Download />
+                        </a>
                       </Button>
                     )}
                   </TableCell>
