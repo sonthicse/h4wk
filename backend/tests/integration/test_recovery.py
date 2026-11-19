@@ -58,9 +58,10 @@ def test_stopped_between_collect_and_media(
         _post(client)
     job = _only_job()
     # Đang chờ ở hàng đợi gpu: status queued, recover không đụng tới.
-    assert (job.status, job.step) == ("queued", "collect") and job.capture
+    assert (job.status, job.step) == ("queued", "media") and job.capture
+    assert recovery.next_task(job) == "media"
     assert recovery.recover("gpu") == []
-    # Giả lập job đã chạy dở nhưng mất dấu (running ở bước collect, đã có bản thu).
+    # Giả lập job đã chạy dở nhưng mất dấu (running ở bước media, tiến độ 40).
     pipeline._update(job.id, status="running")
     calls, captures = len(fetched), _captures(data_dir)
 
