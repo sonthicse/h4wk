@@ -53,7 +53,7 @@ export default function ReviewQueueCard() {
       <CardHeader>
         <CardTitle className="text-xl">Review</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-h-[calc(100svh-14rem)] overflow-y-auto pr-1">
         {queue.error && <p className="text-sm text-destructive">Could not load the review queue.</p>}
         {queue.isPending && <p className="text-sm text-muted-foreground">Loading queue…</p>}
         {queue.data && pending.length === 0 && (

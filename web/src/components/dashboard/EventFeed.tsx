@@ -104,7 +104,7 @@ export default function EventFeed() {
       <CardHeader>
         <CardTitle className="text-xl">Events</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-h-[calc(100svh-14rem)] overflow-y-auto pr-1">
         {events.error && <p className="text-sm text-destructive">Could not load events.</p>}
         {events.isPending && <p className="text-sm text-muted-foreground">Loading events…</p>}
         {events.data && events.data.length === 0 && (
