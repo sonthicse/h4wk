@@ -20,15 +20,14 @@ const statuses: ReviewStatus[] = ['pending', 'confirmed', 'rejected', 'needs_inf
 const cardLink =
   'block rounded-xl transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none [&>*]:hover:bg-muted/40'
 
-// Một con số kèm dòng giải thích ngắn nó đếm cái gì; bấm sang trang chi tiết.
-function StatCard({ label, value, hint, to }: { label: string; value: number; hint: string; to: string }) {
+// Một con số; bấm sang trang chi tiết.
+function StatCard({ label, value, to }: { label: string; value: number; to: string }) {
   return (
     <Link to={to} aria-label={`${label}: ${value}`} className={cardLink}>
       <Card className="h-full">
         <CardHeader>
           <CardDescription>{label}</CardDescription>
           <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
-          <p className="text-xs text-muted-foreground">{hint}</p>
         </CardHeader>
       </Card>
     </Link>
@@ -133,9 +132,9 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <FeaturedVideoCard />
           <div className="grid grid-cols-3 gap-4">
-            <StatCard label="Watched channels" value={d.channelCount} hint="Channels in the watchlist" to="/watchlist" />
-            <StatCard label="Videos collected" value={d.videoCount} hint="Different videos saved so far" to="/videos" />
-            <StatCard label="Captures" value={d.captureCount} hint="Collection runs; one video can be collected again" to="/collect" />
+            <StatCard label="Watched channels" value={d.channelCount} to="/watchlist" />
+            <StatCard label="Videos collected" value={d.videoCount} to="/videos" />
+            <StatCard label="Captures" value={d.captureCount} to="/collect" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findingsBySeverity} variant={severityVariant} />
