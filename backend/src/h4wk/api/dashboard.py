@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlmodel import Session, func, select
 
 from h4wk.collectors import quota
+from h4wk.collectors.providers import supadata
 from h4wk.core.config import data_dir
 from h4wk.core.db import WatchItemRow, get_engine
 from h4wk.core.types import VN_TZ
@@ -62,7 +63,7 @@ class Dashboard(BaseModel):
     findings_by_status: StatusCounts
     activity: list[DayActivity]  # 14 ngày, cũ trước, theo giờ Việt Nam
     youtube_quota: Usage | None  # quota YouTube API hôm nay
-    supadata_credits: Usage | None  # có khi làm T15
+    supadata_credits: Usage | None  # credit Supadata trong kỳ; None khi chưa có key hoặc lỗi
     top_video: TopVideo | None
 
 
@@ -119,6 +120,7 @@ def dashboard(latest_only: bool = False) -> Dashboard:
         )
 
     u = quota.usage(datetime.now(VN_TZ))
+    c = supadata.credits_usage()
     return Dashboard(
         channel_count=channel_count,
         video_count=len(captures_by_video),
@@ -129,6 +131,6 @@ def dashboard(latest_only: bool = False) -> Dashboard:
             DayActivity(date=d, captures=capture_days[d], findings=finding_days[d]) for d in days
         ],
         youtube_quota=Usage(used=u.used, limit=u.limit),
-        supadata_credits=None,
+        supadata_credits=Usage(used=c.used, limit=c.limit) if c else None,
         top_video=top,
     )

@@ -16,6 +16,7 @@ from h4wk.api.deps import current_actor
 from h4wk.collectors import quota, registry
 from h4wk.collectors.models import Cap
 from h4wk.collectors.orchestrator import Settings as RouteSettings
+from h4wk.collectors.providers import supadata
 from h4wk.core import audit, secrets, settings
 from h4wk.core.config_models import AiConfig, ModelCaps, Route, SourcesConfig
 from h4wk.core.db import SourceStateRow, as_aware, get_engine
@@ -41,13 +42,13 @@ class SourceInfo(BaseModel):
     fault_injection: bool  # bật thì nguồn bị coi như bị chặn (giả lập cho demo)
     needs_key: bool
     key: KeyInfo | None
-    implemented: bool  # đã có adapter (youtube_api ở T14, supadata ở T15)
+    implemented: bool  # đã có adapter
     status: Literal["active", "paused"]
     paused_until: VnDatetime | None
     consecutive_failures: int
     last_error: str | None
     last_error_at: VnDatetime | None
-    usage: Usage | None  # có với youtube_api; supadata ở T15
+    usage: Usage | None  # youtube_api (theo ngày), supadata (theo kỳ thanh toán)
 
 
 class SourcesSettings(BaseModel):
@@ -103,6 +104,9 @@ def _invalid(e: ValidationError) -> HTTPException:
 
 
 def _usage(name: str, now: datetime) -> Usage | None:
+    if name == "supadata":
+        c = supadata.credits_usage()
+        return Usage(used=c.used, limit=c.limit, period="month", resets_at=None) if c else None
     if name != "youtube_api":
         return None
     u = quota.usage(now)

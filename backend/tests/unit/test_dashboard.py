@@ -9,11 +9,17 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from h4wk.analysis.models import Finding
+from h4wk.collectors.providers import supadata
 from h4wk.core.db import FindingRow, get_engine
 from h4wk.jobs import pipeline
 
 SAMPLE = Path(__file__).parents[1] / "fixtures" / "captures" / "h4wkDemo001"
 RUN = "r_20261118T160500"
+
+
+@pytest.fixture(autouse=True)
+def _no_supadata_network(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(supadata, "credits_usage", lambda: None)
 
 
 @pytest.fixture
@@ -56,6 +62,12 @@ def test_empty_dashboard(client: TestClient) -> None:
     d = client.get("/api/dashboard").json()
     assert d["video_count"] == 0 and d["top_video"] is None
     assert d["youtube_quota"] == {"used": 0, "limit": 10000}
+    assert d["supadata_credits"] is None
+
+
+def test_dashboard_shows_supadata_credits(client: TestClient, monkeypatch) -> None:
+    monkeypatch.setattr(supadata, "credits_usage", lambda: supadata.CreditUsage(37, 100, "Free"))
+    assert client.get("/api/dashboard").json()["supadata_credits"] == {"used": 37, "limit": 100}
 
 
 def test_events_have_titles_findings_error_and_review(client: TestClient, sample) -> None:

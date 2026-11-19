@@ -15,6 +15,8 @@ from h4wk.ai.fake import FakeProvider
 from h4wk.collectors.base import Health
 from h4wk.collectors.models import Cap
 from h4wk.collectors.orchestrator import Orchestrator
+from h4wk.collectors.providers import supadata
+from h4wk.collectors.providers.supadata import CreditUsage, SupadataCollector
 from h4wk.collectors.providers.youtube_api import YouTubeApiCollector
 from h4wk.core.db import SourceStateRow, get_engine
 from h4wk.core.types import VN_TZ
@@ -22,6 +24,11 @@ from h4wk.core.types import VN_TZ
 REPO_CONFIG = Path(__file__).parents[3] / "config"
 YT_KEY = "AIzaSyTHISISAFULLSECRETKEY0001"
 AI_KEY = "sk-ant-THISISAFULLSECRETKEY0002"
+
+
+@pytest.fixture(autouse=True)
+def _no_supadata_network(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(supadata, "credits_usage", lambda: None)
 
 
 @pytest.fixture
@@ -72,6 +79,20 @@ def test_sources_show_youtube_quota_usage(client: TestClient, cfg) -> None:
     assert sources["ytdlp"]["usage"] is None
 
 
+def test_sources_show_supadata_credits(
+    client: TestClient, cfg, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(supadata, "credits_usage", lambda: CreditUsage(37, 100, "Free"))
+    sources = {s["name"]: s for s in client.get("/api/settings/sources").json()["sources"]}
+    assert sources["supadata"]["implemented"] is True
+    assert sources["supadata"]["usage"] == {
+        "used": 37,
+        "limit": 100,
+        "period": "month",
+        "resets_at": None,
+    }
+
+
 def test_priority_change_is_used_by_next_job(client: TestClient, cfg) -> None:
     r = client.put("/api/settings/sources", json={"priority": {"video.metadata": ["ytdlp"]}})
     assert r.status_code == 200 and r.json()["priority"]["video.metadata"] == ["ytdlp"]
@@ -108,10 +129,10 @@ def test_paused_source_shows_error_and_resumes(client: TestClient, cfg) -> None:
     assert r.json()["status"] == "active"
 
 
-def test_source_tests(client: TestClient, cfg) -> None:
+def test_source_tests(client: TestClient, cfg, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(SupadataCollector, "health_check", lambda self: Health(True, "ok"))
     assert client.post("/api/settings/sources/ytdlp/test").json()["ok"] is True
-    r = client.post("/api/settings/sources/supadata/test").json()
-    assert r == {"ok": False, "detail": "not implemented yet", "latency_ms": None}
+    assert client.post("/api/settings/sources/supadata/test").json()["ok"] is True
     assert client.put("/api/settings/sources/ytdlp/key", json={"value": "x"}).status_code == 400
 
 
