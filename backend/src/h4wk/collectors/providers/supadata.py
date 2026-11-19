@@ -45,9 +45,9 @@ KEY_NAME = "SUPADATA_API_KEY"
 POLL_INTERVAL = 1.0
 JOB_TIMEOUT = 600.0  # giây
 ME_TTL = 300.0
-# Mode generate trả kết quả ngay trong response khi video ngắn (video 19 giây mất ~25 s), nên
-# timeout dài hơn 30 s; timeout sớm làm orchestrator gửi lại và tốn thêm credit.
-GENERATE_TIMEOUT = 120.0
+# Mode generate trả kết quả đồng bộ và thời gian tăng theo độ dài video (đo thật: video 19 giây
+# mất ~25 s), nên chờ tới JOB_TIMEOUT.
+GENERATE_TIMEOUT = JOB_TIMEOUT
 
 
 def _ts(v: str | None) -> datetime | None:
