@@ -101,7 +101,6 @@ export default function DashboardPage() {
   if (stats.isPending) {
     return (
       <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
         <Skeleton className="h-28 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -123,8 +122,6 @@ export default function DashboardPage() {
   // Chiều cao = màn hình trừ thanh trên (3rem) và lề của <main> (2 × 1.5rem).
   return (
     <div className="flex h-[calc(100svh-6rem)] flex-col gap-4">
-      <h1 className="text-2xl font-semibold">Dashboard</h1>
-
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,11fr)_minmax(0,9fr)] gap-4">
         <div className="-m-1 min-h-0 space-y-4 overflow-y-auto p-1">
           <FeaturedVideoCard topVideoId={d.top_video?.id ?? null} />
