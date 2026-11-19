@@ -449,6 +449,82 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/watchlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Watchlist */
+        get: operations["list_watchlist_api_watchlist_get"];
+        put?: never;
+        /**
+         * Add Watch
+         * @description Thêm kênh; bước thêm kênh (thu hồ sơ, xử lý video mới nhất) chạy nền ngay sau đó.
+         */
+        post: operations["add_watch_api_watchlist_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/watchlist/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Watch */
+        delete: operations["delete_watch_api_watchlist__item_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Watch */
+        patch: operations["update_watch_api_watchlist__item_id__patch"];
+        trace?: never;
+    };
+    "/api/watchlist/{item_id}/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check Now
+         * @description Check now: RSS cộng danh sách video của kênh (không chờ cache RSS).
+         */
+        post: operations["check_now_api_watchlist__item_id__check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Events */
+        get: operations["list_events_api_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -550,6 +626,13 @@ export interface components {
              * @default []
              */
             links: string[];
+        };
+        /** CheckResult */
+        CheckResult: {
+            /** New Videos */
+            new_videos: string[];
+            /** Checked At */
+            checked_at: string;
         };
         /** CollectBody */
         CollectBody: {
@@ -671,6 +754,29 @@ export interface components {
             aliases?: string[] | null;
             /** Abbreviations */
             abbreviations?: string[] | null;
+        };
+        /** Event */
+        Event: {
+            /** Id */
+            id: number;
+            /** At */
+            at: string;
+            /** Kind */
+            kind: string;
+            /** Message */
+            message: string;
+            /** Watch Item */
+            watch_item: string | null;
+            /** Video Id */
+            video_id: string | null;
+            job: components["schemas"]["EventJob"] | null;
+        };
+        /** EventJob */
+        EventJob: {
+            /** Id */
+            id: string;
+            /** Status */
+            status: string;
         };
         /** FileEntry */
         FileEntry: {
@@ -824,6 +930,15 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** LatestVideo */
+        LatestVideo: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+            /** Published At */
+            published_at: string | null;
         };
         /** LoginBody */
         LoginBody: {
@@ -1190,6 +1305,42 @@ export interface components {
             provider: string;
             /** Model */
             model: string;
+        };
+        /** WatchCreate */
+        WatchCreate: {
+            /** Url */
+            url: string;
+            /** @default full */
+            level: components["schemas"]["CollectLevel"];
+        };
+        /** WatchItem */
+        WatchItem: {
+            /** Id */
+            id: string;
+            /** Channel Id */
+            channel_id: string;
+            /** Title */
+            title: string;
+            /** Handle */
+            handle: string | null;
+            /** Enabled */
+            enabled: boolean;
+            level: components["schemas"]["CollectLevel"];
+            /** Initialized */
+            initialized: boolean;
+            /** Last Checked At */
+            last_checked_at: string | null;
+            /** Last Error */
+            last_error: string | null;
+            latest_video: components["schemas"]["LatestVideo"] | null;
+            /** Collected Count */
+            collected_count: number;
+        };
+        /** WatchUpdate */
+        WatchUpdate: {
+            /** Enabled */
+            enabled?: boolean | null;
+            level?: components["schemas"]["CollectLevel"] | null;
         };
         /**
          * Trigger
@@ -2023,6 +2174,185 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_watchlist_api_watchlist_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WatchItem"][];
+                };
+            };
+        };
+    };
+    add_watch_api_watchlist_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WatchCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WatchItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_watch_api_watchlist__item_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_watch_api_watchlist__item_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WatchUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WatchItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_now_api_watchlist__item_id__check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_events_api_events_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Event"][];
+                };
             };
             /** @description Validation Error */
             422: {

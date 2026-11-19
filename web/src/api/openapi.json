@@ -1278,6 +1278,246 @@
         }
       }
     },
+    "/api/watchlist": {
+      "get": {
+        "tags": [
+          "watchlist"
+        ],
+        "summary": "List Watchlist",
+        "operationId": "list_watchlist_api_watchlist_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WatchItem"
+                  },
+                  "type": "array",
+                  "title": "Response List Watchlist Api Watchlist Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "watchlist"
+        ],
+        "summary": "Add Watch",
+        "description": "Th\u00eam k\u00eanh; b\u01b0\u1edbc th\u00eam k\u00eanh (thu h\u1ed3 s\u01a1, x\u1eed l\u00fd video m\u1edbi nh\u1ea5t) ch\u1ea1y n\u1ec1n ngay sau \u0111\u00f3.",
+        "operationId": "add_watch_api_watchlist_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/watchlist/{item_id}": {
+      "patch": {
+        "tags": [
+          "watchlist"
+        ],
+        "summary": "Update Watch",
+        "operationId": "update_watch_api_watchlist__item_id__patch",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "watchlist"
+        ],
+        "summary": "Delete Watch",
+        "operationId": "delete_watch_api_watchlist__item_id__delete",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/watchlist/{item_id}/check": {
+      "post": {
+        "tags": [
+          "watchlist"
+        ],
+        "summary": "Check Now",
+        "description": "Check now: RSS c\u1ed9ng danh s\u00e1ch video c\u1ee7a k\u00eanh (kh\u00f4ng ch\u1edd cache RSS).",
+        "operationId": "check_now_api_watchlist__item_id__check_post",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events": {
+      "get": {
+        "tags": [
+          "watchlist"
+        ],
+        "summary": "List Events",
+        "operationId": "list_events_api_events_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Event"
+                  },
+                  "title": "Response List Events Api Events Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/health": {
       "get": {
         "summary": "Health",
@@ -1548,6 +1788,27 @@
           "title"
         ],
         "title": "Channel"
+      },
+      "CheckResult": {
+        "properties": {
+          "new_videos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "New Videos"
+          },
+          "checked_at": {
+            "type": "string",
+            "title": "Checked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "new_videos",
+          "checked_at"
+        ],
+        "title": "CheckResult"
       },
       "CollectBody": {
         "properties": {
@@ -1863,6 +2124,87 @@
         },
         "type": "object",
         "title": "EntityUpdate"
+      },
+      "Event": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "at": {
+            "type": "string",
+            "title": "At"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "watch_item": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Watch Item"
+          },
+          "video_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Id"
+          },
+          "job": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventJob"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "at",
+          "kind",
+          "message",
+          "watch_item",
+          "video_id",
+          "job"
+        ],
+        "title": "Event"
+      },
+      "EventJob": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "title": "EventJob"
       },
       "FileEntry": {
         "properties": {
@@ -2317,6 +2659,36 @@
           "updated_at"
         ],
         "title": "Job"
+      },
+      "LatestVideo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "published_at"
+        ],
+        "title": "LatestVideo"
       },
       "LoginBody": {
         "properties": {
@@ -3331,6 +3703,139 @@
         ],
         "title": "Visual",
         "description": "M\u00f4 t\u1ea3 c\u1ee7a VLM. Kh\u00f4ng ch\u1ee9a danh t\u00ednh ng\u01b0\u1eddi trong \u1ea3nh."
+      },
+      "WatchCreate": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "level": {
+            "$ref": "#/components/schemas/CollectLevel",
+            "default": "full"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "WatchCreate"
+      },
+      "WatchItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "channel_id": {
+            "type": "string",
+            "title": "Channel Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "handle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Handle"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "level": {
+            "$ref": "#/components/schemas/CollectLevel"
+          },
+          "initialized": {
+            "type": "boolean",
+            "title": "Initialized"
+          },
+          "last_checked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Checked At"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "latest_video": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LatestVideo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "collected_count": {
+            "type": "integer",
+            "title": "Collected Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "channel_id",
+          "title",
+          "handle",
+          "enabled",
+          "level",
+          "initialized",
+          "last_checked_at",
+          "last_error",
+          "latest_video",
+          "collected_count"
+        ],
+        "title": "WatchItem"
+      },
+      "WatchUpdate": {
+        "properties": {
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CollectLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "WatchUpdate"
       },
       "h4wk__analysis__models__Trigger": {
         "properties": {
