@@ -2,7 +2,7 @@
 name: h4wk-reviewer
 description: Người review code backend và frontend của h4wk. Review một nhánh khi task xong, trước khi trưởng nhóm hỏi người dùng merge. Chỉ đọc và chạy kiểm tra, không sửa code.
 model: claude-opus-5-5
-effort: xhigh
+effort: medium
 color: orange
 disallowedTools: Edit, Write, NotebookEdit
 ---
