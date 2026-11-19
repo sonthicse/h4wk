@@ -52,7 +52,7 @@ def parse_target(text: str) -> Target:
         return bare
     url = urlparse(text if "://" in text else f"https://{text}")
     if url.hostname not in HOSTS:
-        raise ValueError(f"không nhận ra link YouTube: {text!r}")
+        raise ValueError(f"not a recognised YouTube link: {text!r}")
     parts = [p for p in url.path.split("/") if p]
     query = parse_qs(url.query)
     candidates: list[tuple[str, TargetKind]] = []
@@ -72,4 +72,4 @@ def parse_target(text: str) -> Target:
         t = _bare(ident)
         if t is not None and t.kind == kind:
             return t
-    raise ValueError(f"không nhận ra video, kênh hay playlist trong: {text!r}")
+    raise ValueError(f"no video, channel or playlist found in: {text!r}")

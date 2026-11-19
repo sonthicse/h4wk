@@ -50,7 +50,7 @@ def _extract(proxy: Path, staging: Path, settings: KeyframeSettings) -> list[Key
     scenes = detect(proxy, ContentDetector(min_scene_len=1), start_in_scene=True)
     starts = [start.seconds for start, _ in scenes]
     if not starts:
-        raise ValueError(f"Proxy không có cảnh: {proxy}")
+        raise ValueError(f"proxy has no scenes: {proxy}")
     frames = []
     previous_scene = 0
     previous_small = None
@@ -69,7 +69,7 @@ def _extract(proxy: Path, staging: Path, settings: KeyframeSettings) -> list[Key
             previous_scene, previous_slot = scene, slot
             ok, frame = capture.retrieve()
             if not ok:
-                raise OSError(f"Không giải mã được khung tại {t}s")
+                raise OSError(f"cannot decode frame at {t}s")
             small = cv2.resize(frame, (256, 144), interpolation=cv2.INTER_AREA)
             fingerprint = _phash(small)
             if (
@@ -83,7 +83,7 @@ def _extract(proxy: Path, staging: Path, settings: KeyframeSettings) -> list[Key
             number = int(capture.get(cv2.CAP_PROP_POS_FRAMES))
             name = f"{number:06d}.jpg"
             if not cv2.imwrite(str(staging / name), frame):
-                raise OSError(f"Không ghi được khung {name}")
+                raise OSError(f"cannot write frame {name}")
             frames.append(
                 Keyframe(file=f"frames/{name}", t=t, scene=scene, hash=f"{fingerprint:016x}")
             )
@@ -91,7 +91,7 @@ def _extract(proxy: Path, staging: Path, settings: KeyframeSettings) -> list[Key
     finally:
         capture.release()
     if len({frame.scene for frame in frames}) != len(scenes):
-        raise OSError("Không lấy được khung đại diện cho mọi cảnh")
+        raise OSError("cannot get a representative frame for every scene")
     return frames
 
 

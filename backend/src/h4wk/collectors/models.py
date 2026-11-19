@@ -69,7 +69,7 @@ class TranscriptSegment(Contract):
     @model_validator(mode="after")
     def _end_after_start(self) -> Self:
         if self.end < self.start:
-            raise ValueError("end phải >= start")
+            raise ValueError("end must be >= start")
         return self
 
 
@@ -90,7 +90,7 @@ class Comment(Contract):
     @model_validator(mode="after")
     def _not_own_parent(self) -> Self:
         if self.parent_id == self.id:
-            raise ValueError("comment không thể là reply của chính nó")
+            raise ValueError("a comment cannot reply to itself")
         return self
 
 

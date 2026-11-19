@@ -56,10 +56,10 @@ class Segment(Contract):
     @model_validator(mode="after")
     def _times(self) -> Self:
         if self.end < self.start:
-            raise ValueError("end phải >= start")
+            raise ValueError("end must be >= start")
         for item in [*self.ocr, *self.visual]:
             if not self.start <= item.t <= self.end:
-                raise ValueError(f"khung {item.frame} (t={item.t}) nằm ngoài đoạn {self.id}")
+                raise ValueError(f"frame {item.frame} (t={item.t}) is outside segment {self.id}")
         return self
 
 
@@ -76,5 +76,5 @@ class Timeline(Contract):
     def _unique_segment_ids(self) -> Self:
         ids = [s.id for s in self.segments]
         if len(ids) != len(set(ids)):
-            raise ValueError("id đoạn bị trùng")
+            raise ValueError("duplicate segment id")
         return self

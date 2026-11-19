@@ -212,7 +212,7 @@ class YtDlpCollector:
 
     def fetch(self, cap: Cap, target: Target, workdir: Path) -> FetchResult:
         if (target.kind == TargetKind.VIDEO) != (cap in _VIDEO_CAPS):
-            raise Unsupported(f"{cap} không áp dụng cho {target.kind}")
+            raise Unsupported(f"{cap} does not apply to {target.kind}")
         try:
             return FetchResult(normalized=self._fetch(cap, target, workdir))
         except (DownloadError, ExtractorError) as e:
@@ -229,7 +229,7 @@ class YtDlpCollector:
         elif cap == Cap.TRANSCRIPTS:
             manual, auto = subtitle_langs(self._info(target, workdir))
             if not manual and not auto:
-                raise Unsupported("video không có phụ đề tiếng Việt")
+                raise Unsupported("video has no Vietnamese subtitles")
             self._extract(
                 target.url,
                 download=True,

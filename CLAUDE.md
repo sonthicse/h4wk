@@ -90,7 +90,7 @@ cd web && npm run build && npm run lint
 - Thời gian luôn có múi giờ, theo giờ Việt Nam (`+07:00`); giờ UTC từ YouTube đổi sang khi đọc vào. Thư mục bản thu dạng `YYYYMMDDTHHMMSS`.
 - Mô hình hợp đồng kế thừa `Contract` (cấm trường lạ). Đổi hợp đồng thì thêm cả ví dụ hợp lệ lẫn ví dụ bị từ chối vào `tests/unit/test_contracts.py`, và kiểm tra ví dụ bị từ chối bị chặn đúng vì quy tắc nó muốn kiểm.
 - Đọc/ghi file văn bản luôn truyền `encoding="utf-8"`, kể cả trong test.
-- Tên code bằng tiếng Anh; comment, docstring, tài liệu và commit message bằng tiếng Việt. Giao diện web bằng tiếng Anh.
+- Tên code bằng tiếng Anh; comment, docstring, tài liệu và commit message bằng tiếng Việt. Giao diện web bằng tiếng Anh. Thông báo lỗi do code sinh ra (exception, `detail` của HTTP, lỗi job) bằng tiếng Anh vì hiện trên giao diện.
 - Không ghi secret vào `config/*.toml`; key nằm trong `.env` (đã gitignore). Không commit `config/*.toml` và `data/`.
 
 ## Git khi nhiều phiên cùng làm

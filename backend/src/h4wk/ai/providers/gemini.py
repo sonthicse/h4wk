@@ -31,7 +31,7 @@ class GeminiProvider:
                     model=request.model, contents=contents, config=config
                 )
         except (errors.APIError, httpx2.RequestError) as error:
-            raise ProviderError("Lỗi API Gemini") from error
+            raise ProviderError("Gemini API error") from error
         usage = reply.usage_metadata
         return ProviderReply(
             reply.text or "",

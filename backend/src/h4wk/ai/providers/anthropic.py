@@ -32,7 +32,7 @@ class AnthropicProvider:
             try:
                 schema = transform_schema(request.schema)
             except ValueError as error:
-                raise ProviderError("Anthropic không hỗ trợ schema này") from error
+                raise ProviderError("Anthropic does not support this schema") from error
             options["output_config"] = {"format": {"type": "json_schema", "schema": schema}}
         try:
             with Anthropic(api_key=self.key, max_retries=0) as client:
@@ -40,6 +40,6 @@ class AnthropicProvider:
                     model=request.model, max_tokens=4096, messages=messages, **options
                 )
         except APIError as error:
-            raise ProviderError("Lỗi API Anthropic") from error
+            raise ProviderError("Anthropic API error") from error
         text = "".join(b.text for b in reply.content if b.type == "text")
         return ProviderReply(text, reply.usage.input_tokens, reply.usage.output_tokens)

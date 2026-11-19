@@ -38,7 +38,7 @@ class Trigger(Contract):
     @model_validator(mode="after")
     def _watchlist_needs_item(self) -> Self:
         if self.type == "watchlist" and not self.watch_item:
-            raise ValueError("trigger watchlist phải có watch_item")
+            raise ValueError("a watchlist trigger needs watch_item")
         return self
 
 
@@ -62,7 +62,7 @@ class SourceCall(Contract):
     @model_validator(mode="after")
     def _provider_null_iff_no_source(self) -> Self:
         if (self.provider is None) != (self.status == SourceStatus.NO_SOURCE):
-            raise ValueError("provider là null khi và chỉ khi status là no_source")
+            raise ValueError("provider is null if and only if status is no_source")
         return self
 
 

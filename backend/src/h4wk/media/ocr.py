@@ -51,7 +51,7 @@ def _recognize(paths: list[Path]) -> list[list[dict]]:
 
 def process_ocr(capture_dir: Path, derived_dir: Path) -> list[OcrLine]:
     if derived_dir.resolve().is_relative_to(capture_dir.resolve()):
-        raise ValueError("Tệp phái sinh phải nằm ngoài thư mục bản thu")
+        raise ValueError("derived files must be outside the capture directory")
     data = Normalized.model_validate_json((capture_dir / "normalized.json").read_bytes())
     sources: list[tuple[Path, str, float | None]] = []
     index_path = derived_dir / "frames/index.json"
@@ -68,7 +68,7 @@ def process_ocr(capture_dir: Path, derived_dir: Path) -> list[OcrLine]:
     for root, file, t in sources:
         path = (root / file).resolve()
         if not path.is_relative_to(root.resolve()):
-            raise ValueError(f"Ảnh nằm ngoài thư mục nguồn: {file}")
+            raise ValueError(f"image is outside the source directory: {file}")
         stat = path.stat()
         paths.append(path)
         images.append(_Image(frame=file, t=t, size=stat.st_size, mtime_ns=stat.st_mtime_ns))

@@ -61,7 +61,7 @@ def collect(body: CollectBody, actor: ActorDep) -> Job:
         raise reject(400, str(e)) from None
     if target.kind != TargetKind.VIDEO:
         # Kênh và @handle chuyển cho watchlist (T30); playlist xử lý ở T46.
-        raise reject(400, f"chưa hỗ trợ thu {target.kind}; hiện chỉ thu từng video")
+        raise reject(400, f"collecting a {target.kind} is not supported yet; only single videos")
     job = pipeline.create_job(target.url, target.id, body.level, body.force, actor)
     audit.log(actor, "job.create", job.id, {"url": target.url, "level": body.level})
     pipeline.start(job.id)

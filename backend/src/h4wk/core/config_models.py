@@ -15,7 +15,7 @@ from h4wk.core.types import Cap, Contract, TranscriptKind
 
 def _no_duplicates[T](items: list[T]) -> list[T]:
     if len(items) != len(set(items)):
-        raise ValueError("danh sách có phần tử trùng")
+        raise ValueError("list has duplicate items")
     return items
 
 
@@ -82,7 +82,7 @@ class ProviderConfig(Contract):
     @model_validator(mode="after")
     def _base_url(self) -> Self:
         if self.type == "openai_compat" and self.base_url is None:
-            raise ValueError("provider openai_compat phải có base_url")
+            raise ValueError("an openai_compat provider needs base_url")
         return self
 
 
@@ -102,12 +102,12 @@ class AiConfig(Contract):
             for r in routes:
                 provider = self.providers.get(r.provider)
                 if provider is None:
-                    raise ValueError(f"{task}: provider {r.provider!r} chưa được khai báo")
+                    raise ValueError(f"{task}: provider {r.provider!r} is not declared")
                 caps = provider.models.get(r.model)
                 if caps is None:
-                    raise ValueError(f"{task}: model {r.model!r} chưa có trong {r.provider}")
+                    raise ValueError(f"{task}: model {r.model!r} is not declared in {r.provider}")
                 if task == AiTask.VISION and not caps.vision:
-                    raise ValueError(f"{task}: {r.provider}/{r.model} không đọc được ảnh")
+                    raise ValueError(f"{task}: {r.provider}/{r.model} cannot read images")
         return self
 
 

@@ -40,9 +40,9 @@ class OpenAICompatProvider:
                     model=request.model, messages=messages, **options
                 )
         except APIError as error:
-            raise ProviderError("Lỗi API chat completions") from error
+            raise ProviderError("chat completions API error") from error
         if not reply.choices:
-            raise ProviderError("API trả về danh sách choices rỗng")
+            raise ProviderError("API returned no choices")
         message = reply.choices[0].message
         text = message.content or ""
         if request.structured:

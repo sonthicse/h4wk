@@ -29,10 +29,10 @@ def _token_hash(token: str) -> str:
 
 def create_user(username: str, password: str) -> None:
     if not username or not password:
-        raise ValueError("username và mật khẩu không được rỗng")
+        raise ValueError("username and password must not be empty")
     with Session(get_engine()) as s:
         if s.get(UserRow, username):
-            raise ValueError(f"tài khoản {username!r} đã tồn tại")
+            raise ValueError(f"user {username!r} already exists")
         s.add(UserRow(username=username, password_hash=_hasher.hash(password), created_at=_now()))
         s.commit()
 

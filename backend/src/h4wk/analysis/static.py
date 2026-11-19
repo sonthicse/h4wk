@@ -29,7 +29,7 @@ def load_lexicon(path: Path = LEXICON_PATH) -> list[LexiconEntry]:
             group, category = m["group"].strip(), Category(m["category"])
             continue
         if group is None or category is None:
-            raise ValueError(f"cụm từ {line!r} nằm ngoài nhóm nào trong {path}")
+            raise ValueError(f"phrase {line!r} is outside any group in {path}")
         entries.append(LexiconEntry(line, group, category))
     return entries
 

@@ -221,4 +221,4 @@ def test_failed_step_marks_job_failed_and_audits(
 def test_channel_and_playlist_not_supported_yet(client: TestClient, url: str) -> None:
     _entity(client)
     r = client.post("/api/collect", json={"url": url})
-    assert r.status_code == 400 and "chưa hỗ trợ" in r.json()["detail"]
+    assert r.status_code == 400 and "not supported" in r.json()["detail"]

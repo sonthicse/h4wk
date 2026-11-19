@@ -52,7 +52,7 @@ NonNegFloat = Annotated[float, Field(ge=0)]
 
 def _check_bbox(b: tuple[float, float, float, float]) -> tuple[float, float, float, float]:
     if b[2] < 0 or b[3] < 0:
-        raise ValueError("bbox: w và h phải không âm")
+        raise ValueError("bbox: w and h must be non-negative")
     return b
 
 
@@ -63,7 +63,7 @@ BBox = Annotated[tuple[float, float, float, float], AfterValidator(_check_bbox)]
 def _check_rel_path(p: str) -> str:
     parts = p.split("/")
     if not p or p.startswith("/") or "\\" in p or ".." in parts or "" in parts:
-        raise ValueError(f"đường dẫn phải tương đối, dùng '/', không có '..': {p!r}")
+        raise ValueError(f"path must be relative, use '/' and contain no '..': {p!r}")
     return p
 
 

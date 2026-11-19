@@ -53,11 +53,11 @@ class SttWorker:
 
 def transcribe_capture(capture_dir: Path, output_dir: Path, worker: SttWorker) -> str:
     if output_dir.resolve().is_relative_to(capture_dir.resolve()):
-        raise ValueError("Tệp phái sinh phải nằm ngoài thư mục bản thu")
+        raise ValueError("derived files must be outside the capture directory")
     data = Normalized.model_validate_json((capture_dir / "normalized.json").read_bytes())
     video = next((m for m in data.media if m.kind == "video"), None)
     if data.video is None or video is None:
-        raise ValueError("Bản thu full thiếu video")
+        raise ValueError("full capture has no video file")
     audio = next((m for m in data.media if m.kind == "audio"), None)
     _, wav = prepare_media(
         capture_dir / video.file,

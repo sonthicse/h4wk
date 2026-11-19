@@ -77,7 +77,7 @@ def read_capture_timeline(capture_dir: Path, output_dir: Path, config: AnalysisC
         (capture_dir / "normalized.json").read_text(encoding="utf-8")
     )
     if normalized.video is None:
-        raise ValueError("Bản thu không có video")
+        raise ValueError("capture has no video")
     transcripts = normalized.transcripts
     stt_path = output_dir / "transcripts" / "stt.vi.json"
     if stt_path.is_file():

@@ -94,7 +94,7 @@ def test_image_and_route_reload(config, tmp_path):
 
 def test_invalid_vision_route(config):
     config.write_text(CONFIG.replace("vision = true", "vision = false"), encoding="utf-8")
-    with pytest.raises(ValidationError, match="không đọc được ảnh"):
+    with pytest.raises(ValidationError, match="cannot read images"):
         load_ai_config(config)
 
 
@@ -140,3 +140,9 @@ def test_limit_is_per_provider(config, tmp_path):
         finally:
             release.set()
         assert first.result() == second.result() == Answer(label="ok")
+
+
+def test_missing_key_is_reported(config, tmp_path):
+    gateway = AIGateway({}, config_path=config, log_dir=tmp_path)
+    with pytest.raises(GatewayError, match="no AI provider available.*missing API key"):
+        gateway.describe_image("media.vision", b"pixels", "describe", Answer)

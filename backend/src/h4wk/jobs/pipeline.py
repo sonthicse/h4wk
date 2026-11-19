@@ -121,7 +121,7 @@ def collect(job_id: str) -> None:
             n = Normalized.model_validate_json((path / "normalized.json").read_text("utf-8"))
             if n.video is None:
                 # Bản thu vẫn được giữ làm bằng chứng của lần thu thất bại.
-                raise RuntimeError(f"không nguồn nào lấy được metadata video (bản thu {capture})")
+                raise RuntimeError(f"no source returned video metadata (capture {capture})")
     except Exception as e:
         _fail(job_id, "collect", e)
         return

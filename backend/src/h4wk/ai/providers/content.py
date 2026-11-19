@@ -25,7 +25,7 @@ def image_part(data: bytes) -> Image:
         return Image(data, "image/gif")
     if data.startswith(b"RIFF") and data[8:12] == b"WEBP":
         return Image(data, "image/webp")
-    raise ProviderError("Định dạng ảnh không được hỗ trợ")
+    raise ProviderError("unsupported image format")
 
 
 def split_messages(request: ProviderRequest) -> tuple[str, list[tuple[Message, Image | None]]]:

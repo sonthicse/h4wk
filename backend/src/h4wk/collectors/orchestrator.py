@@ -146,7 +146,7 @@ class Orchestrator:
     ) -> Path:
         """Thu một video và trả về thư mục bản thu đã khoá."""
         if target.kind != TargetKind.VIDEO:
-            raise ValueError(f"orchestrator chưa thu {target.kind}; chỉ thu video")
+            raise ValueError(f"orchestrator cannot collect a {target.kind} yet; only videos")
         writer = CaptureWriter(
             self.root / "videos" / target.id / "captures",
             source_url=target.url,

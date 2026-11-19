@@ -72,10 +72,11 @@ class AIGateway:
         config = load_ai_config(self.config_path)
         routes = config.tasks.get(task)
         if not routes:
-            raise GatewayError(f"{task}: chưa có định tuyến")
+            raise GatewayError(f"{task}: no route configured")
 
         json_schema = schema.model_json_schema()
         last_error = None
+        unavailable: list[str] = []
         keys = {**dotenv_values(REPO_ROOT / ".env"), **os.environ} if self.providers is None else {}
         for route in routes:
             provider = (
@@ -84,8 +85,11 @@ class AIGateway:
                 else self.providers.get(route.provider)
             )
             caps = config.providers[route.provider].models[route.model]
-            if provider is None or (image is not None and not caps.vision):
-                last_error = GatewayError(f"Tuyến không khả dụng: {route.provider}/{route.model}")
+            if provider is None:
+                unavailable.append(f"{route.provider}/{route.model}: missing API key")
+                continue
+            if image is not None and not caps.vision:
+                unavailable.append(f"{route.provider}/{route.model}: cannot read images")
                 continue
             history = list(messages)
             for attempt in range(3):
@@ -118,7 +122,9 @@ class AIGateway:
                 else:
                     self._log(task, route, start, "ok", reply)
                     return answer, route
-        raise GatewayError(f"{task}: không có kết quả hợp lệ") from last_error
+        if last_error is None:
+            raise GatewayError(f"{task}: no AI provider available ({'; '.join(unavailable)})")
+        raise GatewayError(f"{task}: no valid result ({last_error})") from last_error
 
     def _log(
         self,

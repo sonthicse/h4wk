@@ -81,7 +81,7 @@ class CaptureWriter:
         target = self.captures_dir / self.collected_at.strftime(CAPTURE_TS_FORMAT)
         try:
             if target.exists():
-                raise FileExistsError(f"bản thu đã tồn tại: {target}")
+                raise FileExistsError(f"capture already exists: {target}")
             previous = list_captures(self.captures_dir)
             (self.tmp / "normalized.json").write_text(
                 normalized.model_dump_json(indent=2), encoding="utf-8"

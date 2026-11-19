@@ -67,9 +67,9 @@ class Trigger(Contract):
     @model_validator(mode="after")
     def _location(self) -> Self:
         if self.via == Via.COMMENT and not self.comment_id:
-            raise ValueError("via comment phải có comment_id")
+            raise ValueError("via comment needs comment_id")
         if self.via in (Via.FACE, Via.REF_IMAGE) and not self.frame:
-            raise ValueError(f"via {self.via} phải có frame")
+            raise ValueError(f"via {self.via} needs frame")
         return self
 
 
@@ -120,15 +120,15 @@ class Finding(Contract):
     @model_validator(mode="after")
     def _rules(self) -> Self:
         if self.analyzer == "llm" and self.model is None:
-            raise ValueError("nghi vấn llm phải có model")
+            raise ValueError("an llm finding needs model")
         if self.source_kind == SourceKind.VISUAL and not self.frame:
-            raise ValueError("nghi vấn visual phải trích khung hình (frame)")
+            raise ValueError("a visual finding needs frame")
         if self.source_kind in _TIMED_KINDS and (not self.segment_id or self.start is None):
-            raise ValueError(f"nghi vấn {self.source_kind} phải có segment_id và start")
+            raise ValueError(f"a {self.source_kind} finding needs segment_id and start")
         if self.source_kind == SourceKind.COMMENT and not self.comment_id:
-            raise ValueError("nghi vấn từ comment phải có comment_id")
+            raise ValueError("a comment finding needs comment_id")
         if self.start is not None and self.end is not None and self.end < self.start:
-            raise ValueError("end phải >= start")
+            raise ValueError("end must be >= start")
         return self
 
 
@@ -146,5 +146,5 @@ class ReviewDecision(Contract):
     def _reject_needs_reason(self) -> Self:
         # reviews.jsonl chỉ ghi thêm, ghi sai thì không sửa được, nên chặn ngay ở hợp đồng.
         if self.status == "rejected" and not self.note.strip():
-            raise ValueError("Reject phải có lý do (note)")
+            raise ValueError("Reject needs a note")
         return self
