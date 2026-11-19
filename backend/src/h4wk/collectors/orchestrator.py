@@ -21,7 +21,7 @@ from h4wk.collectors.base import (
 )
 from h4wk.collectors.models import Cap, CollectLevel, Normalized
 from h4wk.collectors.targets import Target, TargetKind
-from h4wk.core.config import CONFIG_DIR
+from h4wk.core.config import config_dir
 from h4wk.core.config_models import SourcesConfig, load_toml
 from h4wk.core.db import SourceStateRow, as_aware, get_engine
 from h4wk.core.types import VN_TZ
@@ -138,7 +138,7 @@ class Orchestrator:
         cls, root: Path, sources: SourcesConfig | None = None, **kwargs: object
     ) -> "Orchestrator":
         if sources is None:
-            path = CONFIG_DIR / "sources.toml"
+            path = config_dir() / "sources.toml"
             sources = load_toml(path, SourcesConfig) if path.exists() else SourcesConfig()
         collectors = {name: make() for name, make in registry.COLLECTORS.items()}
         settings = Settings.from_sources(sources, list(collectors))

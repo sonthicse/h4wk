@@ -16,6 +16,15 @@ def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return d
 
 
+@pytest.fixture(autouse=True)
+def config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Test không đọc cấu hình thật của máy; thư mục cấu hình rỗng thì dùng mặc định C5."""
+    d = tmp_path / "h4wk-config"
+    d.mkdir()
+    monkeypatch.setenv("H4WK_CONFIG_DIR", str(d))
+    return d
+
+
 @pytest.fixture
 def anon_client(data_dir: Path) -> Iterator[TestClient]:
     """Client chưa đăng nhập; đã có sẵn tài khoản USERNAME."""

@@ -34,7 +34,7 @@ from h4wk.collectors.models import (
     Video,
 )
 from h4wk.collectors.targets import Target, TargetKind
-from h4wk.core.config import CONFIG_DIR
+from h4wk.core.config import config_dir
 from h4wk.core.config_models import SourcesConfig, load_toml
 
 # Video 720p kèm audio; chưa có 720p (video vừa đăng) thì lấy bản tốt nhất hiện có.
@@ -329,6 +329,6 @@ class YtDlpCollector:
 
 
 def from_config() -> YtDlpCollector:
-    path = CONFIG_DIR / "sources.toml"
+    path = config_dir() / "sources.toml"
     cfg = load_toml(path, SourcesConfig) if path.exists() else SourcesConfig()
     return YtDlpCollector(cookies_file=cfg.sources.ytdlp.cookies_file)

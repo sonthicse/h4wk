@@ -10,7 +10,7 @@ from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import Target, TargetKind, parse_target
 from h4wk.core import audit
-from h4wk.core.config import CONFIG_DIR, data_dir
+from h4wk.core.config import config_dir, data_dir
 from h4wk.core.config_models import SourcesConfig, load_toml
 from h4wk.core.db import JobRow, KnownVideoRow, WatchItemRow, get_engine
 from h4wk.core.events import record as event
@@ -53,7 +53,7 @@ def _now() -> datetime:
 
 
 def _settings():
-    path = CONFIG_DIR / "sources.toml"
+    path = config_dir() / "sources.toml"
     return (load_toml(path, SourcesConfig) if path.exists() else SourcesConfig()).watchlist
 
 

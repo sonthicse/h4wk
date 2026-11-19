@@ -14,7 +14,7 @@ from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import parse_target
 from h4wk.core import audit, events
-from h4wk.core.config import CONFIG_DIR, data_dir
+from h4wk.core.config import config_dir, data_dir
 from h4wk.core.config_models import AnalysisConfig, load_toml
 from h4wk.core.db import FindingRow, JobRow, get_engine
 from h4wk.core.entities import load_entities
@@ -109,7 +109,7 @@ def _recent_capture(job: JobRow) -> str | None:
 
 
 def _analysis_config() -> AnalysisConfig:
-    path = CONFIG_DIR / "analysis.toml"
+    path = config_dir() / "analysis.toml"
     return load_toml(path, AnalysisConfig) if path.exists() else AnalysisConfig()
 
 

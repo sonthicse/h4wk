@@ -12,7 +12,7 @@ from dotenv import dotenv_values
 from pydantic import BaseModel, ValidationError
 
 from h4wk.ai.base import Message, Provider, ProviderError, ProviderReply, ProviderRequest
-from h4wk.ai.config import AI_CONFIG_PATH, load_ai_config
+from h4wk.ai.config import ai_config_path, load_ai_config
 from h4wk.ai.providers import make_provider
 from h4wk.core.config import REPO_ROOT, data_dir
 from h4wk.core.config_models import AiTask, Route
@@ -31,11 +31,11 @@ class AIGateway:
         self,
         providers: Mapping[str, Provider] | None = None,
         *,
-        config_path: Path = AI_CONFIG_PATH,
+        config_path: Path | None = None,
         log_dir: Path | None = None,
     ):
         self.providers = providers
-        self.config_path = config_path
+        self.config_path = config_path or ai_config_path()
         self.log_path = (data_dir() if log_dir is None else log_dir) / "ai_calls.jsonl"
 
     def complete_structured[M: BaseModel](
