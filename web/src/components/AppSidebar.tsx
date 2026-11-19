@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import {
   BriefcaseIcon,
+  FolderIcon,
   DownloadIcon,
   EyeIcon,
   FlagIcon,
@@ -10,7 +11,7 @@ import {
   UsersIcon,
 } from 'lucide-react'
 import { NavLink, useMatch, useParams } from 'react-router'
-import { getCase } from '@/api/cases'
+import { getCase, listCases } from '@/api/cases'
 import { getHealth } from '@/api/health'
 import {
   Sidebar,
@@ -65,6 +66,7 @@ export default function AppSidebar() {
   const { caseId } = useParams()
   // Cùng queryKey với các trang dùng getCase nên chỉ gọi API một lần.
   const current = useQuery({ queryKey: ['case', caseId], queryFn: () => getCase(caseId!), enabled: !!caseId }).data
+  const cases = useQuery({ queryKey: ['cases'], queryFn: listCases }).data ?? []
 
   return (
     <Sidebar collapsible="icon">
@@ -79,18 +81,38 @@ export default function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <NavItem to="/cases" label="Cases" icon={BriefcaseIcon} />
+              <NavItem to="/cases" label="All cases" icon={BriefcaseIcon} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {current && (
+        {/* Danh sách case để chuyển nhanh, có ở mọi trang (kể cả Cases và Settings); ẩn khi thu gọn. */}
+        {cases.length > 0 && (
+          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel>Cases</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {cases.map((c) => (
+                  <SidebarMenuItem key={c.id}>
+                    <SidebarMenuButton asChild isActive={c.id === caseId}>
+                      <NavLink to={`/cases/${c.id}/collect`}>
+                        <FolderIcon />
+                        <span>{c.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+        {caseId && (
           <SidebarGroup>
             {/* Giữ chỗ cho nhãn khi thu gọn (mặc định shadcn kéo -mt-8) để icon bên dưới không nhảy lên. */}
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:mt-0">{current.title}</SidebarGroupLabel>
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:mt-0">{current?.title ?? caseId}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {caseNav.map((item) => (
-                  <NavItem key={item.path} to={`/cases/${current.id}/${item.path}`} label={item.label} icon={item.icon} />
+                  <NavItem key={item.path} to={`/cases/${caseId}/${item.path}`} label={item.label} icon={item.icon} />
                 ))}
               </SidebarMenu>
             </SidebarGroupContent>
