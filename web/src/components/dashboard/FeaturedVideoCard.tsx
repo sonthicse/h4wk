@@ -38,6 +38,7 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   const live = findings.data?.filter((it) => it.status !== 'rejected').map((it) => it.finding)
   const list = live && topVideoId ? videoFindings(live, topVideoId) : []
   const top = topVideoId && list.length > 0 ? { videoId: topVideoId, findings: list } : null
+  const video = findings.data?.find((it) => it.finding.video_id === top?.videoId)?.video
   const detail = useQuery({
     queryKey: ['video', topVideoId],
     queryFn: () => getVideo(topVideoId!),
@@ -48,7 +49,7 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top video</CardTitle>
+          <CardTitle>Most serious</CardTitle>
           <CardDescription>
             {findings.isPending
               ? 'Loading…'
@@ -67,15 +68,18 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Top video</CardTitle>
+        <CardTitle className="text-xl">Most serious</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <EmbeddedPlayer videoId={top.videoId} start={start} />
-        {detail.data?.video.description && (
-          <p className="line-clamp-3 text-sm whitespace-pre-line text-muted-foreground">
-            {detail.data.video.description}
-          </p>
-        )}
+        <div className="space-y-1">
+          <p className="text-lg font-semibold">{video?.title ?? top.videoId}</p>
+          {detail.data?.video.description && (
+            <p className="line-clamp-3 text-sm whitespace-pre-line text-muted-foreground">
+              {detail.data.video.description}
+            </p>
+          )}
+        </div>
         <Link to="/findings" className="text-sm text-muted-foreground underline">
           All findings
         </Link>
