@@ -1,7 +1,8 @@
 // API giả cho trang Dashboard (T31 dòng sự kiện, T35 số liệu). Thay bằng `api/dashboard.py` khi có.
 // Dòng sự kiện tự sinh sự kiện mới theo thời gian, nên poll mỗi 5 giây sẽ thấy feed cập nhật.
 import type { JobStatus } from '@/mocks/jobs'
-import { findings, type ReviewStatus, type Severity } from '@/mocks/data'
+import { findings, type Category, type ReviewStatus, type Severity } from '@/mocks/data'
+import { findVideo } from '@/mocks/videos'
 
 export type DayActivity = { date: string; captures: number; findings: number }
 
@@ -12,9 +13,23 @@ export type DashboardStats = {
   findingsBySeverity: Record<Severity, number>
   findingsByStatus: Record<ReviewStatus, number>
   activity: DayActivity[]
+  featured: FeaturedVideo | null
   // Quota YouTube Data API đếm theo ngày, reset lúc nửa đêm giờ Thái Bình Dương; credit Supadata đếm theo tháng (SPEC 10.3).
   youtubeQuota: { used: number; limit: number }
   supadataCredits: { used: number; limit: number }
+}
+
+// Video nổi bật nhất: video có nhiều nghi vấn nặng nhất (xem featuredVideo bên dưới).
+export type FeaturedVideo = {
+  videoId: string
+  title: string
+  channel: string
+  publishedAt: string | null
+  viewCount: number | null
+  findingsBySeverity: Record<Severity, number>
+  pending: number
+  // Nghi vấn nặng nhất của video, để hiện trích dẫn.
+  top: { id: string; quote: string; category: Category; severity: Severity; start: number; timed: boolean }
 }
 
 export type FeedEvent = {
@@ -189,6 +204,44 @@ function lastDays(n: number) {
   return Array.from({ length: n }, (_, i) => new Date(Date.now() - (n - 1 - i) * 24 * 60 * MINUTE).toISOString())
 }
 
+const SEVERITY_WEIGHT: Record<Severity, number> = { high: 3, medium: 2, low: 1 }
+
+// Chấm điểm mỗi video theo nghi vấn: high = 3, medium = 2, low = 1; bằng điểm thì video nhiều lượt xem hơn đứng trước.
+// Nghi vấn đã bị Reject không tính, vì analyst đã kết luận là báo nhầm.
+function featuredVideo(): FeaturedVideo | null {
+  const live = findings.filter((f) => f.status !== 'rejected')
+  const ids = [...new Set(live.map((f) => f.videoId))]
+  if (ids.length === 0) return null
+  const score = (id: string) => live.filter((f) => f.videoId === id).reduce((s, f) => s + SEVERITY_WEIGHT[f.severity], 0)
+  const views = (id: string) => findVideo(id)?.viewCount ?? 0
+  const best = ids.sort((a, b) => score(b) - score(a) || views(b) - views(a))[0]
+
+  const list = live.filter((f) => f.videoId === best)
+  const top = [...list].sort((a, b) => SEVERITY_WEIGHT[b.severity] - SEVERITY_WEIGHT[a.severity])[0]
+  const video = findVideo(best)
+  return {
+    videoId: best,
+    title: video?.title ?? top.videoTitle,
+    channel: video?.channel ?? top.channel,
+    publishedAt: video?.publishedAt ?? null,
+    viewCount: video?.viewCount ?? null,
+    findingsBySeverity: {
+      high: list.filter((f) => f.severity === 'high').length,
+      medium: list.filter((f) => f.severity === 'medium').length,
+      low: list.filter((f) => f.severity === 'low').length,
+    },
+    pending: list.filter((f) => f.status === 'pending' || f.status === 'needs_info').length,
+    top: {
+      id: top.id,
+      quote: top.quote,
+      category: top.category,
+      severity: top.severity,
+      start: top.start,
+      timed: ['speech', 'ocr', 'visual'].includes(top.sourceKind),
+    },
+  }
+}
+
 export function getDashboard(): Promise<DashboardStats> {
   const count = <K extends string>(keys: K[], pick: (f: (typeof findings)[number]) => K) =>
     Object.fromEntries(keys.map((k) => [k, findings.filter((f) => pick(f) === k).length])) as Record<K, number>
@@ -209,6 +262,7 @@ export function getDashboard(): Promise<DashboardStats> {
     findingsBySeverity: count(['high', 'medium', 'low'], (f) => f.severity),
     findingsByStatus: count(['pending', 'confirmed', 'rejected', 'needs_info'], (f) => f.status),
     activity,
+    featured: featuredVideo(),
     youtubeQuota: { used: 1_243 + processed * 3, limit: 10_000 },
     supadataCredits: { used: 37, limit: 100 },
   })

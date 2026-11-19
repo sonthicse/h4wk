@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import ActivityChart from '@/components/dashboard/ActivityChart'
 import EventFeed from '@/components/dashboard/EventFeed'
+import FeaturedVideoCard from '@/components/dashboard/FeaturedVideoCard'
 import UsageCard from '@/components/dashboard/UsageCard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -13,12 +14,14 @@ import type { ReviewStatus, Severity } from '@/mocks/data'
 const severities: Severity[] = ['high', 'medium', 'low']
 const statuses: ReviewStatus[] = ['pending', 'confirmed', 'rejected', 'needs_info']
 
-function StatCard({ label, value }: { label: string; value: number }) {
+// Một con số kèm dòng giải thích ngắn nó đếm cái gì.
+function StatCard({ label, value, hint }: { label: string; value: number; hint: string }) {
   return (
     <Card>
       <CardHeader>
         <CardDescription>{label}</CardDescription>
         <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
+        <p className="text-xs text-muted-foreground">{hint}</p>
       </CardHeader>
     </Card>
   )
@@ -89,14 +92,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <StatCard label="Channels" value={d.channelCount} />
-        <StatCard label="Videos" value={d.videoCount} />
-        <StatCard label="Captures" value={d.captureCount} />
-      </div>
-
       <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4">
         <div className="space-y-4">
+          <FeaturedVideoCard video={d.featured} />
+          <div className="grid grid-cols-3 gap-4">
+            <StatCard label="Watched channels" value={d.channelCount} hint="Channels in the watchlist" />
+            <StatCard label="Videos collected" value={d.videoCount} hint="Different videos saved so far" />
+            <StatCard label="Captures" value={d.captureCount} hint="Collection runs; one video can be collected again" />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Breakdown title="Findings by severity" keys={severities} counts={d.findingsBySeverity} variant={severityVariant} />
             <Breakdown title="Findings by review status" keys={statuses} counts={d.findingsByStatus} variant={statusVariant} />
