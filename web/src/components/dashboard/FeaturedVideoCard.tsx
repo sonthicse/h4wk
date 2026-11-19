@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { ExternalLinkIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import type { Finding } from '@/api/findings'
 import { listQueue } from '@/api/review'
+import { getVideo } from '@/api/videos'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatTime, severityVariant } from '@/lib/findings'
@@ -42,6 +42,12 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   const live = findings.data?.filter((it) => it.status !== 'rejected').map((it) => it.finding)
   const list = live && topVideoId ? videoFindings(live, topVideoId) : []
   const top = topVideoId && list.length > 0 ? { videoId: topVideoId, findings: list } : null
+  const video = findings.data?.find((it) => it.finding.video_id === top?.videoId)?.video
+  const detail = useQuery({
+    queryKey: ['video', topVideoId],
+    queryFn: () => getVideo(topVideoId!),
+    enabled: topVideoId != null,
+  })
   const [picked, setPicked] = useState<string | null>(null)
 
   if (!top) {
@@ -64,34 +70,22 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   // Nghi vấn đang phát: mặc định là nghi vấn nặng nhất; bấm nghi vấn khác để nhảy tới đó.
   const current = top.findings.find((f) => f.id === picked) ?? top.findings[0]
   const start = Math.max(0, Math.floor((current.start ?? 0) - LEAD_S))
-  const count = (s: Severity) => top.findings.filter((f) => f.severity === s).length
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex shrink-0 items-center gap-2 text-sm">
-            {(['high', 'medium', 'low'] as const).map(
-              (s) =>
-                count(s) > 0 && (
-                  <Badge key={s} variant={severityVariant[s]}>
-                    {count(s)} {s}
-                  </Badge>
-                ),
-            )}
-          </div>
-          <a
-            href={`https://www.youtube.com/watch?v=${encodeURIComponent(top.videoId)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-primary hover:underline"
-          >
-            YouTube <ExternalLinkIcon className="size-3.5" />
-          </a>
-        </div>
+        <CardTitle className="text-xl">Top video</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <EmbeddedPlayer videoId={top.videoId} start={start} />
+        <div className="space-y-1">
+          <p className="text-sm font-medium">{video?.title ?? top.videoId}</p>
+          {detail.data?.video.description && (
+            <p className="line-clamp-3 text-sm whitespace-pre-line text-muted-foreground">
+              {detail.data.video.description}
+            </p>
+          )}
+        </div>
         <ul className="space-y-1">
           {top.findings.map((f) => (
             <li key={f.id}>
