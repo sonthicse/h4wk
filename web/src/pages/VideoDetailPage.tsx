@@ -50,22 +50,17 @@ function VideoView({
   const [, setSearchParams] = useSearchParams()
   const [tab, setTab] = useState<Tab>('comments')
 
-  // Mỗi loại dữ liệu lấy từ bản thu mới nhất thực sự có nó (bản metadata mới nhất thường chưa có transcript/comment).
-  const newestFirst = [...captures].reverse()
-  const transcriptCapture = newestFirst.find((c) => c.transcript_kinds.length > 0)?.id
-  const commentCapture = newestFirst.find((c) => c.comment_count > 0)?.id
-  const mediaCapture = newestFirst.find((c) => c.level === 'full')?.id
+  // Không truyền ?capture=: backend tự lấy bản thu mới nhất có loại dữ liệu đó. has_media cho biết có file video không.
+  const hasMedia = captures.some((c) => c.has_media)
 
   const timeline = useQuery({ queryKey: ['timeline', video.id], queryFn: () => getTimeline(video.id) })
   const transcripts = useQuery({
-    queryKey: ['transcripts', video.id, transcriptCapture],
-    queryFn: () => listTranscripts(video.id, transcriptCapture),
-    enabled: transcriptCapture !== undefined,
+    queryKey: ['transcripts', video.id],
+    queryFn: () => listTranscripts(video.id),
   })
   const comments = useQuery({
-    queryKey: ['comments', video.id, commentCapture],
-    queryFn: () => listComments(video.id, commentCapture),
-    enabled: commentCapture !== undefined,
+    queryKey: ['comments', video.id],
+    queryFn: () => listComments(video.id),
   })
   const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
 
@@ -125,7 +120,7 @@ function VideoView({
             <Player
               player={player}
               videoProps={videoProps}
-              src={mediaCapture ? mediaUrl(video.id, mediaCapture) : null}
+              src={hasMedia ? mediaUrl(video.id) : null}
               failed={failed}
               activeFinding={finding}
             />
@@ -145,7 +140,7 @@ function VideoView({
               <TabsTrigger value="captures">Captures ({captures.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="comments">
-              {comments.isPending && commentCapture !== undefined ? (
+              {comments.isPending ? (
                 <Skeleton className="mt-2 h-24 w-full" />
               ) : comments.error ? (
                 <p className="py-4 text-sm text-destructive">Could not load comments.</p>
@@ -159,14 +154,12 @@ function VideoView({
               )}
             </TabsContent>
             <TabsContent value="captures">
-              <CapturesTab captures={newestFirst} videoId={video.id} />
+              <CapturesTab captures={[...captures].reverse()} videoId={video.id} />
             </TabsContent>
           </Tabs>
         </div>
         <div className="sticky top-4 h-[calc(100vh-7rem)]">
           <TranscriptPane
-            // Đổi bản thu thì dựng lại để ô chọn loại transcript lấy lại giá trị mặc định.
-            key={transcriptCapture}
             transcripts={transcripts.data ?? []}
             findings={findings}
             player={player}

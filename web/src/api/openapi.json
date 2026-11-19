@@ -890,6 +890,7 @@
           "videos"
         ],
         "summary": "Get Transcripts",
+        "description": "Transcript c\u1ee7a b\u1ea3n thu ch\u1ec9 \u0111\u1ecbnh, m\u1eb7c \u0111\u1ecbnh l\u00e0 b\u1ea3n thu m\u1edbi nh\u1ea5t c\u00f3 transcript.",
         "operationId": "get_transcripts_api_videos__video_id__transcripts_get",
         "parameters": [
           {
@@ -952,7 +953,7 @@
           "videos"
         ],
         "summary": "Get Comments",
-        "description": "Comment ph\u1eb3ng theo C2; reply c\u00f3 parent_id tr\u1ecf v\u1ec1 comment g\u1ed1c.",
+        "description": "Comment ph\u1eb3ng theo C2, reply c\u00f3 parent_id. M\u1eb7c \u0111\u1ecbnh l\u1ea5y b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 thu comment.",
         "operationId": "get_comments_api_videos__video_id__comments_get",
         "parameters": [
           {
@@ -1389,6 +1390,14 @@
           "keyframe_count": {
             "type": "integer",
             "title": "Keyframe Count"
+          },
+          "has_media": {
+            "type": "boolean",
+            "title": "Has Media"
+          },
+          "has_timeline": {
+            "type": "boolean",
+            "title": "Has Timeline"
           }
         },
         "type": "object",
@@ -1398,7 +1407,9 @@
           "collected_at",
           "transcript_kinds",
           "comment_count",
-          "keyframe_count"
+          "keyframe_count",
+          "has_media",
+          "has_timeline"
         ],
         "title": "CaptureSummary"
       },

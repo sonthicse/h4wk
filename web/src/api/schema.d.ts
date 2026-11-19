@@ -325,7 +325,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Transcripts */
+        /**
+         * Get Transcripts
+         * @description Transcript của bản thu chỉ định, mặc định là bản thu mới nhất có transcript.
+         */
         get: operations["get_transcripts_api_videos__video_id__transcripts_get"];
         put?: never;
         post?: never;
@@ -344,7 +347,7 @@ export interface paths {
         };
         /**
          * Get Comments
-         * @description Comment phẳng theo C2; reply có parent_id trỏ về comment gốc.
+         * @description Comment phẳng theo C2, reply có parent_id. Mặc định lấy bản thu mới nhất đã thu comment.
          */
         get: operations["get_comments_api_videos__video_id__comments_get"];
         put?: never;
@@ -505,6 +508,10 @@ export interface components {
             comment_count: number;
             /** Keyframe Count */
             keyframe_count: number;
+            /** Has Media */
+            has_media: boolean;
+            /** Has Timeline */
+            has_timeline: boolean;
         };
         /**
          * Category

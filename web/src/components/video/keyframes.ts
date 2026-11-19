@@ -35,6 +35,8 @@ export function buildKeyframes(timeline: Timeline | null | undefined, findings: 
     const name = entityNames[f.entity] ?? f.entity
     for (const tr of f.triggers) {
       if ((tr.via !== 'face' && tr.via !== 'ref_image') || !tr.frame || !tr.bbox) continue
+      // Khung đã có trong timeline (visual/ocr) thì dùng đúng t của khung đó; chỉ khung ngoài timeline
+      // (ví dụ thumbnail "sources/…") mới tạm lấy thời điểm của nghi vấn.
       const k = get(tr.frame, f.start ?? 0)
       const match = { label: name, bbox: tr.bbox as Bbox }
       ;(tr.via === 'face' ? k.faces : k.refImages).push(match)
