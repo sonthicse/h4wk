@@ -179,3 +179,27 @@ def test_poll_survives_transient_error_without_new_job(supadata_api, tmp_path: P
     assert res.normalized.transcripts[0].segments
     modes = [r.url.params.get("mode") for r in supadata_api.requests]
     assert modes.count("generate") == 1
+
+
+def test_generate_server_error_is_blocked_and_not_retried(supadata_api, tmp_path: Path) -> None:
+    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
+    supadata_api.override["generate"] = [(503, {"error": "upstream-error", "message": "x"})]
+    with pytest.raises(Blocked, match="not retried"):
+        supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
+    modes = [r.url.params.get("mode") for r in supadata_api.requests]
+    assert modes.count("generate") == 1
+
+
+def test_generate_timeout_is_blocked(supadata_api, tmp_path: Path) -> None:
+    import httpx2
+
+    def handler(request):  # noqa: ANN001, ANN202
+        if request.url.params.get("mode") == "generate":
+            raise httpx2.ReadTimeout("slow", request=request)
+        return supadata_api.handler(request)
+
+    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
+    c = supadata_api.collector()
+    c.client = httpx2.Client(transport=httpx2.MockTransport(handler))
+    with pytest.raises(Blocked, match="not retried"):
+        c.fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)

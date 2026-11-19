@@ -55,6 +55,8 @@ def _ts(v: str | None) -> datetime | None:
 
 
 def video_from_supadata(d: dict[str, Any]) -> Video:
+    # uploadDate chỉ có ngày (00:00 UTC): published_at là 07:00 giờ VN của ngày đó, không phải
+    # giờ đăng thật.
     return Video(
         id=d["id"],
         channel_id=d["channel"]["id"],
@@ -185,7 +187,15 @@ class SupadataCollector:
                 return d
         except Unsupported:
             pass  # không có phụ đề: nhờ AI tạo
-        status, d = self._get("transcript", {**base, "mode": "generate"}, timeout=GENERATE_TIMEOUT)
+        try:
+            status, d = self._get(
+                "transcript", {**base, "mode": "generate"}, timeout=GENERATE_TIMEOUT
+            )
+        except Transient as e:
+            # Gửi lại generate tốn thêm credit (2 credit/phút, gói free chỉ 100/tháng): không retry.
+            raise Blocked(
+                f"Supadata generate failed, not retried to avoid extra credits: {e}"
+            ) from e
         if status == 202:
             job_id = d.get("jobId")
             if not job_id:
