@@ -63,10 +63,14 @@ export default function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         {/* Chỗ đặt logo: kích thước cố định để menu không nhảy khi thu gọn sidebar. */}
-        <div
-          aria-label="Logo"
-          className="size-8 shrink-0 rounded-md border border-dashed border-muted-foreground/40"
-        />
+        <div className="flex items-center gap-2">
+          <div
+            aria-label="Logo"
+            className="size-8 shrink-0 rounded-md border border-dashed border-muted-foreground/40"
+          />
+          {/* Ẩn chữ khi thu gọn; ô logo giữ nguyên kích thước nên menu không nhảy. */}
+          <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">h4wk</span>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

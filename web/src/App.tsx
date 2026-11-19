@@ -17,13 +17,16 @@ import VideoDetailPage from '@/pages/VideoDetailPage'
 import WatchlistPage from '@/pages/WatchlistPage'
 
 // Phiên hết hạn giữa chừng (API trả 401): kiểm tra lại /api/auth/me để RequireLogin chuyển sang /login.
-function onError(error: Error) {
-  if (error instanceof UnauthorizedError) queryClient.invalidateQueries({ queryKey: ['me'] })
+// Bỏ qua lỗi của chính query ['me'], nếu không sẽ gọi lại /api/auth/me mãi và trang kẹt ở "Loading…".
+function onError(error: Error, queryKey?: readonly unknown[]) {
+  if (error instanceof UnauthorizedError && queryKey?.[0] !== 'me') {
+    queryClient.invalidateQueries({ queryKey: ['me'] })
+  }
 }
 
 const queryClient = new QueryClient({
-  queryCache: new QueryCache({ onError }),
-  mutationCache: new MutationCache({ onError }),
+  queryCache: new QueryCache({ onError: (error, query) => onError(error, query.queryKey) }),
+  mutationCache: new MutationCache({ onError: (error) => onError(error) }),
 })
 
 export default function App() {
