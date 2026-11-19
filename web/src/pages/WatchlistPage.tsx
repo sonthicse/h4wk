@@ -5,11 +5,14 @@ import WatchlistRow from '@/components/watchlist/WatchlistRow'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { CHECK_INTERVAL_MIN, listWatchItems } from '@/mocks/watchlist'
+import { CHECK_INTERVAL_MIN, listWatchItems } from '@/api/watchlist'
 
 // Trang Watchlist (T31, SPEC 10.9): các kênh được kiểm tra video mới bằng RSS.
 export default function WatchlistPage() {
-  const items = useQuery({ queryKey: ['watchlist'], queryFn: listWatchItems })
+  const items = useQuery({ queryKey: ['watchlist'], queryFn: listWatchItems,
+    // Còn kênh đang khởi tạo nền thì hỏi lại mỗi 5 giây.
+    refetchInterval: (q) => (q.state.data?.some((w) => !w.initialized) ? 5000 : false),
+  })
 
   const all = items.data ?? []
   const enabled = all.filter((w) => w.enabled).length
@@ -37,7 +40,7 @@ export default function WatchlistPage() {
             channel's uploads playlist from the YouTube API.
           </AlertDescription>
         </Alert>
-        {items.error && <p className="text-sm text-destructive">Could not load the watchlist.</p>}
+        {items.error && <p className="text-sm text-destructive">Could not load the watchlist: {items.error.message}</p>}
         <Table>
           <TableHeader>
             <TableRow>

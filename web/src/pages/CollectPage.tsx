@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { collect, listJobs, type CollectLevel, type Job } from '@/api/jobs'
+import { addWatchItem, isChannelInput } from '@/api/watchlist'
 import { formatVnDateTime } from '@/lib/format'
 
 type StepStatus = 'pending' | 'running' | 'done' | 'failed'
@@ -77,12 +78,21 @@ export default function CollectPage() {
     refetchInterval: 2000,
   })
 
+  const [channelAdded, setChannelAdded] = useState(false)
+
+  // Link kênh đi vào watchlist (kênh tự thu 10 video mới nhất); link video tạo job collect như cũ.
   const create = useMutation({
-    mutationFn: () => collect(input.trim(), level, force),
-    onSuccess: () => {
+    mutationFn: async () => {
+      const channel = isChannelInput(input)
+      if (channel) await addWatchItem(input, level)
+      else await collect(input.trim(), level, force)
+      return channel
+    },
+    onSuccess: (channel) => {
       setInput('')
       setForce(false)
-      queryClient.invalidateQueries({ queryKey: ['jobs'] })
+      setChannelAdded(channel)
+      queryClient.invalidateQueries({ queryKey: [channel ? 'watchlist' : 'jobs'] })
     },
   })
 
@@ -99,15 +109,16 @@ export default function CollectPage() {
             className="space-y-3"
             onSubmit={(e) => {
               e.preventDefault()
+              setChannelAdded(false)
               if (input.trim()) create.mutate()
             }}
           >
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="collect-input">Video link or ID</Label>
+                <Label htmlFor="collect-input">Video or channel link</Label>
                 <Input
                   id="collect-input"
-                  placeholder="https://www.youtube.com/watch?v=…"
+                  placeholder="https://www.youtube.com/watch?v=… or a channel link / @handle"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                 />
@@ -135,6 +146,14 @@ export default function CollectPage() {
                 Collect again even if this video was collected in the last 10 minutes
               </Label>
             </div>
+            {channelAdded && (
+              <p role="status" className="text-sm text-muted-foreground">
+                Channel added to the watchlist.{' '}
+                <Link to="/watchlist" className="underline">
+                  Open Watchlist
+                </Link>
+              </p>
+            )}
             {create.error && (
               <p role="alert" className="text-sm text-destructive">
                 {create.error.message}

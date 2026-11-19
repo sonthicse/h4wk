@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { CollectLevel } from '@/mocks/jobs'
-import { addWatchItem, CHECK_INTERVAL_MIN, INITIAL_VIDEOS, levels } from '@/mocks/watchlist'
+import type { CollectLevel } from '@/api/jobs'
+import { addWatchItem, CHECK_INTERVAL_MIN, INITIAL_VIDEOS, levels } from '@/api/watchlist'
 
 // Form thêm kênh vào watchlist (SPEC 10.9). Mức thu mặc định là `full` (SPEC 10.7).
 export default function AddChannelCard() {
@@ -18,7 +18,7 @@ export default function AddChannelCard() {
   const add = useMutation({
     mutationFn: () => addWatchItem(input, level),
     onSuccess: (item) => {
-      setAdded(`${item.channelTitle} added. Its ${INITIAL_VIDEOS} latest videos are being collected at ${item.level} level.`)
+      setAdded(`${item.title} added. Its ${INITIAL_VIDEOS} latest videos are being collected at ${item.level} level.`)
       setInput('')
       queryClient.invalidateQueries({ queryKey: ['watchlist'] })
     },

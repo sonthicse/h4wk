@@ -17,9 +17,9 @@ import { Switch } from '@/components/ui/switch'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { formatVnDateTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { findings } from '@/mocks/data'
-import type { CollectLevel } from '@/mocks/jobs'
-import { checkNow, levels, removeWatchItem, updateWatchItem, type WatchItem } from '@/mocks/watchlist'
+import type { CollectLevel } from '@/api/jobs'
+import { ApiError } from '@/api/client'
+import { checkNow, levels, removeWatchItem, updateWatchItem, type WatchItem } from '@/api/watchlist'
 
 function checkResultText(n: number) {
   if (n === 0) return 'No new videos'
@@ -45,16 +45,24 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
     },
   })
 
-  // Chỉ link khi video có trong mock; video khác chưa có trang chi tiết.
-  const knownVideo = item.latestVideo && findings.some((f) => f.videoId === item.latestVideo?.videoId)
-
   return (
     <TableRow className="align-top">
-      <TableCell className={cn('font-medium', !item.enabled && 'text-muted-foreground')}>{item.channelTitle}</TableCell>
+      <TableCell className={cn('font-medium', !item.enabled && 'text-muted-foreground')}>
+        {item.title}
+        {!item.initialized && (
+          <span className="mt-1 flex items-center gap-1 text-xs font-normal text-muted-foreground">
+            <Loader2Icon className="size-3 animate-spin" />
+            Setting up…
+          </span>
+        )}
+        {item.last_error && (
+          <p className="mt-1 max-w-64 text-xs font-normal [overflow-wrap:anywhere] text-destructive">{item.last_error}</p>
+        )}
+      </TableCell>
       <TableCell className="text-muted-foreground">{item.handle || '—'}</TableCell>
       <TableCell>
         <Switch
-          aria-label={`Watch ${item.channelTitle}`}
+          aria-label={`Watch ${item.title}`}
           checked={item.enabled}
           disabled={update.isPending}
           onCheckedChange={(enabled) => update.mutate({ enabled })}
@@ -62,7 +70,7 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
       </TableCell>
       <TableCell>
         <Select value={item.level} onValueChange={(v) => update.mutate({ level: v as CollectLevel })}>
-          <SelectTrigger size="sm" className="w-28" aria-label={`Collect level for ${item.channelTitle}`}>
+          <SelectTrigger size="sm" className="w-28" aria-label={`Collect level for ${item.title}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -74,36 +82,36 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
           </SelectContent>
         </Select>
       </TableCell>
-      <TableCell className="text-xs">{item.lastCheckedAt ? formatVnDateTime(item.lastCheckedAt) : 'Never'}</TableCell>
+      <TableCell className="text-xs">{item.last_checked_at ? formatVnDateTime(item.last_checked_at) : 'Never'}</TableCell>
       <TableCell className="max-w-64">
-        {item.latestVideo ? (
+        {item.latest_video ? (
           <>
-            {knownVideo ? (
-              <Link
-                to={`/videos/${item.latestVideo.videoId}`}
-                className="block truncate hover:underline"
-                title={item.latestVideo.title}
-              >
-                {item.latestVideo.title}
-              </Link>
-            ) : (
-              <span className="block truncate" title={item.latestVideo.title}>
-                {item.latestVideo.title}
-              </span>
+            <Link
+              to={`/videos/${item.latest_video.id}`}
+              className="block truncate hover:underline"
+              title={item.latest_video.title}
+            >
+              {item.latest_video.title}
+            </Link>
+            {item.latest_video.published_at && (
+              <span className="text-xs text-muted-foreground">{formatVnDateTime(item.latest_video.published_at)}</span>
             )}
-            <span className="text-xs text-muted-foreground">{formatVnDateTime(item.latestVideo.publishedAt)}</span>
           </>
         ) : (
           <span className="text-muted-foreground">—</span>
         )}
       </TableCell>
-      <TableCell className="text-right">{item.collectedCount}</TableCell>
+      <TableCell className="text-right">{item.collected_count}</TableCell>
       <TableCell>
         <div className="flex items-center justify-end gap-1">
           <span className="text-xs text-muted-foreground" aria-live="polite">
             {check.isPending && 'Checking…'}
-            {check.isSuccess && checkResultText(check.data.newVideos)}
-            {check.isError && <span className="text-destructive">Check failed</span>}
+            {check.isSuccess && checkResultText(check.data.new_videos.length)}
+            {check.isError && (
+              <span className="text-destructive">
+                {check.error instanceof ApiError && check.error.status === 502 ? check.error.message : 'Check failed'}
+              </span>
+            )}
           </span>
           <span title={item.enabled ? undefined : 'Enable the channel to check it'}>
             <Button variant="outline" size="sm" disabled={check.isPending || !item.enabled} onClick={() => check.mutate()}>
@@ -114,7 +122,7 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label={`Remove ${item.channelTitle}`}
+            aria-label={`Remove ${item.title}`}
             onClick={() => setConfirming(true)}
           >
             <Trash2Icon />
@@ -125,7 +133,7 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
       <Dialog open={confirming} onOpenChange={setConfirming}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove {item.channelTitle}?</DialogTitle>
+            <DialogTitle>Remove {item.title}?</DialogTitle>
             <DialogDescription>
               The channel will no longer be checked for new videos. Videos and captures already collected are
               kept.
