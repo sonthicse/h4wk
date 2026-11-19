@@ -103,9 +103,10 @@ function VideoView({
           </p>
         </div>
         <div className="flex flex-wrap justify-end gap-2 text-sm">
-          <Badge variant="outline">{count(video.view_count)} views</Badge>
-          <Badge variant="outline">{count(video.like_count)} likes</Badge>
-          <Badge variant="outline">{count(video.comment_count)} comments</Badge>
+          {/* YouTube có thể ẩn số liệu (null): khi đó bỏ hẳn badge thay vì hiện "—". */}
+          {video.view_count != null && <Badge variant="outline">{count(video.view_count)} views</Badge>}
+          {video.like_count != null && <Badge variant="outline">{count(video.like_count)} likes</Badge>}
+          {video.comment_count != null && <Badge variant="outline">{count(video.comment_count)} comments</Badge>}
           <Badge variant={findings.length > 0 ? 'destructive' : 'outline'}>{findings.length} findings</Badge>
           <a
             href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.id)}`}
