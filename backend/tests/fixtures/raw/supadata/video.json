@@ -1,0 +1,21 @@
+{
+ "id": "h4wkDemo001",
+ "title": "Video thử nghiệm h4wk",
+ "description": "Mô tả có dấu.",
+ "duration": 40,
+ "channel": {
+  "id": "UCh4wkDemoChannel000000",
+  "name": "Kênh thử nghiệm h4wk"
+ },
+ "tags": [
+  "thử nghiệm",
+  "h4wk"
+ ],
+ "thumbnail": "https://i.ytimg.com/vi/h4wkDemo001/maxresdefault.jpg",
+ "uploadDate": "2026-11-18T09:00:00.000Z",
+ "viewCount": 12,
+ "likeCount": null,
+ "transcriptLanguages": [
+  "vi"
+ ]
+}

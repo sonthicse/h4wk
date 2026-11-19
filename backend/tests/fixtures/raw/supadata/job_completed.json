@@ -1,0 +1,15 @@
+{
+ "status": "completed",
+ "content": [
+  {
+   "text": "Đây là bản AI tạo",
+   "offset": 500,
+   "duration": 2500,
+   "lang": "vi"
+  }
+ ],
+ "lang": "vi",
+ "availableLangs": [
+  "vi"
+ ]
+}

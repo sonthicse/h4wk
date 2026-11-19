@@ -1,0 +1,6 @@
+{
+ "error": "limit-exceeded",
+ "message": "Rate limit exceeded",
+ "details": "Rate limit exceeded",
+ "documentationUrl": "https://docs.supadata.ai/errors/limit-exceeded"
+}

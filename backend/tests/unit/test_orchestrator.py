@@ -266,3 +266,27 @@ def test_manifest_json_has_vietnam_time(clock: Clock, root: Path) -> None:
     )
     raw = json.loads((cap_dir / "manifest.json").read_text("utf-8"))
     assert raw["collected_at"].endswith("+07:00")
+
+
+def test_fault_injection_ytdlp_falls_back_to_supadata(
+    clock: Clock, root: Path, data_dir: Path, supadata_api
+) -> None:
+    ytdlp = FakeCollector("ytdlp", ALL)
+    orch = Orchestrator(
+        collectors={"ytdlp": ytdlp, "supadata": supadata_api.collector()},
+        settings=Settings(
+            priority={c: ["ytdlp", "supadata"] for c in Cap}, fault_injection={"ytdlp"}
+        ),
+        root=root,
+        now=clock,
+        sleep=lambda _s: None,
+    )
+    m = _collect(orch)
+    assert _calls(m, Cap.TRANSCRIPTS) == [("ytdlp", "blocked"), ("supadata", "ok")]
+    call = next(c for c in m.sources if c.provider == "supadata" and c.what == Cap.TRANSCRIPTS)
+    assert call.cost.credits >= 1
+    assert ytdlp.calls == []
+    n = _norm(m, data_dir)
+    assert n.transcripts[0].kind == "supadata_ai" and n.transcripts[0].lang == "vi"
+    assert n.transcripts[0].segments
+    assert n.provenance[Cap.TRANSCRIPTS] == "supadata"

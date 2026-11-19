@@ -1,0 +1,6 @@
+{
+ "error": "unauthorized",
+ "message": "Invalid or missing API key",
+ "details": "Invalid or missing API key",
+ "documentationUrl": "https://docs.supadata.ai/errors/unauthorized"
+}

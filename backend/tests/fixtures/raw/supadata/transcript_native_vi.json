@@ -1,0 +1,33 @@
+{
+ "content": [
+  {
+   "text": "Xin chào các bạn",
+   "offset": 0,
+   "duration": 3000,
+   "lang": "vi"
+  },
+  {
+   "text": "đây là video thử nghiệm",
+   "offset": 2000,
+   "duration": 3000,
+   "lang": "vi"
+  },
+  {
+   "text": "   ",
+   "offset": 6000,
+   "duration": 1000,
+   "lang": "vi"
+  },
+  {
+   "text": "Cảm ơn đã xem",
+   "offset": 8000,
+   "duration": 2000,
+   "lang": "vi"
+  }
+ ],
+ "lang": "vi",
+ "availableLangs": [
+  "vi",
+  "en"
+ ]
+}

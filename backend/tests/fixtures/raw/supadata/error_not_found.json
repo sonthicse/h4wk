@@ -1,0 +1,6 @@
+{
+ "error": "not-found",
+ "message": "Video not found",
+ "details": "Video not found",
+ "documentationUrl": "https://docs.supadata.ai/errors/not-found"
+}
