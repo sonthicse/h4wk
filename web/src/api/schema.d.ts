@@ -660,6 +660,8 @@ export interface components {
             parent_id?: string | null;
             /** Author Channel Id */
             author_channel_id?: string | null;
+            /** Author Name */
+            author_name?: string | null;
             /** Text */
             text: string;
             /** Published At */

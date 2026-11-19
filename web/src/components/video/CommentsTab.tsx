@@ -37,7 +37,7 @@ function CommentItem({
       )}
     >
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span className="font-medium text-foreground">{comment.author_channel_id ?? 'Unknown author'}</span>
+        <span className="font-medium text-foreground">{comment.author_name ?? comment.author_channel_id ?? 'Unknown author'}</span>
         {comment.published_at && <span>{formatVnDateTime(comment.published_at)}</span>}
         <span>{comment.like_count ?? 0} likes</span>
         {findingId && (

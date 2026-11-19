@@ -4,7 +4,8 @@ import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatVnDateTime } from '@/lib/format'
-import { listEvents, type WatchEvent } from '@/api/watchlist'
+import { listVideos } from '@/api/videos'
+import { listEvents, listWatchItems, type WatchEvent } from '@/api/watchlist'
 
 const POLL_MS = 5000
 
@@ -23,32 +24,61 @@ const kindIcon: Record<string, typeof PlusCircleIcon> = {
   job_failed: CircleXIcon,
 }
 
-function EventItem({ event }: { event: WatchEvent }) {
+type Names = { video: (id: string) => string | null; channel: (watchItem: string | null | undefined) => string | null }
+
+// Backend ghi "…: N findings" trong message của job_done; tách số ra để hiện badge.
+function findingCount(message: string) {
+  const m = message.match(/(\d+) findings?/)
+  return m ? Number(m[1]) : null
+}
+
+// Câu ngắn dễ đọc theo loại sự kiện; tên video/kênh lấy từ danh sách video và watchlist, không hiện mã.
+function headline(event: WatchEvent, names: Names) {
+  const channel = names.channel(event.watch_item)
+  switch (event.kind) {
+    case 'channel_added':
+      return channel ? `Started watching ${channel}` : 'Started watching a channel'
+    case 'new_video':
+      return channel ? `New video on ${channel}` : 'New video detected'
+    case 'job_done':
+      return 'Video analyzed'
+    case 'job_failed':
+      return 'Collection failed'
+    default:
+      return event.message
+  }
+}
+
+function EventItem({ event, names }: { event: WatchEvent; names: Names }) {
   const Icon = kindIcon[event.kind] ?? RadioTowerIcon
+  const title = event.video_id ? (names.video(event.video_id) ?? 'Untitled video (still collecting)') : null
+  const found = event.kind === 'job_done' ? findingCount(event.message) : null
+  const status = event.job?.status
   return (
     <li className="flex gap-3 py-3">
       <Icon className={event.kind === 'job_failed' ? 'mt-0.5 size-4 shrink-0 text-destructive' : 'mt-0.5 size-4 shrink-0 text-muted-foreground'} />
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium">{event.message}</p>
+          <p className="text-sm font-medium">{headline(event, names)}</p>
           <time dateTime={event.at} className="shrink-0 text-xs text-muted-foreground tabular-nums">
             {formatVnDateTime(event.at)}
           </time>
         </div>
-        {event.video_id && (
-          <Link
-            to={`/videos/${event.video_id}`}
-            className="block truncate font-mono text-xs text-muted-foreground hover:text-foreground hover:underline"
-          >
-            {event.video_id}
+        {event.video_id && title && (
+          <Link to={`/videos/${event.video_id}`} className="block truncate text-sm text-muted-foreground hover:text-foreground hover:underline">
+            {title}
           </Link>
         )}
-        {event.job && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="font-mono">{event.job.id}</span>
-            <Badge variant={jobVariant[event.job.status] ?? 'outline'}>{event.job.status}</Badge>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {found !== null && (
+            <Badge variant={found > 0 ? 'destructive' : 'outline'}>
+              {found === 0 ? 'No findings' : `${found} ${found === 1 ? 'finding' : 'findings'}`}
+            </Badge>
+          )}
+          {/* Chỉ hiện trạng thái job khi còn đang chạy; xong/lỗi đã thể hiện qua biểu tượng. */}
+          {status && status !== 'done' && status !== 'failed' && <Badge variant={jobVariant[status] ?? 'outline'}>{status}</Badge>}
+        </div>
+        {event.kind === 'job_failed' && <p className="text-xs text-destructive">{event.message}</p>}
       </div>
     </li>
   )
@@ -64,6 +94,12 @@ export default function EventFeed() {
     queryFn: () => listEvents(),
     refetchInterval: POLL_MS,
   })
+  const videos = useQuery({ queryKey: ['videos'], queryFn: listVideos, refetchInterval: POLL_MS })
+  const watchlist = useQuery({ queryKey: ['watchlist'], queryFn: listWatchItems })
+  const names: Names = {
+    video: (id) => videos.data?.find((v) => v.id === id)?.title ?? null,
+    channel: (w) => (w ? (watchlist.data?.find((i) => i.id === w)?.title ?? null) : null),
+  }
 
   return (
     <Card>
@@ -80,7 +116,7 @@ export default function EventFeed() {
         {events.data && events.data.length > 0 && (
           <ol aria-live="polite" className="divide-y">
             {events.data.slice(0, MAX_EVENTS).map((e) => (
-              <EventItem key={e.id} event={e} />
+              <EventItem key={e.id} event={e} names={names} />
             ))}
           </ol>
         )}

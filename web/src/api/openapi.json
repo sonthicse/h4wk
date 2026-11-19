@@ -1870,6 +1870,17 @@
             ],
             "title": "Author Channel Id"
           },
+          "author_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Name"
+          },
           "text": {
             "type": "string",
             "title": "Text"
