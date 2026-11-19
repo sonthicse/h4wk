@@ -45,7 +45,8 @@ LEVEL_CAPS: dict[CollectLevel, list[Cap]] = {
 }
 # Loại dữ liệu → các trường của Normalized do nó cung cấp.
 CAP_FIELDS: dict[Cap, list[str]] = {
-    Cap.VIDEO_METADATA: ["video"],
+    # Metadata video kèm thông tin cơ bản của kênh (tên, handle), nếu nguồn trả về.
+    Cap.VIDEO_METADATA: ["video", "channel"],
     Cap.CHANNEL_METADATA: ["channel"],
     Cap.CHANNEL_VIDEOS: ["video_ids"],
     Cap.PLAYLIST_VIDEOS: ["video_ids"],

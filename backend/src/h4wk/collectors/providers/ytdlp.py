@@ -108,6 +108,17 @@ def channel_from_info(info: dict[str, Any]) -> Channel:
     )
 
 
+def channel_from_video_info(info: dict[str, Any]) -> Channel:
+    """Thông tin kênh có sẵn trong metadata của một video (không gọi thêm trang kênh)."""
+    handle = info.get("uploader_id")
+    return Channel(
+        id=info["channel_id"],
+        handle=handle if handle and handle.startswith("@") else None,
+        title=info.get("channel") or info.get("uploader") or "",
+        subscriber_count=info.get("channel_follower_count"),
+    )
+
+
 def video_ids_from_flat(info: dict[str, Any]) -> list[str]:
     return [e["id"] for e in info.get("entries") or [] if e and e.get("id")]
 
@@ -222,7 +233,9 @@ class YtDlpCollector:
         rel = f"sources/{workdir.name}"
         n: dict[str, Any] = {"schema": "h4wk.normalized/1"}
         if cap == Cap.VIDEO_METADATA:
-            n["video"] = video_from_info(self._info(target, workdir))
+            info = self._info(target, workdir)
+            n["video"] = video_from_info(info)
+            n["channel"] = channel_from_video_info(info)
         elif cap == Cap.THUMBNAILS:
             info = self._info(target, workdir)
             n["thumbnails"] = self._download_thumbnails(info, workdir, rel)

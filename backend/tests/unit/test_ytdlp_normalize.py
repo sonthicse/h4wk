@@ -103,3 +103,10 @@ def test_channel_from_flat() -> None:
 )
 def test_classify_error(msg: str, kind: type) -> None:
     assert isinstance(y.classify_error(DownloadError(msg)), kind)
+
+
+def test_channel_from_video_info() -> None:
+    info = json.loads((RAW / "video.info.json").read_text(encoding="utf-8"))
+    c = y.channel_from_video_info(info)
+    assert c.title == "Kênh thử nghiệm h4wk" and c.handle == "@h4wkdemo"
+    assert c.id == info["channel_id"] and c.description == ""
