@@ -229,7 +229,10 @@ def latest_findings(latest_only: bool = False) -> list[Finding]:
     mới nhất đã phân tích của mỗi video, để thu lại cùng video không làm lặp nghi vấn.
     "Mới nhất" xác định từ findings.json trong data/ (nguồn gốc), không từ bảng jobs, nên kết
     quả trước và sau reindex giống nhau. Run mới nhất không có nghi vấn thì bản thu đó
-    không hiện nghi vấn nào, run cũ không hiện lại."""
+    không hiện nghi vấn nào, run cũ không hiện lại.
+    Hạn chế: findings.json được ghi trước khi commit FindingRow, nên nếu commit DB lỗi, hoặc
+    findings.json của run mới bị hỏng, run đó vẫn được coi là mới nhất và bản thu hiện 0
+    nghi vấn cho tới khi chạy `h4wk reindex`."""
     latest = _latest_runs(data_dir())
     newest: dict[str, str] = {}
     for vid, cap in latest:

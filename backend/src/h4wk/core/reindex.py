@@ -71,7 +71,9 @@ def reindex() -> ReindexResult:
                 decisions += 1
         s.commit()
 
-    from h4wk.api.videos import list_videos  # đếm giống API; import muộn để tránh vòng
+    from h4wk.api.videos import (
+        list_videos,
+    )  # đếm giống GET /api/videos; import muộn để core không kéo api (và jobs.queue) khi import
 
     videos = len(list_videos())
     audit.log(
