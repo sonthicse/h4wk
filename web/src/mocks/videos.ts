@@ -220,11 +220,6 @@ const store: VideoDetail[] = [
   ),
 ]
 
-// Bản đồng bộ, dùng cho dữ liệu giả của Dashboard.
-export function findVideo(videoId: string): VideoDetail | null {
-  return store.find((v) => v.id === videoId) ?? null
-}
-
 // Trả về null khi không có video để trang hiện "not found".
 export function getVideo(videoId: string): Promise<VideoDetail | null> {
   const video = store.find((v) => v.id === videoId) ?? null

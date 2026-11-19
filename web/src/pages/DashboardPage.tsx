@@ -94,7 +94,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4">
         <div className="space-y-4">
-          <FeaturedVideoCard video={d.featured} />
+          <FeaturedVideoCard />
           <div className="grid grid-cols-3 gap-4">
             <StatCard label="Watched channels" value={d.channelCount} hint="Channels in the watchlist" />
             <StatCard label="Videos collected" value={d.videoCount} hint="Different videos saved so far" />
