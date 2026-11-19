@@ -235,7 +235,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 2: Nguồn thu, AI và hoàn thiện luồng xử lý (tuần 2)
 
-- [ ] T14: Adapter YouTube Data API và quota
+- [x] T14: Adapter YouTube Data API và quota
 - [ ] T15: Adapter Supadata và credit
 - [ ] T45: `core`: dựng lại database chỉ mục
 - [ ] T46: `jobs`: chạy lại job bị treo và xử lý playlist

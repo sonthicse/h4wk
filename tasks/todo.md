@@ -299,8 +299,8 @@ Gồm các task: T13.
 
 Nghiệm thu:
 
-- [ ] Phần chuyển sang dữ liệu chung có test dùng response đã ghi sẵn.
-- [ ] Tắt yt-dlp thì metadata, comment và thumbnail vẫn thu được; manifest ghi yt-dlp là `disabled` và `MEDIA` là `no_source`; job vẫn chạy phân tích phần văn bản.
+- [x] Phần chuyển sang dữ liệu chung có test dùng response đã ghi sẵn.
+- [x] Tắt yt-dlp thì metadata, comment và thumbnail vẫn thu được; manifest ghi yt-dlp là `disabled` và `MEDIA` là `no_source`; job vẫn chạy phân tích phần văn bản.
 
 Kiểm tra: `uv run pytest tests/unit/test_ytapi_normalize.py` và `uv run pytest -m live -k ytapi`.
 
