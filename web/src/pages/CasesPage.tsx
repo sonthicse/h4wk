@@ -38,7 +38,7 @@ function NewCaseSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (op
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[28rem] sm:max-w-md">
+      <SheetContent>
         <form
           className="flex h-full flex-col"
           onSubmit={(e) => {

@@ -10,6 +10,7 @@ import {
   SettingsIcon,
   UsersIcon,
 } from 'lucide-react'
+import { useEffect } from 'react'
 import { NavLink, useMatch, useParams } from 'react-router'
 import { getCase, listCases } from '@/api/cases'
 import { getHealth } from '@/api/health'
@@ -62,11 +63,39 @@ function ApiStatus() {
   )
 }
 
+const LAST_CASE_KEY = 'h4wk.lastCase'
+
+// localStorage có thể bị chặn (chế độ riêng tư); khi đó chỉ mất tính năng nhớ case.
+function readLastCase(): string | null {
+  try {
+    return localStorage.getItem(LAST_CASE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function writeLastCase(id: string) {
+  try {
+    localStorage.setItem(LAST_CASE_KEY, id)
+  } catch {
+    // bỏ qua
+  }
+}
+
 export default function AppSidebar() {
-  const { caseId } = useParams()
+  const { caseId: routeCaseId } = useParams()
+  const cases = useQuery({ queryKey: ['cases'], queryFn: listCases }).data ?? []
+
+  // Ở trang không thuộc case nào (All cases, Settings) vẫn hiện menu của case mở gần nhất,
+  // để sidebar giống nhau trên mọi trang. Case gần nhất nhớ trong trình duyệt.
+  useEffect(() => {
+    if (routeCaseId) writeLastCase(routeCaseId)
+  }, [routeCaseId])
+  const last = readLastCase()
+  const caseId = routeCaseId ?? (last && cases.some((c) => c.id === last) ? last : cases[0]?.id)
+
   // Cùng queryKey với các trang dùng getCase nên chỉ gọi API một lần.
   const current = useQuery({ queryKey: ['case', caseId], queryFn: () => getCase(caseId!), enabled: !!caseId }).data
-  const cases = useQuery({ queryKey: ['cases'], queryFn: listCases }).data ?? []
 
   return (
     <Sidebar collapsible="icon">
@@ -93,7 +122,7 @@ export default function AppSidebar() {
               <SidebarMenu>
                 {cases.map((c) => (
                   <SidebarMenuItem key={c.id}>
-                    <SidebarMenuButton asChild isActive={c.id === caseId}>
+                    <SidebarMenuButton asChild isActive={c.id === routeCaseId}>
                       <NavLink to={`/cases/${c.id}/collect`}>
                         <FolderIcon />
                         <span>{c.title}</span>

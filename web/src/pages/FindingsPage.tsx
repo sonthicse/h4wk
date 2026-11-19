@@ -71,7 +71,7 @@ function FindingSheet({
 }) {
   return (
     <Sheet open={finding !== null} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-[28rem] sm:max-w-md">
+      <SheetContent>
         {finding && (
           <>
             <SheetHeader>
