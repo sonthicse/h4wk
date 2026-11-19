@@ -580,10 +580,12 @@ Backend cho tải lên, xem và xoá ảnh mẫu của từng đối tượng, g
 
 Nghiệm thu:
 
-- [ ] Tải ảnh lên thì file nằm đúng thư mục và có dòng audit.
+- [x] Tải ảnh lên thì file nằm đúng thư mục và có dòng audit.
 - [ ] Trang Entities hiện ảnh mẫu theo hai nhóm.
 
 Kiểm tra: `uv run pytest tests/unit/test_entities.py`, `npm run build` và kiểm tra thủ công.
+
+Backend xong: `PATCH /api/entities/{id}`, `GET /api/entities/{id}/refs`, `POST /api/entities/{id}/refs/{face|image}` (thân request là bytes ảnh JPEG/PNG/WebP, tối đa 10 MB, tên file theo SHA-256), `GET`/`DELETE` từng ảnh; `GET /api/entities` có `ref_counts`. Phần giao diện do phiên UI làm.
 
 File: `src/h4wk/core/entities.py`, `api/entities.py`, `web/src/pages/Entities.tsx`, tests.
 Người làm: Thi. Phụ thuộc: T6, T13. Cỡ: M.

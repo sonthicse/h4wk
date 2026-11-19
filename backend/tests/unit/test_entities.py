@@ -55,3 +55,76 @@ def test_index_survives_restart(client: TestClient) -> None:
 
     with TestClient(app, cookies=client.cookies) as c2:
         assert [e["id"] for e in c2.get("/api/entities").json()] == ["e_01"]
+
+
+# ------------------------------------------------------------- T39: sửa, ảnh mẫu
+
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 32
+JPG = b"\xff\xd8\xff\xe0" + b"\x01" * 32
+
+
+def test_update_entity_keeps_fields_not_sent(client: TestClient, data_dir: Path) -> None:
+    _add(client)
+    r = client.patch("/api/entities/e_01", json={"aliases": ["Mẫu Ca", "Ông Mẫu"]})
+    assert r.status_code == 200, r.text
+    assert r.json()["name"] == "Trần Văn Mẫu" and r.json()["abbreviations"] == ["TVM"]
+    assert load_entities()[0].aliases == ["Mẫu Ca", "Ông Mẫu"]
+    assert _audit(data_dir / "log" / "audit.jsonl")[-1]["action"] == "entity.update"
+
+
+def test_update_unknown_entity_is_404_and_audited(client: TestClient, data_dir: Path) -> None:
+    assert client.patch("/api/entities/e_99", json={"name": "X"}).status_code == 404
+    line = _audit(data_dir / "log" / "audit.jsonl")[-1]
+    assert line["action"] == "entity.update" and line["status"] == "error"
+
+
+def test_upload_list_get_delete_ref(client: TestClient, data_dir: Path) -> None:
+    _add(client)
+    r = client.post("/api/entities/e_01/refs/face", content=PNG)
+    assert r.status_code == 201, r.text
+    ref = r.json()
+    path = data_dir / "entities" / "e_01" / "refs" / "face" / ref["file"]
+    assert path.read_bytes() == PNG and ref["file"].endswith(".png")
+    client.post("/api/entities/e_01/refs/image", content=JPG)
+    refs = client.get("/api/entities/e_01/refs").json()
+    assert [x["file"] for x in refs["face"]] == [ref["file"]]
+    assert [x["kind"] for x in refs["image"]] == ["image"]
+    assert client.get(ref["url"]).content == PNG
+    assert ref["uploaded_at"].endswith("+07:00")
+    listed = client.get("/api/entities").json()[0]
+    assert listed["ref_counts"] == {"face": 1, "image": 1}
+    assert client.delete(ref["url"]).status_code == 204
+    assert not path.exists()
+    actions = [x["action"] for x in _audit(data_dir / "log" / "audit.jsonl")]
+    assert actions[-3:] == ["entity.ref.add", "entity.ref.add", "entity.ref.delete"]
+
+
+def test_same_image_twice_is_stored_once(client: TestClient) -> None:
+    _add(client)
+    a = client.post("/api/entities/e_01/refs/face", content=PNG).json()
+    b = client.post("/api/entities/e_01/refs/face", content=PNG).json()
+    assert a == b
+    assert len(client.get("/api/entities/e_01/refs").json()["face"]) == 1
+
+
+def test_non_image_is_rejected_and_audited(client: TestClient, data_dir: Path) -> None:
+    _add(client)
+    r = client.post("/api/entities/e_01/refs/face", content=b"<svg/>")
+    assert r.status_code == 400
+    line = _audit(data_dir / "log" / "audit.jsonl")[-1]
+    assert line["action"] == "entity.ref.add" and line["status"] == "error"
+
+
+def test_bad_kind_and_traversal_are_rejected(client: TestClient) -> None:
+    _add(client)
+    assert client.post("/api/entities/e_01/refs/other", content=PNG).status_code == 422
+    assert client.get("/api/entities/e_01/refs/face/..%2F..%2Fentities.json").status_code == 404
+    assert client.get("/api/entities/e_02/refs").status_code == 404
+
+
+def test_too_large_image_is_413(client: TestClient, monkeypatch) -> None:
+    from h4wk.core import entities
+
+    monkeypatch.setattr(entities, "MAX_REF_BYTES", 16)
+    _add(client)
+    assert client.post("/api/entities/e_01/refs/face", content=PNG).status_code == 413

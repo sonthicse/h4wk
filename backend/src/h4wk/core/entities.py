@@ -1,13 +1,17 @@
 """Đối tượng cần bảo vệ. entities.json là nguồn gốc; database chỉ mục được cập nhật theo."""
 
+import hashlib
+import re
+from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, TypeAdapter
 from sqlmodel import Session
 
 from h4wk.core.config import data_dir
 from h4wk.core.db import EntityRow
-from h4wk.core.types import Contract
+from h4wk.core.types import VN_TZ, Contract, VnDatetime
 
 
 class Entity(Contract):
@@ -56,3 +60,125 @@ def add_entity(
     session.add(EntityRow(id=entity.id, name=entity.name))
     session.commit()
     return entity
+
+
+class NotFound(LookupError):
+    pass
+
+
+class TooLarge(ValueError):
+    pass
+
+
+def get_entity(entity_id: str) -> Entity:
+    for entity in load_entities():
+        if entity.id == entity_id:
+            return entity
+    raise NotFound(entity_id)
+
+
+def update_entity(session: Session, entity_id: str, **fields: object) -> Entity:
+    """Sửa tên, biệt danh, viết tắt; trường không truyền thì giữ nguyên."""
+    entities = load_entities()
+    for i, entity in enumerate(entities):
+        if entity.id == entity_id:
+            entities[i] = Entity.model_validate({**entity.model_dump(), **fields})
+            _save(entities)
+            row = session.get(EntityRow, entity_id)
+            if row is None:
+                row = EntityRow(id=entity_id, name=entities[i].name)
+            row.name = entities[i].name
+            session.add(row)
+            session.commit()
+            return entities[i]
+    raise NotFound(entity_id)
+
+
+# ------------------------------------------------------------------ ảnh mẫu
+
+RefKind = Literal["face", "image"]
+MAX_REF_BYTES = 10 * 1024 * 1024
+REF_FILE = re.compile(r"^[0-9a-f]{16}\.(jpg|png|webp)$")
+_MAGIC = {b"\xff\xd8\xff": "jpg", b"\x89PNG\r\n\x1a\n": "png"}
+
+
+class RefImage(Contract):
+    kind: RefKind
+    file: str
+    bytes: int
+    sha256: str
+    uploaded_at: VnDatetime
+    url: str
+
+
+def refs_dir(entity_id: str, kind: RefKind) -> Path:
+    return data_dir() / "entities" / entity_id / "refs" / kind
+
+
+def _image_ext(data: bytes) -> str | None:
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "webp"
+    for magic, ext in _MAGIC.items():
+        if data.startswith(magic):
+            return ext
+    return None
+
+
+def _ref(entity_id: str, kind: RefKind, path: Path) -> RefImage:
+    data = path.read_bytes()
+    return RefImage(
+        kind=kind,
+        file=path.name,
+        bytes=len(data),
+        sha256=hashlib.sha256(data).hexdigest(),
+        uploaded_at=datetime.fromtimestamp(path.stat().st_mtime, VN_TZ),
+        url=f"/api/entities/{entity_id}/refs/{kind}/{path.name}",
+    )
+
+
+def list_refs(entity_id: str) -> dict[str, list[RefImage]]:
+    get_entity(entity_id)
+    out: dict[str, list[RefImage]] = {}
+    for kind in ("face", "image"):
+        d = refs_dir(entity_id, kind)
+        files = sorted(p for p in d.iterdir() if REF_FILE.match(p.name)) if d.is_dir() else []
+        out[kind] = [_ref(entity_id, kind, p) for p in files]
+    return out
+
+
+def add_ref(entity_id: str, kind: RefKind, data: bytes) -> RefImage:
+    """Lưu ảnh mẫu; tên file lấy từ SHA-256 nên tải lại cùng ảnh không tạo bản trùng."""
+    get_entity(entity_id)
+    if len(data) > MAX_REF_BYTES:
+        raise TooLarge(f"image is larger than {MAX_REF_BYTES // (1024 * 1024)} MB")
+    ext = _image_ext(data)
+    if ext is None:
+        raise ValueError("only JPEG, PNG or WebP images are accepted")
+    d = refs_dir(entity_id, kind)
+    d.mkdir(parents=True, exist_ok=True)
+    path = d / f"{hashlib.sha256(data).hexdigest()[:16]}.{ext}"
+    if not path.exists():
+        tmp = path.with_suffix(".tmp")
+        tmp.write_bytes(data)
+        tmp.replace(path)
+    return _ref(entity_id, kind, path)
+
+
+def ref_path(entity_id: str, kind: RefKind, file: str) -> Path:
+    get_entity(entity_id)
+    path = refs_dir(entity_id, kind) / file
+    if not REF_FILE.match(file) or not path.is_file():
+        raise NotFound(f"{entity_id}/{kind}/{file}")
+    return path
+
+
+def ref_counts(entity_id: str) -> dict[str, int]:
+    return {
+        kind: sum(1 for p in d.iterdir() if REF_FILE.match(p.name)) if d.is_dir() else 0
+        for kind in ("face", "image")
+        for d in [refs_dir(entity_id, kind)]
+    }
+
+
+def delete_ref(entity_id: str, kind: RefKind, file: str) -> None:
+    ref_path(entity_id, kind, file).unlink()
