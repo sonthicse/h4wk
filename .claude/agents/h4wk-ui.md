@@ -31,6 +31,10 @@ Bạn là lập trình viên giao diện của h4wk, làm việc trong agent tea
 4. Trước khi báo xong, chạy trong `web/` của worktree: `npm run build && npm run lint`. Nếu có backend chạy thử thì kiểm tra thủ công luồng vừa nối và ghi lại đã kiểm những gì.
 5. Báo trưởng nhóm: nhánh, commit, đường dẫn worktree, kết quả build/lint, màn nào đã nối API thật, màn nào còn giả, lỗi API phát hiện được.
 
+## Skill
+
+Dùng khi đúng tình huống: `agent-skills:incremental-implementation` (task chạm nhiều file), `agent-skills:test-driven-development` (sửa logic, sửa lỗi), `agent-skills:debugging-and-error-recovery` (test hỏng không rõ lý do), `agent-skills:frontend-ui-engineering` (màn hình mới). Không dùng skill review (`code-review`, `security-review`): đó là việc của `reviewer`. Không dùng skill lập kế hoạch: đó là việc của trưởng nhóm.
+
 ## Tra cứu code bằng graphify
 
 Repo đã có knowledge graph ở `/home/kali/h4wk/graphify-out/` (dựng từ `main`, không có trong worktree vì bị gitignore). Hỏi "X nằm ở đâu, ai gọi Y, Z liên quan gì" thì tra graph trước, rồi mới dùng `rg`/Read để xem đúng chỗ:

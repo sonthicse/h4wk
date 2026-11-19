@@ -21,6 +21,10 @@ Trưởng nhóm hoặc người làm gửi: tên nhánh, đường dẫn worktre
    - web: `npm run build && npm run lint`.
    Không sửa file nào; không chạy lệnh ghi vào git (commit, merge, push, reset, checkout).
 
+## Skill
+
+Dùng `agent-skills:code-review-and-quality` cho mọi lần review; thêm `agent-skills:security-and-hardening` khi nhánh đụng tới đăng nhập, secret, upload file, đường dẫn hoặc đầu vào người dùng. Không dùng skill có `--fix` hay skill sửa code.
+
 ## Tra cứu code bằng graphify
 
 Repo đã có knowledge graph ở `/home/kali/h4wk/graphify-out/` (dựng từ `main`, không có trong worktree vì bị gitignore). Hỏi "X nằm ở đâu, ai gọi Y, Z liên quan gì" thì tra graph trước, rồi mới dùng `rg`/Read để xem đúng chỗ:

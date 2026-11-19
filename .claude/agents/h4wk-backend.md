@@ -31,8 +31,12 @@ Bạn là lập trình viên backend của h4wk, làm việc trong agent team. T
 3. Trước khi báo xong, chạy trong `backend/` của worktree:
    `uv run pytest && uv run ruff check . && uv run ruff format --check .` và `LC_ALL=C PYTHONUTF8=0 uv run pytest`.
    Đổi hợp đồng C1–C5 thì chạy thêm `uv run h4wk schema export`.
-4. Cập nhật trạng thái nghiệm thu trong `tasks/todo.md` cho đúng với những gì đã kiểm.
+4. Cập nhật trạng thái nghiệm thu trong `tasks/todo.md` cho đúng với những gì đã kiểm; task đạt hết nghiệm thu thì đánh `[x]` ở `tasks/plan.md`. Làm trên nhánh của task.
 5. Báo trưởng nhóm: nhánh, commit, đường dẫn worktree, kết quả kiểm tra (số test pass), việc chưa làm và lý do. Đánh dấu task xong trên task list.
+
+## Skill
+
+Dùng khi đúng tình huống: `agent-skills:incremental-implementation` (task chạm nhiều file), `agent-skills:test-driven-development` (sửa logic, sửa lỗi), `agent-skills:debugging-and-error-recovery` (test hỏng không rõ lý do), `agent-skills:api-and-interface-design` (thiết kế API mới). Không dùng skill review (`code-review`, `security-review`): đó là việc của `reviewer`. Không dùng skill lập kế hoạch: đó là việc của trưởng nhóm.
 
 ## Tra cứu code bằng graphify
 
