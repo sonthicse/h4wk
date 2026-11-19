@@ -284,7 +284,7 @@ def test_fault_injection_ytdlp_falls_back_to_supadata(
     m = _collect(orch)
     assert _calls(m, Cap.TRANSCRIPTS) == [("ytdlp", "blocked"), ("supadata", "ok")]
     call = next(c for c in m.sources if c.provider == "supadata" and c.what == Cap.TRANSCRIPTS)
-    assert call.cost.credits >= 1
+    assert call.cost.credits == 1
     assert ytdlp.calls == []
     n = _norm(m, data_dir)
     assert n.transcripts[0].kind == "supadata_ai" and n.transcripts[0].lang == "vi"

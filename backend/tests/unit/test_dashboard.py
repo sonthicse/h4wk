@@ -17,11 +17,6 @@ SAMPLE = Path(__file__).parents[1] / "fixtures" / "captures" / "h4wkDemo001"
 RUN = "r_20261118T160500"
 
 
-@pytest.fixture(autouse=True)
-def _no_supadata_network(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(supadata, "credits_usage", lambda: None)
-
-
 @pytest.fixture
 def sample(client: TestClient, data_dir: Path) -> list[Finding]:
     shutil.copytree(SAMPLE, data_dir / "videos" / "h4wkDemo001")

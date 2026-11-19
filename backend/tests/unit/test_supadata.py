@@ -159,3 +159,23 @@ def test_health_check(supadata_api) -> None:
     h = supadata_api.collector().health_check()
     assert h.ok and "37/100" in h.detail
     assert supadata_api.collector(key=lambda: None).health_check().ok is False
+
+
+def test_202_without_job_id_is_blocked(supadata_api, tmp_path: Path) -> None:
+    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
+    supadata_api.override["generate"] = [(202, {})]
+    with pytest.raises(Blocked, match="without jobId"):
+        supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
+
+
+def test_poll_survives_transient_error_without_new_job(supadata_api, tmp_path: Path) -> None:
+    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
+    supadata_api.override["generate"] = [(202, raw("transcript_job.json"))]
+    supadata_api.override["job"] = [
+        (503, {"error": "upstream-error", "message": "x"}),
+        (200, raw("job_completed.json")),
+    ]
+    res = supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
+    assert res.normalized.transcripts[0].segments
+    modes = [r.url.params.get("mode") for r in supadata_api.requests]
+    assert modes.count("generate") == 1

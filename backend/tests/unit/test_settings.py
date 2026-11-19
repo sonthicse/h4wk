@@ -26,11 +26,6 @@ YT_KEY = "AIzaSyTHISISAFULLSECRETKEY0001"
 AI_KEY = "sk-ant-THISISAFULLSECRETKEY0002"
 
 
-@pytest.fixture(autouse=True)
-def _no_supadata_network(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(supadata, "credits_usage", lambda: None)
-
-
 @pytest.fixture
 def cfg(config_dir: Path) -> Path:
     for name in ("sources", "ai"):

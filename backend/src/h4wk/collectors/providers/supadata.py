@@ -184,7 +184,10 @@ class SupadataCollector:
             pass  # không có phụ đề: nhờ AI tạo
         status, d = self._get("transcript", {**base, "mode": "generate"})
         if status == 202:
-            d = self._wait_job(d["jobId"])
+            job_id = d.get("jobId")
+            if not job_id:
+                raise Blocked("Supadata returned 202 without jobId")
+            d = self._wait_job(job_id)
         self._write_json(workdir / f"{target.id}.transcript.generate.json", d)
         if not d.get("content"):
             raise Unsupported("Supadata detected no speech")
@@ -195,7 +198,12 @@ class SupadataCollector:
         start = self.monotonic()
         while True:
             self.sleep(POLL_INTERVAL)
-            _, d = self._get(f"transcript/{job_id}")
+            try:
+                _, d = self._get(f"transcript/{job_id}")
+            except Transient:
+                # Lỗi mạng thoáng qua khi poll: thử lại ở vòng sau. Ném ra thì orchestrator gửi
+                # lại cả fetch và tạo thêm một job generate tốn credit.
+                d = {}
             if d.get("status") == "completed":
                 return d
             if d.get("status") == "failed":

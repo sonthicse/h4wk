@@ -58,6 +58,16 @@ def _no_network(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch)
     monkeypatch.setattr(socket, "getaddrinfo", guard)
 
 
+@pytest.fixture(autouse=True)
+def _offline_supadata_credits(request, monkeypatch):  # noqa: ANN001, ANN202
+    """Không test nào hỏi /me của Supadata thật, kể cả khi máy có SUPADATA_API_KEY."""
+    if "supadata_api" in request.fixturenames:
+        return
+    from h4wk.collectors.providers import supadata
+
+    monkeypatch.setattr(supadata, "credits_usage", lambda *a, **k: None)
+
+
 class FakeYtApi:
     """YouTube Data API giả: trả response ghi sẵn ở tests/fixtures/raw/ytapi/ theo đường dẫn."""
 
