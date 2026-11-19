@@ -165,3 +165,57 @@ def test_ai_provider_test(client: TestClient, cfg, monkeypatch) -> None:
     r = client.post("/api/settings/ai/providers/anthropic/test", json={}).json()
     assert r["ok"] is True and r["latency_ms"] is not None
     assert ai_providers.key_name("local-llm") == "LOCAL_LLM_API_KEY"
+
+
+def _providers(client: TestClient) -> dict:
+    return {
+        p["name"]: {k: p[k] for k in ("type", "base_url", "models")}
+        for p in client.get("/api/settings/ai").json()["providers"]
+    }
+
+
+def _add_local(client: TestClient) -> dict:
+    providers = _providers(client)
+    providers["local-llm"] = {
+        "type": "openai_compat",
+        "base_url": "http://localhost:8080/v1",
+        "models": {"m1": {"vision": False, "structured": True}},
+    }
+    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
+    client.put("/api/settings/ai/providers/local-llm/key", json={"value": AI_KEY})
+    client.put("/api/settings/ai/providers/anthropic/key", json={"value": YT_KEY})
+    return providers
+
+
+def _stored(data_dir: Path) -> dict:
+    return json.loads((data_dir / "secrets.json").read_text(encoding="utf-8"))
+
+
+def _key_deletes(data_dir: Path) -> list[str]:
+    lines = (data_dir / "log" / "audit.jsonl").read_text(encoding="utf-8").splitlines()
+    return [d["target"] for d in map(json.loads, lines) if d["action"] == "settings.key.delete"]
+
+
+def test_put_ai_removing_provider_deletes_its_key(client: TestClient, cfg, data_dir: Path) -> None:
+    providers = _add_local(client)
+    del providers["local-llm"]
+    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
+    stored = _stored(data_dir)
+    assert "LOCAL_LLM_API_KEY" not in stored and "ANTHROPIC_API_KEY" in stored
+    assert _key_deletes(data_dir)[-1] == "LOCAL_LLM_API_KEY"
+
+
+def test_put_ai_422_keeps_keys(client: TestClient, cfg, data_dir: Path) -> None:
+    providers = _add_local(client)
+    del providers["local-llm"]
+    providers["Bad Name"] = {}
+    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 422
+    assert "LOCAL_LLM_API_KEY" in _stored(data_dir)
+    assert _key_deletes(data_dir) == []
+
+
+def test_delete_provider_deletes_its_key(client: TestClient, cfg, data_dir: Path) -> None:
+    _add_local(client)
+    assert client.delete("/api/settings/ai/providers/local-llm").status_code == 200
+    assert "LOCAL_LLM_API_KEY" not in _stored(data_dir)
+    assert _key_deletes(data_dir) == ["LOCAL_LLM_API_KEY"]
