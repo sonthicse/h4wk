@@ -49,16 +49,20 @@ Chỉ tạo thành viên mà task cần. Task chỉ có backend thì không tạ
 
 ## Giao việc cho thành viên
 
-Thành viên không thấy hội thoại của bạn. Mỗi lần giao việc, tin nhắn phải đủ để làm mà không cần hỏi lại:
+Thành viên code chạy ở effort thấp: họ làm đúng theo brief, không tự khảo sát rộng hay tự quyết thiết kế. Vì vậy brief phải chi tiết tới mức đọc xong là code được ngay. Bạn tự khảo sát code (graph, Read) để viết brief; thành viên không thấy hội thoại của bạn.
 
-- **Task:** mã task và một câu mục tiêu.
-- **Đọc:** mục trong `tasks/todo.md`, mục SPEC, file code liên quan (đường dẫn cụ thể).
-- **Làm:** các bước, thứ tự, file được sửa và không được sửa.
-- **Xong khi:** tiêu chí từ mục nghiệm thu và lệnh kiểm tra phải pass.
-- **Phối hợp:** hợp đồng API gửi ai, chờ ai.
+Mỗi brief gồm:
+
+- **Task:** mã task, một câu mục tiêu, tên nhánh (vd `feat/t14-youtube-api`).
+- **Bối cảnh:** mục `tasks/todo.md` và mục SPEC cần đọc; file và hàm liên quan kèm `đường/dẫn:dòng`.
+- **Mẫu để làm theo:** chỗ code có sẵn làm việc tương tự để bắt chước (vd "làm như `collectors/providers/ytdlp.py:fetch`", "API viết theo `api/watchlist.py`").
+- **Thay đổi cụ thể:** từng file sửa hoặc tạo; hàm, lớp, endpoint cần thêm hoặc đổi, kèm chữ ký (tham số, kiểu trả về); hình dạng dữ liệu (trường, kiểu, ví dụ JSON); hành vi ở trường hợp lỗi và trường hợp biên. File không được sửa.
+- **Test cần viết:** liệt kê từng ca test (đầu vào, kết quả mong đợi), file test đặt ở đâu, dùng fixture nào có sẵn.
+- **Xong khi:** mục nghiệm thu nào phải đạt, lệnh kiểm tra phải pass, mục nào trong `tasks/todo.md` và `tasks/plan.md` cần đánh dấu.
+- **Phối hợp:** hợp đồng API đầy đủ (bạn viết sẵn, gửi cho cả `backend` và `ui`), ai chờ ai.
 - **Tài nguyên:** mọi link, tài liệu, ảnh người dùng gửi kèm, giữ nguyên văn (không rút gọn URL, không bỏ query, không diễn giải thành "link ở trên"). Bước con cần tài nguyên nào thì kèm đúng tài nguyên đó.
 
-Kế hoạch của bạn dừng ở mức làm gì, ở đâu, vì sao. Cách code (dùng skill nào, viết thế nào) là việc của thành viên.
+Task lớn thì chia thành nhiều brief nhỏ, mỗi brief một phần độc lập kiểm được. Thành viên hỏi lại vì brief thiếu thì bổ sung brief, đừng để họ tự đoán.
 
 ## Merge
 
