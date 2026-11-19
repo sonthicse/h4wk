@@ -13,16 +13,19 @@ import {
 } from '@/components/ui/dialog'
 import RefThumb from '@/components/entities/RefThumb'
 import { formatVnDateTime } from '@/lib/format'
-import { addRefImages, deleteRefImage, type Entity, type RefImage, type RefKind } from '@/mocks/entities'
+import type { Entity } from '@/api/entities'
+import { addRefImages, deleteRefImage, type RefImage, type RefKind } from '@/mocks/entities'
 
 // Một nhóm ảnh mẫu (khuôn mặt hoặc ảnh hay bị dùng lại) của một đối tượng: tải lên, xem lớn, xoá.
 export default function RefImageGroup({
   entity,
+  refs,
   kind,
   title,
   description,
 }: {
   entity: Entity
+  refs: RefImage[]
   kind: RefKind
   title: string
   description: string
@@ -32,15 +35,15 @@ export default function RefImageGroup({
   const [viewing, setViewing] = useState<RefImage | null>(null)
   const [deleting, setDeleting] = useState<RefImage | null>(null)
 
-  const images = entity.refs.filter((r) => r.kind === kind)
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ['entities', entity.caseId] })
+  const images = refs.filter((r) => r.entityId === entity.id && r.kind === kind)
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['refImages'] })
 
   const upload = useMutation({
-    mutationFn: (files: File[]) => addRefImages(entity.caseId, entity.id, kind, files),
+    mutationFn: (files: File[]) => addRefImages(entity.id, kind, files),
     onSuccess: refresh,
   })
   const remove = useMutation({
-    mutationFn: (ref: RefImage) => deleteRefImage(entity.caseId, entity.id, ref.id),
+    mutationFn: (ref: RefImage) => deleteRefImage(ref.id),
     onSuccess: async () => {
       await refresh()
       setDeleting(null)

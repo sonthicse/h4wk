@@ -30,5 +30,5 @@ export function timeRange(f: Finding) {
 }
 
 export function videoLink(f: Finding) {
-  return `/cases/${f.caseId}/videos/${f.videoId}?finding=${f.id}`
+  return `/videos/${f.videoId}?finding=${f.id}`
 }

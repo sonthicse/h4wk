@@ -7,7 +7,6 @@ export type StepStatus = 'pending' | 'running' | 'done' | 'failed'
 
 export type Job = {
   id: string
-  caseId: string
   input: string
   level: CollectLevel
   createdAt: string
@@ -32,14 +31,12 @@ type StoredJob = Omit<Job, 'status' | 'progress' | 'steps'> & { failAt?: number 
 const store: StoredJob[] = [
   {
     id: 'j_002',
-    caseId: 'c_demo',
     input: 'https://www.youtube.com/watch?v=aBcD1234xyz',
     level: 'full',
     createdAt: new Date(Date.now() - 60 * 60_000).toISOString(),
   },
   {
     id: 'j_001',
-    caseId: 'c_demo',
     input: 'https://www.youtube.com/watch?v=privateVid01',
     level: 'full',
     createdAt: new Date(Date.now() - 2 * 60 * 60_000).toISOString(),
@@ -83,14 +80,13 @@ function delay<T>(value: T): Promise<T> {
   return new Promise((r) => setTimeout(() => r(value), 150))
 }
 
-export function listJobs(caseId: string): Promise<Job[]> {
-  return delay(store.filter((j) => j.caseId === caseId).map(resolve))
+export function listJobs(): Promise<Job[]> {
+  return delay(store.map(resolve))
 }
 
-export function createJob(caseId: string, input: string, level: CollectLevel): Promise<Job> {
+export function createJob(input: string, level: CollectLevel): Promise<Job> {
   const job: StoredJob = {
     id: `j_${Date.now()}`,
-    caseId,
     input,
     level,
     createdAt: new Date().toISOString(),

@@ -43,7 +43,6 @@ export type VideoCapture = {
 
 export type VideoDetail = {
   id: string
-  caseId: string
   title: string
   channel: string
   publishedAt: string
@@ -148,14 +147,13 @@ const abcdKeyframes: Keyframe[] = [
 ]
 
 // Tạo nhanh một video tối thiểu cho các video còn lại.
-function minimal(v: Pick<VideoDetail, 'id' | 'caseId' | 'title' | 'channel' | 'publishedAt' | 'durationS' | 'viewCount' | 'likeCount' | 'commentCount'>, overrides: Partial<VideoDetail>): VideoDetail {
+function minimal(v: Pick<VideoDetail, 'id' | 'title' | 'channel' | 'publishedAt' | 'durationS' | 'viewCount' | 'likeCount' | 'commentCount'>, overrides: Partial<VideoDetail>): VideoDetail {
   return { ...v, transcripts: [], keyframes: [], comments: [], captures: [], ...overrides }
 }
 
 const store: VideoDetail[] = [
   {
     id: 'dQw4w9WgXcQ',
-    caseId: 'c_demo',
     title: 'Bình luận thời sự tối 17/11',
     channel: 'Kênh Thời Sự X',
     publishedAt: '2026-11-17T20:00:00+07:00',
@@ -173,7 +171,6 @@ const store: VideoDetail[] = [
   },
   {
     id: 'aBcD1234xyz',
-    caseId: 'c_demo',
     title: 'Phân tích báo cáo tài chính quý 3',
     channel: 'Góc Nhìn Kinh Tế',
     publishedAt: '2026-11-16T12:00:00+07:00',
@@ -192,7 +189,7 @@ const store: VideoDetail[] = [
     ],
   },
   minimal(
-    { id: 'qWeRtY98765', caseId: 'c_demo', title: 'SỰ THẬT về ông A mà không ai dám nói', channel: 'Tin Nóng 24h', publishedAt: '2026-11-18T07:30:00+07:00', durationS: 300, viewCount: 96400, likeCount: 2100, commentCount: 3 },
+    { id: 'qWeRtY98765', title: 'SỰ THẬT về ông A mà không ai dám nói', channel: 'Tin Nóng 24h', publishedAt: '2026-11-18T07:30:00+07:00', durationS: 300, viewCount: 96400, likeCount: 2100, commentCount: 3 },
     {
       transcripts: [{ kind: 'auto', lang: 'vi', segments: segs([
         [0, 40, 'chào mừng các bạn đến với kênh tin nóng hôm nay chúng ta nói về một nhân vật gây tranh cãi'],
@@ -208,14 +205,14 @@ const store: VideoDetail[] = [
     },
   ),
   minimal(
-    { id: 'zXcV5555aaa', caseId: 'c_demo', title: 'Review sản phẩm mới của Công ty B', channel: 'Tech Việt', publishedAt: '2026-11-15T09:00:00+07:00', durationS: 600, viewCount: 22300, likeCount: 780, commentCount: 0 },
+    { id: 'zXcV5555aaa', title: 'Review sản phẩm mới của Công ty B', channel: 'Tech Việt', publishedAt: '2026-11-15T09:00:00+07:00', durationS: 600, viewCount: 22300, likeCount: 780, commentCount: 0 },
     {
       transcripts: [{ kind: 'auto', lang: 'vi', segments: segs([[510, 520, 'pin dùng được khoảng sáu tiếng hơi kém so với quảng cáo']]) }],
       captures: [{ id: '20261115T103000', level: 'metadata', capturedAt: '2026-11-15T10:30:00+07:00', transcriptKinds: [], commentCount: 0, keyframeCount: 0 }],
     },
   ),
   minimal(
-    { id: 'zzZZ9876abc', caseId: 'c_trial', title: 'Livestream hỏi đáp', channel: 'Kênh Cá Nhân C', publishedAt: '2026-11-16T21:00:00+07:00', durationS: 900, viewCount: 3120, likeCount: 95, commentCount: 1 },
+    { id: 'zzZZ9876abc', title: 'Livestream hỏi đáp', channel: 'Kênh Cá Nhân C', publishedAt: '2026-11-16T21:00:00+07:00', durationS: 900, viewCount: 3120, likeCount: 95, commentCount: 1 },
     {
       comments: [{ id: 'c1', parentId: null, author: '@nguoixem02', text: 'Bà C là đồ dối trá', publishedAt: '2026-11-16T21:45:00+07:00', likeCount: 2, findingId: 'f_005' }],
       captures: [{ id: '20261116T224000', level: 'text', capturedAt: '2026-11-16T22:40:00+07:00', transcriptKinds: [], commentCount: 1, keyframeCount: 0 }],
@@ -223,8 +220,8 @@ const store: VideoDetail[] = [
   ),
 ]
 
-// Trả về null khi không có video (hoặc video thuộc case khác) để trang hiện "not found".
-export function getVideo(caseId: string, videoId: string): Promise<VideoDetail | null> {
-  const video = store.find((v) => v.id === videoId && v.caseId === caseId) ?? null
+// Trả về null khi không có video để trang hiện "not found".
+export function getVideo(videoId: string): Promise<VideoDetail | null> {
+  const video = store.find((v) => v.id === videoId) ?? null
   return new Promise((r) => setTimeout(() => r(video), 150))
 }

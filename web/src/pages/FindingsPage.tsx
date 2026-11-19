@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useParams } from 'react-router'
-import { getCase } from '@/api/cases'
+import { listEntities } from '@/api/entities'
 import { listFindings, type Finding } from '@/api/findings'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -121,18 +120,17 @@ function FindingSheet({
 }
 
 export default function FindingsPage() {
-  const { caseId } = useParams()
   const [filters, setFilters] = useState<Filters>(emptyFilters)
   const [selected, setSelected] = useState<Finding | null>(null)
 
-  const findings = useQuery({ queryKey: ['findings', caseId], queryFn: () => listFindings(caseId!) })
-  const caseFile = useQuery({ queryKey: ['case', caseId], queryFn: () => getCase(caseId!) })
-  // Nghi vấn chỉ ghi id đối tượng (e_01); tên lấy từ case.
-  const entityName = (id: string) => caseFile.data?.entities.find((e) => e.id === id)?.name ?? id
+  const findings = useQuery({ queryKey: ['findings'], queryFn: listFindings })
+  const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
+  // Nghi vấn chỉ ghi id đối tượng (e_01); tên lấy từ danh sách đối tượng.
+  const entityName = (id: string) => entities.data?.find((e) => e.id === id)?.name ?? id
 
-  const caseFindings = findings.data ?? []
+  const allFindings = findings.data ?? []
   const q = filters.q.trim().toLowerCase()
-  const rows = caseFindings
+  const rows = allFindings
     .filter((f) => filters.severity === 'all' || f.severity === filters.severity)
     .filter((f) => filters.category === 'all' || f.category === filters.category)
     .filter((f) => filters.source === 'all' || f.source_kind === filters.source)
@@ -145,7 +143,7 @@ export default function FindingsPage() {
     )
 
   const set = (key: keyof Filters) => (value: string) => setFilters((f) => ({ ...f, [key]: value }))
-  const count = (s: Severity) => caseFindings.filter((f) => f.severity === s).length
+  const count = (s: Severity) => allFindings.filter((f) => f.severity === s).length
   const isFiltered = JSON.stringify(filters) !== JSON.stringify(emptyFilters)
 
   return (
@@ -171,7 +169,7 @@ export default function FindingsPage() {
         <FilterSelect
           label="Categories"
           value={filters.category}
-          options={['insult', 'unsupported_accusation', 'fabrication', 'legitimate_criticism', 'neutral']}
+          options={['insult', 'unsupported_accusation', 'fabrication', 'incitement', 'state_secret', 'legitimate_criticism', 'neutral']}
           onChange={set('category')}
         />
         <FilterSelect
@@ -186,7 +184,7 @@ export default function FindingsPage() {
           </Button>
         )}
         <span className="ml-auto text-sm text-muted-foreground">
-          {rows.length} of {caseFindings.length}
+          {rows.length} of {allFindings.length}
         </span>
       </div>
 
@@ -254,7 +252,7 @@ export default function FindingsPage() {
           {findings.data && rows.length === 0 && (
             <TableRow>
               <TableCell colSpan={8} className="text-center text-muted-foreground">
-                {caseFindings.length === 0 ? 'No findings yet. Collect a video to analyze it.' : 'No findings match these filters.'}
+                {allFindings.length === 0 ? 'No findings yet. Collect a video to analyze it.' : 'No findings match these filters.'}
               </TableCell>
             </TableRow>
           )}

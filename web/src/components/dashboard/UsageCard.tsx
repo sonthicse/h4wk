@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import type { DashboardStats } from '@/mocks/dashboard'
 
@@ -17,13 +17,12 @@ function Meter({ label, note, used, limit, unit }: { label: string; note: string
   )
 }
 
-// Quota YouTube Data API và credit Supadata đã dùng (SPEC 10.3); nguồn thu dùng chung cho mọi case.
+// Quota YouTube Data API và credit Supadata đã dùng (SPEC 10.3).
 export default function UsageCard({ youtubeQuota, supadataCredits }: Pick<DashboardStats, 'youtubeQuota' | 'supadataCredits'>) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Source usage</CardTitle>
-        <CardDescription>Shared by all cases</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Meter

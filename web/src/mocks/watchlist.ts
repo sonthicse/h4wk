@@ -12,7 +12,6 @@ export type LatestVideo = { videoId: string; title: string; publishedAt: string 
 
 export type WatchItem = {
   id: string
-  caseId: string
   channelId: string
   channelTitle: string
   handle: string
@@ -31,7 +30,6 @@ type StoredItem = WatchItem & { pending: LatestVideo[] }
 const store: StoredItem[] = [
   {
     id: 'w_012',
-    caseId: 'c_demo',
     channelId: 'UCZYKmEA2iQOSbyKc6xj5Vfw',
     channelTitle: 'HTV Tin Tức',
     handle: '@HTVTinTuc',
@@ -48,7 +46,6 @@ const store: StoredItem[] = [
   },
   {
     id: 'w_013',
-    caseId: 'c_demo',
     channelId: 'UCabsTV34JwALXKGMqHpvUiA',
     channelTitle: 'VTV24',
     handle: '@vtv24',
@@ -64,7 +61,6 @@ const store: StoredItem[] = [
   },
   {
     id: 'w_014',
-    caseId: 'c_demo',
     channelId: 'UC4tN0ng24hTinNong00abcd',
     channelTitle: 'Tin Nóng 24h',
     handle: '@tinnong24h',
@@ -78,7 +74,6 @@ const store: StoredItem[] = [
   },
   {
     id: 'w_015',
-    caseId: 'c_demo',
     channelId: 'UCkTsX0ThoiSuX000000wxyz',
     channelTitle: 'Kênh Thời Sự X',
     handle: '@kenhthoisux',
@@ -92,7 +87,6 @@ const store: StoredItem[] = [
   },
   {
     id: 'w_016',
-    caseId: 'c_demo',
     channelId: 'UC47WI-kZXFf0H_f7pvaNCEQ',
     channelTitle: 'Báo Tuổi Trẻ',
     handle: '@baotuoitre',
@@ -121,8 +115,8 @@ function find(id: string) {
   return item
 }
 
-export function listWatchItems(caseId: string): Promise<WatchItem[]> {
-  return delay(store.filter((w) => w.caseId === caseId).map(toItem))
+export function listWatchItems(): Promise<WatchItem[]> {
+  return delay(store.map(toItem))
 }
 
 // Nhận link kênh (youtube.com/@handle, youtube.com/channel/UC…) hoặc `@handle`.
@@ -136,11 +130,11 @@ export function parseChannelInput(input: string): { handle: string; channelId: s
   return null
 }
 
-export function addWatchItem(caseId: string, input: string, level: CollectLevel): Promise<WatchItem> {
+export function addWatchItem(input: string, level: CollectLevel): Promise<WatchItem> {
   const parsed = parseChannelInput(input)
   if (!parsed) return Promise.reject(new Error('Enter a channel link or an @handle.'))
   const exists = store.some(
-    (w) => w.caseId === caseId && (w.channelId === parsed.channelId || (parsed.handle && w.handle.toLowerCase() === parsed.handle.toLowerCase())),
+    (w) => w.channelId === parsed.channelId || (parsed.handle && w.handle.toLowerCase() === parsed.handle.toLowerCase()),
   )
   if (exists) return Promise.reject(new Error('This channel is already in the watchlist.'))
 
@@ -148,7 +142,6 @@ export function addWatchItem(caseId: string, input: string, level: CollectLevel)
   const channelId = parsed.channelId ?? `UCmock${Date.now()}`
   const item: StoredItem = {
     id: `w_${Date.now()}`,
-    caseId,
     channelId,
     // Backend thật lấy tên kênh từ bản thu hồ sơ kênh; ở đây tạm dùng handle hoặc channel ID.
     channelTitle: parsed.handle ? parsed.handle.slice(1) : channelId,

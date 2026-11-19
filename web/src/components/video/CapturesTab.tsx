@@ -5,7 +5,7 @@ import { formatVnDateTime } from '@/lib/format'
 import type { VideoCapture } from '@/mocks/videos'
 
 // Lịch sử các lần thu của video, mới nhất ở trên; bấm mã để mở trang Capture.
-export default function CapturesTab({ captures, caseId, videoId }: { captures: VideoCapture[]; caseId: string; videoId: string }) {
+export default function CapturesTab({ captures, videoId }: { captures: VideoCapture[]; videoId: string }) {
   if (captures.length === 0) return <p className="py-4 text-sm text-muted-foreground">No captures yet.</p>
 
   return (
@@ -24,7 +24,7 @@ export default function CapturesTab({ captures, caseId, videoId }: { captures: V
         {captures.map((c, i) => (
           <TableRow key={c.id}>
             <TableCell className="font-mono">
-              <Link to={`/cases/${caseId}/videos/${videoId}/captures/${c.id}`} className="hover:underline">
+              <Link to={`/videos/${videoId}/captures/${c.id}`} className="hover:underline">
                 {c.id}
               </Link>
               {i === 0 && <Badge variant="secondary" className="ml-2">latest</Badge>}

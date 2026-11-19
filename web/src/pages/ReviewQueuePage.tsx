@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -34,7 +34,6 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 }
 
 export default function ReviewQueuePage() {
-  const { caseId } = useParams()
   const [decisions, setDecisions] = useState<Record<string, Decision[]>>({})
   const [view, setView] = useState<View>('pending')
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -44,7 +43,6 @@ export default function ReviewQueuePage() {
 
   const statusOf = (f: Finding): ReviewStatus => decisions[f.id]?.at(-1)?.status ?? f.status
   const caseFindings = findings
-    .filter((f) => f.caseId === caseId)
     .sort((a, b) => severityRank[a.severity] - severityRank[b.severity] || a.videoTitle.localeCompare(b.videoTitle) || a.start - b.start)
   const queue = caseFindings.filter((f) => view === 'all' || statusOf(f) === view)
   const selected = queue.find((f) => f.id === selectedId) ?? queue[0] ?? null

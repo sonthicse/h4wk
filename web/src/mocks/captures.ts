@@ -53,7 +53,6 @@ export type Manifest = {
 
 export type Capture = {
   id: string // YYYYMMDDTHHMMSS, cũng là tên thư mục bản thu
-  caseId: string
   videoId: string
   videoTitle: string
   manifest: Manifest
@@ -91,7 +90,6 @@ const captures: Capture[] = [
   // Thu thủ công, mọi nguồn chạy tốt. Verify: tất cả OK.
   {
     id: '20261117T213000',
-    caseId: 'c_demo',
     videoId: 'dQw4w9WgXcQ',
     videoTitle: '',
     manifest: {
@@ -127,7 +125,6 @@ const captures: Capture[] = [
   // Verify: 1 FAIL, 1 missing, 1 unexpected (xem verifyProblems bên dưới).
   {
     id: '20261118T091200',
-    caseId: 'c_demo',
     videoId: 'dQw4w9WgXcQ',
     videoTitle: '',
     manifest: {
@@ -186,7 +183,6 @@ const captures: Capture[] = [
   },
   {
     id: '20261116T150500',
-    caseId: 'c_demo',
     videoId: 'aBcD1234xyz',
     videoTitle: '',
     manifest: {
@@ -220,7 +216,6 @@ const captures: Capture[] = [
   // Thu tự động từ watchlist; yt-dlp đang bị tắt trong Settings nên ghi `disabled`.
   {
     id: '20261118T080000',
-    caseId: 'c_demo',
     videoId: 'qWeRtY98765',
     videoTitle: '',
     manifest: {
@@ -256,7 +251,6 @@ const captures: Capture[] = [
   // Mức thu `text`: quota YouTube API hết khi lấy comment nên chuyển sang yt-dlp.
   {
     id: '20261115T103000',
-    caseId: 'c_demo',
     videoId: 'zXcV5555aaa',
     videoTitle: '',
     manifest: {
@@ -293,10 +287,9 @@ const captures: Capture[] = [
       previousCapture: null,
     },
   },
-  // Mức thu `metadata` của case c_trial.
+  // Mức thu `metadata`.
   {
     id: '20261116T224000',
-    caseId: 'c_trial',
     videoId: 'zzZZ9876abc',
     videoTitle: '',
     manifest: {
@@ -341,24 +334,24 @@ function delay<T>(value: T, ms = 150): Promise<T> {
   return new Promise((r) => setTimeout(() => r(value), ms))
 }
 
-function find(caseId: string, videoId: string, captureId: string) {
-  return captures.find((c) => c.caseId === caseId && c.videoId === videoId && c.id === captureId) ?? null
+function find(videoId: string, captureId: string) {
+  return captures.find((c) => c.videoId === videoId && c.id === captureId) ?? null
 }
 
 // Danh sách bản thu của một video, mới nhất trước (dùng cho tab Captures của Video detail).
-export function listCaptures(caseId: string, videoId: string): Promise<Capture[]> {
+export function listCaptures(videoId: string): Promise<Capture[]> {
   return delay(
-    captures.filter((c) => c.caseId === caseId && c.videoId === videoId).sort((a, b) => b.id.localeCompare(a.id)),
+    captures.filter((c) => c.videoId === videoId).sort((a, b) => b.id.localeCompare(a.id)),
   )
 }
 
-export function getCapture(caseId: string, videoId: string, captureId: string): Promise<Capture | null> {
-  return delay(find(caseId, videoId, captureId))
+export function getCapture(videoId: string, captureId: string): Promise<Capture | null> {
+  return delay(find(videoId, captureId))
 }
 
 // Giả lập `verify()`: tính lại SHA-256 từng file rồi so với manifest (SPEC 10.2).
-export function verifyCapture(caseId: string, videoId: string, captureId: string): Promise<VerifyResult> {
-  const capture = find(caseId, videoId, captureId)
+export function verifyCapture(videoId: string, captureId: string): Promise<VerifyResult> {
+  const capture = find(videoId, captureId)
   if (!capture) return Promise.reject(new Error('Capture not found'))
 
   const problems = verifyProblems[captureId]

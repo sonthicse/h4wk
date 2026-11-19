@@ -28,7 +28,7 @@ const kindIcon: Record<FeedEvent['kind'], typeof GavelIcon> = {
   review: GavelIcon,
 }
 
-function EventItem({ event, caseId }: { event: FeedEvent; caseId: string }) {
+function EventItem({ event }: { event: FeedEvent }) {
   const Icon = kindIcon[event.kind]
   return (
     <li className="flex gap-3 py-3">
@@ -42,7 +42,7 @@ function EventItem({ event, caseId }: { event: FeedEvent; caseId: string }) {
         </div>
         {event.videoId && knownVideos.has(event.videoId) && (
           <Link
-            to={`/cases/${caseId}/videos/${event.videoId}`}
+            to={`/videos/${event.videoId}`}
             className="block truncate text-sm text-muted-foreground hover:text-foreground hover:underline"
           >
             {event.videoTitle}
@@ -63,11 +63,11 @@ function EventItem({ event, caseId }: { event: FeedEvent; caseId: string }) {
   )
 }
 
-// Dòng sự kiện của case (T31): poll mỗi 5 giây.
-export default function EventFeed({ caseId }: { caseId: string }) {
+// Dòng sự kiện (T31): poll mỗi 5 giây.
+export default function EventFeed() {
   const events = useQuery({
-    queryKey: ['events', caseId],
-    queryFn: () => listEvents(caseId),
+    queryKey: ['events'],
+    queryFn: listEvents,
     refetchInterval: POLL_MS,
   })
 
@@ -87,7 +87,7 @@ export default function EventFeed({ caseId }: { caseId: string }) {
           <div className="h-full overflow-y-auto pr-3">
             <ol aria-live="polite" className="divide-y">
               {events.data.map((e) => (
-                <EventItem key={e.id} event={e} caseId={caseId} />
+                <EventItem key={e.id} event={e} />
               ))}
             </ol>
           </div>

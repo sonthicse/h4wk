@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { InfoIcon } from 'lucide-react'
-import { useParams } from 'react-router'
 import AddChannelCard from '@/components/watchlist/AddChannelCard'
 import WatchlistRow from '@/components/watchlist/WatchlistRow'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -8,10 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { CHECK_INTERVAL_MIN, listWatchItems } from '@/mocks/watchlist'
 
-// Trang Watchlist (T31, SPEC 10.9): các kênh của case được kiểm tra video mới bằng RSS.
+// Trang Watchlist (T31, SPEC 10.9): các kênh được kiểm tra video mới bằng RSS.
 export default function WatchlistPage() {
-  const { caseId = '' } = useParams()
-  const items = useQuery({ queryKey: ['watchlist', caseId], queryFn: () => listWatchItems(caseId) })
+  const items = useQuery({ queryKey: ['watchlist'], queryFn: listWatchItems })
 
   const all = items.data ?? []
   const enabled = all.filter((w) => w.enabled).length
@@ -26,7 +24,7 @@ export default function WatchlistPage() {
         </div>
       </div>
 
-      <AddChannelCard caseId={caseId} />
+      <AddChannelCard />
 
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Channels</h2>

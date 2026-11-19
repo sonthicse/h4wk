@@ -43,7 +43,7 @@ function downloadDemo(path: string, sha256: string) {
 
 export default function FilesTable({ capture }: { capture: Capture }) {
   const verify = useMutation({
-    mutationFn: () => verifyCapture(capture.caseId, capture.videoId, capture.id),
+    mutationFn: () => verifyCapture(capture.videoId, capture.id),
   })
 
   // Danh sách hiển thị: theo manifest; sau khi verify thì theo kết quả (có thêm file `unexpected`).

@@ -7,12 +7,12 @@ import { Badge } from '@/components/ui/badge'
 import { getCapture } from '@/mocks/captures'
 
 export default function CapturePage() {
-  const { caseId = '', videoId = '', captureId = '' } = useParams()
+  const { videoId = '', captureId = '' } = useParams()
   const capture = useQuery({
-    queryKey: ['capture', caseId, videoId, captureId],
-    queryFn: () => getCapture(caseId, videoId, captureId),
+    queryKey: ['capture', videoId, captureId],
+    queryFn: () => getCapture(videoId, captureId),
   })
-  const videoUrl = `/cases/${caseId}/videos/${videoId}`
+  const videoUrl = `/videos/${videoId}`
 
   if (capture.isLoading) return <p className="text-sm text-muted-foreground">Loading capture…</p>
   if (capture.error) return <p className="text-sm text-destructive">Could not load capture.</p>
@@ -23,9 +23,9 @@ export default function CapturePage() {
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">Capture not found</h1>
         <p className="text-sm text-muted-foreground">
-          There is no capture <code>{captureId}</code> for video <code>{videoId}</code> in this case.
+          There is no capture <code>{captureId}</code> for video <code>{videoId}</code>.
         </p>
-        <Link className="text-sm underline" to={`/cases/${caseId}/videos/${videoId}`}>
+        <Link className="text-sm underline" to={videoUrl}>
           Back to video
         </Link>
       </div>

@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useParams } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -56,24 +55,23 @@ function Steps({ job }: { job: Job }) {
 }
 
 export default function CollectPage() {
-  const { caseId = '' } = useParams()
   const queryClient = useQueryClient()
   const [input, setInput] = useState('')
   const [level, setLevel] = useState<CollectLevel>('full')
   const [force, setForce] = useState(false)
 
   const jobs = useQuery({
-    queryKey: ['jobs', caseId],
-    queryFn: () => listJobs(caseId),
+    queryKey: ['jobs'],
+    queryFn: listJobs,
     refetchInterval: 2000,
   })
 
   const create = useMutation({
-    mutationFn: () => collect(caseId, input.trim(), level, force),
+    mutationFn: () => collect(input.trim(), level, force),
     onSuccess: () => {
       setInput('')
       setForce(false)
-      queryClient.invalidateQueries({ queryKey: ['jobs', caseId] })
+      queryClient.invalidateQueries({ queryKey: ['jobs'] })
     },
   })
 

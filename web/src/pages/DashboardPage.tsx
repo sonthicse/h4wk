@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router'
 import ActivityChart from '@/components/dashboard/ActivityChart'
 import EventFeed from '@/components/dashboard/EventFeed'
 import UsageCard from '@/components/dashboard/UsageCard'
@@ -56,9 +55,8 @@ function Breakdown<K extends string>({
 }
 
 export default function DashboardPage() {
-  const { caseId = '' } = useParams()
   // Số liệu cũng làm mới mỗi 5 giây để khớp với dòng sự kiện (video watchlist xử lý xong thì số tăng).
-  const stats = useQuery({ queryKey: ['dashboard', caseId], queryFn: () => getDashboard(caseId), refetchInterval: 5000 })
+  const stats = useQuery({ queryKey: ['dashboard'], queryFn: getDashboard, refetchInterval: 5000 })
 
   if (stats.isPending) {
     return (
@@ -79,20 +77,6 @@ export default function DashboardPage() {
     )
   }
 
-  if (!stats.data) {
-    return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <Alert>
-          <AlertTitle>Case not found</AlertTitle>
-          <AlertDescription>
-            No case has the id “{caseId}”. <Link to="/cases" className="underline">Back to cases</Link>
-          </AlertDescription>
-        </Alert>
-      </div>
-    )
-  }
-
   const d = stats.data
   const totalFindings = severities.reduce((sum, s) => sum + d.findingsBySeverity[s], 0)
 
@@ -101,7 +85,6 @@ export default function DashboardPage() {
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
         <div className="flex gap-2 text-sm">
-          <Badge variant="outline">{d.caseName}</Badge>
           <Badge variant="outline">{totalFindings} {totalFindings === 1 ? 'finding' : 'findings'}</Badge>
         </div>
       </div>
@@ -121,7 +104,7 @@ export default function DashboardPage() {
           <ActivityChart data={d.activity} />
           <UsageCard youtubeQuota={d.youtubeQuota} supadataCredits={d.supadataCredits} />
         </div>
-        <EventFeed caseId={caseId} />
+        <EventFeed />
       </div>
     </div>
   )

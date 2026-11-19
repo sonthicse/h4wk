@@ -9,18 +9,18 @@ import type { CollectLevel } from '@/mocks/jobs'
 import { addWatchItem, CHECK_INTERVAL_MIN, INITIAL_VIDEOS, levels } from '@/mocks/watchlist'
 
 // Form thêm kênh vào watchlist (SPEC 10.9). Mức thu mặc định là `full` (SPEC 10.7).
-export default function AddChannelCard({ caseId }: { caseId: string }) {
+export default function AddChannelCard() {
   const queryClient = useQueryClient()
   const [input, setInput] = useState('')
   const [level, setLevel] = useState<CollectLevel>('full')
   const [added, setAdded] = useState<string | null>(null)
 
   const add = useMutation({
-    mutationFn: () => addWatchItem(caseId, input, level),
+    mutationFn: () => addWatchItem(input, level),
     onSuccess: (item) => {
       setAdded(`${item.channelTitle} added. Its ${INITIAL_VIDEOS} latest videos are being collected at ${item.level} level.`)
       setInput('')
-      queryClient.invalidateQueries({ queryKey: ['watchlist', caseId] })
+      queryClient.invalidateQueries({ queryKey: ['watchlist'] })
     },
   })
 

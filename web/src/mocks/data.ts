@@ -1,25 +1,22 @@
 // Dữ liệu giả để dựng giao diện trước khi có API. Tên trường bám theo SPEC 10.6;
 // sẽ thay bằng kiểu sinh từ OpenAPI (`npm run gen:api`) khi T4 xong.
 
-export type Case = {
-  id: string
-  name: string
-  entities: string[]
-  videoCount: number
-  openFindings: number
-  updatedAt: string
-}
-
 export type Severity = 'low' | 'medium' | 'high'
 export type ReviewStatus = 'pending' | 'confirmed' | 'rejected' | 'needs_info'
 export type SourceKind = 'speech' | 'ocr' | 'visual' | 'title' | 'description' | 'thumbnail' | 'comment'
-export type Category = 'insult' | 'unsupported_accusation' | 'fabrication' | 'legitimate_criticism' | 'neutral'
+export type Category =
+  | 'insult'
+  | 'unsupported_accusation'
+  | 'fabrication'
+  | 'incitement'
+  | 'state_secret'
+  | 'legitimate_criticism'
+  | 'neutral'
 export type Confidence = 'unverified' | 'likely' | 'highly_likely'
 export type TriggerVia = 'speech' | 'ocr' | 'title' | 'description' | 'comment' | 'thumbnail' | 'face' | 'ref_image'
 
 export type Finding = {
   id: string
-  caseId: string
   videoId: string
   videoTitle: string
   channel: string
@@ -38,32 +35,12 @@ export type Finding = {
   status: ReviewStatus
 }
 
-export const cases: Case[] = [
-  {
-    id: 'c_demo',
-    name: 'Demo case',
-    entities: ['Nguyễn Văn A', 'Công ty B'],
-    videoCount: 14,
-    openFindings: 9,
-    updatedAt: '2026-11-18T09:12:00Z',
-  },
-  {
-    id: 'c_trial',
-    name: 'Trial run',
-    entities: ['Trần Thị C'],
-    videoCount: 3,
-    openFindings: 1,
-    updatedAt: '2026-11-16T15:40:00Z',
-  },
-]
-
 const llm = { provider: 'anthropic', model: 'claude-sonnet-5-5' }
 const vlm = { provider: 'gemini', model: 'gemini-vision' }
 
 export const findings: Finding[] = [
   {
     id: 'f_001',
-    caseId: 'c_demo',
     videoId: 'dQw4w9WgXcQ',
     videoTitle: 'Bình luận thời sự tối 17/11',
     channel: 'Kênh Thời Sự X',
@@ -83,7 +60,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_002',
-    caseId: 'c_demo',
     videoId: 'dQw4w9WgXcQ',
     videoTitle: 'Bình luận thời sự tối 17/11',
     channel: 'Kênh Thời Sự X',
@@ -103,7 +79,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_003',
-    caseId: 'c_demo',
     videoId: 'aBcD1234xyz',
     videoTitle: 'Phân tích báo cáo tài chính quý 3',
     channel: 'Góc Nhìn Kinh Tế',
@@ -126,7 +101,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_004',
-    caseId: 'c_demo',
     videoId: 'aBcD1234xyz',
     videoTitle: 'Phân tích báo cáo tài chính quý 3',
     channel: 'Góc Nhìn Kinh Tế',
@@ -146,7 +120,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_006',
-    caseId: 'c_demo',
     videoId: 'qWeRtY98765',
     videoTitle: 'SỰ THẬT về ông A mà không ai dám nói',
     channel: 'Tin Nóng 24h',
@@ -166,7 +139,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_007',
-    caseId: 'c_demo',
     videoId: 'qWeRtY98765',
     videoTitle: 'SỰ THẬT về ông A mà không ai dám nói',
     channel: 'Tin Nóng 24h',
@@ -189,7 +161,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_008',
-    caseId: 'c_demo',
     videoId: 'qWeRtY98765',
     videoTitle: 'SỰ THẬT về ông A mà không ai dám nói',
     channel: 'Tin Nóng 24h',
@@ -209,7 +180,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_009',
-    caseId: 'c_demo',
     videoId: 'qWeRtY98765',
     videoTitle: 'SỰ THẬT về ông A mà không ai dám nói',
     channel: 'Tin Nóng 24h',
@@ -229,7 +199,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_010',
-    caseId: 'c_demo',
     videoId: 'zXcV5555aaa',
     videoTitle: 'Review sản phẩm mới của Công ty B',
     channel: 'Tech Việt',
@@ -249,7 +218,6 @@ export const findings: Finding[] = [
   },
   {
     id: 'f_011',
-    caseId: 'c_demo',
     videoId: 'zXcV5555aaa',
     videoTitle: 'Review sản phẩm mới của Công ty B',
     channel: 'Tech Việt',
@@ -268,8 +236,26 @@ export const findings: Finding[] = [
     status: 'pending',
   },
   {
+    id: 'f_012',
+    videoId: 'qWeRtY98765',
+    videoTitle: 'SỰ THẬT về ông A mà không ai dám nói',
+    channel: 'Tin Nóng 24h',
+    sourceKind: 'speech',
+    start: 262.0,
+    end: 271.5,
+    quote: 'Mọi người hãy kéo đến nhà ông A mà đòi lại công bằng.',
+    entity: 'Nguyễn Văn A',
+    category: 'incitement',
+    severity: 'high',
+    confidence: 'likely',
+    analyzer: 'llm',
+    model: llm,
+    triggers: [{ via: 'speech', score: 0.87 }],
+    reason: 'Kêu gọi người xem tụ tập tới nhà đối tượng, có nguy cơ dẫn tới bạo lực.',
+    status: 'pending',
+  },
+  {
     id: 'f_005',
-    caseId: 'c_trial',
     videoId: 'zzZZ9876abc',
     videoTitle: 'Livestream hỏi đáp',
     channel: 'Kênh Cá Nhân C',

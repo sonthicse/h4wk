@@ -30,7 +30,7 @@ function checkResultText(n: number) {
 export default function WatchlistRow({ item }: { item: WatchItem }) {
   const queryClient = useQueryClient()
   const [confirming, setConfirming] = useState(false)
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ['watchlist', item.caseId] })
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['watchlist'] })
 
   const update = useMutation({
     mutationFn: (patch: Partial<Pick<WatchItem, 'enabled' | 'level'>>) => updateWatchItem(item.id, patch),
@@ -80,7 +80,7 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
           <>
             {knownVideo ? (
               <Link
-                to={`/cases/${item.caseId}/videos/${item.latestVideo.videoId}`}
+                to={`/videos/${item.latestVideo.videoId}`}
                 className="block truncate hover:underline"
                 title={item.latestVideo.title}
               >
@@ -127,8 +127,8 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
           <DialogHeader>
             <DialogTitle>Remove {item.channelTitle}?</DialogTitle>
             <DialogDescription>
-              The channel will no longer be checked for new videos. Videos and captures already collected stay in the
-              case.
+              The channel will no longer be checked for new videos. Videos and captures already collected are
+              kept.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

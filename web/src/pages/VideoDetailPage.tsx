@@ -29,7 +29,7 @@ function VideoView({ video, findings, finding, t }: { video: VideoDetail; findin
   const player = usePlayer(video.durationS, Math.min(Math.max(startAt ?? 0, 0), video.durationS), hasTarget)
   const [tab, setTab] = useState<Tab>('comments')
 
-  const ownHref = `/cases/${video.caseId}/videos/${video.id}`
+  const ownHref = `/videos/${video.id}`
   const findingHref = (id: string) => `${ownHref}?finding=${id}`
 
   // Bấm một nghi vấn: đổi ?finding=, trang dựng lại trình phát (xem key bên dưới) và nhảy tới đúng chỗ.
@@ -74,7 +74,7 @@ function VideoView({ video, findings, finding, t }: { video: VideoDetail; findin
               <CommentsTab comments={video.comments} highlightId={finding?.id ?? null} findingHref={findingHref} />
             </TabsContent>
             <TabsContent value="captures">
-              <CapturesTab captures={video.captures} caseId={video.caseId} videoId={video.id} />
+              <CapturesTab captures={video.captures} videoId={video.id} />
             </TabsContent>
           </Tabs>
         </div>
@@ -87,9 +87,9 @@ function VideoView({ video, findings, finding, t }: { video: VideoDetail; findin
 }
 
 export default function VideoDetailPage() {
-  const { caseId = '', videoId = '' } = useParams()
+  const { videoId = '' } = useParams()
   const [params] = useSearchParams()
-  const video = useQuery({ queryKey: ['video', caseId, videoId], queryFn: () => getVideo(caseId, videoId) })
+  const video = useQuery({ queryKey: ['video', videoId], queryFn: () => getVideo(videoId) })
 
   if (video.isPending) return <Skeleton className="h-96 w-full" />
   if (video.error) return <p className="text-sm text-destructive">Could not load this video.</p>
@@ -98,14 +98,14 @@ export default function VideoDetailPage() {
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold">Video not found</h1>
         <p className="text-sm text-muted-foreground">
-          No video <span className="font-mono">{videoId}</span> in this case.{' '}
-          <Link to={`/cases/${caseId}/findings`} className="underline">Back to findings</Link>
+          No video <span className="font-mono">{videoId}</span>.{' '}
+          <Link to="/findings" className="underline">Back to findings</Link>
         </p>
       </div>
     )
   }
 
-  const findings = allFindings.filter((f) => f.caseId === caseId && f.videoId === videoId)
+  const findings = allFindings.filter((f) => f.videoId === videoId)
   const finding = findings.find((f) => f.id === params.get('finding')) ?? null
   const tParam = Number(params.get('t'))
   const t = params.get('t') !== null && Number.isFinite(tParam) ? tParam : null
