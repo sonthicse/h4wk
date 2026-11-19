@@ -118,13 +118,15 @@ export default function DashboardPage() {
 
   const d = stats.data
 
-  // Bố cục kiểu bảng điều khiển: cột trái (video nổi bật) đứng yên, cột phải gồm các ô tự cuộn.
+  // Bố cục kiểu bảng điều khiển: cột trái (video nổi bật + activity) đứng yên, cột phải gồm các ô tự cuộn.
+  // Cột trái rộng theo bề ngang cửa sổ (45vw) nên mở/đóng sidebar không làm hai thẻ đổi kích thước.
   // Chiều cao = màn hình trừ thanh trên (3rem) và lề của <main> (2 × 1.5rem).
   return (
     <div className="flex h-[calc(100svh-6rem)] flex-col gap-4">
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,11fr)_minmax(0,9fr)] gap-4">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,45vw)_minmax(0,1fr)] gap-4">
         <div className="-m-1 min-h-0 space-y-4 overflow-y-auto p-1">
           <FeaturedVideoCard topVideoId={d.top_video?.id ?? null} />
+          <ActivityChart data={d.activity} />
         </div>
         <div className="-m-1 min-h-0 overflow-y-auto p-1 pr-2">
           <div className="grid grid-cols-2 gap-4">
@@ -137,9 +139,6 @@ export default function DashboardPage() {
             <Breakdown title="Review" to="/review" centerLabel="findings" keys={statuses} counts={d.findings_by_status} variant={statusVariant} />
             <div className="col-span-2">
               <EventFeed />
-            </div>
-            <div className="col-span-2">
-              <ActivityChart data={d.activity} />
             </div>
             <div className="col-span-2">
               <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} />
