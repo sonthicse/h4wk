@@ -11,9 +11,16 @@ export default function Donut({ slices, centerLabel }: { slices: DonutSlice[]; c
 
   return (
     <div className="relative size-32 shrink-0">
-      <ChartContainer config={config} className="aspect-square size-32">
+      <ChartContainer config={config} className="relative z-10 aspect-square size-32">
         <PieChart>
-          {total > 0 && <ChartTooltip content={<ChartTooltipContent nameKey="key" hideLabel />} />}
+          {/* Tooltip hiện ngay tại chỗ (không trượt theo chuột) và nằm trên số ở giữa vòng tròn. */}
+          {total > 0 && (
+            <ChartTooltip
+              isAnimationActive={false}
+              wrapperStyle={{ zIndex: 20 }}
+              content={<ChartTooltipContent nameKey="key" hideLabel />}
+            />
+          )}
           <Pie
             data={data}
             dataKey="value"
@@ -30,7 +37,7 @@ export default function Donut({ slices, centerLabel }: { slices: DonutSlice[]; c
           </Pie>
         </PieChart>
       </ChartContainer>
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+      <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center">
         <span className="text-2xl font-semibold tabular-nums">{total}</span>
         <span className="text-[10px] tracking-wide text-muted-foreground uppercase">{centerLabel}</span>
       </div>
