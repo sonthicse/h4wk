@@ -45,6 +45,7 @@ def test_list_and_detail(client: TestClient, sample) -> None:
     cap = detail["captures"][0]
     assert cap["id"] == CAP and cap["level"] == "full"
     assert cap["collected_at"].endswith("+07:00")
+    assert cap["has_media"] and cap["has_timeline"]
 
 
 def test_timeline_transcripts_comments(client: TestClient, sample) -> None:
@@ -101,3 +102,22 @@ def test_verify_reports_changed_byte(client: TestClient, sample, data_dir: Path)
     assert bad[0]["status"] == "FAIL" and bad[0]["actual_sha256"] != bad[0]["expected_sha256"]
     log = (data_dir / "log" / "audit.jsonl").read_text(encoding="utf-8").splitlines()
     assert json.loads(log[-1])["action"] == "capture.verify"
+
+
+def test_falls_back_to_latest_capture_with_data(client: TestClient, sample, data_dir: Path) -> None:
+    """Bản thu metadata mới hơn không có video, timeline, comment: API rơi về bản full cũ."""
+    d = data_dir / "videos" / VID / "captures"
+    newer = d / "20261119T090000"
+    shutil.copytree(d / CAP, newer)
+    newer.chmod(0o755)
+    (newer / "normalized.json").chmod(0o644)
+    raw = json.loads((newer / "normalized.json").read_text(encoding="utf-8"))
+    raw.update(media=[], transcripts=[], comments=[])
+    raw["provenance"].pop("comments", None)
+    (newer / "normalized.json").write_text(json.dumps(raw), encoding="utf-8")
+    caps = client.get(f"/api/videos/{VID}").json()["captures"]
+    assert [c["has_media"] for c in caps] == [True, False]
+    assert client.get(f"/api/videos/{VID}/media").status_code == 200
+    assert client.get(f"/api/videos/{VID}/timeline").json()["capture"] == CAP
+    assert client.get(f"/api/videos/{VID}/transcripts").json()
+    assert client.get(f"/api/videos/{VID}/media?capture=20261119T090000").status_code == 404

@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ValidationError
 
-from h4wk.collectors.models import Channel, Comment, Normalized, Transcript, Video
+from h4wk.collectors.models import Cap, Channel, Comment, Normalized, Transcript, Video
 from h4wk.core.config import data_dir
 from h4wk.core.types import VnDatetime
 from h4wk.evidence.models import Manifest
@@ -47,6 +47,8 @@ class CaptureSummary(BaseModel):
     transcript_kinds: list[str]
     comment_count: int
     keyframe_count: int
+    has_media: bool
+    has_timeline: bool
 
 
 class VideoDetail(BaseModel):
@@ -169,18 +171,35 @@ def get_video(video_id: str) -> VideoDetail:
                 transcript_kinds=kinds,
                 comment_count=len(n.comments) if n else 0,
                 keyframe_count=len(frames),
+                has_media=_media_path(d, cap) is not None,
+                has_timeline=(d / "derived" / cap / "timeline.json").is_file(),
             )
         )
     assert latest.video is not None
     return VideoDetail(video=latest.video, channel=latest.channel, captures=captures)
 
 
+def _candidates(d: Path, capture: str | None) -> list[str]:
+    """Bản thu được chỉ định, hoặc mọi bản thu từ mới tới cũ để rơi về bản có dữ liệu."""
+    return [_capture(d, capture)] if capture else list(reversed(_captures(d)))
+
+
+def _media_path(d: Path, cap: str) -> Path | None:
+    proxy = d / "derived" / cap / "proxy_480p.mp4"
+    if proxy.is_file():
+        return proxy
+    n = _normalized(d, cap)
+    for m in n.media if n else []:
+        if m.kind == "video" and (d / "captures" / cap / m.file).is_file():
+            return d / "captures" / cap / m.file
+    return None
+
+
 @router.get("/{video_id}/timeline")
 def get_timeline(video_id: str, capture: str | None = None) -> Timeline:
     """Timeline (C3) của bản thu chỉ định, mặc định là bản thu mới nhất đã có timeline."""
     d = _video_dir(video_id)
-    caps = [_capture(d, capture)] if capture else list(reversed(_captures(d)))
-    for cap in caps:
+    for cap in _candidates(d, capture):
         path = d / "derived" / cap / "timeline.json"
         if path.is_file():
             return Timeline.model_validate_json(path.read_text(encoding="utf-8"))
@@ -189,40 +208,44 @@ def get_timeline(video_id: str, capture: str | None = None) -> Timeline:
 
 @router.get("/{video_id}/transcripts")
 def get_transcripts(video_id: str, capture: str | None = None) -> list[Transcript]:
+    """Transcript của bản thu chỉ định, mặc định là bản thu mới nhất có transcript."""
     d = _video_dir(video_id)
-    cap = _capture(d, capture)
-    n = _normalized(d, cap)
-    return [*(n.transcripts if n else []), *_derived_transcripts(d, cap)]
+    for cap in _candidates(d, capture):
+        n = _normalized(d, cap)
+        found = [*(n.transcripts if n else []), *_derived_transcripts(d, cap)]
+        if found:
+            return found
+    return []
 
 
 @router.get("/{video_id}/comments")
 def get_comments(video_id: str, capture: str | None = None) -> list[Comment]:
-    """Comment phẳng theo C2; reply có parent_id trỏ về comment gốc."""
+    """Comment phẳng theo C2, reply có parent_id. Mặc định lấy bản thu mới nhất đã thu comment."""
     d = _video_dir(video_id)
-    n = _normalized(d, _capture(d, capture))
-    return n.comments if n else []
+    for cap in _candidates(d, capture):
+        n = _normalized(d, cap)
+        if n is not None and Cap.COMMENTS in n.provenance:
+            return n.comments
+    return []
 
 
 @router.get("/{video_id}/media", response_class=FileResponse)
 def get_media(video_id: str, capture: str | None = None) -> FileResponse:
     """Bản proxy 480p nếu đã có, nếu không thì file video gốc. Hỗ trợ Range."""
     d = _video_dir(video_id)
-    caps = [_capture(d, capture)] if capture else list(reversed(_captures(d)))
-    for cap in caps:
-        proxy = d / "derived" / cap / "proxy_480p.mp4"
-        if proxy.is_file():
-            return FileResponse(proxy, media_type="video/mp4")
-        n = _normalized(d, cap)
-        for m in n.media if n else []:
-            if m.kind == "video" and (d / "captures" / cap / m.file).is_file():
-                return FileResponse(d / "captures" / cap / m.file, media_type="video/mp4")
+    for cap in _candidates(d, capture):
+        path = _media_path(d, cap)
+        if path is not None:
+            return FileResponse(path, media_type="video/mp4")
     raise _not_found("media")
 
 
 @router.get("/{video_id}/frames/{file}", response_class=FileResponse)
 def get_frame(video_id: str, file: str, capture: str | None = None) -> FileResponse:
     d = _video_dir(video_id)
-    path = d / "derived" / _capture(d, capture) / "frames" / file
-    if not _FRAME.match(file) or not path.is_file():
-        raise _not_found("frame")
-    return FileResponse(path, media_type="image/jpeg")
+    if _FRAME.match(file):
+        for cap in _candidates(d, capture):
+            path = d / "derived" / cap / "frames" / file
+            if path.is_file():
+                return FileResponse(path, media_type="image/jpeg")
+    raise _not_found("frame")
