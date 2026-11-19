@@ -53,3 +53,17 @@ def test_exhaust_blocks_further_spending(data_dir: Path) -> None:
     assert quota.usage(NOON).used == 10_000
     with pytest.raises(QuotaExceeded):
         quota.spend(1, NOON)
+
+
+def test_concurrent_spend_loses_no_update(data_dir: Path) -> None:
+    from concurrent.futures import ThreadPoolExecutor
+
+    def work() -> None:
+        for _ in range(25):
+            quota.spend(1, NOON)
+
+    quota.usage(NOON)
+    with ThreadPoolExecutor(4) as ex:
+        for f in [ex.submit(work) for _ in range(4)]:
+            f.result()
+    assert quota.usage(NOON).used == 100

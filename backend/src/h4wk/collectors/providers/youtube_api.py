@@ -238,7 +238,10 @@ class YouTubeApiCollector:
         except (httpx2.TransportError, httpx2.TimeoutException) as e:
             raise Transient(str(e)) from e
         if r.status_code == 200:
-            return r.json()
+            try:
+                return r.json()
+            except ValueError as e:
+                raise Transient("YouTube API returned a non-JSON response") from e
         try:
             body = r.json()
         except ValueError:

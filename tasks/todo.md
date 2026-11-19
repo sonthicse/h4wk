@@ -304,6 +304,8 @@ Nghiệm thu:
 
 Kiểm tra: `uv run pytest tests/unit/test_ytapi_normalize.py` và `uv run pytest -m live -k ytapi`.
 
+Hạn chế đã biết: comment lấy toàn bộ (SPEC 10.3), không giới hạn; khoảng 1 đơn vị quota cho 100 comment, nên video rất nhiều comment tốn nhiều quota. Chạm ngưỡng 90% giữa chừng thì phần comment đã lấy bị bỏ và orchestrator chuyển sang yt-dlp. Người dùng đã chấp nhận cho demo (2026-11-19).
+
 File: `collectors/providers/youtube_api.py`, `collectors/quota.py`, fixtures, tests.
 Người làm: Thi. Phụ thuộc: T8. Cỡ: M.
 

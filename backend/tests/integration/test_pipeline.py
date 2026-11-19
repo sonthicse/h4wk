@@ -252,11 +252,12 @@ def test_ytdlp_disabled_still_collects_text(
         ("ytdlp", "disabled"),
         (None, "no_source"),
     ]
-    for what in ("video.metadata", "video.comments", "video.thumbnails"):
+    expected = {"video.metadata": 2, "video.comments": 3, "video.thumbnails": 0}
+    for what in expected:
         ok = [s for s in by_what[what] if s["status"] == "ok"]
         assert [s["provider"] for s in ok] == ["youtube_api"], what
         # thumbnails dùng lại video đã lấy ở bước metadata nên không tốn thêm quota
-        assert ok[0]["cost"]["quota_units"] >= (0 if what == "video.thumbnails" else 1), what
+        assert ok[0]["cost"]["quota_units"] == expected[what], what
     normalized = json.loads((cap / "normalized.json").read_bytes())
     assert normalized["video"]["id"] == "h4wkDemo001" and normalized["media"] == []
     assert normalized["comments"] and any(t["name"] == "maxres" for t in normalized["thumbnails"])

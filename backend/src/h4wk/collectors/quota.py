@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
+from sqlalchemy import text
 from sqlmodel import Session
 
 from h4wk.collectors.base import QuotaExceeded
@@ -38,12 +39,10 @@ def resets_at(now: datetime) -> datetime:
 
 
 def _row(s: Session, now: datetime) -> QuotaRow:
-    """Dòng của kỳ hiện tại; chưa có hoặc đã thuộc kỳ cũ thì coi như used = 0."""
+    """Dòng của kỳ hiện tại; chưa có hoặc đã thuộc kỳ cũ thì coi như used = 0 (chỉ đọc)."""
     row = s.get(QuotaRow, PROVIDER)
-    if row is None:
+    if row is None or row.period != period(now):
         return QuotaRow(provider=PROVIDER, period=period(now))
-    if row.period != period(now):
-        row.period, row.used = period(now), 0
     return row
 
 
@@ -53,21 +52,38 @@ def usage(now: datetime) -> QuotaUsage:
     return QuotaUsage(used=used, limit=DAILY_LIMIT, resets_at=resets_at(now))
 
 
+def _ensure_period(s: Session, now: datetime) -> None:
+    """Tạo dòng của kỳ hiện tại, hoặc đưa used về 0 nếu dòng thuộc kỳ cũ (một câu SQL nguyên tử)."""
+    s.connection().execute(
+        text(
+            "INSERT INTO source_quota (provider, period, used) VALUES (:p, :period, 0) "
+            "ON CONFLICT(provider) DO UPDATE SET period = excluded.period, used = 0 "
+            "WHERE source_quota.period != excluded.period"
+        ),
+        {"p": PROVIDER, "period": period(now)},
+    )
+
+
 def spend(units: int, now: datetime) -> None:
     """Cộng quota đã dùng; từ 90% giới hạn trở lên thì ném QuotaExceeded và không cộng."""
     with Session(get_engine()) as s:
-        row = _row(s, now)
-        if row.used >= DAILY_LIMIT * STOP_RATIO:
-            raise QuotaExceeded(f"YouTube API quota at {row.used}/{DAILY_LIMIT} units today")
-        row.used += units
-        s.add(row)
+        _ensure_period(s, now)
+        done = s.connection().execute(
+            text("UPDATE source_quota SET used = used + :n WHERE provider = :p AND used < :stop"),
+            {"n": units, "p": PROVIDER, "stop": int(DAILY_LIMIT * STOP_RATIO)},
+        )
+        used = s.get(QuotaRow, PROVIDER).used if done.rowcount == 0 else 0
         s.commit()
+    if done.rowcount == 0:
+        raise QuotaExceeded(f"YouTube API quota at {used}/{DAILY_LIMIT} units today")
 
 
 def exhaust(now: datetime) -> None:
     """Google báo hết quota: coi như đã dùng hết cả ngày."""
     with Session(get_engine()) as s:
-        row = _row(s, now)
-        row.used = DAILY_LIMIT
-        s.add(row)
+        _ensure_period(s, now)
+        s.connection().execute(
+            text("UPDATE source_quota SET used = :limit WHERE provider = :p"),
+            {"limit": DAILY_LIMIT, "p": PROVIDER},
+        )
         s.commit()

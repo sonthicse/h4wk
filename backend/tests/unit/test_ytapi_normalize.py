@@ -288,3 +288,14 @@ def test_maxres_falls_back_when_largest_listed_thumbnail_is_missing(
     maxres = res.normalized.thumbnails[0]
     assert maxres.name == "maxres" and maxres.url.endswith("/maxresdefault.jpg")
     assert maxres.width == 1280
+
+
+def test_non_json_200_is_transient(ytapi, tmp_path: Path) -> None:
+    import httpx2
+
+    c = ytapi.collector()
+    c.client = httpx2.Client(
+        transport=httpx2.MockTransport(lambda r: httpx2.Response(200, text="<html>oops</html>"))
+    )
+    with pytest.raises(Transient, match="non-JSON"):
+        c.fetch(Cap.VIDEO_METADATA, VIDEO, tmp_path)
