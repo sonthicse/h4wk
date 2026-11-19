@@ -1,0 +1,34 @@
+{
+ "kind": "youtube#playlistItemListResponse",
+ "pageInfo": {
+  "totalResults": 3,
+  "resultsPerPage": 50
+ },
+ "items": [
+  {
+   "kind": "youtube#playlistItem",
+   "id": "item0",
+   "contentDetails": {
+    "videoId": "h4wkDemo001",
+    "videoPublishedAt": "2026-11-18T09:00:00Z"
+   }
+  },
+  {
+   "kind": "youtube#playlistItem",
+   "id": "item1",
+   "contentDetails": {
+    "videoId": "h4wkDemo002",
+    "videoPublishedAt": "2026-11-18T09:00:00Z"
+   }
+  },
+  {
+   "kind": "youtube#playlistItem",
+   "id": "item2",
+   "contentDetails": {
+    "videoId": "h4wkDemo003",
+    "videoPublishedAt": "2026-11-18T09:00:00Z"
+   }
+  }
+ ],
+ "nextPageToken": "PLPAGE2"
+}

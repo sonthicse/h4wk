@@ -1,0 +1,58 @@
+{
+ "kind": "youtube#commentThreadListResponse",
+ "nextPageToken": "PAGE2",
+ "pageInfo": {
+  "totalResults": 1,
+  "resultsPerPage": 1
+ },
+ "items": [
+  {
+   "kind": "youtube#commentThread",
+   "id": "Ugw1",
+   "snippet": {
+    "videoId": "h4wkDemo001",
+    "topLevelComment": {
+     "kind": "youtube#comment",
+     "id": "Ugw1",
+     "snippet": {
+      "authorDisplayName": "@nguoi1",
+      "authorChannelId": {
+       "value": "UCcommenter000000000001"
+      },
+      "textDisplay": "Video này có dấu hiệu lừa đảo.",
+      "textOriginal": "Video này có dấu hiệu lừa đảo.",
+      "canRate": true,
+      "likeCount": 4,
+      "publishedAt": "2026-11-18T10:00:00Z",
+      "updatedAt": "2026-11-18T10:00:00Z",
+      "videoId": "h4wkDemo001"
+     }
+    },
+    "canReply": true,
+    "totalReplyCount": 1,
+    "isPublic": true
+   },
+   "replies": {
+    "comments": [
+     {
+      "kind": "youtube#comment",
+      "id": "Ugw1.r1",
+      "snippet": {
+       "authorDisplayName": "@nguoi2",
+       "authorChannelId": {
+        "value": "UCcommenter000000000002"
+       },
+       "textDisplay": "Đồng ý với bạn.",
+       "textOriginal": "Đồng ý với bạn.",
+       "canRate": true,
+       "likeCount": 0,
+       "publishedAt": "2026-11-18T11:00:00Z",
+       "updatedAt": "2026-11-18T11:00:00Z",
+       "parentId": "Ugw1"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

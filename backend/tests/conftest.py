@@ -56,3 +56,57 @@ def _no_network(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch)
 
     monkeypatch.setattr(socket.socket, "connect", guard)
     monkeypatch.setattr(socket, "getaddrinfo", guard)
+
+
+class FakeYtApi:
+    """YouTube Data API giả: trả response ghi sẵn ở tests/fixtures/raw/ytapi/ theo đường dẫn."""
+
+    RAW = Path(__file__).parent / "fixtures" / "raw" / "ytapi"
+
+    def __init__(self) -> None:
+        self.requests: list = []
+        # tên endpoint → (status, body); đặt để thay response mặc định
+        self.override: dict[str, tuple[int, dict]] = {}
+
+    def _raw(self, name: str) -> dict:
+        import json
+
+        return json.loads((self.RAW / name).read_text(encoding="utf-8"))
+
+    def handler(self, request):  # noqa: ANN001, ANN201
+        import httpx2
+
+        self.requests.append(request)
+        if request.url.host == "i.ytimg.com":
+            if request.url.path.endswith(("/2.jpg", "/fhddefault.jpg")):
+                return httpx2.Response(404)
+            return httpx2.Response(200, content=b"\xff\xd8jpg")
+        endpoint = request.url.path.rsplit("/", 1)[-1]
+        if endpoint in self.override:
+            status, body = self.override[endpoint]
+            return httpx2.Response(status, json=body)
+        token = request.url.params.get("pageToken")
+        names = {
+            "videos": "video.json",
+            "channels": "channel.json",
+            "comments": "comment_replies.json",
+            "commentThreads": "comment_threads.p2.json" if token else "comment_threads.p1.json",
+            "playlistItems": "playlist_items.p2.json" if token else "playlist_items.p1.json",
+        }
+        return httpx2.Response(200, json=self._raw(names[endpoint]))
+
+    def collector(self, key=lambda: "test-key"):  # noqa: ANN001, ANN201
+        import httpx2
+
+        from h4wk.collectors.providers.youtube_api import YouTubeApiCollector
+
+        client = httpx2.Client(transport=httpx2.MockTransport(self.handler))
+        return YouTubeApiCollector(client=client, key=key)
+
+    def api_requests(self) -> list:
+        return [r for r in self.requests if r.url.host == "www.googleapis.com"]
+
+
+@pytest.fixture
+def ytapi(data_dir: Path) -> FakeYtApi:
+    return FakeYtApi()

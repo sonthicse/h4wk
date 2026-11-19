@@ -1,0 +1,25 @@
+{
+ "kind": "youtube#playlistItemListResponse",
+ "pageInfo": {
+  "totalResults": 2,
+  "resultsPerPage": 50
+ },
+ "items": [
+  {
+   "kind": "youtube#playlistItem",
+   "id": "item0",
+   "contentDetails": {
+    "videoId": "h4wkDemo004",
+    "videoPublishedAt": "2026-11-18T09:00:00Z"
+   }
+  },
+  {
+   "kind": "youtube#playlistItem",
+   "id": "item1",
+   "contentDetails": {
+    "videoId": "h4wkDemo005",
+    "videoPublishedAt": "2026-11-18T09:00:00Z"
+   }
+  }
+ ]
+}

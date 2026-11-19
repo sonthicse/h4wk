@@ -1,0 +1,14 @@
+{
+ "error": {
+  "code": 404,
+  "message": "The video identified by the videoId parameter could not be found.",
+  "errors": [
+   {
+    "message": "The video identified by the videoId parameter could not be found.",
+    "domain": "global",
+    "reason": "videoNotFound"
+   }
+  ],
+  "status": "NOT_FOUND"
+ }
+}

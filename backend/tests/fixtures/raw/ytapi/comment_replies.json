@@ -1,0 +1,56 @@
+{
+ "kind": "youtube#commentListResponse",
+ "items": [
+  {
+   "kind": "youtube#comment",
+   "id": "Ugw2.r1",
+   "snippet": {
+    "authorDisplayName": "@nguoi1",
+    "authorChannelId": {
+     "value": "UCcommenter000000000001"
+    },
+    "textDisplay": "Trả lời 1",
+    "textOriginal": "Trả lời 1",
+    "canRate": true,
+    "likeCount": 0,
+    "publishedAt": "2026-11-18T13:00:00Z",
+    "updatedAt": "2026-11-18T13:00:00Z",
+    "parentId": "Ugw2"
+   }
+  },
+  {
+   "kind": "youtube#comment",
+   "id": "Ugw2.r2",
+   "snippet": {
+    "authorDisplayName": "@nguoi2",
+    "authorChannelId": {
+     "value": "UCcommenter000000000002"
+    },
+    "textDisplay": "Trả lời 2",
+    "textOriginal": "Trả lời 2",
+    "canRate": true,
+    "likeCount": 1,
+    "publishedAt": "2026-11-18T14:00:00Z",
+    "updatedAt": "2026-11-18T14:00:00Z",
+    "parentId": "Ugw2"
+   }
+  },
+  {
+   "kind": "youtube#comment",
+   "id": "Ugw2.r3",
+   "snippet": {
+    "authorDisplayName": "@nguoi3",
+    "authorChannelId": {
+     "value": "UCcommenter000000000003"
+    },
+    "textDisplay": "Trả lời 3",
+    "textOriginal": "Trả lời 3",
+    "canRate": true,
+    "likeCount": 0,
+    "publishedAt": "2026-11-18T15:00:00Z",
+    "updatedAt": "2026-11-18T15:00:00Z",
+    "parentId": "Ugw2"
+   }
+  }
+ ]
+}

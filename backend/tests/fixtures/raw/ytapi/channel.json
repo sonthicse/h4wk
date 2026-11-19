@@ -1,0 +1,53 @@
+{
+ "kind": "youtube#channelListResponse",
+ "items": [
+  {
+   "kind": "youtube#channel",
+   "id": "UCh4wkDemoChannel000000",
+   "snippet": {
+    "title": "Kênh thử nghiệm h4wk",
+    "description": "Kênh mẫu dùng để thử nghiệm.",
+    "customUrl": "@h4wkdemo",
+    "publishedAt": "2020-03-05T01:02:03Z",
+    "thumbnails": {
+     "default": {
+      "url": "https://yt3.ggpht.com/h4wk/s88",
+      "width": 88,
+      "height": 88
+     },
+     "medium": {
+      "url": "https://yt3.ggpht.com/h4wk/s240",
+      "width": 240,
+      "height": 240
+     },
+     "high": {
+      "url": "https://yt3.ggpht.com/h4wk/s800",
+      "width": 800,
+      "height": 800
+     }
+    },
+    "country": "VN"
+   },
+   "contentDetails": {
+    "relatedPlaylists": {
+     "uploads": "UUh4wkDemoChannel000000"
+    }
+   },
+   "statistics": {
+    "viewCount": "34567",
+    "subscriberCount": "1200",
+    "hiddenSubscriberCount": false,
+    "videoCount": "7"
+   },
+   "brandingSettings": {
+    "image": {
+     "bannerExternalUrl": "https://yt3.googleusercontent.com/h4wk-banner"
+    }
+   }
+  }
+ ],
+ "pageInfo": {
+  "totalResults": 1,
+  "resultsPerPage": 1
+ }
+}

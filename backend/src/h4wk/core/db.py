@@ -43,6 +43,15 @@ class SourceStateRow(SQLModel, table=True):
     last_error_at: datetime | None = None
 
 
+class QuotaRow(SQLModel, table=True):
+    """Quota đã dùng của nguồn thu trong kỳ hiện tại (YouTube API: một ngày theo giờ Pacific)."""
+
+    __tablename__ = "source_quota"
+    provider: str = Field(primary_key=True)
+    period: str  # "2026-11-19": ngày theo giờ Pacific
+    used: int = 0
+
+
 class JobRow(SQLModel, table=True):
     """Một lần chạy luồng collect → media → analyze cho một video."""
 

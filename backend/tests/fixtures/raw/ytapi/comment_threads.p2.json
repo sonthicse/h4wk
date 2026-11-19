@@ -1,0 +1,57 @@
+{
+ "kind": "youtube#commentThreadListResponse",
+ "pageInfo": {
+  "totalResults": 1,
+  "resultsPerPage": 1
+ },
+ "items": [
+  {
+   "kind": "youtube#commentThread",
+   "id": "Ugw2",
+   "snippet": {
+    "videoId": "h4wkDemo001",
+    "topLevelComment": {
+     "kind": "youtube#comment",
+     "id": "Ugw2",
+     "snippet": {
+      "authorDisplayName": "@nguoi3",
+      "authorChannelId": {
+       "value": "UCcommenter000000000003"
+      },
+      "textDisplay": "Cảm ơn đã chia sẻ.",
+      "textOriginal": "Cảm ơn đã chia sẻ.",
+      "canRate": true,
+      "likeCount": 2,
+      "publishedAt": "2026-11-18T12:00:00Z",
+      "updatedAt": "2026-11-18T12:00:00Z",
+      "videoId": "h4wkDemo001"
+     }
+    },
+    "canReply": true,
+    "totalReplyCount": 3,
+    "isPublic": true
+   },
+   "replies": {
+    "comments": [
+     {
+      "kind": "youtube#comment",
+      "id": "Ugw2.r1",
+      "snippet": {
+       "authorDisplayName": "@nguoi1",
+       "authorChannelId": {
+        "value": "UCcommenter000000000001"
+       },
+       "textDisplay": "Trả lời 1",
+       "textOriginal": "Trả lời 1",
+       "canRate": true,
+       "likeCount": 0,
+       "publishedAt": "2026-11-18T13:00:00Z",
+       "updatedAt": "2026-11-18T13:00:00Z",
+       "parentId": "Ugw2"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,63 @@
+{
+ "kind": "youtube#videoListResponse",
+ "items": [
+  {
+   "kind": "youtube#video",
+   "id": "h4wkDemo001",
+   "snippet": {
+    "publishedAt": "2026-11-18T09:00:00Z",
+    "channelId": "UCh4wkDemoChannel000000",
+    "title": "Video thử nghiệm h4wk",
+    "description": "Mô tả có dấu.\nDòng 2",
+    "thumbnails": {
+     "default": {
+      "url": "https://i.ytimg.com/vi/h4wkDemo001/default.jpg",
+      "width": 120,
+      "height": 90
+     },
+     "medium": {
+      "url": "https://i.ytimg.com/vi/h4wkDemo001/mqdefault.jpg",
+      "width": 320,
+      "height": 180
+     },
+     "high": {
+      "url": "https://i.ytimg.com/vi/h4wkDemo001/hqdefault.jpg",
+      "width": 480,
+      "height": 360
+     },
+     "maxres": {
+      "url": "https://i.ytimg.com/vi/h4wkDemo001/maxresdefault.jpg",
+      "width": 1280,
+      "height": 720
+     }
+    },
+    "channelTitle": "Kênh thử nghiệm h4wk",
+    "tags": [
+     "thử nghiệm",
+     "h4wk"
+    ],
+    "categoryId": "25",
+    "liveBroadcastContent": "none"
+   },
+   "contentDetails": {
+    "duration": "PT40S",
+    "dimension": "2d",
+    "definition": "hd",
+    "caption": "true"
+   },
+   "status": {
+    "uploadStatus": "processed",
+    "privacyStatus": "public"
+   },
+   "statistics": {
+    "viewCount": "12",
+    "likeCount": "1",
+    "commentCount": "3"
+   }
+  }
+ ],
+ "pageInfo": {
+  "totalResults": 1,
+  "resultsPerPage": 1
+ }
+}
