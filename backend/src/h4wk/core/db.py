@@ -154,6 +154,16 @@ def get_engine(root: Path | None = None) -> Engine:
     return _engines[path]
 
 
+def drop_index(root: Path | None = None) -> None:
+    """Đóng engine đang cache (nếu có) rồi xoá index.db cùng file -wal, -shm."""
+    path = ((root or data_dir()) / "index.db").resolve()
+    engine = _engines.pop(path, None)
+    if engine is not None:
+        engine.dispose()
+    for suffix in ("", "-wal", "-shm"):
+        Path(f"{path}{suffix}").unlink(missing_ok=True)
+
+
 def _add_missing_columns(engine: Engine) -> None:
     """create_all không thêm cột mới vào bảng đã có. Cột mới luôn cho phép NULL nên thêm
     bằng ALTER TABLE là đủ; chỉ mục dựng lại được từ data/ nên không cần công cụ migrate."""

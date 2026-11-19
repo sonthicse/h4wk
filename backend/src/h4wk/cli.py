@@ -118,5 +118,28 @@ def verify(capture_dir: Path) -> None:
         raise typer.Exit(code=1)
 
 
+@app.command()
+def reindex(
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip the confirmation prompt."),
+) -> None:
+    """Xoá index.db rồi dựng lại đối tượng, nghi vấn, quyết định rà soát từ file trong data/."""
+    if not yes:
+        typer.confirm(
+            "This deletes index.db: accounts, sessions, watchlist, known videos and job "
+            "history will be lost. Stop the API and workers first. Continue?",
+            abort=True,
+        )
+    from h4wk.core.reindex import reindex as run
+
+    result = run()
+    typer.echo(f"entities: {result.entities}")
+    typer.echo(f"videos: {result.videos}")
+    typer.echo(f"findings: {result.findings}")
+    typer.echo(f"decisions: {result.decisions}")
+    for item in result.skipped:
+        typer.echo(f"skipped: {item}")
+    typer.echo("Recreate accounts with: h4wk user create <username>")
+
+
 def main() -> None:
     app()

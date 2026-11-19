@@ -331,8 +331,10 @@ Người làm: Thi. Phụ thuộc: T8. Cỡ: S.
 
 Nghiệm thu:
 
-- [ ] Xoá `index.db` rồi chạy `reindex` thì API trả về đối tượng, video và nghi vấn như trước.
-- [ ] Quyết định rà soát trong một `reviews.jsonl` mẫu được nạp lại đúng.
+- [x] Xoá `index.db` rồi chạy `reindex` thì API trả về đối tượng, video và nghi vấn như trước.
+- [x] Quyết định rà soát trong một `reviews.jsonl` mẫu được nạp lại đúng.
+
+Ghi chú: reindex nạp nghi vấn của mọi lần chạy (API vẫn chỉ hiện lần mới nhất) và xoá cả `index.db` theo quyết định của người dùng.
 
 Kiểm tra: `uv run pytest tests/integration/test_reindex.py`.
 
@@ -516,12 +518,12 @@ API hàng đợi chỉ trả nghi vấn của lần chạy mới nhất cho mỗ
 Nghiệm thu:
 
 - [x] Bác nghi vấn mà không có lý do thì nhận 422.
-- [ ] Sau `reindex`, trạng thái rà soát vẫn giữ nguyên.
+- [x] Sau `reindex`, trạng thái rà soát vẫn giữ nguyên.
 - [x] Chạy phân tích lại thì nghi vấn của lần chạy mới ở trạng thái chưa rà soát; quyết định của lần chạy trước vẫn còn trong `reviews.jsonl`.
 
 Kiểm tra: `uv run pytest tests/unit/test_review.py`.
 
-API: `GET /api/review/queue?video=&source_kind=&status=` trả `{finding, status, video: {id, title, channel}, decisions[]}`; `POST /api/findings/{id}/decision`; `GET /api/findings/{id}/decisions` (mới nhất trước). Mục giữ trạng thái sau `reindex` chờ T45. Tham số `latest_only=true` (queue, findings, videos, dashboard) chỉ giữ bản thu mới nhất mỗi video.
+API: `GET /api/review/queue?video=&source_kind=&status=` trả `{finding, status, video: {id, title, channel}, decisions[]}`; `POST /api/findings/{id}/decision`; `GET /api/findings/{id}/decisions` (mới nhất trước). Giữ trạng thái sau `reindex` đã làm ở T45. Tham số `latest_only=true` (queue, findings, videos, dashboard) chỉ giữ bản thu mới nhất mỗi video.
 
 File: `src/h4wk/review/{queue.py,decisions.py}`, `api/review.py`, tests.
 Người làm: Thi. Phụ thuộc: T12, T44, T45. Tích hợp sau: T11, T23. Cỡ: S.

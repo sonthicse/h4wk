@@ -237,7 +237,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 - [x] T14: Adapter YouTube Data API và quota
 - [x] T15: Adapter Supadata và credit
-- [ ] T45: `core`: dựng lại database chỉ mục
+- [x] T45: `core`: dựng lại database chỉ mục
 - [ ] T46: `jobs`: chạy lại job bị treo và xử lý playlist
 - [x] T16: `ai-gateway`: lõi
 - [ ] T17: `ai-gateway`: provider anthropic, openai_compat, gemini (còn chạy live, cần API key)
@@ -258,7 +258,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 - [ ] T23: `analysis`: tầng LLM
 - [ ] T24: `analysis`: comment
-- [ ] T25: `review`: backend hàng đợi và quyết định (backend xong; còn giữ trạng thái sau reindex, chờ T45)
+- [x] T25: `review`: backend hàng đợi và quyết định
 - [ ] T26: UI Video detail: trình phát, transcript, thanh thời gian (API ở `api/videos.py` và giao diện đã nối; chờ nghiệm thu)
 - [ ] T27: UI Video detail: dải khung hình, comment, lịch sử bản thu (giao diện đã nối API; chờ nghiệm thu)
 - [ ] T28: UI Review queue (giao diện đã nối API T25; chờ nghiệm thu)
