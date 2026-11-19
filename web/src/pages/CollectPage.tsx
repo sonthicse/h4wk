@@ -122,10 +122,10 @@ export default function CollectPage() {
           >
             <div className="flex items-end gap-3">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="collect-input">Video or channel link</Label>
+                <Label htmlFor="collect-input">Video, playlist or channel link</Label>
                 <Input
                   id="collect-input"
-                  placeholder="https://www.youtube.com/watch?v=… or a channel link / @handle"
+                  placeholder="https://www.youtube.com/watch?v=…, a playlist link, or a channel link / @handle"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                 />

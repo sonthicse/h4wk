@@ -154,7 +154,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Collect */
+        /**
+         * Collect
+         * @description Link video: một job. Link playlist: mỗi video một job (tối đa playlist_max_videos).
+         */
         post: operations["collect_api_collect_post"];
         delete?: never;
         options?: never;
@@ -2117,7 +2120,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Job"];
+                    "application/json": components["schemas"]["Job"][];
                 };
             };
             /** @description Validation Error */

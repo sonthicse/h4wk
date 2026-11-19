@@ -442,6 +442,7 @@
           "jobs"
         ],
         "summary": "Collect",
+        "description": "Link video: m\u1ed9t job. Link playlist: m\u1ed7i video m\u1ed9t job (t\u1ed1i \u0111a playlist_max_videos).",
         "operationId": "collect_api_collect_post",
         "requestBody": {
           "content": {
@@ -459,7 +460,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Job"
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  },
+                  "type": "array",
+                  "title": "Response Collect Api Collect Post"
                 }
               }
             }
