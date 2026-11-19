@@ -7,7 +7,7 @@ from pydantic import BaseModel, ValidationError
 
 from h4wk.analysis.models import ReviewDecision, SourceKind
 from h4wk.api.deps import current_actor
-from h4wk.core import audit
+from h4wk.core import audit, events
 from h4wk.review import decisions
 from h4wk.review.queue import QueueItem, ReviewStatus, queue
 
@@ -47,4 +47,10 @@ def decide(finding_id: str, body: DecisionBody, actor: ActorDep) -> ReviewDecisi
     except ValidationError:
         raise fail(status.HTTP_422_UNPROCESSABLE_CONTENT, "Reject needs a note") from None
     audit.log(actor, "review.decide", finding_id, {"status": d.status, "note": d.note})
+    f = decisions.finding(finding_id)
+    events.record(
+        "review",
+        f"{actor.removeprefix('user:')} marked a {f.category} finding as {d.status}",
+        video_id=f.video_id,
+    )
     return d

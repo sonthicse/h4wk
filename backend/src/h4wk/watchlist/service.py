@@ -12,7 +12,8 @@ from h4wk.collectors.targets import Target, TargetKind, parse_target
 from h4wk.core import audit
 from h4wk.core.config import CONFIG_DIR, data_dir
 from h4wk.core.config_models import SourcesConfig, load_toml
-from h4wk.core.db import EventRow, JobRow, KnownVideoRow, WatchItemRow, get_engine
+from h4wk.core.db import JobRow, KnownVideoRow, WatchItemRow, get_engine
+from h4wk.core.events import record as event
 from h4wk.core.types import VN_TZ
 from h4wk.evidence.models import Trigger
 from h4wk.jobs import pipeline
@@ -58,12 +59,6 @@ def _settings():
 
 def trigger_of(item_id: str) -> str:
     return f"system:watchlist:{item_id}"
-
-
-def event(kind: str, message: str, **fields: str | None) -> None:
-    with Session(get_engine()) as s:
-        s.add(EventRow(at=_now(), kind=kind, message=message, **fields))
-        s.commit()
 
 
 def _next_id(s: Session) -> str:

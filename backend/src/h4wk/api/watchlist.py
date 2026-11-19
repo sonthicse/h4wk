@@ -5,12 +5,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
-from sqlmodel import Session, col, select
 
 from h4wk.api.deps import current_actor
 from h4wk.collectors.models import CollectLevel
 from h4wk.core import audit
-from h4wk.core.db import EventRow, JobRow, WatchItemRow, as_aware, get_engine
+from h4wk.core.db import WatchItemRow, as_aware
 from h4wk.core.types import VnDatetime
 from h4wk.watchlist import service, tasks
 
@@ -51,21 +50,6 @@ class WatchUpdate(BaseModel):
 class CheckResult(BaseModel):
     new_videos: list[str]
     checked_at: VnDatetime
-
-
-class EventJob(BaseModel):
-    id: str
-    status: str
-
-
-class Event(BaseModel):
-    id: int
-    at: VnDatetime
-    kind: str
-    message: str
-    watch_item: str | None
-    video_id: str | None
-    job: EventJob | None
 
 
 def _aware(dt: datetime | None) -> datetime | None:
@@ -152,29 +136,3 @@ def check_now(item_id: str, actor: ActorDep) -> CheckResult:
     audit.log(actor, "watchlist.check", item_id, {"new_videos": new})
     item = service.get_item(item_id)
     return CheckResult(new_videos=new, checked_at=_aware(item.last_checked_at))  # type: ignore[arg-type]
-
-
-@router.get("/api/events")
-def list_events(limit: int = 50) -> list[Event]:
-    with Session(get_engine()) as s:
-        rows = s.exec(
-            select(EventRow).order_by(col(EventRow.id).desc()).limit(max(1, min(limit, 500)))
-        ).all()
-        jobs = {
-            j.id: j
-            for j in s.exec(
-                select(JobRow).where(col(JobRow.id).in_([r.job_id for r in rows if r.job_id]))
-            ).all()
-        }
-    return [
-        Event(
-            id=r.id or 0,
-            at=as_aware(r.at),
-            kind=r.kind,
-            message=r.message,
-            watch_item=r.watch_item,
-            video_id=r.video_id,
-            job=EventJob(id=r.job_id, status=jobs[r.job_id].status) if r.job_id in jobs else None,
-        )
-        for r in rows
-    ]

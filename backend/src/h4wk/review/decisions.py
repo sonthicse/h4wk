@@ -40,6 +40,14 @@ def record(finding_id: str, status: str, note: str, by: str) -> ReviewDecision:
     return decision
 
 
+def finding(finding_id: str) -> Finding:
+    with Session(get_engine()) as s:
+        row = s.get(FindingRow, finding_id)
+    if row is None:
+        raise NotFound(finding_id)
+    return Finding.model_validate_json(row.data)
+
+
 def decisions_for(finding_ids: list[str] | None = None) -> dict[str, list[ReviewDecision]]:
     """Các quyết định theo finding_id, mới nhất trước."""
     with Session(get_engine()) as s:

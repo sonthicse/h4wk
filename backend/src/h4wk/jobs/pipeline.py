@@ -13,10 +13,10 @@ from h4wk.analysis.models import Finding
 from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import parse_target
-from h4wk.core import audit
+from h4wk.core import audit, events
 from h4wk.core.config import CONFIG_DIR, data_dir
 from h4wk.core.config_models import AnalysisConfig, load_toml
-from h4wk.core.db import EventRow, FindingRow, JobRow, get_engine
+from h4wk.core.db import FindingRow, JobRow, get_engine
 from h4wk.core.entities import load_entities
 from h4wk.core.ids import new_ulid
 from h4wk.core.types import VN_TZ
@@ -73,21 +73,9 @@ def _video_dir(job: JobRow) -> Path:
     return data_dir() / "videos" / job.video_id
 
 
-def _event(job: JobRow, kind: str, message: str) -> None:
-    with Session(get_engine()) as s:
-        s.add(
-            EventRow(
-                at=_now(),
-                kind=kind,
-                message=message,
-                video_id=job.video_id,
-                job_id=job.id,
-                watch_item=job.trigger.removeprefix(_WATCH)
-                if job.trigger.startswith(_WATCH)
-                else None,
-            )
-        )
-        s.commit()
+def _event(job: JobRow, kind: events.EventKind, message: str) -> None:
+    watch = job.trigger.removeprefix(_WATCH) if job.trigger.startswith(_WATCH) else None
+    events.record(kind, message, video_id=job.video_id, job_id=job.id, watch_item=watch)
 
 
 _WATCH = "system:watchlist:"

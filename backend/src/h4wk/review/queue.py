@@ -18,6 +18,7 @@ class VideoRef(BaseModel):
     id: str
     title: str | None = None
     channel: str | None = None
+    view_count: int | None = None
 
 
 class QueueItem(BaseModel):
@@ -37,7 +38,19 @@ def _video(video_id: str, capture: str) -> VideoRef:
         id=video_id,
         title=n.video.title if n.video else None,
         channel=n.channel.title if n.channel else None,
+        view_count=n.video.view_count if n.video else None,
     )
+
+
+def video_ref(video_id: str) -> VideoRef:
+    """Tiêu đề và kênh theo bản thu mới nhất có metadata video."""
+    from h4wk.evidence.writer import list_captures
+
+    for cap in reversed(list_captures(data_dir() / "videos" / video_id / "captures")):
+        ref = _video(video_id, cap)
+        if ref.title is not None:
+            return ref
+    return VideoRef(id=video_id)
 
 
 def queue(

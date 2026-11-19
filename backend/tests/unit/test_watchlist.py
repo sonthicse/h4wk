@@ -128,3 +128,13 @@ def test_seed_defaults_once(data_dir) -> None:
     ]
     assert {i.level for i in items} == {"metadata"}
     assert service.seed_defaults() == []
+
+
+def test_collected_count_counts_done_jobs(client: TestClient, fake) -> None:
+    fake["feed"] = _entries([_vid(0), _vid(1)])
+    item = client.post("/api/watchlist", json={"url": "@VietTan"}).json()
+    service.check(item["id"])
+    jobs = [j for j in client.get("/api/jobs").json() if j["trigger"].endswith(item["id"])]
+    assert len(jobs) == 2
+    pipeline._update(jobs[0]["id"], status="done")
+    assert client.get("/api/watchlist").json()[0]["collected_count"] == 1

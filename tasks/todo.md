@@ -742,6 +742,8 @@ Nghiệm thu:
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
+Backend xong: `GET /api/dashboard` (số kênh, video, bản thu; nghi vấn theo severity và trạng thái; hoạt động 14 ngày; video nổi bật tính high 3, medium 2, low 1, bỏ nghi vấn đã bác, hoà thì nhiều view hơn). `youtube_quota` và `supadata_credits` là null tới khi có T14, T15. `GET /api/events` có thêm tiêu đề video, tên kênh, số nghi vấn, lỗi và sự kiện `review`.
+
 File: `api/dashboard.py`, `web/src/pages/Dashboard.tsx`.
 Người làm: Thi. Phụ thuộc: T31, T32, T25, T15, T13. Cỡ: M.
 
