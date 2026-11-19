@@ -102,7 +102,7 @@ export default function EventFeed() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Events</CardTitle>
+        <CardTitle className="text-xl">Events</CardTitle>
         <CardDescription>Watchlist, jobs and review decisions · refreshes every 5 s</CardDescription>
       </CardHeader>
       <CardContent>

@@ -30,8 +30,9 @@ async function orNull<T>(p: Promise<T>): Promise<T | null> {
   }
 }
 
+// Số nghi vấn của mỗi video chỉ tính bản thu mới nhất đã phân tích.
 export function listVideos(): Promise<VideoSummary[]> {
-  return api('/api/videos')
+  return api('/api/videos?latest_only=true')
 }
 
 export function getVideo(id: string): Promise<VideoDetail | null> {

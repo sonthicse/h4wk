@@ -203,7 +203,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Findings */
+        /**
+         * Findings
+         * @description latest_only=true: chỉ bản thu mới nhất của mỗi video.
+         */
         get: operations["findings_api_findings_get"];
         put?: never;
         post?: never;
@@ -220,7 +223,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Review Queue */
+        /**
+         * Review Queue
+         * @description latest_only=true: chỉ bản thu mới nhất của mỗi video (thu lại không làm lặp nghi vấn).
+         */
         get: operations["review_queue_api_review_queue_get"];
         put?: never;
         post?: never;
@@ -532,7 +538,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Dashboard */
+        /**
+         * Dashboard
+         * @description latest_only=true: số nghi vấn và video nổi bật chỉ tính bản thu mới nhất mỗi video.
+         */
         get: operations["dashboard_api_dashboard_get"];
         put?: never;
         post?: never;
@@ -1866,7 +1875,9 @@ export interface operations {
     };
     findings_api_findings_get: {
         parameters: {
-            query?: never;
+            query?: {
+                latest_only?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1882,6 +1893,15 @@ export interface operations {
                     "application/json": components["schemas"]["Finding"][];
                 };
             };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
     };
     review_queue_api_review_queue_get: {
@@ -1890,6 +1910,7 @@ export interface operations {
                 video?: string | null;
                 source_kind?: components["schemas"]["SourceKind"] | null;
                 status?: ("unreviewed" | "confirmed" | "rejected" | "needs_info") | null;
+                latest_only?: boolean;
             };
             header?: never;
             path?: never;
@@ -1985,7 +2006,9 @@ export interface operations {
     };
     list_videos_api_videos_get: {
         parameters: {
-            query?: never;
+            query?: {
+                latest_only?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1999,6 +2022,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VideoSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2472,7 +2504,9 @@ export interface operations {
     };
     dashboard_api_dashboard_get: {
         parameters: {
-            query?: never;
+            query?: {
+                latest_only?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2486,6 +2520,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -550,18 +550,41 @@
           "jobs"
         ],
         "summary": "Findings",
+        "description": "latest_only=true: ch\u1ec9 b\u1ea3n thu m\u1edbi nh\u1ea5t c\u1ee7a m\u1ed7i video.",
         "operationId": "findings_api_findings_get",
+        "parameters": [
+          {
+            "name": "latest_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Latest Only"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/Finding"
                   },
-                  "type": "array",
                   "title": "Response Findings Api Findings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -575,6 +598,7 @@
           "review"
         ],
         "summary": "Review Queue",
+        "description": "latest_only=true: ch\u1ec9 b\u1ea3n thu m\u1edbi nh\u1ea5t c\u1ee7a m\u1ed7i video (thu l\u1ea1i kh\u00f4ng l\u00e0m l\u1eb7p nghi v\u1ea5n).",
         "operationId": "review_queue_api_review_queue_get",
         "parameters": [
           {
@@ -629,6 +653,16 @@
                 }
               ],
               "title": "Status"
+            }
+          },
+          {
+            "name": "latest_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Latest Only"
             }
           }
         ],
@@ -765,17 +799,39 @@
         ],
         "summary": "List Videos",
         "operationId": "list_videos_api_videos_get",
+        "parameters": [
+          {
+            "name": "latest_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Latest Only"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/VideoSummary"
                   },
-                  "type": "array",
                   "title": "Response List Videos Api Videos Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1524,7 +1580,20 @@
           "dashboard"
         ],
         "summary": "Dashboard",
+        "description": "latest_only=true: s\u1ed1 nghi v\u1ea5n v\u00e0 video n\u1ed5i b\u1eadt ch\u1ec9 t\u00ednh b\u1ea3n thu m\u1edbi nh\u1ea5t m\u1ed7i video.",
         "operationId": "dashboard_api_dashboard_get",
+        "parameters": [
+          {
+            "name": "latest_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Latest Only"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1532,6 +1601,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Dashboard"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }

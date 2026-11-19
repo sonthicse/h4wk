@@ -177,7 +177,7 @@ export default function VideoDetailPage() {
   const video = useQuery({ queryKey: ['video', videoId], queryFn: () => getVideo(videoId) })
   const queue = useQuery({
     queryKey: ['queue', 'video', videoId],
-    queryFn: () => listQueue({ video: videoId }),
+    queryFn: () => listQueue({ video: videoId, latestOnly: false }),
     enabled: video.data != null,
   })
 
