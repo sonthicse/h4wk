@@ -726,8 +726,6 @@ Nghiệm thu:
 
 - [x] Tắt yt-dlp trên giao diện rồi thu một video thì manifest ghi yt-dlp là `disabled`. (Nghiệm thu 19/11 trên Chrome: tắt yt-dlp trên giao diện rồi thu `8VB-P9Wk7v4` mức full, manifest ghi `ytdlp … disabled` cho mọi cap.)
 
-Giao diện đã nối API T32; chờ nghiệm thu thủ công.
-
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
 File: `web/src/pages/settings/Sources.tsx`.
