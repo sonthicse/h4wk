@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { NavLink, useMatch } from 'react-router'
 import { getHealth } from '@/api/health'
+import Logo from '@/components/Logo'
 import {
   Sidebar,
   SidebarContent,
@@ -65,12 +66,9 @@ export default function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        {/* Chỗ đặt logo: kích thước cố định để menu không nhảy khi thu gọn sidebar. */}
+        {/* Ô logo giữ kích thước cố định để menu không nhảy khi thu gọn sidebar. */}
         <div className="flex items-center gap-2">
-          <div
-            aria-label="Logo"
-            className="size-8 shrink-0 rounded-md border border-dashed border-muted-foreground/40"
-          />
+          <Logo className="size-8 shrink-0" />
           {/* Ẩn chữ khi thu gọn; ô logo giữ nguyên kích thước nên menu không nhảy. */}
           <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">h4wk</span>
         </div>

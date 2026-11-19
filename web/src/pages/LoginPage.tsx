@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Logo from '@/components/Logo'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -34,8 +35,7 @@ export default function LoginPage() {
     <div className="flex min-h-svh items-center justify-center bg-muted">
       <Card className="w-full max-w-md py-10">
         <CardHeader className="flex flex-col items-center gap-4 px-10">
-          {/* Chỗ đặt logo, sẽ thay bằng ảnh logo khi có. */}
-          <div aria-label="Logo" className="size-64 rounded-3xl border border-dashed border-muted-foreground/40" />
+          <Logo className="size-64 text-foreground" />
           <CardTitle className="text-xl">
             <h1>Sign in</h1>
           </CardTitle>
