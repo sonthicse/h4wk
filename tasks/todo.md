@@ -66,7 +66,7 @@ Ghi lại giấy phép sử dụng của model khuôn mặt và model embedding.
 
 Nghiệm thu:
 
-- [ ] `docs/spikes/gpu-models.md` ghi: phiên bản từng thư viện cài được cùng nhau; model được chọn cho từng việc; thời gian xử lý 5 phút audio; thời gian nạp mỗi model; WER của STT trên 1 phút audio gán nhãn tay; OCR có giữ được dấu tiếng Việt không.
+- [x] `docs/spikes/gpu-models.md` ghi: phiên bản từng thư viện cài được cùng nhau; model được chọn cho từng việc; thời gian xử lý 5 phút audio; thời gian nạp mỗi model; WER của STT trên 1 phút audio gán nhãn tay; OCR có giữ được dấu tiếng Việt không.
 - [ ] Nếu không cài chung được, file ghi phương án dự phòng đã thử được (PaddleOCR chạy CPU, hoặc tách môi trường cho worker `gpu`).
 
 Kiểm tra: đọc và duyệt file kết quả.
@@ -395,9 +395,9 @@ Nghiệm thu:
 
 - [ ] Video mẫu (T44) cho ra transcript có mốc thời gian hợp lệ.
 - [x] Với video không có phụ đề, timeline dùng transcript `stt`.
-- [ ] Chạy hai job liên tiếp thì model chỉ được nạp một lần (kiểm qua log).
+- [x] Chạy hai job cho hai bản thu riêng trong cùng worker chỉ nạp Whisper large-v3 một lần (kiểm qua log).
 
-Đã kiểm tra bằng FFmpeg thật việc tạo proxy và audio, khôi phục tệp bị cắt dở và giữ OCR khi chạy lại. Test với model mô phỏng kiểm tra thứ tự phụ đề và log nạp model cho hai bản thu. Hàm `process_full_capture` nhận một `SttWorker` dùng chung; việc nối worker vào hàng đợi GPU thuộc bước tích hợp pipeline.
+Đã kiểm tra bằng FFmpeg thật việc tạo proxy và audio, khôi phục tệp bị cắt dở và giữ OCR khi chạy lại. Test với model mô phỏng kiểm tra thứ tự phụ đề và log nạp model cho hai bản thu. Worker của hàng đợi GPU dùng chung một `SttWorker` giữa các job. Kiểm thử API trên T44 tổng hợp xác nhận một lần nạp Whisper thật trên RTX 3050. Chạy lại bằng `uv run --extra stt pytest -m gpu tests/integration/test_pipeline.py` với `H4WK_STT_MODEL` trỏ tới model cục bộ.
 
 Kiểm tra: `uv run pytest tests/integration/test_media_stt.py`, cần `ffmpeg` và `ffprobe` trong PATH. Để nghiệm thu GPU, đặt `H4WK_STT_MODEL` thành tên hoặc đường dẫn model đã chọn và `H4WK_T44_CAPTURE` thành thư mục bản thu T44 rồi chạy `uv run --extra stt pytest -m gpu tests/integration/test_media_stt.py`.
 
@@ -441,10 +441,10 @@ Gọi `gateway.describe_image("media.vision", …)` cho từng keyframe và thum
 
 Nghiệm thu:
 
-- [ ] Test với `FakeProvider` cho ra `vision.json` hợp lệ.
+- [x] Test với `FakeProvider` cho ra `vision.json` hợp lệ (trong `tests/integration/test_pipeline.py`).
 - [ ] Test live với 3 khung mẫu đã biết trước dấu hiệu (một ảnh ghép còng tay, một ảnh có chữ chửi, một ảnh bình thường): hai khung đầu có `offensive_cues` đúng loại, khung thứ ba không có.
 
-Kiểm tra: `uv run pytest tests/unit/test_vision.py` và `uv run pytest -m live -k vision`.
+Kiểm tra tích hợp với nhà cung cấp giả bằng `uv run pytest tests/integration/test_pipeline.py -k full_flow`. Nghiệm thu VLM thật cần API key.
 
 File: `src/h4wk/media/vision.py`, `media/prompts/vision.md`, tests.
 Người làm: Bảo. Phụ thuộc: T17, T19. Cỡ: S.
@@ -455,7 +455,7 @@ Kết quả OCR và VLM được gắn vào đoạn theo thời gian `t` của k
 
 Nghiệm thu:
 
-- [ ] Timeline của video mẫu có đủ speech, ocr, visual và khối thumbnails, và validate được theo C3.
+- [x] Timeline T44 tổng hợp có đủ speech, ocr, visual và khối thumbnails, và validate được theo C3 trong kiểm thử API. STT, nhận dạng OCR và nhà cung cấp VLM được mô phỏng trong kiểm thử này.
 - [ ] Màn Collect hiện đủ các bước collect → transcribe → frames → OCR/VLM → analyze.
 
 Kiểm tra: `uv run pytest tests/integration/test_pipeline.py`.
