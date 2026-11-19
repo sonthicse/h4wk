@@ -22,7 +22,7 @@ export default function WatchlistPage() {
       <div className="flex items-baseline justify-between">
         <h1 className="text-2xl font-semibold">Watchlist</h1>
         <div className="flex gap-2 text-sm">
-          <Badge variant="outline">{all.length} channels</Badge>
+          <Badge variant="outline">{all.length} {all.length === 1 ? 'channel' : 'channels'}</Badge>
           <Badge variant="outline">{enabled} enabled</Badge>
         </div>
       </div>
