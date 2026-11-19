@@ -6,7 +6,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from h4wk.analysis import runner
 from h4wk.analysis.models import Finding
@@ -220,16 +220,26 @@ def analyze(job_id: str) -> None:
     )
 
 
-def latest_findings() -> list[Finding]:
-    """Nghi vấn của lần chạy mới nhất cho mỗi bản thu."""
+def latest_findings(latest_only: bool = False) -> list[Finding]:
+    """Nghi vấn của lần chạy mới nhất cho mỗi bản thu. latest_only=True: chỉ giữ bản thu
+    mới nhất đã phân tích của mỗi video, để thu lại cùng video không làm lặp nghi vấn."""
     with Session(get_engine()) as s:
         rows = s.exec(select(FindingRow)).all()
+        done = s.exec(
+            select(JobRow.video_id, JobRow.capture).where(
+                JobRow.status == "done", col(JobRow.capture).is_not(None)
+            )
+        ).all()
     latest: dict[tuple[str, str], str] = {}
     for r in rows:
         key = (r.video_id, r.capture)
         latest[key] = max(latest.get(key, ""), r.run_id)
+    newest: dict[str, str] = {}
+    for vid, cap in [*((r.video_id, r.capture) for r in rows), *done]:
+        newest[vid] = max(newest.get(vid, ""), str(cap))
     return [
         Finding.model_validate_json(r.data)
         for r in rows
         if latest[(r.video_id, r.capture)] == r.run_id
+        and (not latest_only or newest[r.video_id] == r.capture)
     ]

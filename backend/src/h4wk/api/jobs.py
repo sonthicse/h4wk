@@ -86,5 +86,6 @@ def get_job(job_id: str, session: SessionDep) -> Job:
 
 
 @router.get("/api/findings")
-def findings() -> list[Finding]:
-    return pipeline.latest_findings()
+def findings(latest_only: bool = False) -> list[Finding]:
+    """latest_only=true: chỉ bản thu mới nhất của mỗi video."""
+    return pipeline.latest_findings(latest_only)

@@ -54,11 +54,14 @@ def video_ref(video_id: str) -> VideoRef:
 
 
 def queue(
-    video: str | None = None, source_kind: str | None = None, status: str | None = None
+    video: str | None = None,
+    source_kind: str | None = None,
+    status: str | None = None,
+    latest_only: bool = False,
 ) -> list[QueueItem]:
     findings = [
         f
-        for f in latest_findings()
+        for f in latest_findings(latest_only)
         if (video is None or f.video_id == video)
         and (source_kind is None or f.source_kind == source_kind)
     ]

@@ -70,7 +70,8 @@ def _day(capture: str) -> date:
 
 
 @router.get("/api/dashboard")
-def dashboard() -> Dashboard:
+def dashboard(latest_only: bool = False) -> Dashboard:
+    """latest_only=true: số nghi vấn và video nổi bật chỉ tính bản thu mới nhất mỗi video."""
     with Session(get_engine()) as s:
         channel_count = s.exec(select(func.count()).select_from(WatchItemRow)).one()
 
@@ -81,7 +82,7 @@ def dashboard() -> Dashboard:
     captures_by_video = {k: v for k, v in captures_by_video.items() if v}
     capture_days = Counter(_day(c) for caps in captures_by_video.values() for c in caps)
 
-    findings = latest_findings()
+    findings = latest_findings(latest_only)
     decisions = decisions_for([f.id for f in findings])
     status = {
         f.id: decisions[f.id][0].status if f.id in decisions else "unreviewed" for f in findings

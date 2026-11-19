@@ -111,3 +111,28 @@ def test_new_run_starts_unreviewed_and_keeps_old_decision(
     assert items[0]["finding"]["id"] == rerun.id
     line = json.loads((data_dir / "reviews.jsonl").read_text(encoding="utf-8"))
     assert line["finding_id"] == old.id and line["run_id"] == old.run_id
+
+
+def test_latest_only_drops_older_capture_of_same_video(client: TestClient, sample) -> None:
+    newer = [
+        f.model_copy(
+            update={"id": f"f_{new_ulid()}", "capture": "20261119T090000", "run_id": "r_new"}
+        )
+        for f in sample
+    ]
+    _index(newer)
+    assert len(client.get("/api/review/queue").json()) == 2 * len(sample)
+    only = client.get("/api/review/queue?latest_only=true").json()
+    assert {i["finding"]["capture"] for i in only} == {"20261119T090000"}
+    assert len(client.get("/api/findings?latest_only=true").json()) == len(sample)
+    d = client.get("/api/dashboard?latest_only=true").json()
+    assert sum(d["findings_by_severity"].values()) == len(sample)
+
+
+def test_latest_only_newer_capture_without_findings(client: TestClient, sample) -> None:
+    from h4wk.jobs import pipeline
+
+    job = pipeline.create_job("u", "h4wkDemo001", "full", False, "user:thi")
+    pipeline._update(job.id, status="done", capture="20261119T090000", run_id="r_empty")
+    assert client.get("/api/review/queue?latest_only=true").json() == []
+    assert len(client.get("/api/review/queue").json()) == len(sample)

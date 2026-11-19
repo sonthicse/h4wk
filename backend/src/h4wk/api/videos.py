@@ -112,9 +112,9 @@ def _derived_transcripts(d: Path, capture: str) -> list[Transcript]:
 
 
 @router.get("")
-def list_videos() -> list[VideoSummary]:
+def list_videos(latest_only: bool = False) -> list[VideoSummary]:
     counts: dict[str, Counter[str]] = {}
-    for f in latest_findings():
+    for f in latest_findings(latest_only):
         counts.setdefault(f.video_id, Counter())[f.severity] += 1
     root = data_dir() / "videos"
     out = []

@@ -474,7 +474,7 @@ Nghiệm thu:
 
 ### 10.8 `review`
 
-Hàng đợi rà soát chỉ hiện nghi vấn của lần chạy phân tích mới nhất cho mỗi bản thu. Hàng đợi sắp xếp theo mức độ, sau đó theo thời gian, và lọc được theo video, `source_kind` và trạng thái.
+Hàng đợi rà soát chỉ hiện nghi vấn của lần chạy phân tích mới nhất cho mỗi bản thu. Tham số `latest_only` chỉ giữ bản thu mới nhất của mỗi video, để thu lại cùng một video không làm lặp nghi vấn. Hàng đợi sắp xếp theo mức độ, sau đó theo thời gian, và lọc được theo video, `source_kind` và trạng thái.
 
 Màn chi tiết video gồm:
 

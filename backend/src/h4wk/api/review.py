@@ -25,8 +25,10 @@ def review_queue(
     video: str | None = None,
     source_kind: SourceKind | None = None,
     status: ReviewStatus | None = None,
+    latest_only: bool = False,
 ) -> list[QueueItem]:
-    return queue(video, source_kind, status)
+    """latest_only=true: chỉ bản thu mới nhất của mỗi video (thu lại không làm lặp nghi vấn)."""
+    return queue(video, source_kind, status, latest_only)
 
 
 @router.get("/api/findings/{finding_id}/decisions")
