@@ -119,26 +119,25 @@ export default function DashboardPage() {
 
   const d = stats.data
 
-  // Bố cục kiểu bảng điều khiển: cột trái (video nổi bật + activity) đứng yên, không cuộn;
+  // Bố cục kiểu bảng điều khiển: cột trái (video + 3 thẻ số liệu + activity) đứng yên, không cuộn;
   // chỉ cột phải tự cuộn. Cột trái 9 phần, cột phải 11 phần để Events và Review đủ rộng.
-  // Trình phát co theo chiều cao còn lại để vừa màn hình.
   // Chiều cao = màn hình trừ thanh trên (3rem) và lề của <main> (2 × 1.5rem).
   return (
     <div className="flex h-[calc(100svh-6rem)] flex-col gap-4">
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,9fr)_minmax(0,11fr)] gap-4">
         <div className="-m-1 flex min-h-0 flex-col gap-4 p-1">
-          <div className="min-h-0 flex-1">
+          <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] items-start gap-4">
             <FeaturedVideoCard topVideoId={d.top_video?.id ?? null} />
+            <div className="flex flex-col gap-4">
+              <StatCard label="Watched channels" value={d.channel_count} to="/watchlist" />
+              <StatCard label="Videos collected" value={d.video_count} to="/videos" />
+              <StatCard label="Captures" value={d.capture_count} to="/collect" />
+            </div>
           </div>
           <ActivityChart data={d.activity} />
         </div>
         <div className="-m-1 min-h-0 overflow-y-auto p-1 pr-2">
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 grid grid-cols-3 gap-4">
-              <StatCard label="Watched channels" value={d.channel_count} to="/watchlist" />
-              <StatCard label="Videos collected" value={d.video_count} to="/videos" />
-              <StatCard label="Captures" value={d.capture_count} to="/collect" />
-            </div>
             <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findings_by_severity} variant={severityVariant} />
             <Breakdown title="Review" to="/review" centerLabel="findings" keys={statuses} counts={d.findings_by_status} variant={statusVariant} />
             <EventFeed />

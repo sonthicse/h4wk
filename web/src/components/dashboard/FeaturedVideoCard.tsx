@@ -30,7 +30,7 @@ function EmbeddedPlayer({ videoId, start }: { videoId: string; start: number }) 
       key={`${videoId}-${start}`}
       src={src}
       title="Top video"
-      className="h-full w-full rounded-lg bg-black"
+      className="aspect-video w-full rounded-lg bg-black"
       allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
       allowFullScreen
     />
@@ -67,7 +67,7 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
   const count = (s: Severity) => top.findings.filter((f) => f.severity === s).length
 
   return (
-    <Card className="flex h-full min-h-0 flex-col">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div className="flex shrink-0 items-center gap-2 text-sm">
@@ -90,11 +90,9 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
           </a>
         </div>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-3">
-        <div className="min-h-0 flex-1">
-          <EmbeddedPlayer videoId={top.videoId} start={start} />
-        </div>
-        <ul className="shrink-0 space-y-1">
+      <CardContent className="space-y-3">
+        <EmbeddedPlayer videoId={top.videoId} start={start} />
+        <ul className="space-y-1">
           {top.findings.map((f) => (
             <li key={f.id}>
               <button
@@ -116,7 +114,7 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
             </li>
           ))}
         </ul>
-        <Link to="/findings" className="shrink-0 text-sm text-muted-foreground underline">
+        <Link to="/findings" className="text-sm text-muted-foreground underline">
           All findings
         </Link>
       </CardContent>
