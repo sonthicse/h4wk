@@ -241,9 +241,9 @@ def latest_findings(latest_only: bool = False) -> list[Finding]:
     "Mới nhất" xác định từ findings.json trong data/ (nguồn gốc), không từ bảng jobs, nên kết
     quả trước và sau reindex giống nhau. Run mới nhất không có nghi vấn thì bản thu đó
     không hiện nghi vấn nào, run cũ không hiện lại.
-    Hạn chế: findings.json được ghi trước khi commit FindingRow, nên nếu commit DB lỗi, hoặc
-    findings.json của run mới bị hỏng, run đó vẫn được coi là mới nhất và bản thu hiện 0
-    nghi vấn cho tới khi chạy `h4wk reindex`."""
+    Hạn chế: findings.json được ghi trước khi commit FindingRow. Commit DB lỗi thì bản thu
+    hiện 0 nghi vấn cho tới khi chạy `h4wk reindex`. findings.json hỏng thì run đó vẫn được
+    coi là mới nhất (chỉ xét tên file), phải sửa hoặc xoá file."""
     latest = _latest_runs(data_dir())
     newest: dict[str, str] = {}
     for vid, cap in latest:

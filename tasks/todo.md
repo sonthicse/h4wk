@@ -350,7 +350,7 @@ Nghiệm thu:
 - [x] Integration test tắt worker giữa chừng rồi bật lại; job chạy tiếp tới `done` và không làm lại bước đã xong.
 - [x] Dán link một playlist có 3 video (dùng adapter giả) thì tạo đúng 3 job.
 
-Ghi chú: playlist không lưu bản thu (người dùng quyết); `POST /api/collect` trả `list[Job]`; mỗi hàng đợi chỉ nhận lại bước của mình khi khởi động. Giao diện còn phải chạy `npm run gen:api` và đổi kiểu trả về của `collect()` trong `web/src/api/jobs.ts` sang `Job[]`.
+Ghi chú: playlist không lưu bản thu (người dùng quyết); `POST /api/collect` trả `list[Job]`; mỗi hàng đợi chỉ nhận lại bước của mình khi khởi động. Giao diện đã đồng bộ: `collect()` trả `Job[]`, schema đã sinh lại.
 
 Kiểm tra: `uv run pytest tests/integration/test_recovery.py tests/integration/test_playlist.py`.
 
