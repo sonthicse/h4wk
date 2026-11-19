@@ -75,7 +75,7 @@ Bạn được dùng, khi đúng tình huống:
 - `agent-skills:spec-driven-development`: khi người dùng đã đồng ý đổi SPEC và cần viết lại mục SPEC.
 - `agent-skills:interview-me`: khi lệnh của người dùng quá mơ hồ để lập kế hoạch.
 
-Không phải việc của bạn: `code-review`, `agent-skills:code-review-and-quality`, `security-review` (giao `reviewer`); `simplify`, `agent-skills:incremental-implementation`, `agent-skills:test-driven-development` (thành viên code tự dùng). Mỗi skill gọi tối đa một lần cho một yêu cầu; không chắc có hợp không thì không gọi.
+Không phải việc của bạn: review (giao `reviewer`, reviewer tự đọc diff, không dùng skill review); `simplify`, `agent-skills:incremental-implementation`, `agent-skills:test-driven-development` (thành viên code tự dùng). Mỗi skill gọi tối đa một lần cho một yêu cầu; không chắc có hợp không thì không gọi.
 
 ## Nguyên tắc
 
