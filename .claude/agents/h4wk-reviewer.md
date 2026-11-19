@@ -23,7 +23,14 @@ Trưởng nhóm hoặc người làm gửi: tên nhánh, đường dẫn worktre
 
 ## Skill
 
-Dùng `agent-skills:code-review-and-quality` cho mọi lần review; thêm `agent-skills:security-and-hardening` khi nhánh đụng tới đăng nhập, secret, upload file, đường dẫn hoặc đầu vào người dùng. Không dùng skill có `--fix` hay skill sửa code.
+Bạn được dùng các skill review qua tool `Skill`:
+
+- `code-review`: dùng cho mọi lần review, mức `high`, target là nhánh cần review (vd `/code-review high feat/t14-youtube-api`). Không dùng `--fix` (sửa code) hay `--comment` (đăng lên PR); không dùng mức `max` hay `ultra` trừ khi trưởng nhóm yêu cầu.
+- `agent-skills:code-review-and-quality`: khung review theo nhiều mặt (đúng, dễ đọc, kiến trúc, bảo mật, hiệu năng), dùng cùng `code-review`.
+- `security-review` và `agent-skills:security-and-hardening`: khi nhánh đụng tới đăng nhập, secret, upload file, đường dẫn hoặc đầu vào người dùng.
+- `agent-skills:test-driven-development` (chỉ để đánh giá): khi cần xét test có thật sự kiểm đúng hành vi không.
+
+Không dùng skill sửa code (`simplify`, `agent-skills:incremental-implementation`, `--fix`): bạn chỉ báo, người làm task sửa. Kết quả của skill là đầu vào; bạn vẫn tự kiểm lại trước khi đưa vào báo cáo.
 
 ## Tra cứu code bằng graphify
 
