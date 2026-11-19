@@ -14,18 +14,11 @@ type Severity = Finding['severity']
 const WEIGHT: Record<Severity, number> = { high: 3, medium: 2, low: 1 }
 const LEAD_S = 2
 
-// Video nổi bật nhất, tính từ hàng đợi rà soát thật: mỗi nghi vấn high = 3, medium = 2, low = 1 điểm,
-// bỏ nghi vấn đã Reject; video tổng điểm cao nhất đứng đầu. Khi có API dashboard (T35) thì việc chấm điểm
-// chuyển sang backend.
-function pickTopVideo(findings: Finding[]) {
-  const score = new Map<string, number>()
-  for (const f of findings) score.set(f.video_id, (score.get(f.video_id) ?? 0) + WEIGHT[f.severity])
-  const top = [...score.entries()].sort((a, b) => b[1] - a[1])[0]
-  if (!top) return null
-  const list = findings
-    .filter((f) => f.video_id === top[0])
+// Nghi vấn của video nổi bật (backend chọn ở /api/dashboard: high 3, medium 2, low 1, bỏ đã Reject), nặng nhất trước.
+function videoFindings(findings: Finding[], videoId: string) {
+  return findings
+    .filter((f) => f.video_id === videoId)
     .sort((a, b) => WEIGHT[b.severity] - WEIGHT[a.severity] || (a.start ?? 0) - (b.start ?? 0))
-  return { videoId: top[0], findings: list }
 }
 
 // Trình phát nhúng của YouTube (bản nocookie), tự phát không tiếng từ giây `start`.
@@ -44,10 +37,11 @@ function EmbeddedPlayer({ videoId, start }: { videoId: string; start: number }) 
   )
 }
 
-export default function FeaturedVideoCard() {
+export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string | null }) {
   const findings = useQuery({ queryKey: ['review-queue'], queryFn: () => listQueue(), refetchInterval: 30_000 })
   const live = findings.data?.filter((it) => it.status !== 'rejected').map((it) => it.finding)
-  const top = live ? pickTopVideo(live) : null
+  const list = live && topVideoId ? videoFindings(live, topVideoId) : []
+  const top = topVideoId && list.length > 0 ? { videoId: topVideoId, findings: list } : null
   const video = findings.data?.find((it) => it.finding.video_id === top?.videoId)?.video
   const [picked, setPicked] = useState<string | null>(null)
 

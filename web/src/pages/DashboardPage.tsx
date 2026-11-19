@@ -10,11 +10,12 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { severityVariant, statusVariant } from '@/lib/findings'
-import { getDashboard } from '@/mocks/dashboard'
-import type { ReviewStatus, Severity } from '@/mocks/data'
+import { getDashboard } from '@/api/dashboard'
+import type { Finding } from '@/api/findings'
+import type { ReviewStatus } from '@/api/review'
 
-const severities: Severity[] = ['high', 'medium', 'low']
-const statuses: ReviewStatus[] = ['pending', 'confirmed', 'rejected', 'needs_info']
+const severities: Finding['severity'][] = ['high', 'medium', 'low']
+const statuses: ReviewStatus[] = ['unreviewed', 'confirmed', 'rejected', 'needs_info']
 
 // Thẻ cả khối là link; dùng chung cho thẻ số liệu và thẻ đếm theo nhóm.
 const cardLink =
@@ -40,7 +41,7 @@ const sliceColor: Record<string, string> = {
   high: 'var(--destructive)',
   medium: 'oklch(0.75 0.16 65)',
   low: 'oklch(0.62 0.17 255)',
-  pending: 'oklch(0.75 0.16 65)',
+  unreviewed: 'oklch(0.75 0.16 65)',
   needs_info: 'oklch(0.62 0.17 255)',
   confirmed: 'var(--destructive)',
   rejected: 'var(--muted-foreground)',
@@ -94,7 +95,7 @@ function Breakdown<K extends string>({
 }
 
 export default function DashboardPage() {
-  // Số liệu cũng làm mới mỗi 5 giây để khớp với dòng sự kiện (video watchlist xử lý xong thì số tăng).
+  // Làm mới mỗi 5 giây để khớp với dòng sự kiện (video watchlist xử lý xong thì số tăng).
   const stats = useQuery({ queryKey: ['dashboard'], queryFn: getDashboard, refetchInterval: 5000 })
 
   if (stats.isPending) {
@@ -117,7 +118,7 @@ export default function DashboardPage() {
   }
 
   const d = stats.data
-  const totalFindings = severities.reduce((sum, s) => sum + d.findingsBySeverity[s], 0)
+  const totalFindings = severities.reduce((sum, s) => sum + d.findings_by_severity[s], 0)
 
   return (
     <div className="space-y-4">
@@ -130,22 +131,22 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-start gap-4">
         <div className="space-y-4">
-          <FeaturedVideoCard />
+          <FeaturedVideoCard topVideoId={d.top_video?.id ?? null} />
           <div className="grid grid-cols-3 gap-4">
-            <StatCard label="Watched channels" value={d.channelCount} to="/watchlist" />
-            <StatCard label="Videos collected" value={d.videoCount} to="/videos" />
-            <StatCard label="Captures" value={d.captureCount} to="/collect" />
+            <StatCard label="Watched channels" value={d.channel_count} to="/watchlist" />
+            <StatCard label="Videos collected" value={d.video_count} to="/videos" />
+            <StatCard label="Captures" value={d.capture_count} to="/collect" />
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findingsBySeverity} variant={severityVariant} />
-            <Breakdown title="Review" to="/review" centerLabel="findings" keys={statuses} counts={d.findingsByStatus} variant={statusVariant} />
+            <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findings_by_severity} variant={severityVariant} />
+            <Breakdown title="Review" to="/review" centerLabel="findings" keys={statuses} counts={d.findings_by_status} variant={statusVariant} />
           </div>
         </div>
         {/* Cột phải: sự kiện, hoạt động và mức dùng nguồn, cho hai cột cao gần bằng nhau. */}
         <div className="space-y-4">
           <EventFeed />
           <ActivityChart data={d.activity} />
-          <UsageCard youtubeQuota={d.youtubeQuota} supadataCredits={d.supadataCredits} />
+          <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} />
         </div>
       </div>
     </div>

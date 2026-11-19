@@ -1474,7 +1474,7 @@
     "/api/events": {
       "get": {
         "tags": [
-          "watchlist"
+          "events"
         ],
         "summary": "List Events",
         "operationId": "list_events_api_events_get",
@@ -1511,6 +1511,27 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Dashboard",
+        "operationId": "dashboard_api_dashboard_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Dashboard"
                 }
               }
             }
@@ -1958,6 +1979,102 @@
         "type": "object",
         "title": "Cost"
       },
+      "Dashboard": {
+        "properties": {
+          "channel_count": {
+            "type": "integer",
+            "title": "Channel Count"
+          },
+          "video_count": {
+            "type": "integer",
+            "title": "Video Count"
+          },
+          "capture_count": {
+            "type": "integer",
+            "title": "Capture Count"
+          },
+          "findings_by_severity": {
+            "$ref": "#/components/schemas/SeverityCounts"
+          },
+          "findings_by_status": {
+            "$ref": "#/components/schemas/StatusCounts"
+          },
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/DayActivity"
+            },
+            "type": "array",
+            "title": "Activity"
+          },
+          "youtube_quota": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Usage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "supadata_credits": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Usage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "top_video": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TopVideo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "channel_count",
+          "video_count",
+          "capture_count",
+          "findings_by_severity",
+          "findings_by_status",
+          "activity",
+          "youtube_quota",
+          "supadata_credits",
+          "top_video"
+        ],
+        "title": "Dashboard"
+      },
+      "DayActivity": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "captures": {
+            "type": "integer",
+            "title": "Captures"
+          },
+          "findings": {
+            "type": "integer",
+            "title": "Findings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "captures",
+          "findings"
+        ],
+        "title": "DayActivity"
+      },
       "DecisionBody": {
         "properties": {
           "status": {
@@ -2148,6 +2265,13 @@
           },
           "kind": {
             "type": "string",
+            "enum": [
+              "channel_added",
+              "new_video",
+              "job_done",
+              "job_failed",
+              "review"
+            ],
             "title": "Kind"
           },
           "message": {
@@ -2176,6 +2300,50 @@
             ],
             "title": "Video Id"
           },
+          "video_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Title"
+          },
+          "channel_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel Title"
+          },
+          "findings": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Findings"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "job": {
             "anyOf": [
               {
@@ -2195,6 +2363,10 @@
           "message",
           "watch_item",
           "video_id",
+          "video_title",
+          "channel_title",
+          "findings",
+          "error",
           "job"
         ],
         "title": "Event"
@@ -2207,6 +2379,12 @@
           },
           "status": {
             "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "failed"
+            ],
             "title": "Status"
           }
         },
@@ -3192,6 +3370,32 @@
         ],
         "title": "SourceStatus"
       },
+      "StatusCounts": {
+        "properties": {
+          "unreviewed": {
+            "type": "integer",
+            "title": "Unreviewed",
+            "default": 0
+          },
+          "confirmed": {
+            "type": "integer",
+            "title": "Confirmed",
+            "default": 0
+          },
+          "rejected": {
+            "type": "integer",
+            "title": "Rejected",
+            "default": 0
+          },
+          "needs_info": {
+            "type": "integer",
+            "title": "Needs Info",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "StatusCounts"
+      },
       "ThumbnailAnalysis": {
         "properties": {
           "file": {
@@ -3288,6 +3492,52 @@
         ],
         "title": "Timeline"
       },
+      "TopVideo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "findings": {
+            "$ref": "#/components/schemas/SeverityCounts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "channel",
+          "score",
+          "findings"
+        ],
+        "title": "TopVideo"
+      },
       "Transcript": {
         "properties": {
           "kind": {
@@ -3349,6 +3599,24 @@
           "text"
         ],
         "title": "TranscriptSegment"
+      },
+      "Usage": {
+        "properties": {
+          "used": {
+            "type": "integer",
+            "title": "Used"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "used",
+          "limit"
+        ],
+        "title": "Usage"
       },
       "ValidationError": {
         "properties": {
@@ -3611,6 +3879,17 @@
               }
             ],
             "title": "Channel"
+          },
+          "view_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "View Count"
           }
         },
         "type": "object",

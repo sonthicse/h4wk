@@ -1,8 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import type { DashboardStats } from '@/mocks/dashboard'
+import type { Usage } from '@/api/dashboard'
 
-function Meter({ label, note, used, limit, unit }: { label: string; note: string; used: number; limit: number; unit: string }) {
+// usage = null: nguồn chưa theo dõi mức dùng (T14/T15 chưa làm).
+function Meter({ label, note, usage, unit }: { label: string; note: string; usage: Usage | null | undefined; unit: string }) {
+  if (!usage) {
+    return (
+      <div className="flex items-baseline justify-between gap-2 text-sm">
+        <span className="font-medium">{label}</span>
+        <span className="text-muted-foreground">Not tracked yet</span>
+      </div>
+    )
+  }
+  const { used, limit } = usage
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2 text-sm">
@@ -18,7 +28,7 @@ function Meter({ label, note, used, limit, unit }: { label: string; note: string
 }
 
 // Quota YouTube Data API và credit Supadata đã dùng (SPEC 10.3).
-export default function UsageCard({ youtubeQuota, supadataCredits }: Pick<DashboardStats, 'youtubeQuota' | 'supadataCredits'>) {
+export default function UsageCard({ youtubeQuota, supadataCredits }: { youtubeQuota: Usage | null | undefined; supadataCredits: Usage | null | undefined }) {
   return (
     <Card>
       <CardHeader>
@@ -29,9 +39,9 @@ export default function UsageCard({ youtubeQuota, supadataCredits }: Pick<Dashbo
           label="YouTube Data API"
           note="Today · resets at midnight Pacific Time (15:00 VN)"
           unit="units"
-          {...youtubeQuota}
+          usage={youtubeQuota}
         />
-        <Meter label="Supadata" note="This month" unit="credits" {...supadataCredits} />
+        <Meter label="Supadata" note="This month" unit="credits" usage={supadataCredits} />
       </CardContent>
     </Card>
   )

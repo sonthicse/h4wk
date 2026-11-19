@@ -8,16 +8,17 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import type { DayActivity } from '@/mocks/dashboard'
+import type { DayActivity } from '@/api/dashboard'
 
 const config = {
   captures: { label: 'Captures', color: 'oklch(0.62 0.17 255)' },
   findings: { label: 'Findings', color: 'var(--destructive)' },
 } satisfies ChartConfig
 
-// Ngày hiện theo giờ Việt Nam, dạng 18/11.
-function dayLabel(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit' })
+// API trả ngày theo giờ Việt Nam dạng YYYY-MM-DD; hiện thành 18/11.
+function dayLabel(date: string) {
+  const [, m, d] = date.split('-')
+  return `${d}/${m}`
 }
 
 export default function ActivityChart({ data }: { data: DayActivity[] }) {

@@ -525,6 +525,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dashboard */
+        get: operations["dashboard_api_dashboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -682,6 +699,34 @@ export interface components {
             /** Credits */
             credits?: number | null;
         };
+        /** Dashboard */
+        Dashboard: {
+            /** Channel Count */
+            channel_count: number;
+            /** Video Count */
+            video_count: number;
+            /** Capture Count */
+            capture_count: number;
+            findings_by_severity: components["schemas"]["SeverityCounts"];
+            findings_by_status: components["schemas"]["StatusCounts"];
+            /** Activity */
+            activity: components["schemas"]["DayActivity"][];
+            youtube_quota: components["schemas"]["Usage"] | null;
+            supadata_credits: components["schemas"]["Usage"] | null;
+            top_video: components["schemas"]["TopVideo"] | null;
+        };
+        /** DayActivity */
+        DayActivity: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Captures */
+            captures: number;
+            /** Findings */
+            findings: number;
+        };
         /** DecisionBody */
         DecisionBody: {
             /**
@@ -763,22 +808,36 @@ export interface components {
             id: number;
             /** At */
             at: string;
-            /** Kind */
-            kind: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "channel_added" | "new_video" | "job_done" | "job_failed" | "review";
             /** Message */
             message: string;
             /** Watch Item */
             watch_item: string | null;
             /** Video Id */
             video_id: string | null;
+            /** Video Title */
+            video_title: string | null;
+            /** Channel Title */
+            channel_title: string | null;
+            /** Findings */
+            findings: number | null;
+            /** Error */
+            error: string | null;
             job: components["schemas"]["EventJob"] | null;
         };
         /** EventJob */
         EventJob: {
             /** Id */
             id: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "done" | "failed";
         };
         /** FileEntry */
         FileEntry: {
@@ -1136,6 +1195,29 @@ export interface components {
          * @enum {string}
          */
         SourceStatus: "ok" | "failed" | "blocked" | "quota_exceeded" | "not_found" | "unsupported" | "disabled" | "suspended" | "no_source";
+        /** StatusCounts */
+        StatusCounts: {
+            /**
+             * Unreviewed
+             * @default 0
+             */
+            unreviewed: number;
+            /**
+             * Confirmed
+             * @default 0
+             */
+            confirmed: number;
+            /**
+             * Rejected
+             * @default 0
+             */
+            rejected: number;
+            /**
+             * Needs Info
+             * @default 0
+             */
+            needs_info: number;
+        };
         /** ThumbnailAnalysis */
         ThumbnailAnalysis: {
             /** File */
@@ -1172,6 +1254,18 @@ export interface components {
              */
             segments: components["schemas"]["Segment"][];
         };
+        /** TopVideo */
+        TopVideo: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string | null;
+            /** Channel */
+            channel: string | null;
+            /** Score */
+            score: number;
+            findings: components["schemas"]["SeverityCounts"];
+        };
         /** Transcript */
         Transcript: {
             kind: components["schemas"]["TranscriptKind"];
@@ -1193,6 +1287,13 @@ export interface components {
             end: number;
             /** Text */
             text: string;
+        };
+        /** Usage */
+        Usage: {
+            /** Used */
+            used: number;
+            /** Limit */
+            limit: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -1274,6 +1375,8 @@ export interface components {
             title?: string | null;
             /** Channel */
             channel?: string | null;
+            /** View Count */
+            view_count?: number | null;
         };
         /** VideoSummary */
         VideoSummary: {
@@ -2363,6 +2466,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dashboard_api_dashboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
                 };
             };
         };

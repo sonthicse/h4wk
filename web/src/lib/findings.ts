@@ -1,5 +1,8 @@
-// Hàm hiển thị nghi vấn dùng chung cho trang Findings và Review queue.
-import type { Finding, ReviewStatus, Severity } from '@/mocks/data'
+// Hàm hiển thị nghi vấn dùng chung cho các trang.
+import type { Finding } from '@/api/findings'
+import type { ReviewStatus } from '@/api/review'
+
+type Severity = Finding['severity']
 
 export const severityVariant: Record<Severity, 'destructive' | 'default' | 'secondary'> = {
   high: 'destructive',
@@ -7,8 +10,8 @@ export const severityVariant: Record<Severity, 'destructive' | 'default' | 'seco
   low: 'secondary',
 }
 
-export const statusVariant: Record<ReviewStatus, 'outline' | 'default' | 'secondary' | 'destructive'> = {
-  pending: 'outline',
+export const statusVariant: Record<ReviewStatus, 'outline' | 'default' | 'secondary'> = {
+  unreviewed: 'outline',
   confirmed: 'default',
   rejected: 'secondary',
   needs_info: 'outline',
@@ -23,12 +26,4 @@ export function formatTime(s: number) {
   const m = Math.floor(s / 60)
   const sec = Math.floor(s % 60)
   return `${m}:${sec.toString().padStart(2, '0')}`
-}
-
-export function timeRange(f: Finding) {
-  return timedSources.has(f.sourceKind) ? `${formatTime(f.start)}–${formatTime(f.end)}` : '—'
-}
-
-export function videoLink(f: Finding) {
-  return `/videos/${f.videoId}?finding=${f.id}`
 }
