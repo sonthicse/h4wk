@@ -61,7 +61,7 @@ def _no_network(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch)
 @pytest.fixture(autouse=True)
 def _offline_supadata_credits(request, monkeypatch):  # noqa: ANN001, ANN202
     """Không test nào hỏi /me của Supadata thật, kể cả khi máy có SUPADATA_API_KEY."""
-    if "supadata_api" in request.fixturenames:
+    if "supadata_api" in request.fixturenames or request.node.get_closest_marker("live"):
         return
     from h4wk.collectors.providers import supadata
 
@@ -163,7 +163,7 @@ class FakeSupadata:
             status, body = queue.pop(0) if len(queue) > 1 else queue[0]
         else:
             status, body = defaults[kind][0], self._raw(defaults[kind][1])
-        credits = {"native": 1, "generate": 2, "video": 1}.get(kind, 0)
+        credits = {"native": 1, "generate": 2}.get(kind, 0)
         return httpx2.Response(status, json=body, headers={"x-billable-requests": str(credits)})
 
     def sleep(self, seconds: float) -> None:

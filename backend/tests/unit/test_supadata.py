@@ -70,7 +70,7 @@ def test_classify_error(status: int, body: dict | None, kind: type) -> None:
 def test_video_metadata(supadata_api, tmp_path: Path) -> None:
     res = supadata_api.collector().fetch(Cap.VIDEO_METADATA, VIDEO, tmp_path)
     assert res.normalized.video.id == "h4wkDemo001" and res.normalized.channel.title
-    assert res.cost.credits == 1 and (tmp_path / "h4wkDemo001.video.json").exists()
+    assert res.cost.credits == 0 and (tmp_path / "h4wkDemo001.video.json").exists()
 
 
 def test_transcript_native(supadata_api, tmp_path: Path) -> None:

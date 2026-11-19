@@ -45,6 +45,9 @@ KEY_NAME = "SUPADATA_API_KEY"
 POLL_INTERVAL = 1.0
 JOB_TIMEOUT = 600.0  # giây
 ME_TTL = 300.0
+# Mode generate trả kết quả ngay trong response khi video ngắn (video 19 giây mất ~25 s), nên
+# timeout dài hơn 30 s; timeout sớm làm orchestrator gửi lại và tốn thêm credit.
+GENERATE_TIMEOUT = 120.0
 
 
 def _ts(v: str | None) -> datetime | None:
@@ -182,7 +185,7 @@ class SupadataCollector:
                 return d
         except Unsupported:
             pass  # không có phụ đề: nhờ AI tạo
-        status, d = self._get("transcript", {**base, "mode": "generate"})
+        status, d = self._get("transcript", {**base, "mode": "generate"}, timeout=GENERATE_TIMEOUT)
         if status == 202:
             job_id = d.get("jobId")
             if not job_id:
