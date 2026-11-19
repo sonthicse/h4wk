@@ -44,7 +44,8 @@ class AIGateway:
         messages: list[Message],
         schema: type[M],
     ) -> M:
-        return self._run(AiTask(task), messages, schema, image=None)
+        answer, _ = self._run(AiTask(task), messages, schema, image=None)
+        return answer
 
     def describe_image[M: BaseModel](
         self,
@@ -53,6 +54,12 @@ class AIGateway:
         prompt: str,
         schema: type[M],
     ) -> M:
+        answer, _ = self.describe_image_with_route(task, image, prompt, schema)
+        return answer
+
+    def describe_image_with_route[M: BaseModel](
+        self, task: AiTask | str, image: bytes, prompt: str, schema: type[M]
+    ) -> tuple[M, Route]:
         return self._run(AiTask(task), [{"role": "user", "content": prompt}], schema, image)
 
     def _run[M: BaseModel](
@@ -61,7 +68,7 @@ class AIGateway:
         messages: list[Message],
         schema: type[M],
         image: bytes | None,
-    ) -> M:
+    ) -> tuple[M, Route]:
         config = load_ai_config(self.config_path)
         routes = config.tasks.get(task)
         if not routes:
@@ -110,7 +117,7 @@ class AIGateway:
                         ]
                 else:
                     self._log(task, route, start, "ok", reply)
-                    return answer
+                    return answer, route
         raise GatewayError(f"{task}: không có kết quả hợp lệ") from last_error
 
     def _log(

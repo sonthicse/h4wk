@@ -72,7 +72,7 @@ def write_timeline(path: Path, timeline: Timeline) -> None:
         temporary.write_text(content, encoding="utf-8")
 
 
-def process_capture(capture_dir: Path, output_dir: Path, config: AnalysisConfig) -> Timeline:
+def read_capture_timeline(capture_dir: Path, output_dir: Path, config: AnalysisConfig) -> Timeline:
     normalized = Normalized.model_validate_json(
         (capture_dir / "normalized.json").read_text(encoding="utf-8")
     )
@@ -82,7 +82,11 @@ def process_capture(capture_dir: Path, output_dir: Path, config: AnalysisConfig)
     stt_path = output_dir / "transcripts" / "stt.vi.json"
     if stt_path.is_file():
         transcripts = [Transcript.model_validate_json(stt_path.read_bytes()), *transcripts]
-    timeline = build_timeline(normalized.video.id, capture_dir.name, transcripts, config)
+    return build_timeline(normalized.video.id, capture_dir.name, transcripts, config)
+
+
+def process_capture(capture_dir: Path, output_dir: Path, config: AnalysisConfig) -> Timeline:
+    timeline = read_capture_timeline(capture_dir, output_dir, config)
     path = output_dir / "timeline.json"
     if path.is_file():
         try:

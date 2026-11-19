@@ -1,6 +1,8 @@
 """Luồng collect → media → analyze (T12). Mỗi bước là một task Huey; media chạy trên hàng
 đợi gpu. Mỗi bước cập nhật trạng thái và tiến độ của job trong chỉ mục."""
 
+import os
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -18,11 +20,15 @@ from h4wk.core.config_models import AnalysisConfig, load_toml
 from h4wk.core.db import FindingRow, JobRow, get_engine
 from h4wk.core.ids import new_ulid
 from h4wk.core.types import VN_TZ
-from h4wk.evidence.models import Trigger
+from h4wk.evidence.models import Manifest, Trigger
 from h4wk.evidence.writer import CAPTURE_TS_FORMAT, list_captures
 from h4wk.jobs.queue import huey, huey_gpu
-from h4wk.media import transcripts
+from h4wk.media import ocr, stt, transcripts
+from h4wk.media.enrich import enrich
+from h4wk.media.keyframes import extract_keyframes
 from h4wk.media.timeline import Timeline
+
+_stt_worker = stt.SttWorker(os.getenv("H4WK_STT_MODEL", "large-v3"))
 
 RECENT = timedelta(minutes=10)
 
@@ -82,7 +88,12 @@ def _recent_capture(job: JobRow) -> str | None:
     if not caps:
         return None
     at = datetime.strptime(caps[-1], CAPTURE_TS_FORMAT).replace(tzinfo=VN_TZ)
-    return caps[-1] if _now() - at < RECENT else None
+    if _now() - at >= RECENT:
+        return None
+    manifest = Manifest.model_validate_json(
+        (_video_dir(job) / "captures" / caps[-1] / "manifest.json").read_bytes()
+    )
+    return caps[-1] if manifest.level == job.level else None
 
 
 def _analysis_config() -> AnalysisConfig:
@@ -100,6 +111,10 @@ def collect(job_id: str) -> None:
     try:
         capture = None if job.force else _recent_capture(job)
         if capture is None:
+            # C1 dùng tên bản thu chính xác đến giây.
+            now = _now()
+            if (_video_dir(job) / "captures" / now.strftime(CAPTURE_TS_FORMAT)).exists():
+                time.sleep(1 - now.microsecond / 1_000_000)
             orch = Orchestrator.from_config(case_dir=case_dir(job.case_id))
             path = orch.collect(
                 parse_target(job.target),
@@ -126,10 +141,28 @@ def media(job_id: str) -> None:
         cap_dir = _video_dir(job) / "captures" / str(job.capture)
         out = _video_dir(job) / "derived" / str(job.capture)
         out.mkdir(parents=True, exist_ok=True)
-        # T10: timeline từ phụ đề. Proxy, keyframe, OCR, STT, VLM được nối ở T22.
-        transcripts.process_capture(cap_dir, out, _analysis_config())
+        data = Normalized.model_validate_json((cap_dir / "normalized.json").read_bytes())
+        frames = []
+        source_hash = None
+        if job.level == CollectLevel.FULL:
+            job = _update(job_id, step="transcribe", progress=48)
+            video_file = stt.transcribe_capture(cap_dir, out, _stt_worker)
+            manifest = Manifest.model_validate_json((cap_dir / "manifest.json").read_bytes())
+            source_hash = manifest.files[video_file].sha256
+            job = _update(job_id, step="frames", progress=55)
+            frames = extract_keyframes(out)
+        timeline = transcripts.read_capture_timeline(cap_dir, out, _analysis_config())
+        timeline.source_video_sha256 = source_hash
+        if job.level == CollectLevel.METADATA:
+            transcripts.write_timeline(out / "timeline.json", timeline)
+        else:
+            job = _update(job_id, step="ocr", progress=60)
+            lines = ocr.process_ocr(cap_dir, out)
+            job = _update(job_id, step="vlm", progress=65)
+            thumbnails = list(dict.fromkeys(t.file for t in data.thumbnails if t.file))
+            enrich(timeline, cap_dir, out, frames, thumbnails, lines)
     except Exception as e:
-        _fail(job_id, "media", e)
+        _fail(job_id, job.step or "media", e)
         return
     _update(job_id, progress=70)
     analyze(job_id)

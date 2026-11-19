@@ -51,9 +51,7 @@ class SttWorker:
         return transcript
 
 
-def process_full_capture(
-    capture_dir: Path, output_dir: Path, config: AnalysisConfig, worker: SttWorker
-) -> Timeline:
+def transcribe_capture(capture_dir: Path, output_dir: Path, worker: SttWorker) -> str:
     if output_dir.resolve().is_relative_to(capture_dir.resolve()):
         raise ValueError("Tệp phái sinh phải nằm ngoài thư mục bản thu")
     data = Normalized.model_validate_json((capture_dir / "normalized.json").read_bytes())
@@ -67,4 +65,11 @@ def process_full_capture(
         audio_source=capture_dir / audio.file if audio else None,
     )
     worker.transcribe(wav, output_dir / "transcripts" / "stt.vi.json")
+    return video.file
+
+
+def process_full_capture(
+    capture_dir: Path, output_dir: Path, config: AnalysisConfig, worker: SttWorker
+) -> Timeline:
+    transcribe_capture(capture_dir, output_dir, worker)
     return process_capture(capture_dir, output_dir, config)
