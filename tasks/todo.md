@@ -532,6 +532,8 @@ Nghiệm thu:
 
 Kiểm tra: `npm run build`, rồi kiểm tra thủ công trên 2 video.
 
+Backend đọc video đã có ở `api/videos.py` (Thi làm trước để giao diện nối): `GET /api/videos`, `/api/videos/{id}`, `/timeline`, `/transcripts`, `/comments`, `/media` (proxy hoặc file gốc, hỗ trợ Range), `/frames/{file}`.
+
 File: `api/media.py`, `web/src/pages/VideoDetail.tsx`, `web/src/components/{Player,TranscriptPane,FindingTimeline}.tsx`.
 Người làm: Bảo. Phụ thuộc: T13, T22, T25. Cỡ: M.
 
@@ -572,6 +574,8 @@ Nghiệm thu:
 - [ ] Sửa 1 byte trên đĩa thì giao diện báo FAIL đúng file đó.
 
 Kiểm tra: `npm run build`; thủ công: sửa 1 byte rồi bấm Verify integrity.
+
+Backend xong: `GET /api/videos/{id}/captures/{capture}` (manifest và file), `POST …/verify` (OK, FAIL, missing, unexpected kèm SHA-256 mong đợi và thực tế, có audit), `GET …/files/{path}` (chỉ file có trong manifest). Có test sửa 1 byte. Phần giao diện do phiên UI làm.
 
 File: `api/captures.py`, `web/src/pages/Capture.tsx`.
 Người làm: Thi. Phụ thuộc: T5, T13. Cỡ: S.
