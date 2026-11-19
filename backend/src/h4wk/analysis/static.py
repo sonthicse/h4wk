@@ -1,20 +1,44 @@
-"""Kiểm tra từ ngữ xúc phạm trong văn bản."""
+"""Tầng tĩnh: tìm cụm từ trong từ điển, theo trọn từ, sau khi bỏ dấu và chuyển chữ thường."""
 
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
+from h4wk.analysis.models import Category
 from h4wk.analysis.normalize import normalize
 
+LEXICON_PATH = Path(__file__).parent / "lexicon" / "vi_insults.txt"
+_HEADER = re.compile(r"^\[(?P<group>[^:\]]+):\s*(?P<category>\w+)\]$")
 
-def contains_insult(text: str, insults: list[str]) -> bool:
+
+@dataclass(frozen=True)
+class LexiconEntry:
+    phrase: str
+    group: str
+    category: Category
+
+
+def load_lexicon(path: Path = LEXICON_PATH) -> list[LexiconEntry]:
+    entries: list[LexiconEntry] = []
+    group, category = None, None
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if m := _HEADER.match(line):
+            group, category = m["group"].strip(), Category(m["category"])
+            continue
+        if group is None or category is None:
+            raise ValueError(f"cụm từ {line!r} nằm ngoài nhóm nào trong {path}")
+        entries.append(LexiconEntry(line, group, category))
+    return entries
+
+
+def find_insult(text: str, lexicon: list[LexiconEntry]) -> LexiconEntry | None:
+    """Cụm từ đầu tiên của từ điển có trong văn bản, hoặc None."""
     words = re.findall(r"\w+", normalize(text))
-    for insult in insults:
-        parts = re.findall(r"\w+", normalize(insult))
-        if parts and any(words[i:i + len(parts)] == parts for i in range(len(words))):
-            return True
-    return False
-
-
-def load_insults() -> list[str]:
-    path = Path(__file__).parent / "lexicon" / "vi_insults.txt"
-    return [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    for entry in lexicon:
+        parts = re.findall(r"\w+", normalize(entry.phrase))
+        if parts and any(words[i : i + len(parts)] == parts for i in range(len(words))):
+            return entry
+    return None

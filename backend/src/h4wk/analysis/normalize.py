@@ -16,7 +16,7 @@ def _one_edit(a: str, b: str) -> bool:
         a, b = b, a
     for i, (x, y) in enumerate(zip(a, b, strict=False)):
         if x != y:
-            return a[i + 1:] == b[i + 1:] if len(a) == len(b) else a[i:] == b[i + 1:]
+            return a[i + 1 :] == b[i + 1 :] if len(a) == len(b) else a[i:] == b[i + 1 :]
     return True
 
 
@@ -29,7 +29,9 @@ def matches_name(text: str, names: list[str], abbreviations: list[str]) -> bool:
         if not parts:
             continue
         for i in range(len(words) - len(parts) + 1):
-            if all(a == b or (len(a) >= 4 and _one_edit(a, b))
-                   for a, b in zip(parts, words[i:i + len(parts)], strict=True)):
+            if all(
+                a == b or (len(a) >= 4 and _one_edit(a, b))
+                for a, b in zip(parts, words[i : i + len(parts)], strict=True)
+            ):
                 return True
     return False

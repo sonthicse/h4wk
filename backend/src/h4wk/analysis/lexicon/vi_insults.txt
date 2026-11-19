@@ -1,4 +1,86 @@
+# Từ điển cho tầng tĩnh. Dòng "[nhóm: category]" mở một nhóm; các dòng sau là cụm từ của nhóm.
+# category phải là một giá trị của C4: insult, unsupported_accusation, fabrication.
+# So khớp sau khi chuẩn hoá (bỏ dấu, chữ thường) và theo trọn từ. Tầng tĩnh chỉ chạy trên vùng
+# văn bản có dấu hiệu tên đối tượng; tầng LLM và người rà soát quyết định cuối cùng.
+# Số trong ngoặc là mục tương ứng trong danh sách thông tin xâm phạm an ninh quốc gia.
+
+[xúc phạm, phỉ báng (1, 3): insult]
+xúc phạm
+phỉ báng
+bôi nhọ
+nhục mạ
+lăng mạ
+đồ hèn
 đồ ngốc
 đồ ngu
 ngu dốt
 đồ khốn
+khốn nạn
+mất dạy
+súc vật
+đồ chó
+xúc phạm quốc kỳ
+xúc phạm quốc huy
+xúc phạm quốc ca
+xúc phạm lãnh tụ
+xúc phạm anh hùng
+
+[cáo buộc không bằng chứng (1, 17): unsupported_accusation]
+lừa đảo
+tham nhũng
+bán nước
+phản quốc
+độc tài
+tay sai
+bè lũ
+cướp đất
+ăn cắp
+đàn áp
+thối nát
+
+[xuyên tạc, bịa đặt, giả mạo (1, 4, 5, 11, 12, 22, 23, 24): fabrication]
+xuyên tạc
+bịa đặt
+sai sự thật
+tin giả
+bóp méo lịch sử
+viết lại lịch sử
+phủ nhận thành tựu
+phủ nhận cách mạng
+đường lưỡi bò
+đường chín đoạn
+bản đồ sai
+giả mạo
+video giả
+giả giọng
+deepfake
+cắt ghép
+
+[kích động, chia rẽ, bạo lực (2, 6, 8, 9, 10, 13, 14, 15, 16, 18, 19, 25): insult]
+kích động
+xúi giục
+lôi kéo
+kêu gọi biểu tình
+xuống đường
+tụ tập đông người
+bạo loạn
+lật đổ
+khởi nghĩa
+cầm vũ khí
+khủng bố
+đánh bom
+ly khai
+chia rẽ dân tộc
+chia rẽ tôn giáo
+hận thù dân tộc
+kỳ thị dân tộc
+chống người thi hành công vụ
+phá hoại
+tẩy chay
+
+[bí mật nhà nước (20, 21): insult]
+bí mật nhà nước
+tài liệu mật
+tài liệu tuyệt mật
+lộ bí mật
+rò rỉ tài liệu

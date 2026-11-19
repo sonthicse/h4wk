@@ -28,7 +28,8 @@ def capture(tmp_path):
                 "settings": {},
                 "frames": [{"file": "frames/000007.jpg", "scene": 1, "t": 1.5, "hash": "0" * 16}],
             }
-        )
+        ),
+        encoding="utf-8",
     )
     (raw / "normalized.json").write_text(
         json.dumps(
@@ -39,7 +40,8 @@ def capture(tmp_path):
                     {"name": "remote", "url": "https://example.org/image"},
                 ],
             }
-        )
+        ),
+        encoding="utf-8",
     )
     return raw, derived
 
@@ -57,7 +59,9 @@ def test_process_keyframes_and_local_thumbnails(capture, monkeypatch):
         ("frames/000007.jpg", 1.5, "LỪA ĐẢO")
     ]
     path = derived / "ocr.json"
-    assert json.loads(path.read_text())["lines"] == [line.model_dump(mode="json") for line in lines]
+    assert json.loads(path.read_text(encoding="utf-8"))["lines"] == [
+        line.model_dump(mode="json") for line in lines
+    ]
     stamp = path.stat().st_mtime_ns
     monkeypatch.setattr(ocr, "_recognize", lambda paths: pytest.fail("cache miss"))
     assert ocr.process_ocr(raw, derived) == lines and path.stat().st_mtime_ns == stamp
@@ -112,6 +116,6 @@ def test_full_video_requires_index(capture):
     normalized = raw / "normalized.json"
     data = json.loads(normalized.read_bytes())
     data["media"] = [{"kind": "video", "file": "video.mp4"}]
-    normalized.write_text(json.dumps(data))
+    normalized.write_text(json.dumps(data), encoding="utf-8")
     with pytest.raises(FileNotFoundError, match="index.json"):
         ocr.process_ocr(raw, derived)

@@ -34,12 +34,15 @@ OK = ProviderReply('{"label":"ok"}', input_tokens=10, output_tokens=4, cost_usd=
 @pytest.fixture
 def config(tmp_path):
     path = tmp_path / "ai.toml"
-    path.write_text(CONFIG)
+    path.write_text(CONFIG, encoding="utf-8")
     return path
 
 
 def logs(tmp_path):
-    return [json.loads(line) for line in (tmp_path / "ai_calls.jsonl").read_text().splitlines()]
+    return [
+        json.loads(line)
+        for line in (tmp_path / "ai_calls.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
 
 
 def test_repair_invalid_json(config, tmp_path):
@@ -84,13 +87,13 @@ def test_image_and_route_reload(config, tmp_path):
     request = second.requests[0]
     assert request.image == b"pixels" and request.messages[-1]["content"] == "describe"
     assert request.model == "image" and not request.structured
-    config.write_text(CONFIG.replace('{provider="first", model="text"}, ', ""))
+    config.write_text(CONFIG.replace('{provider="first", model="text"}, ', ""), encoding="utf-8")
     assert gateway.complete_structured("analysis.classify", [], Answer).label == "ok"
     assert [r["status"] for r in logs(tmp_path)] == ["ok", "ok"]
 
 
 def test_invalid_vision_route(config):
-    config.write_text(CONFIG.replace("vision = true", "vision = false"))
+    config.write_text(CONFIG.replace("vision = true", "vision = false"), encoding="utf-8")
     with pytest.raises(ValidationError, match="không đọc được ảnh"):
         load_ai_config(config)
 

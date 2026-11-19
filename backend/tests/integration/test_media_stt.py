@@ -111,7 +111,7 @@ def test_full_capture_runs_stt_even_with_uploaded_captions(clip, tmp_path, monke
                 }
             ]
         original = Normalized.model_validate(data).model_dump_json(by_alias=True)
-        (capture / "normalized.json").write_text(original)
+        (capture / "normalized.json").write_text(original, encoding="utf-8")
         output = tmp_path / "derived" / capture.name
         result = process_full_capture(capture, output, AnalysisConfig(), worker)
         assert result.transcript_kind == expected
@@ -121,7 +121,7 @@ def test_full_capture_runs_stt_even_with_uploaded_captions(clip, tmp_path, monke
         stamp = path.stat().st_mtime_ns
         assert process_full_capture(capture, output, AnalysisConfig(), worker) == result
         assert path.stat().st_mtime_ns == stamp
-        assert (capture / "normalized.json").read_text() == original
+        assert (capture / "normalized.json").read_text(encoding="utf-8") == original
     assert model.transcribe.call_count == 2
     load.assert_called_once_with("test-model")
     assert sum("test-model" in record.getMessage() for record in caplog.records) == 1
@@ -180,7 +180,8 @@ def test_stt_retry_preserves_ocr(clip, tmp_path, monkeypatch):
                 "video": {"id": "vid", "channel_id": "c", "title": "t"},
                 "media": [{"kind": "video", "file": "sample.mp4"}],
             }
-        )
+        ),
+        encoding="utf-8",
     )
     model = Mock()
     model.transcribe.return_value = ([SimpleNamespace(start=0, end=1, text="xin")], None)
@@ -193,7 +194,7 @@ def test_stt_retry_preserves_ocr(clip, tmp_path, monkeypatch):
     data["segments"][0]["ocr"] = [
         {"text": "xin", "bbox": [0, 0, 2, 2], "frame": "frame.jpg", "t": 0.5}
     ]
-    path.write_text(json.dumps(data))
+    path.write_text(json.dumps(data), encoding="utf-8")
     stamp = path.stat().st_mtime_ns
     timeline = process_full_capture(capture, output, AnalysisConfig(), worker)
     assert timeline.segments[0].ocr[0].text == "xin"

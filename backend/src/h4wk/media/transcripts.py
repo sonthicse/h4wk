@@ -14,14 +14,20 @@ from h4wk.media.timeline import Segment, Timeline
 def group_segments(sentences: list[TranscriptSegment]) -> list[Segment]:
     groups: list[list[TranscriptSegment]] = []
     for sentence in sorted(sentences, key=lambda item: item.start):
-        if not groups or max(s.end for s in groups[-1]) - groups[-1][0].start >= 8 or (
-            max(sentence.end, *(s.end for s in groups[-1])) - groups[-1][0].start > 20
+        if (
+            not groups
+            or max(s.end for s in groups[-1]) - groups[-1][0].start >= 8
+            or (max(sentence.end, *(s.end for s in groups[-1])) - groups[-1][0].start > 20)
         ):
             groups.append([])
         groups[-1].append(sentence)
     return [
-        Segment(id=f"seg_{i:04d}", start=group[0].start,
-                end=max(s.end for s in group), speech=" ".join(s.text for s in group))
+        Segment(
+            id=f"seg_{i:04d}",
+            start=group[0].start,
+            end=max(s.end for s in group),
+            speech=" ".join(s.text for s in group),
+        )
         for i, group in enumerate(groups, 1)
     ]
 
@@ -41,7 +47,10 @@ def choose_transcript(
 
 
 def build_timeline(
-    video_id: str, capture: str, transcripts: list[Transcript], config: AnalysisConfig,
+    video_id: str,
+    capture: str,
+    transcripts: list[Transcript],
+    config: AnalysisConfig,
     source_video_sha256: str | None = None,
 ) -> Timeline:
     transcript = choose_transcript(transcripts, config.transcript_priority)
