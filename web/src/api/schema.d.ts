@@ -887,8 +887,8 @@ export interface components {
             findings_by_status: components["schemas"]["StatusCounts"];
             /** Activity */
             activity: components["schemas"]["DayActivity"][];
-            youtube_quota: components["schemas"]["h4wk__api__dashboard__Usage"] | null;
-            supadata_credits: components["schemas"]["h4wk__api__dashboard__Usage"] | null;
+            youtube_quota: components["schemas"]["Usage"] | null;
+            supadata_credits: components["schemas"]["Usage"] | null;
             top_video: components["schemas"]["TopVideo"] | null;
         };
         /** DayActivity */
@@ -1441,7 +1441,7 @@ export interface components {
             last_error: string | null;
             /** Last Error At */
             last_error_at: string | null;
-            usage: components["schemas"]["h4wk__api__settings__Usage"] | null;
+            usage: components["schemas"]["SourceUsage"] | null;
         };
         /**
          * SourceKind
@@ -1460,6 +1460,20 @@ export interface components {
          * @enum {string}
          */
         SourceStatus: "ok" | "failed" | "blocked" | "quota_exceeded" | "not_found" | "unsupported" | "disabled" | "suspended" | "no_source";
+        /** SourceUsage */
+        SourceUsage: {
+            /** Used */
+            used: number;
+            /** Limit */
+            limit: number;
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "day" | "month";
+            /** Resets At */
+            resets_at: string | null;
+        };
         /** SourcesSettings */
         SourcesSettings: {
             /** Sources */
@@ -1591,6 +1605,13 @@ export interface components {
             end: number;
             /** Text */
             text: string;
+        };
+        /** Usage */
+        Usage: {
+            /** Used */
+            used: number;
+            /** Limit */
+            limit: number;
         };
         /** ValidationError */
         ValidationError: {
@@ -1765,27 +1786,6 @@ export interface components {
             ] | null;
             /** Score */
             score?: number | null;
-        };
-        /** Usage */
-        h4wk__api__dashboard__Usage: {
-            /** Used */
-            used: number;
-            /** Limit */
-            limit: number;
-        };
-        /** Usage */
-        h4wk__api__settings__Usage: {
-            /** Used */
-            used: number;
-            /** Limit */
-            limit: number;
-            /**
-             * Period
-             * @enum {string}
-             */
-            period: "day" | "month";
-            /** Resets At */
-            resets_at: string | null;
         };
         /** Trigger */
         h4wk__evidence__models__Trigger: {

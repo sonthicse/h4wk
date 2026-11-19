@@ -2666,7 +2666,7 @@
           "youtube_quota": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/h4wk__api__dashboard__Usage"
+                "$ref": "#/components/schemas/Usage"
               },
               {
                 "type": "null"
@@ -2676,7 +2676,7 @@
           "supadata_credits": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/h4wk__api__dashboard__Usage"
+                "$ref": "#/components/schemas/Usage"
               },
               {
                 "type": "null"
@@ -4222,7 +4222,7 @@
           "usage": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/h4wk__api__settings__Usage"
+                "$ref": "#/components/schemas/SourceUsage"
               },
               {
                 "type": "null"
@@ -4302,6 +4302,45 @@
           "no_source"
         ],
         "title": "SourceStatus"
+      },
+      "SourceUsage": {
+        "properties": {
+          "used": {
+            "type": "integer",
+            "title": "Used"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "day",
+              "month"
+            ],
+            "title": "Period"
+          },
+          "resets_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resets At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "used",
+          "limit",
+          "period",
+          "resets_at"
+        ],
+        "title": "SourceUsage"
       },
       "SourcesSettings": {
         "properties": {
@@ -4667,6 +4706,24 @@
           "text"
         ],
         "title": "TranscriptSegment"
+      },
+      "Usage": {
+        "properties": {
+          "used": {
+            "type": "integer",
+            "title": "Used"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "used",
+          "limit"
+        ],
+        "title": "Usage"
       },
       "ValidationError": {
         "properties": {
@@ -5261,63 +5318,6 @@
         ],
         "title": "Trigger",
         "description": "D\u1ea5u hi\u1ec7u \u0111\u00e3 k\u00e9o m\u1ed9t \u0111o\u1ea1n v\u00e0o ph\u00e2n t\u00edch."
-      },
-      "h4wk__api__dashboard__Usage": {
-        "properties": {
-          "used": {
-            "type": "integer",
-            "title": "Used"
-          },
-          "limit": {
-            "type": "integer",
-            "title": "Limit"
-          }
-        },
-        "type": "object",
-        "required": [
-          "used",
-          "limit"
-        ],
-        "title": "Usage"
-      },
-      "h4wk__api__settings__Usage": {
-        "properties": {
-          "used": {
-            "type": "integer",
-            "title": "Used"
-          },
-          "limit": {
-            "type": "integer",
-            "title": "Limit"
-          },
-          "period": {
-            "type": "string",
-            "enum": [
-              "day",
-              "month"
-            ],
-            "title": "Period"
-          },
-          "resets_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Resets At"
-          }
-        },
-        "type": "object",
-        "required": [
-          "used",
-          "limit",
-          "period",
-          "resets_at"
-        ],
-        "title": "Usage"
       },
       "h4wk__evidence__models__Trigger": {
         "properties": {
