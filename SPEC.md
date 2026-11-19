@@ -389,7 +389,7 @@ Bước 1 tìm dấu hiệu đối tượng (`hits`). Mỗi dấu hiệu ghi đ�
 
 Một video được coi là liên quan tới đối tượng khi có ít nhất một dấu hiệu ở bất kỳ đâu.
 
-Bước 2 là tầng tĩnh. Từ điển tiếng Việt (`analysis/lexicon/vi_insults.txt`) chạy trên các vùng văn bản có dấu hiệu tên. Từ điển chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia (xúc phạm, phỉ báng; cáo buộc không bằng chứng; xuyên tạc, bịa đặt, giả mạo; kích động, chia rẽ, bạo lực; bí mật nhà nước), mỗi nhóm gắn một `category` của C4. Có cụm từ trong từ điển thì sinh nghi vấn `analyzer: "static"` với `category` của nhóm, và `reason` ghi nhóm cùng cụm từ khớp. Dấu hiệu tên đơn thuần chỉ được ghi vào `hits.json`, không vào hàng đợi.
+Bước 2 là tầng tĩnh. Từ điển tiếng Việt (`analysis/lexicon/vi_insults.txt`) chạy trên các vùng văn bản có dấu hiệu tên. Đối tượng của case thường là lãnh đạo Đảng và Nhà nước, vì nội dung xâm phạm an ninh quốc gia khi nhắc tên một người cụ thể thường nhắm vào những người này. Từ điển chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia (xúc phạm, phỉ báng; cáo buộc không bằng chứng; xuyên tạc, bịa đặt, giả mạo; kích động, chia rẽ, bạo lực; bí mật nhà nước), mỗi nhóm gắn một `category` của C4 (lần lượt `insult`, `unsupported_accusation`, `fabrication`, `incitement`, `state_secret`). Có cụm từ trong từ điển thì sinh nghi vấn `analyzer: "static"` với `category` của nhóm, và `reason` ghi nhóm cùng cụm từ khớp. Dấu hiệu tên đơn thuần chỉ được ghi vào `hits.json`, không vào hàng đợi.
 
 Bước 3 là tầng LLM, qua tác vụ AI `analysis.classify`. Các phần được gửi đi:
 
@@ -418,7 +418,7 @@ Nghi vấn (`findings.json`):
   "segment_id": "seg_0007", "comment_id": null,
   "start": 92.4, "end": 104.1, "quote": "…", "frame": "frames/000231.jpg", "bbox": null,
   "entity": "e_01",
-  "category": "insult|unsupported_accusation|fabrication|legitimate_criticism|neutral",
+  "category": "insult|unsupported_accusation|fabrication|incitement|state_secret|legitimate_criticism|neutral",
   "severity": "low|medium|high",
   "confidence": "unverified|likely|highly_likely",
   "reason": "…"

@@ -5,6 +5,8 @@
         "insult",
         "unsupported_accusation",
         "fabrication",
+        "incitement",
+        "state_secret",
         "legitimate_criticism",
         "neutral"
       ],

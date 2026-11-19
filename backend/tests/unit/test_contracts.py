@@ -264,6 +264,8 @@ VALID: list[tuple[Any, dict[str, Any]]] = [
     (Timeline, TIMELINE),
     (EntityHit, HIT),
     (Finding, FINDING),
+    (Finding, _finding(category="incitement")),
+    (Finding, _finding(category="state_secret")),
     (ReviewDecision, REVIEW),
     (SourcesConfig, SOURCES),
     (AiConfig, AI),

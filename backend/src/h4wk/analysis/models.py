@@ -34,6 +34,8 @@ class Category(StrEnum):
     INSULT = "insult"
     UNSUPPORTED_ACCUSATION = "unsupported_accusation"
     FABRICATION = "fabrication"
+    INCITEMENT = "incitement"
+    STATE_SECRET = "state_secret"
     LEGITIMATE_CRITICISM = "legitimate_criticism"
     NEUTRAL = "neutral"
 

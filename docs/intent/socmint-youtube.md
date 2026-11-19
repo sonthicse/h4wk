@@ -93,5 +93,7 @@ Cùng ngày, khi duyệt hợp đồng C1–C5:
 
 Ngày 2026-11-19, khi gộp phần của Bảo:
 
-- Từ điển tầng tĩnh chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia; mỗi nhóm gắn một category có sẵn của C4.
+- Từ điển tầng tĩnh chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia; mỗi nhóm gắn một category của C4.
+- C4 thêm hai category `incitement` (kích động, chia rẽ, bạo lực) và `state_secret` (bí mật nhà nước).
+- Đối tượng của case thường là lãnh đạo Đảng và Nhà nước; tầng tĩnh vẫn chỉ chạy ở vùng nhắc tên đối tượng.
 - Viết tắt của đối tượng so không phân biệt hoa thường.

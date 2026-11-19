@@ -1,5 +1,6 @@
 # Từ điển cho tầng tĩnh. Dòng "[nhóm: category]" mở một nhóm; các dòng sau là cụm từ của nhóm.
-# category phải là một giá trị của C4: insult, unsupported_accusation, fabrication.
+# category phải là một giá trị của C4: insult, unsupported_accusation, fabrication,
+# incitement, state_secret.
 # So khớp sau khi chuẩn hoá (bỏ dấu, chữ thường) và theo trọn từ. Tầng tĩnh chỉ chạy trên vùng
 # văn bản có dấu hiệu tên đối tượng; tầng LLM và người rà soát quyết định cuối cùng.
 # Số trong ngoặc là mục tương ứng trong danh sách thông tin xâm phạm an ninh quốc gia.
@@ -56,7 +57,7 @@ giả giọng
 deepfake
 cắt ghép
 
-[kích động, chia rẽ, bạo lực (2, 6, 8, 9, 10, 13, 14, 15, 16, 18, 19, 25): insult]
+[kích động, chia rẽ, bạo lực (2, 6, 8, 9, 10, 13, 14, 15, 16, 18, 19, 25): incitement]
 kích động
 xúi giục
 lôi kéo
@@ -78,7 +79,7 @@ chống người thi hành công vụ
 phá hoại
 tẩy chay
 
-[bí mật nhà nước (20, 21): insult]
+[bí mật nhà nước (20, 21): state_secret]
 bí mật nhà nước
 tài liệu mật
 tài liệu tuyệt mật

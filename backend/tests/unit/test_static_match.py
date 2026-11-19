@@ -123,11 +123,12 @@ def test_lexicon_groups_use_c4_categories():
     from h4wk.analysis.static import load_lexicon
 
     lexicon = load_lexicon()
-    assert {e.category for e in lexicon} <= {
-        Category.INSULT,
-        Category.UNSUPPORTED_ACCUSATION,
-        Category.FABRICATION,
-    }
+    by_phrase = {e.phrase: e.category for e in lexicon}
+    assert by_phrase["đồ hèn"] == Category.INSULT
+    assert by_phrase["lừa đảo"] == Category.UNSUPPORTED_ACCUSATION
+    assert by_phrase["xuyên tạc"] == Category.FABRICATION
+    assert by_phrase["kích động"] == Category.INCITEMENT
+    assert by_phrase["bí mật nhà nước"] == Category.STATE_SECRET
     assert len({e.phrase for e in lexicon}) == len(lexicon)  # không trùng cụm từ
     phrases = {e.phrase for e in lexicon}
     assert {"lừa đảo", "đồ hèn", "xuyên tạc", "kích động", "bí mật nhà nước"} <= phrases
