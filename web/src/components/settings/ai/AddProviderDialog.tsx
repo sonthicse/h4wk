@@ -28,8 +28,8 @@ export default function AddProviderDialog({ open, onOpenChange, existingNames, o
   const slug = name.trim()
   const nameError = !slug
     ? null
-    : !/^[a-z0-9_-]+$/.test(slug)
-      ? 'Use lowercase letters, digits, - or _.'
+    : !/^[a-z0-9_-]{1,32}$/.test(slug)
+      ? 'Use 1–32 characters: a-z, 0-9, _ or -.'
       : existingNames.includes(slug)
         ? 'A provider with this name already exists.'
         : null

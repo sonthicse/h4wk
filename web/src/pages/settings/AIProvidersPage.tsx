@@ -18,7 +18,9 @@ export default function AIProvidersPage() {
   const [savedAt, setSavedAt] = useState(false)
 
   const save = useMutation({
-    mutationFn: () => saveAiSettings(toInput(draft!), settings.data!),
+    mutationFn: () => saveAiSettings(toInput(draft!)),
+    // Lưu nửa chừng vẫn làm dữ liệu đã lưu đổi, nên tải lại cả khi lỗi.
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ai-settings'] }),
     onSuccess: (data) => {
       queryClient.setQueryData(['ai-settings'], data)
       setDraft(toDraft(data))

@@ -72,7 +72,7 @@ export default function ProviderCard({ provider: p, isNew, changed, onChange, on
         {(test.data || test.isError) && !test.isPending && (
           <p role="status" className={test.data?.ok ? 'text-sm text-emerald-700 dark:text-emerald-400' : 'text-sm text-destructive'}>
             {test.data?.ok
-              ? `Connected in ${test.data.latencyMs} ms.`
+              ? test.data.latencyMs != null ? `Connected in ${test.data.latencyMs} ms.` : 'Connected.'
               : `Test failed: ${test.data?.message ?? 'could not reach the server.'}`}
           </p>
         )}

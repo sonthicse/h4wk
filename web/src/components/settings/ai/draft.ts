@@ -64,7 +64,6 @@ export function draftErrors(d: Draft): string[] {
     if (p.type === 'openai_compat' && !validBaseUrl(p.baseUrl)) errors.push(`${p.name}: base URL must be an http(s) URL.`)
   }
   for (const [task, routes] of Object.entries(d.tasks) as [AiTask, AiRoute[]][]) {
-    if (routes.length === 0) errors.push(`${task}: add at least one provider and model.`)
     routes.forEach((r, i) => {
       const problem = routeProblem(task, r, d.providers)
       if (problem?.blocking) errors.push(`${task} #${i + 1}: ${problem.reason.toLowerCase()}.`)

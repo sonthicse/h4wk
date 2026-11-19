@@ -50,14 +50,18 @@ export default function TaskRoutes({ task, routes, providers, changed, onChange 
         <CardDescription>{taskInfo[task]}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {!usable && (
+        {routes.length === 0 && (
+          <Alert className="border-amber-500 text-amber-700 dark:text-amber-400">
+            <TriangleAlertIcon />
+            <AlertTitle>No model assigned: this task will not run.</AlertTitle>
+          </Alert>
+        )}
+        {routes.length > 0 && !usable && (
           <Alert variant="destructive">
             <TriangleAlertIcon />
             <AlertTitle>No usable model</AlertTitle>
             <AlertDescription>
-              {routes.length === 0
-                ? 'This task has no model assigned.'
-                : 'Every model below is unavailable, so this task will fail. Set an API key or pick another model.'}
+              Every model below is unavailable, so this task will fail. Set an API key or pick another model.
             </AlertDescription>
           </Alert>
         )}

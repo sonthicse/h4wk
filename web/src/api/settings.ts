@@ -96,14 +96,8 @@ export async function getAiSettings(): Promise<AiSettings> {
   }
 }
 
-// Thứ tự: xoá key provider đã bị gỡ (trước khi gỡ khỏi cấu hình, vì sau đó endpoint key trả 404),
-// ghi cấu hình, rồi đặt key mới.
-export async function saveAiSettings(input: AiSettingsInput, saved: AiSettings): Promise<AiSettings> {
-  for (const p of saved.providers) {
-    if (p.apiKeyMasked && !input.providers.some((x) => x.name === p.name)) {
-      await api(`${provider(p.name)}/key`, { method: 'DELETE' })
-    }
-  }
+// Thứ tự: ghi cấu hình (backend tự xoá key của provider bị gỡ), đặt key mới, rồi tải lại.
+export async function saveAiSettings(input: AiSettingsInput): Promise<AiSettings> {
   await api('/api/settings/ai', {
     method: 'PUT',
     body: {
@@ -126,10 +120,7 @@ export async function saveAiSettings(input: AiSettingsInput, saved: AiSettings):
   return getAiSettings()
 }
 
-export async function testProvider(name: string, model?: string): Promise<ProviderTestResult> {
-  const r = await api<Schemas['TestResult']>(`${provider(name)}/test`, {
-    method: 'POST',
-    body: model ? { model } : {},
-  })
+export async function testProvider(name: string): Promise<ProviderTestResult> {
+  const r = await api<Schemas['TestResult']>(`${provider(name)}/test`, { method: 'POST', body: {} })
   return { ok: r.ok, message: r.detail, latencyMs: r.latency_ms ?? undefined }
 }
