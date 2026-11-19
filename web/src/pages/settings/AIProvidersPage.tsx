@@ -8,7 +8,7 @@ import TaskRoutes from '@/components/settings/ai/TaskRoutes'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { AI_TASKS, getAiSettings, saveAiSettings } from '@/mocks/aiProviders'
+import { AI_TASKS, getAiSettings, saveAiSettings } from '@/api/settings'
 
 export default function AIProvidersPage() {
   const queryClient = useQueryClient()
@@ -18,7 +18,7 @@ export default function AIProvidersPage() {
   const [savedAt, setSavedAt] = useState(false)
 
   const save = useMutation({
-    mutationFn: () => saveAiSettings(toInput(draft!)),
+    mutationFn: () => saveAiSettings(toInput(draft!), settings.data!),
     onSuccess: (data) => {
       queryClient.setQueryData(['ai-settings'], data)
       setDraft(toDraft(data))
@@ -49,7 +49,7 @@ export default function AIProvidersPage() {
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">AI providers</h2>
         <div className="flex items-center gap-3">
-          {save.isError && <span className="text-sm text-destructive">Save failed. Try again.</span>}
+          {save.isError && <span className="text-sm text-destructive">{save.error.message}</span>}
           {dirty ? (
             <Badge variant="outline" className="border-amber-500 text-amber-600">
               Unsaved changes

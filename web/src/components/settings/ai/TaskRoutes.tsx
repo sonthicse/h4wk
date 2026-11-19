@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { AiRoute, AiTask } from '@/mocks/aiProviders'
+import type { AiRoute, AiTask } from '@/api/settings'
 import { modelAllowed, routeProblem, type DraftProvider } from './draft'
 
 const taskInfo: Record<AiTask, string> = {

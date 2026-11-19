@@ -1,4 +1,4 @@
-import type { AiProvider, AiRoute, AiSettings, AiSettingsInput, AiTask } from '@/mocks/aiProviders'
+import type { AiProvider, AiRoute, AiSettings, AiSettingsInput, AiTask } from '@/api/settings'
 
 // Bản nháp đang sửa trên trang. Key mới gõ vào chỉ nằm ở newApiKey cho tới khi Save.
 export type DraftProvider = AiProvider & { newApiKey: string }

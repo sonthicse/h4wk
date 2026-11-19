@@ -46,3 +46,90 @@ export function testSource(name: SourceName): Promise<TestResult> {
 export function resumeSource(name: SourceName): Promise<SourceInfo> {
   return api(`${source(name)}/resume`, { method: 'POST' })
 }
+
+// ---- AI providers (T34) ----
+// Kiểu dạng UI: models là mảng, tên trường camelCase. Hàm bên dưới đổi qua lại với dạng API.
+
+export type AiTask = 'analysis.classify' | 'analysis.classify_comment' | 'media.vision'
+export type ProviderType = Schemas['ProviderInfo']['type']
+
+export const AI_TASKS: AiTask[] = ['analysis.classify', 'analysis.classify_comment', 'media.vision']
+
+export type AiModel = { name: string; vision: boolean; structured: boolean }
+
+export type AiProvider = {
+  name: string
+  type: ProviderType
+  baseUrl: string | null // chỉ có với openai_compat
+  models: AiModel[]
+  apiKeyMasked: string | null // dạng sk-…abcd; null nghĩa là chưa có key
+}
+
+export type AiRoute = { provider: string; model: string }
+
+export type AiSettings = {
+  providers: AiProvider[]
+  tasks: Record<AiTask, AiRoute[]>
+}
+
+// Dữ liệu gửi lên khi Save: key mới (nếu có) chỉ đi một chiều từ trình duyệt lên server.
+export type AiSettingsInput = {
+  providers: (Omit<AiProvider, 'apiKeyMasked'> & { newApiKey?: string })[]
+  tasks: Record<AiTask, AiRoute[]>
+}
+
+export type ProviderTestResult = { ok: boolean; message: string; latencyMs?: number }
+
+const provider = (name: string) => `/api/settings/ai/providers/${encodeURIComponent(name)}`
+
+export async function getAiSettings(): Promise<AiSettings> {
+  const data = await api<Schemas['AiSettings']>('/api/settings/ai')
+  return {
+    providers: data.providers.map((p) => ({
+      name: p.name,
+      type: p.type,
+      baseUrl: p.base_url,
+      models: Object.entries(p.models).map(([name, caps]) => ({ name, vision: caps.vision, structured: caps.structured })),
+      apiKeyMasked: p.key.masked ?? null,
+    })),
+    tasks: Object.fromEntries(AI_TASKS.map((t) => [t, data.tasks[t] ?? []])) as AiSettings['tasks'],
+  }
+}
+
+// Thứ tự: xoá key provider đã bị gỡ (trước khi gỡ khỏi cấu hình, vì sau đó endpoint key trả 404),
+// ghi cấu hình, rồi đặt key mới.
+export async function saveAiSettings(input: AiSettingsInput, saved: AiSettings): Promise<AiSettings> {
+  for (const p of saved.providers) {
+    if (p.apiKeyMasked && !input.providers.some((x) => x.name === p.name)) {
+      await api(`${provider(p.name)}/key`, { method: 'DELETE' })
+    }
+  }
+  await api('/api/settings/ai', {
+    method: 'PUT',
+    body: {
+      providers: Object.fromEntries(
+        input.providers.map((p) => [
+          p.name,
+          {
+            type: p.type,
+            ...(p.baseUrl ? { base_url: p.baseUrl } : {}),
+            models: Object.fromEntries(p.models.map((m) => [m.name, { vision: m.vision, structured: m.structured }])),
+          },
+        ]),
+      ),
+      tasks: Object.fromEntries(Object.entries(input.tasks).filter(([, routes]) => routes.length > 0)),
+    },
+  })
+  for (const p of input.providers) {
+    if (p.newApiKey) await api(`${provider(p.name)}/key`, { method: 'PUT', body: { value: p.newApiKey } })
+  }
+  return getAiSettings()
+}
+
+export async function testProvider(name: string, model?: string): Promise<ProviderTestResult> {
+  const r = await api<Schemas['TestResult']>(`${provider(name)}/test`, {
+    method: 'POST',
+    body: model ? { model } : {},
+  })
+  return { ok: r.ok, message: r.detail, latencyMs: r.latency_ms ?? undefined }
+}

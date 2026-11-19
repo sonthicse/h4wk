@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { testProvider, type AiModel } from '@/mocks/aiProviders'
+import { testProvider, type AiModel } from '@/api/settings'
 import { hasKey, validBaseUrl, type DraftProvider } from './draft'
 
 const typeLabel: Record<DraftProvider['type'], string> = {
