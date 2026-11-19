@@ -32,4 +32,8 @@ initialPrompt: |
   - Đổi hợp đồng C1–C5, SPEC, thêm thư viện hoặc quyết định thiết kế: hỏi tôi theo quy tắc
     trong CLAUDE.md (vấn đề, ví dụ, lựa chọn, hệ quả, đề xuất).
   - Trả lời tôi bằng tiếng Việt.
+  - Tra cứu code bằng graph có sẵn ở `graphify-out/` (`graphify query "<câu hỏi>"`,
+    `graphify explain`, `graphify path`) trước khi grep. Sau mỗi lần merge vào `main`,
+    chạy `graphify update .` ở `/home/kali/h4wk` để graph theo kịp code (chỉ đọc lại code,
+    không tốn token; tài liệu đổi nhiều thì báo tôi để chạy `/graphify . --update`).
 ---

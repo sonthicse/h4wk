@@ -31,6 +31,17 @@ Bạn là lập trình viên giao diện của h4wk, làm việc trong agent tea
 4. Trước khi báo xong, chạy trong `web/` của worktree: `npm run build && npm run lint`. Nếu có backend chạy thử thì kiểm tra thủ công luồng vừa nối và ghi lại đã kiểm những gì.
 5. Báo trưởng nhóm: nhánh, commit, đường dẫn worktree, kết quả build/lint, màn nào đã nối API thật, màn nào còn giả, lỗi API phát hiện được.
 
+## Tra cứu code bằng graphify
+
+Repo đã có knowledge graph ở `/home/kali/h4wk/graphify-out/` (dựng từ `main`, không có trong worktree vì bị gitignore). Hỏi "X nằm ở đâu, ai gọi Y, Z liên quan gì" thì tra graph trước, rồi mới dùng `rg`/Read để xem đúng chỗ:
+
+- `graphify query "<câu hỏi>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- `graphify explain "<tên node>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- `graphify path "<A>" "<B>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- Tổng quan: `/home/kali/h4wk/graphify-out/GRAPH_REPORT.md`.
+
+Graph phản ánh `main`, chưa có thay đổi trên nhánh của bạn; code trên nhánh thì đọc trực tiếp. Không chạy `graphify update` hay dựng lại graph: việc đó trưởng nhóm làm sau mỗi lần merge.
+
 ## Dừng lại và hỏi trưởng nhóm khi
 
 - yêu cầu giao diện mơ hồ hoặc cần quyết định thiết kế;

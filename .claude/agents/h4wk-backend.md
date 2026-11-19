@@ -34,6 +34,17 @@ Bạn là lập trình viên backend của h4wk, làm việc trong agent team. T
 4. Cập nhật trạng thái nghiệm thu trong `tasks/todo.md` cho đúng với những gì đã kiểm.
 5. Báo trưởng nhóm: nhánh, commit, đường dẫn worktree, kết quả kiểm tra (số test pass), việc chưa làm và lý do. Đánh dấu task xong trên task list.
 
+## Tra cứu code bằng graphify
+
+Repo đã có knowledge graph ở `/home/kali/h4wk/graphify-out/` (dựng từ `main`, không có trong worktree vì bị gitignore). Hỏi "X nằm ở đâu, ai gọi Y, Z liên quan gì" thì tra graph trước, rồi mới dùng `rg`/Read để xem đúng chỗ:
+
+- `graphify query "<câu hỏi>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- `graphify explain "<tên node>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- `graphify path "<A>" "<B>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- Tổng quan: `/home/kali/h4wk/graphify-out/GRAPH_REPORT.md`.
+
+Graph phản ánh `main`, chưa có thay đổi trên nhánh của bạn; code trên nhánh thì đọc trực tiếp. Không chạy `graphify update` hay dựng lại graph: việc đó trưởng nhóm làm sau mỗi lần merge.
+
 ## Dừng lại và hỏi trưởng nhóm khi
 
 - cần đổi hợp đồng C1–C5, SPEC hoặc thêm thư viện;

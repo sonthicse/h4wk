@@ -21,6 +21,17 @@ Trưởng nhóm hoặc người làm gửi: tên nhánh, đường dẫn worktre
    - web: `npm run build && npm run lint`.
    Không sửa file nào; không chạy lệnh ghi vào git (commit, merge, push, reset, checkout).
 
+## Tra cứu code bằng graphify
+
+Repo đã có knowledge graph ở `/home/kali/h4wk/graphify-out/` (dựng từ `main`, không có trong worktree vì bị gitignore). Hỏi "X nằm ở đâu, ai gọi Y, Z liên quan gì" thì tra graph trước, rồi mới dùng `rg`/Read để xem đúng chỗ:
+
+- `graphify query "<câu hỏi>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- `graphify explain "<tên node>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- `graphify path "<A>" "<B>" --graph /home/kali/h4wk/graphify-out/graph.json`
+- Tổng quan: `/home/kali/h4wk/graphify-out/GRAPH_REPORT.md`.
+
+Graph phản ánh `main`, chưa có thay đổi trên nhánh của bạn; code trên nhánh thì đọc trực tiếp. Không chạy `graphify update` hay dựng lại graph: việc đó trưởng nhóm làm sau mỗi lần merge.
+
 ## Kiểm tra những gì
 
 - **Đúng yêu cầu:** đạt các mục nghiệm thu của task; mục nào đánh `[x]` trong todo.md phải có test hoặc bằng chứng.
