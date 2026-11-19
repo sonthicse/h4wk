@@ -39,6 +39,8 @@ class SourceStateRow(SQLModel, table=True):
     provider: str = Field(primary_key=True)
     consecutive_failures: int = 0
     suspended_until: datetime | None = None
+    last_error: str | None = None
+    last_error_at: datetime | None = None
 
 
 class JobRow(SQLModel, table=True):
@@ -138,8 +140,23 @@ def get_engine(root: Path | None = None) -> Engine:
             cur.close()
 
         SQLModel.metadata.create_all(engine)
+        _add_missing_columns(engine)
         _engines[path] = engine
     return _engines[path]
+
+
+def _add_missing_columns(engine: Engine) -> None:
+    """create_all không thêm cột mới vào bảng đã có. Cột mới luôn cho phép NULL nên thêm
+    bằng ALTER TABLE là đủ; chỉ mục dựng lại được từ data/ nên không cần công cụ migrate."""
+    with engine.begin() as conn:
+        for table in SQLModel.metadata.sorted_tables:
+            have = {r[1] for r in conn.exec_driver_sql(f'PRAGMA table_info("{table.name}")')}
+            for column in table.columns:
+                if column.name not in have:
+                    ddl = column.type.compile(dialect=engine.dialect)
+                    conn.exec_driver_sql(
+                        f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {ddl}'
+                    )
 
 
 def as_aware(dt: datetime) -> datetime:

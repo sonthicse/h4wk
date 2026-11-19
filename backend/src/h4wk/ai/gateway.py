@@ -1,20 +1,19 @@
 """Định tuyến, kiểm tra kết quả và ghi nhật ký các lần gọi AI."""
 
 import json
-import os
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 from threading import Lock
 from time import perf_counter
 
-from dotenv import dotenv_values
 from pydantic import BaseModel, ValidationError
 
 from h4wk.ai.base import Message, Provider, ProviderError, ProviderReply, ProviderRequest
 from h4wk.ai.config import ai_config_path, load_ai_config
 from h4wk.ai.providers import make_provider
-from h4wk.core.config import REPO_ROOT, data_dir
+from h4wk.core import secrets
+from h4wk.core.config import data_dir
 from h4wk.core.config_models import AiTask, Route
 from h4wk.core.types import VN_TZ
 
@@ -77,7 +76,7 @@ class AIGateway:
         json_schema = schema.model_json_schema()
         last_error = None
         unavailable: list[str] = []
-        keys = {**dotenv_values(REPO_ROOT / ".env"), **os.environ} if self.providers is None else {}
+        keys = secrets.all_keys() if self.providers is None else {}
         for route in routes:
             provider = (
                 make_provider(route.provider, config.providers[route.provider], keys)

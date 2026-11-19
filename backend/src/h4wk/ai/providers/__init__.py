@@ -9,11 +9,16 @@ from h4wk.ai.providers.openai_compat import OpenAICompatProvider
 from h4wk.core.config_models import ProviderConfig
 
 
+def key_name(provider: str) -> str:
+    """Tên biến chứa khóa của một nhà cung cấp, vd anthropic → ANTHROPIC_API_KEY."""
+    base = {"qwen": "DASHSCOPE", "glm": "ZAI", "kimi": "MOONSHOT"}.get(provider)
+    return (base or provider.upper().replace("-", "_")) + "_API_KEY"
+
+
 def make_provider(
     name: str, config: ProviderConfig, keys: Mapping[str, str | None]
 ) -> Provider | None:
-    key_name = {"qwen": "DASHSCOPE", "glm": "ZAI", "kimi": "MOONSHOT"}.get(name, name.upper())
-    key = keys.get(key_name + "_API_KEY")
+    key = keys.get(key_name(name))
     if name == "gemini" and not key:
         key = keys.get("GOOGLE_API_KEY")
     if not key:

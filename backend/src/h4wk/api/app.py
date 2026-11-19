@@ -8,7 +8,17 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
 from h4wk.api import auth as auth_api
-from h4wk.api import captures, dashboard, entities, events, jobs, review, videos, watchlist
+from h4wk.api import (
+    captures,
+    dashboard,
+    entities,
+    events,
+    jobs,
+    review,
+    settings,
+    videos,
+    watchlist,
+)
 from h4wk.core import audit, auth
 
 app = FastAPI(title="h4wk")
@@ -21,6 +31,7 @@ app.include_router(captures.router)
 app.include_router(watchlist.router)
 app.include_router(events.router)
 app.include_router(dashboard.router)
+app.include_router(settings.router)
 
 # Mọi API đều cần đăng nhập, trừ các đường dẫn này (mặc định là chặn).
 PUBLIC_PATHS = {"/api/health"}

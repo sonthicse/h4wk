@@ -695,11 +695,13 @@ API đọc và ghi cấu hình nguồn thu (bật/tắt, thứ tự ưu tiên th
 
 Nghiệm thu:
 
-- [ ] Không response API nào chứa secret đầy đủ; có test quét toàn bộ response.
-- [ ] Đổi thứ tự ưu tiên thì job sau dùng thứ tự mới.
-- [ ] Tắt mọi nguồn có `MEDIA` thì API báo `MEDIA` không còn nguồn.
+- [x] Không response API nào chứa secret đầy đủ; có test quét toàn bộ response.
+- [x] Đổi thứ tự ưu tiên thì job sau dùng thứ tự mới.
+- [x] Tắt mọi nguồn có `MEDIA` thì API báo `MEDIA` không còn nguồn.
 
 Kiểm tra: `uv run pytest tests/unit/test_settings.py`.
+
+Đã làm khi chưa có T14, T15: nguồn chưa có adapter trả `implemented: false`, `usage: null`, nút test trả "not implemented yet". Ghi cấu hình là ghi đè cả file toml (mất comment của file mẫu). Secret đặt từ Settings thắng `.env`. Thư mục cấu hình đổi được bằng `H4WK_CONFIG_DIR`, test dùng thư mục riêng. Chỉ mục cũ tự thêm cột mới (cho phép NULL) khi khởi động.
 
 File: `src/h4wk/core/{secrets.py,settings.py}`, `api/settings.py`, tests.
 Người làm: Thi. Phụ thuộc: T8, T14, T15. Tích hợp sau: T16, T17. Cỡ: M.

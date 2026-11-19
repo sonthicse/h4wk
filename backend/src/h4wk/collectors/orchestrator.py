@@ -103,9 +103,11 @@ class SourceState:
             until = self._get(s, provider).suspended_until
         return until is not None and as_aware(until) > self.now()
 
-    def record(self, provider: str, failed: bool) -> None:
+    def record(self, provider: str, failed: bool, error: str | None = None) -> None:
         with Session(get_engine()) as s:
             row = self._get(s, provider)
+            if error is not None:
+                row.last_error, row.last_error_at = error, self.now()
             if failed:
                 row.consecutive_failures += 1
                 if row.consecutive_failures >= SUSPEND_AFTER:
@@ -218,7 +220,7 @@ class Orchestrator:
             except CollectorError as e:
                 status = next(st for tp, st in _ERROR_STATUS if isinstance(e, tp))
                 calls.append(self._call(name, cap, status, started, t0, error=str(e)))
-                self.state.record(name, failed=isinstance(e, _COUNTED))
+                self.state.record(name, failed=isinstance(e, _COUNTED), error=str(e))
                 if isinstance(e, Transient) and attempt < TRANSIENT_RETRIES:
                     self.sleep(2**attempt)
                     continue
