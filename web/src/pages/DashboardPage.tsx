@@ -4,6 +4,7 @@ import ActivityChart from '@/components/dashboard/ActivityChart'
 import Donut from '@/components/dashboard/Donut'
 import EventFeed from '@/components/dashboard/EventFeed'
 import FeaturedVideoCard from '@/components/dashboard/FeaturedVideoCard'
+import ReviewQueueCard from '@/components/dashboard/ReviewQueueCard'
 import UsageCard from '@/components/dashboard/UsageCard'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -140,9 +141,8 @@ export default function DashboardPage() {
             </div>
             <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findings_by_severity} variant={severityVariant} />
             <Breakdown title="Review" to="/review" centerLabel="findings" keys={statuses} counts={d.findings_by_status} variant={statusVariant} />
-            <div className="col-span-2">
-              <EventFeed />
-            </div>
+            <EventFeed />
+            <ReviewQueueCard />
             <div className="col-span-2">
               <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} />
             </div>
