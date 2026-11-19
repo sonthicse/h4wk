@@ -30,7 +30,7 @@ export default function PriorityList({ cap, order, enabled, paused, changed, onC
 
   const isEmpty = order.length === 0 // file cấu hình không ghi loại này; backend thử mọi nguồn theo thứ tự mặc định
   const noSource = !isEmpty && order.every((name) => !enabled[name])
-  const allPaused = !noSource && order.filter((name) => enabled[name]).every((name) => paused[name])
+  const allPaused = !isEmpty && !noSource && order.filter((name) => enabled[name]).every((name) => paused[name])
 
   function moveBy(index: number, step: -1 | 1) {
     const name = order[index]

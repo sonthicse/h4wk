@@ -74,6 +74,7 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
 
   const paused = Object.fromEntries(data.sources.map((s) => [s.name, s.status === 'paused'])) as Record<SourceName, boolean>
   const implemented = Object.fromEntries(data.sources.map((s) => [s.name, s.implemented])) as Record<SourceName, boolean>
+  // `uncovered` tính theo trạng thái đã lưu: tắt hết nguồn trong bản nháp thì cảnh báo cap rỗng chỉ hiện sau khi Save.
   // Danh sách rỗng nghĩa là file cấu hình không ghi; backend tự thử mọi nguồn, chỉ báo khi API báo `uncovered`.
   const emptyCaps = caps.filter((c) =>
     draft.priority[c].length > 0
