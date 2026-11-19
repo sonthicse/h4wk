@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -163,6 +164,15 @@ export default function CollectPage() {
                 <TableCell className="max-w-80">
                   <div className="truncate font-mono text-xs">{job.target}</div>
                   {job.error && <p className="mt-1 text-xs whitespace-normal text-destructive">{job.error}</p>}
+                  {/* Bước VLM/OCR cần nhà cung cấp AI có key; backend báo "no AI provider available" khi thiếu. */}
+                  {job.error?.includes('no AI provider available') && (
+                    <p className="mt-1 text-xs">
+                      <Link to="/settings/ai" className="underline">
+                        Add an AI provider key in Settings
+                      </Link>
+                      , or collect at the <span className="font-mono">metadata</span> level.
+                    </p>
+                  )}
                 </TableCell>
                 <TableCell>{job.level}</TableCell>
                 <TableCell>
