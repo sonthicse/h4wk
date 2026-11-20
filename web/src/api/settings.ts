@@ -50,10 +50,10 @@ export function resumeSource(name: SourceName): Promise<SourceInfo> {
 // ---- AI providers (T34) ----
 // Kiểu dạng UI: models là mảng, tên trường camelCase. Hàm bên dưới đổi qua lại với dạng API.
 
-export type AiTask = 'analysis.classify' | 'analysis.classify_comment' | 'media.vision'
+export type AiTask = 'analysis.classify' | 'analysis.video_verdict' | 'media.vision'
 export type ProviderType = Schemas['ProviderInfo']['type']
 
-export const AI_TASKS: AiTask[] = ['analysis.classify', 'analysis.classify_comment', 'media.vision']
+export const AI_TASKS: AiTask[] = ['analysis.classify', 'analysis.video_verdict', 'media.vision']
 
 export type AiModel = { name: string; vision: boolean; structured: boolean }
 
@@ -123,4 +123,17 @@ export async function saveAiSettings(input: AiSettingsInput): Promise<AiSettings
 export async function testProvider(name: string): Promise<ProviderTestResult> {
   const r = await api<Schemas['TestResult']>(`${provider(name)}/test`, { method: 'POST', body: {} })
   return { ok: r.ok, message: r.detail, latencyMs: r.latency_ms ?? undefined }
+}
+
+// ---- Jev (TypeSafe, T47): phân loại lời nói và comment. Kiểu viết tay, chưa có trong schema.d.ts (không chạy gen:api). ----
+export function getJevSettings(): Promise<{ key: KeyInfo }> {
+  return api('/api/settings/jev')
+}
+
+export function setJevKey(value: string): Promise<KeyInfo> {
+  return api('/api/settings/jev/key', { method: 'PUT', body: { value } })
+}
+
+export function deleteJevKey(): Promise<KeyInfo> {
+  return api('/api/settings/jev/key', { method: 'DELETE' })
 }

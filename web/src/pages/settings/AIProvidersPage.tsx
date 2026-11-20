@@ -6,6 +6,7 @@ import { PlusIcon } from '@/components/animate-ui/icons/plus'
 import { useState } from 'react'
 import AddProviderDialog from '@/components/settings/ai/AddProviderDialog'
 import { draftErrors, providerChanged, toDraft, toInput, type Draft } from '@/components/settings/ai/draft'
+import JevCard from '@/components/settings/ai/JevCard'
 import ProviderCard from '@/components/settings/ai/ProviderCard'
 import TaskRoutes from '@/components/settings/ai/TaskRoutes'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -110,6 +111,8 @@ export default function AIProvidersPage() {
           ))}
         </div>
       </section>
+
+      <JevCard />
 
       <section className="space-y-3">
         <div>
