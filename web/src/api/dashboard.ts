@@ -1,6 +1,7 @@
 import { api, type Schemas } from '@/api/client'
 
-export type DashboardStats = Schemas['Dashboard']
+// videos_by_review_status do T49 thêm (chưa có trong schema.d.ts, không chạy gen:api): viết tay, tuỳ chọn tới khi T49 merge.
+export type DashboardStats = Schemas['Dashboard'] & { videos_by_review_status?: Schemas['Dashboard']['findings_by_status'] }
 export type DayActivity = Schemas['DayActivity']
 export type Usage = Schemas['Usage']
 

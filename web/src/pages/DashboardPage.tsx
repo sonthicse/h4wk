@@ -144,7 +144,7 @@ export default function DashboardPage() {
         <div className="-m-1 min-h-0 overflow-y-auto p-1 pr-2">
           <div className="grid grid-cols-2 gap-4">
             <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findings_by_severity} variant={severityVariant} />
-            <Breakdown title="Review" to="/review" centerLabel="findings" keys={statuses} counts={d.findings_by_status} variant={statusVariant} />
+            <Breakdown title="Review" to="/review" centerLabel={d.videos_by_review_status ? 'videos' : 'findings'} keys={statuses} counts={d.videos_by_review_status ?? d.findings_by_status} variant={statusVariant} />
             <EventFeed />
             <ReviewQueueCard />
             <div className="col-span-2">
