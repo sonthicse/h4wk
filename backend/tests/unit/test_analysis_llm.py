@@ -147,6 +147,16 @@ def test_neutral_only_in_llm_json_and_invalid_verdicts_dropped(tmp_path):
     assert kept == {ids["seg_0001"]: False, ids["seg_0003"]: True}
 
 
+def test_missing_ai_config_keeps_static_findings(tmp_path):
+    data, timeline = _data()
+    gateway = AIGateway({}, config_path=tmp_path / "none.toml", log_dir=tmp_path)
+    _, findings, error = runner.analyze(
+        data, timeline, [ENTITY], INSULT, "r_x", tmp_path / "out", gateway=gateway
+    )
+    assert error and "ai.toml not found" in error
+    assert findings and {f.analyzer for f in findings} == {"static"}
+
+
 def test_schema_error_keeps_static_findings(tmp_path):
     provider = FakeProvider(repeat(ProviderReply("không phải JSON")))
     _, findings, error = _run(tmp_path, provider)

@@ -54,6 +54,12 @@ def test_complete_structured_with_route(config, tmp_path):
     assert (route.provider, route.model) == ("first", "text")
 
 
+def test_missing_config_is_gateway_error(tmp_path):
+    gateway = AIGateway({}, config_path=tmp_path / "none.toml", log_dir=tmp_path)
+    with pytest.raises(GatewayError, match="ai.toml not found"):
+        gateway.complete_structured("analysis.classify", [{"role": "user", "content": "x"}], Answer)
+
+
 def test_repair_invalid_json(config, tmp_path):
     first = FakeProvider([ProviderReply("oops"), OK])
     gateway = AIGateway({"first": first}, config_path=config, log_dir=tmp_path)

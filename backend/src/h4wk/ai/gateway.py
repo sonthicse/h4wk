@@ -72,6 +72,8 @@ class AIGateway:
         schema: type[M],
         image: bytes | None,
     ) -> tuple[M, Route]:
+        if not self.config_path.exists():
+            raise GatewayError(f"{task}: ai.toml not found")
         config = load_ai_config(self.config_path)
         routes = config.tasks.get(task)
         if not routes:
