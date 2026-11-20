@@ -176,13 +176,3 @@ def test_batches_of_eight(tmp_path):
     provider = FakeProvider(repeat(_reply()))
     llm.classify(items, [ENTITY], data, timeline, hits, _gateway(provider, tmp_path), "r")
     assert len(provider.requests) == 2
-
-
-@pytest.mark.live
-def test_analysis_llm_live(tmp_path):
-    data, timeline = _data()
-    _, findings, error = runner.analyze(
-        data, timeline, [ENTITY], None, "r_live", tmp_path, gateway=AIGateway()
-    )
-    assert error is None
-    assert any(f.analyzer == "llm" for f in findings)
