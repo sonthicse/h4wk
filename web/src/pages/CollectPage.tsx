@@ -34,8 +34,8 @@ const stepClass: Record<StepStatus, string> = {
 // Các bước con của job theo mức thu (backend jobs/pipeline.py). API cho biết bước đang chạy (`step`)
 // và trạng thái chung. Bước "media" là lúc chuẩn bị, ngay trước bước con đầu tiên sau collect.
 const STEPS_BY_LEVEL: Record<string, string[]> = {
-  full: ['collect', 'transcribe', 'frames', 'ocr', 'vlm', 'analyze'],
-  text: ['collect', 'ocr', 'vlm', 'analyze'],
+  full: ['collect', 'transcribe', 'frames', 'ocr', 'vlm', 'match', 'analyze'],
+  text: ['collect', 'ocr', 'vlm', 'match', 'analyze'],
   metadata: ['collect', 'analyze'],
 }
 
