@@ -302,6 +302,14 @@ def test_payload_sent_to_llm_carries_triggers_with_entity(tmp_path):
     hits = [
         EntityHit(entity="e_01", via="ref_image", frame=first.file, bbox=(0, 0, 10, 10), score=0.9),
         EntityHit(entity="e_01", via="description"),
+        EntityHit(
+            entity="e_01",
+            via="ref_image",
+            segment_id="seg_0003",
+            frame="frames/000025.jpg",
+            bbox=(0, 0, 10, 10),
+            score=0.8,
+        ),
     ]
     items = llm.build_items(data, timeline, hits)
     provider = FakeProvider([_reply()])
@@ -310,6 +318,10 @@ def test_payload_sent_to_llm_carries_triggers_with_entity(tmp_path):
     by_kind = {i["kind"]: i for i in body["items"]}
     assert by_kind["thumbnail"]["triggers"] == [
         {"via": "ref_image", "frame": first.file, "entity": "e_01"}
+    ]
+    segment = next(i for i in body["items"] if i["kind"] == "segment")
+    assert segment["triggers"] == [
+        {"via": "ref_image", "frame": "frames/000025.jpg", "entity": "e_01"}
     ]
     assert by_kind["description"]["triggers"] == [
         {"via": "description", "frame": None, "entity": "e_01"}
