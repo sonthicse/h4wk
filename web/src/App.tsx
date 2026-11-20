@@ -9,6 +9,7 @@ import DashboardPage from '@/pages/DashboardPage'
 import EntitiesPage from '@/pages/EntitiesPage'
 import FindingsPage from '@/pages/FindingsPage'
 import LoginPage from '@/pages/LoginPage'
+import FindingReviewPage from '@/pages/FindingReviewPage'
 import ReviewQueuePage from '@/pages/ReviewQueuePage'
 import AIProvidersPage from '@/pages/settings/AIProvidersPage'
 import SettingsLayout from '@/pages/settings/SettingsLayout'
@@ -43,6 +44,7 @@ export default function App() {
               <Route path="/collect" element={<CollectPage />} />
               <Route path="/findings" element={<FindingsPage />} />
               <Route path="/review" element={<ReviewQueuePage />} />
+              <Route path="/review/findings" element={<FindingReviewPage />} />
               <Route path="/watchlist" element={<WatchlistPage />} />
               <Route path="/entities" element={<EntitiesPage />} />
               <Route path="/videos" element={<VideosPage />} />

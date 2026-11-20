@@ -3,7 +3,7 @@ import { ExternalLink } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { listEntities } from '@/api/entities'
-import { listQueue } from '@/api/review'
+import { listQueue, type QueueItem } from '@/api/review'
 import {
   getTimeline,
   getVideo,
@@ -19,6 +19,7 @@ import CommentsTab from '@/components/video/CommentsTab'
 import FindingTimeline from '@/components/video/FindingTimeline'
 import KeyframeStrip from '@/components/video/KeyframeStrip'
 import { buildKeyframes } from '@/components/video/keyframes'
+import VerdictCard from '@/components/video/VerdictCard'
 import Player from '@/components/video/Player'
 import TranscriptPane from '@/components/video/TranscriptPane'
 import { usePlayer } from '@/components/video/usePlayer'
@@ -38,10 +39,12 @@ const count = (n: number | null | undefined) => (n == null ? '—' : n.toLocaleS
 function VideoView({
   detail,
   findings,
+  items,
   finding,
   t,
 }: {
   detail: VideoDetail
+  items: QueueItem[]
   findings: VideoFinding[]
   finding: VideoFinding | null
   t: number | null
@@ -89,6 +92,13 @@ function VideoView({
   const openFinding = (f: VideoFinding, at?: number) =>
     setSearchParams(at === undefined ? { finding: f.id } : { finding: f.id, t: String(Math.max(0, at - LEAD_S)) })
 
+  // Bấm bằng chứng: comment thì mở tab Comments và đánh dấu nghi vấn; còn lại tua tới start như openFinding.
+  const openEvidence = (it: QueueItem) => {
+    const vf = toVideoFinding(it)
+    if (vf.sourceKind === 'comment') setTab('comments')
+    openFinding(vf, timedSources.has(vf.sourceKind) && vf.start !== null ? vf.start : undefined)
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row">
@@ -115,6 +125,8 @@ function VideoView({
           </a>
         </div>
       </div>
+
+      <VerdictCard videoId={video.id} items={items} onOpen={openEvidence} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_24rem] items-start gap-6">
         <div className="min-w-0 space-y-6">
@@ -204,10 +216,11 @@ export default function VideoDetailPage() {
   const active = all.find((f) => f.id === params.get('finding')) ?? null
   const capture = active?.capture ?? all.reduce((max, f) => (f.capture > max ? f.capture : max), '')
   const findings = all.filter((f) => f.capture === capture)
+  const items = queue.data.filter((it) => it.finding.capture === capture)
   const finding = active
   const tParam = Number(params.get('t'))
   const t = params.get('t') !== null && Number.isFinite(tParam) ? tParam : null
 
   // key: đổi ?t= hoặc ?finding= thì dựng lại trình phát để nó nhảy tới vị trí mới.
-  return <VideoView key={`${videoId}:${t}:${finding?.id}`} detail={video.data} findings={findings} finding={finding} t={t} />
+  return <VideoView key={`${videoId}:${t}:${finding?.id}`} detail={video.data} findings={findings} items={items} finding={finding} t={t} />
 }
