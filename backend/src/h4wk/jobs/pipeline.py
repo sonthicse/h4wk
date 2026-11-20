@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import cv2
 from pydantic import TypeAdapter
 from sqlmodel import Session, select
 
@@ -29,7 +30,7 @@ from h4wk.evidence.writer import CAPTURE_TS_FORMAT, list_captures
 from h4wk.jobs.queue import huey, huey_gpu
 from h4wk.media import ocr, stt, transcripts
 from h4wk.media.enrich import enrich
-from h4wk.media.keyframes import Keyframe, extract_keyframes
+from h4wk.media.keyframes import Keyframe, extract_keyframes, select_keyframes, write_selected
 from h4wk.media.timeline import Timeline
 
 _stt_worker = stt.SttWorker(os.getenv("H4WK_STT_MODEL", "large-v3"))
@@ -163,6 +164,28 @@ def collect(job_id: str) -> None:
     media(job_id)
 
 
+def _select_frames(
+    job: JobRow, out: Path, candidates: list[Keyframe], lines: list[ocr.OcrLine]
+) -> list[Keyframe]:
+    """Chọn keyframe theo embedding ảnh (DINOv2) và chữ OCR; ghi frames/selected.json."""
+    texts: dict[str, list[tuple[str, float]]] = {}
+    for line in lines:
+        texts.setdefault(line.frame, []).append((line.text, line.score))
+    try:
+        images = [
+            cv2.cvtColor(cv2.imread(str(out / f.file)), cv2.COLOR_BGR2RGB) for f in candidates
+        ]
+        vectors = _ref_embedder.embed(images)
+    except Exception as e:
+        # Thiếu torch, hết VRAM...: chỉ bỏ được khung trùng chữ và trùng hash.
+        logger.warning("Frame embedding failed, keeping near-duplicate frames: %s", e)
+        audit.log(job.trigger, "media.frames", job.id, {"error": str(e)}, status="error")
+        vectors = None
+    frames = select_keyframes(candidates, texts, vectors)
+    write_selected(out, frames)
+    return frames
+
+
 def _match(
     job: JobRow,
     cap_dir: Path,
@@ -240,8 +263,13 @@ def media(job_id: str) -> None:
         else:
             job = _update(job_id, step="ocr", progress=60)
             lines = ocr.process_ocr(cap_dir, out)
-            job = _update(job_id, step="vlm", progress=65)
             thumbnails = list(dict.fromkeys(t.file for t in data.thumbnails if t.file))
+            if frames:
+                # OCR chạy trên mọi khung ứng viên; timeline, VLM và khớp ảnh chỉ dùng keyframe.
+                frames = _select_frames(job, out, frames, lines)
+                kept = {f.file for f in frames} | set(thumbnails)
+                lines = [line for line in lines if line.frame in kept]
+            job = _update(job_id, step="vlm", progress=65)
             failed = enrich(timeline, cap_dir, out, frames, thumbnails, lines)
             if failed:
                 audit.log(job.trigger, "media.vision", job.id, {"failed": failed}, status="error")

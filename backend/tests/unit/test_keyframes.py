@@ -3,9 +3,10 @@ import shutil
 from pathlib import Path
 
 import cv2
+import numpy as np
 import pytest
 
-from h4wk.media.keyframes import KeyframeSettings, extract_keyframes
+from h4wk.media.keyframes import Keyframe, KeyframeSettings, extract_keyframes, select_keyframes
 
 CLIPS = Path(__file__).parents[1] / "fixtures" / "clips"
 
@@ -60,3 +61,36 @@ def test_change_thresholds_keeps_scene_representatives(tmp_path):
     frames = extract_keyframes(tmp_path, settings)
     assert [(frame.t, frame.scene) for frame in frames] == [(0, 1), (3.25, 2)]
     assert set((tmp_path / "frames").glob("*.jpg")) == {tmp_path / frame.file for frame in frames}
+
+
+def _frame(n: int, t: float, hash: str = "0" * 16) -> Keyframe:
+    return Keyframe(file=f"frames/{n:06d}.jpg", t=t, scene=1, hash=hash)
+
+
+def test_select_drops_frames_that_look_like_any_kept_frame():
+    frames = [_frame(i, i / 2) for i in range(5)]
+    a, b = np.array([1.0, 0.0]), np.array([0.0, 1.0])
+    # A A B A B: cảnh quay lại A, B vẫn bị bỏ vì giống một keyframe đã giữ.
+    vectors = np.stack([a, a * 0.99 + b * 0.14, b, a, b])
+    kept = select_keyframes(frames, {}, vectors)
+    assert [f.file for f in kept] == [frames[0].file, frames[2].file]
+
+
+def test_select_keeps_new_text_but_not_ocr_variants():
+    frames = [_frame(i, i / 2) for i in range(5)]
+    vectors = np.ones((5, 2)) / np.sqrt(2)
+    texts = {
+        frames[0].file: [("CHÍNH QUYỀN TÔ LÂM", 0.95)],
+        frames[1].file: [("CHĨNH DUYỀN TỔ LÂM", 0.9)],  # OCR đọc lệch: không phải chữ mới
+        frames[2].file: [("Nguyễn Đắc Vinh", 0.92), ("CHÍNH QUYỀN TÔ LÂM", 0.95)],
+        frames[3].file: [("Nguyễn Đắc Vinh", 0.3)],  # score thấp: bỏ qua
+        frames[4].file: [("abc", 0.99)],  # quá ngắn
+    }
+    kept = select_keyframes(frames, texts, vectors)
+    assert [f.file for f in kept] == [frames[0].file, frames[2].file]
+
+
+def test_select_without_vectors_drops_only_identical_hashes():
+    frames = [_frame(0, 0), _frame(1, 0.5), _frame(2, 1, "f" * 16)]
+    kept = select_keyframes(frames, {}, None)
+    assert [f.file for f in kept] == [frames[0].file, frames[2].file]

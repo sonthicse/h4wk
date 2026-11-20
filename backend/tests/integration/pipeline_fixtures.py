@@ -9,6 +9,7 @@ from itertools import repeat
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 from h4wk.ai.base import ProviderReply
@@ -88,6 +89,12 @@ def fake_source(
         ocr,
         "_recognize",
         lambda paths: [[{"text": "Chữ", "bbox": [0, 0, 1, 1], "score": 1}] for _ in paths],
+    )
+    # Mọi khung giống hệt nhau về hình: bước chọn keyframe chỉ giữ khung đầu (chữ "Chữ" quá ngắn).
+    monkeypatch.setattr(
+        pipeline,
+        "_ref_embedder",
+        SimpleNamespace(embed=lambda images: np.ones((len(images), 4)) / 2),
     )
     provider = FakeProvider(repeat(ProviderReply('{"description":"Ảnh mẫu","offensive_cues":[]}')))
     gateway = AIGateway(

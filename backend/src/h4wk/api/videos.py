@@ -157,12 +157,15 @@ def get_video(video_id: str) -> VideoDetail:
         n = _normalized(d, cap)
         kinds = [t.kind for t in (n.transcripts if n else [])]
         kinds += [t.kind for t in _derived_transcripts(d, cap) if t.kind not in kinds]
+        # selected.json là keyframe đã chọn; bản thu cũ chỉ có index.json (mọi khung ứng viên).
+        selected = d / "derived" / cap / "frames" / "selected.json"
         index = d / "derived" / cap / "frames" / "index.json"
-        frames = (
-            json.loads(index.read_text(encoding="utf-8")).get("frames", [])
-            if index.is_file()
-            else []
-        )
+        if selected.is_file():
+            frames = json.loads(selected.read_text(encoding="utf-8"))
+        elif index.is_file():
+            frames = json.loads(index.read_text(encoding="utf-8")).get("frames", [])
+        else:
+            frames = []
         captures.append(
             CaptureSummary(
                 id=cap,

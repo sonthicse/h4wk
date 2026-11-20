@@ -51,8 +51,10 @@ def test_full_flow_ends_with_findings(
         (derived.parents[1] / "captures" / job["capture"] / "manifest.json").read_bytes()
     )
     assert timeline.source_video_sha256 == manifest["files"]["sources/fake/v.mp4"]["sha256"]
-    frames = json.loads((derived / "frames/index.json").read_bytes())["frames"]
-    expected = {f["file"] for f in frames}
+    candidates = json.loads((derived / "frames/index.json").read_bytes())["frames"]
+    selected = json.loads((derived / "frames/selected.json").read_bytes())
+    assert len(candidates) > 1 and selected == candidates[:1]
+    expected = {f["file"] for f in selected}
     assert {v.frame for seg in timeline.segments for v in seg.visual} == expected
     assert {v.frame for seg in timeline.segments for v in seg.ocr} == expected
     vision_rows = json.loads((derived / "vision.json").read_bytes())

@@ -336,8 +336,8 @@ Module chỉ xử lý media; mọi việc liên quan tới đối tượng nằm
 
 1. Tạo bản proxy 480p (mp4, H.264, dùng cả để phát trên trình duyệt) và audio 16 kHz một kênh.
 2. Speech-to-text có mốc thời gian (`kind=stt`). Ở mức thu `full`, bước này luôn chạy, kể cả khi đã có phụ đề.
-3. Tách cảnh. Trong mỗi cảnh, giải mã 2 khung mỗi giây và giữ khung khi pHash toàn khung hoặc độ khác biệt theo từng ô (lưới 4×4) vượt ngưỡng.
-4. OCR trên keyframe và thumbnail, có bbox.
+3. Tách cảnh. Trong mỗi cảnh, giải mã 2 khung mỗi giây và giữ làm khung ứng viên khi pHash toàn khung hoặc độ khác biệt theo từng ô (lưới 4×4) vượt ngưỡng.
+4. OCR trên khung ứng viên và thumbnail, có bbox. Sau OCR, chọn keyframe từ khung ứng viên: giữ khung có dòng chữ chưa thấy ở keyframe ngay trước (OCR đọc lệch vài ký tự không tính là chữ mới), hoặc khác về hình với mọi keyframe đã giữ (cosine embedding DINOv2 dưới 0,85). Không có model ảnh thì chỉ bỏ khung trùng hash. Keyframe ghi ở `frames/selected.json`; timeline, VLM và khớp ảnh mẫu chỉ dùng keyframe.
 5. VLM mô tả keyframe và thumbnail qua tác vụ AI `media.vision`, chạy song song với số luồng giới hạn. Ngoài phần mô tả, VLM liệt kê các dấu hiệu xúc phạm nhìn thấy được (`offensive_cues`), ví dụ ảnh ghép còng tay, vẽ sừng, chữ chửi. Prompt cấm VLM đoán danh tính người trong ảnh.
 6. Ghép timeline.
 
@@ -374,6 +374,7 @@ Nghiệm thu:
 
 - Trong video thử nghiệm, một dòng chữ nhỏ ở góc khung chỉ hiện 1 giây vẫn được giữ lại thành keyframe và được OCR đọc.
 - Một cảnh tĩnh dài 2 phút cho ra tối đa 3 keyframe.
+- Trên 8 video thật (đo ngày 2026-11-20), số keyframe giảm từ 1253 xuống 374 mà mọi dòng chữ OCR đọc được ở khung ứng viên vẫn có trong keyframe (85/85).
 
 ### 10.6 `analysis`
 

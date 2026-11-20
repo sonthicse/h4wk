@@ -1,10 +1,13 @@
-"""Chọn khung đại diện và khung có thay đổi từ proxy của một bản thu."""
+"""Lấy khung ứng viên từ proxy của một bản thu, rồi chọn keyframe theo hình và chữ OCR."""
 
 import fcntl
+import json
 import math
 import os
 import re
+import unicodedata
 from bisect import bisect_right
+from difflib import SequenceMatcher
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -93,6 +96,67 @@ def _extract(proxy: Path, staging: Path, settings: KeyframeSettings) -> list[Key
     if len({frame.scene for frame in frames}) != len(scenes):
         raise OSError("cannot get a representative frame for every scene")
     return frames
+
+
+SELECTED_FILE = "selected.json"
+TEXT_MIN_SCORE = 0.8  # dòng OCR dưới ngưỡng này hay là nhiễu, không tính là chữ mới
+TEXT_MIN_CHARS = 4
+TEXT_SAME_RATIO = 0.8  # hai dòng giống nhau từ mức này coi là một (OCR đọc lệch vài ký tự)
+
+
+def _fold(text: str) -> str:
+    text = unicodedata.normalize("NFD", text.casefold()).replace("đ", "d")
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    return " ".join(re.sub(r"[^\w]+", " ", text).split())
+
+
+def _ratio(a: str, b: str) -> float:
+    return SequenceMatcher(None, a, b, autojunk=False).ratio()
+
+
+def select_keyframes(
+    candidates: list[Keyframe],
+    texts: dict[str, list[tuple[str, float]]],
+    vectors: np.ndarray | None,
+    similarity: float = 0.85,
+) -> list[Keyframe]:
+    """Chọn keyframe từ các khung ứng viên (đã OCR).
+
+    Giữ khung khi (1) có dòng chữ chưa thấy ở keyframe giữ ngay trước, hoặc (2) khác về hình
+    với mọi keyframe đã giữ: cosine của embedding ảnh (L2 đã chuẩn hoá) với từng khung đã giữ
+    đều dưới `similarity`. So với mọi khung đã giữ, không chỉ khung trước, để cảnh quay lại
+    (phỏng vấn cắt qua lại) không bị giữ lặp. `texts` là các cặp (chữ, score) theo file khung.
+    `vectors` None (không có model ảnh) thì chỉ bỏ được khung trùng chữ và trùng hash."""
+    kept: list[Keyframe] = []
+    kept_vectors: list[np.ndarray] = []
+    previous_text: list[str] = []
+    for i, frame in enumerate(candidates):
+        lines = [
+            folded
+            for text, score in texts.get(frame.file, [])
+            if score >= TEXT_MIN_SCORE
+            and len((folded := _fold(text)).replace(" ", "")) >= TEXT_MIN_CHARS
+        ]
+        new_text = any(
+            all(_ratio(line, seen) < TEXT_SAME_RATIO for seen in previous_text) for line in lines
+        )
+        if vectors is None:
+            different = not kept or frame.hash != kept[-1].hash
+        else:
+            different = all(float(vectors[i] @ v) < similarity for v in kept_vectors)
+        if new_text or different:
+            kept.append(frame)
+            previous_text = lines
+            if vectors is not None:
+                kept_vectors.append(vectors[i])
+    return kept
+
+
+def write_selected(derived_dir: Path, frames: list[Keyframe]) -> None:
+    """Ghi keyframe đã chọn vào frames/selected.json (index.json vẫn là các khung ứng viên)."""
+    content = json.dumps([f.model_dump() for f in frames], indent=2) + "\n"
+    with atomic_output(derived_dir / "frames" / SELECTED_FILE) as path:
+        path.write_text(content, encoding="utf-8")
 
 
 def extract_keyframes(
