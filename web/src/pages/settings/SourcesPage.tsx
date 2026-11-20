@@ -115,7 +115,7 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
           </Button>
           <Button disabled={!dirty || save.isPending} onClick={() => save.mutate()}>
             {save.isPending && <LoaderCircleIcon animate />}
-            Save
+            {save.isPending ? 'Saving…' : 'Save'}
           </Button>
         </div>
       </div>

@@ -67,7 +67,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
             {source.last_error && <p className="font-mono text-xs text-muted-foreground">{source.last_error}</p>}
             <Button size="sm" variant="outline" disabled={resume.isPending} onClick={() => resume.mutate()}>
               {resume.isPending && <LoaderCircleIcon animate />}
-              Resume now
+              {resume.isPending ? 'Resuming…' : 'Resume now'}
             </Button>
             {resume.isError && <p className="text-xs text-destructive">{resume.error.message}</p>}
           </div>

@@ -69,7 +69,7 @@ export default function AIProvidersPage() {
           </Button>
           <Button disabled={!dirty || errors.length > 0 || save.isPending} onClick={() => save.mutate()}>
             {save.isPending && <LoaderCircleIcon animate />}
-            Save
+            {save.isPending ? 'Saving…' : 'Save'}
           </Button>
         </div>
       </div>
