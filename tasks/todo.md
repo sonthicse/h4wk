@@ -826,4 +826,6 @@ Nghiệm thu:
 
 Kiểm tra: đọc và duyệt.
 
+Bản nháp ở `docs/report/bao-cao.md` (chưa duyệt).
+
 Người làm: cả hai. Phụ thuộc: T37. Cỡ: S.
