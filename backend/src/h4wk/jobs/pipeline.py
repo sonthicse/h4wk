@@ -172,6 +172,8 @@ def _match(
     timeline: Timeline,
 ) -> None:
     """Khớp keyframe và thumbnail cục bộ với ảnh mẫu; ghi ref_hits.json."""
+    # Xoá kết quả cũ để lần chạy lại (thu lại cùng bản thu, recovery) không dùng dấu hiệu lỗi thời.
+    (out / "ref_hits.json").unlink(missing_ok=True)
     if not _analysis_config().ref_image.enabled:
         return
     refs = {}
@@ -198,6 +200,11 @@ def _match(
     except ImportError:
         logger.warning("Skipping reference image matching: torch is not installed")
         audit.log(job.trigger, "media.match", job.id, {"skipped": "torch not installed"})
+        return
+    except Exception as e:
+        # Tải model lỗi (mất mạng), hết VRAM...: bỏ qua bước này, job vẫn chạy tiếp tới analyze.
+        logger.warning("Reference image matching failed: %s", e)
+        audit.log(job.trigger, "media.match", job.id, {"error": str(e)}, status="error")
         return
     hits = refimages.to_hits(matches, timeline, {f.file: f.t for f in frames})
     content = [h.model_dump(mode="json", by_alias=True) for h in hits]

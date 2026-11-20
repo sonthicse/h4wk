@@ -294,3 +294,24 @@ def test_ref_image_hit_on_thumbnail_makes_thumbnail_item(tmp_path):
     thumbs = [i for i in items if i.kind == "thumbnail"]
     assert [t.frames for t in thumbs] == [[first.file]]
     assert [t.via for t in thumbs[0].triggers] == ["ref_image"]
+
+
+def test_payload_sent_to_llm_carries_triggers_with_entity(tmp_path):
+    data, timeline = _data()
+    first = timeline.thumbnails[0]
+    hits = [
+        EntityHit(entity="e_01", via="ref_image", frame=first.file, bbox=(0, 0, 10, 10), score=0.9),
+        EntityHit(entity="e_01", via="description"),
+    ]
+    items = llm.build_items(data, timeline, hits)
+    provider = FakeProvider([_reply()])
+    llm.classify(items, [ENTITY], data, timeline, hits, _gateway(provider, tmp_path), "r")
+    body = json.loads(provider.requests[0].messages[1]["content"])
+    by_kind = {i["kind"]: i for i in body["items"]}
+    assert by_kind["thumbnail"]["triggers"] == [
+        {"via": "ref_image", "frame": first.file, "entity": "e_01"}
+    ]
+    assert by_kind["description"]["triggers"] == [
+        {"via": "description", "frame": None, "entity": "e_01"}
+    ]
+    assert "ref_image" in llm.PROMPT_PATH.read_text(encoding="utf-8")

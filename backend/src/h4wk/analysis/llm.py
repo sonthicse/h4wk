@@ -66,6 +66,15 @@ def _trigger(hit: EntityHit) -> Trigger:
     return Trigger(**hit.model_dump(exclude={"entity"}))
 
 
+def _via(hits: list[EntityHit], via: str) -> list[EntityHit]:
+    return [h for h in hits if h.via == via]
+
+
+def _trigger_payload(hits: list[EntityHit]) -> list[dict]:
+    """Dấu hiệu gửi cho LLM, kèm đối tượng (Trigger của C4 không có entity)."""
+    return [{"via": h.via.value, "frame": h.frame, "entity": h.entity} for h in hits]
+
+
 def _segment_payload(segment: Segment) -> dict:
     return {
         "speech": segment.speech,
@@ -88,7 +97,8 @@ def build_items(data: Normalized, timeline: Timeline, hits: list[EntityHit]) -> 
 
     segments = timeline.segments
     for index, segment in enumerate(segments):
-        triggers = [_trigger(h) for h in hits if h.segment_id == segment.id]
+        seg_hits = [h for h in hits if h.segment_id == segment.id]
+        triggers = [_trigger(h) for h in seg_hits]
         cues = any(v.offensive_cues for v in segment.visual)
         if not triggers and not cues:
             continue
@@ -98,20 +108,20 @@ def build_items(data: Normalized, timeline: Timeline, hits: list[EntityHit]) -> 
             **_segment_payload(segment),
             "context_before": before,
             "context_after": after,
+            "triggers": _trigger_payload(seg_hits),
         }
         add("segment", segment, [v.frame for v in segment.visual], triggers, payload)
     via = {h.via.value for h in hits}
     if data.video:
         if "title" in via:
-            add("title", None, [], [Trigger(via="title")], {"text": data.video.title})
+            payload = {"text": data.video.title, "triggers": _trigger_payload(_via(hits, "title"))}
+            add("title", None, [], [Trigger(via="title")], payload)
         if "description" in via:
-            add(
-                "description",
-                None,
-                [],
-                [Trigger(via="description")],
-                {"text": data.video.description},
-            )
+            payload = {
+                "text": data.video.description,
+                "triggers": _trigger_payload(_via(hits, "description")),
+            }
+            add("description", None, [], [Trigger(via="description")], payload)
     for thumbnail in timeline.thumbnails:
         cues = thumbnail.visual is not None and bool(thumbnail.visual.offensive_cues)
         thumb_hits = [
@@ -119,7 +129,7 @@ def build_items(data: Normalized, timeline: Timeline, hits: list[EntityHit]) -> 
         ]
         if not thumb_hits and not cues:
             continue
-        payload = {"ocr": [o.text for o in thumbnail.ocr]}
+        payload = {"ocr": [o.text for o in thumbnail.ocr], "triggers": _trigger_payload(thumb_hits)}
         if thumbnail.visual:
             payload["visual"] = {
                 "description": thumbnail.visual.description,

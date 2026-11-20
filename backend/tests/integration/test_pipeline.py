@@ -320,3 +320,49 @@ def test_missing_torch_skips_matching_and_job_is_done(
     assert job["status"] == "done", job["error"]
     rows = [x for x in _lines(data_dir / "log" / "audit.jsonl") if x["action"] == "media.match"]
     assert rows and rows[0]["detail"]["skipped"] == "torch not installed"
+
+
+def test_stale_ref_hits_are_removed_when_matching_is_skipped(
+    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from h4wk.core.config import config_dir
+    from h4wk.jobs import pipeline
+
+    monkeypatch.setattr(pipeline, "_ref_embedder", _SameVectorEmbedder())
+    _entity(client)
+    _add_ref_image(data_dir)
+    first = client.post("/api/collect", json={"url": VIDEO}).json()[0]
+    j1 = client.get(f"/api/jobs/{first['id']}").json()
+    derived = data_dir / "videos" / j1["video_id"] / "derived" / j1["capture"]
+    assert (derived / "ref_hits.json").exists()
+    (config_dir() / "analysis.toml").write_text("[ref_image]\nenabled = false\n", encoding="utf-8")
+    second = client.post("/api/collect", json={"url": VIDEO}).json()[0]  # cùng bản thu
+    j2 = client.get(f"/api/jobs/{second['id']}").json()
+    assert j2["status"] == "done" and j2["capture"] == j1["capture"]
+    assert not (derived / "ref_hits.json").exists()
+    latest = max((derived / "analysis").iterdir(), key=lambda p: p.name)
+    hits = json.loads((latest / "hits.json").read_text(encoding="utf-8"))
+    assert all(h["via"] != "ref_image" for h in hits)
+
+
+def test_match_error_is_audited_and_job_is_done(
+    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from h4wk.jobs import pipeline
+
+    class Broken:
+        name = "broken"
+
+        def embed(self, images):  # noqa: ANN001, ANN201
+            raise RuntimeError("CUDA out of memory")
+
+    monkeypatch.setattr(pipeline, "_ref_embedder", Broken())
+    _entity(client)
+    _add_ref_image(data_dir)
+    r = client.post("/api/collect", json={"url": VIDEO})
+    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
+    assert job["status"] == "done", job["error"]
+    derived = data_dir / "videos" / job["video_id"] / "derived" / job["capture"]
+    assert not (derived / "ref_hits.json").exists()
+    rows = [x for x in _lines(data_dir / "log" / "audit.jsonl") if x["action"] == "media.match"]
+    assert rows and rows[0]["status"] == "error" and "out of memory" in rows[0]["detail"]["error"]
