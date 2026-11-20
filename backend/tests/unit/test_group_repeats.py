@@ -17,12 +17,12 @@ def _segment(i: int, texts: list[str]) -> Segment:
     return Segment(id=f"seg_{i:04d}", start=i * 10, end=i * 10 + 9, ocr=ocr)
 
 
-def _analyze(tmp_path, segments):
+def _analyze(tmp_path, segments, title=""):
     timeline = Timeline(
         schema="h4wk.timeline/1", video_id="v", capture="20261118T154530", segments=segments
     )
     data = Normalized(
-        schema="h4wk.normalized/1", video=Video(id="v", channel_id="c", title="", description="")
+        schema="h4wk.normalized/1", video=Video(id="v", channel_id="c", title=title, description="")
     )
     entity = Entity(id="e_01", name="Nguyễn Văn Hùng", abbreviations=["NVH"])
     _, findings, _ = analyze(
@@ -60,3 +60,15 @@ def test_other_kinds_are_not_grouped(tmp_path):
     (ocr,) = _analyze(tmp_path, segments)
     speech = ocr.model_copy(update={"source_kind": "speech", "occurrences": []})
     assert group_repeats([speech, speech]) == [speech, speech]
+
+
+def test_quote_is_taken_from_title_when_ocr_misreads_diacritics(tmp_path):
+    misread = "CHĨNH DUYỀN NVH LÀ ĐỒ NGỐC"
+    segments = [_segment(1, [misread]), _segment(2, ["CHĨNH QUYỀN NVH LẢ ĐỒ NGỐC"])]
+    (finding,) = [
+        f
+        for f in _analyze(tmp_path, segments, title="Tin nóng: CHÍNH QUYỀN NVH LÀ ĐỒ NGỐC!")
+        if f.source_kind == "ocr"
+    ]
+    assert finding.quote == "CHÍNH QUYỀN NVH LÀ ĐỒ NGỐC"
+    assert len(finding.occurrences) == 2

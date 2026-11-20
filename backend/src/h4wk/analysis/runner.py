@@ -1,6 +1,7 @@
 """Phân tích tĩnh văn bản theo các đối tượng cần bảo vệ."""
 
 import json
+import re
 from collections import Counter
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -126,7 +127,9 @@ def analyze(
             replaced = {_slot(f) for f in llm_findings}
             findings = [f for f in findings if _slot(f) not in replaced] + llm_findings
     llm_error = "; ".join(errors) or None
-    findings = group_repeats(findings)
+    references = [data.video.title, data.video.description] if data.video else []
+    references += [segment.speech for segment in timeline.segments]
+    findings = group_repeats(findings, references)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     for filename, items in (("hits.json", hits), ("findings.json", findings)):
@@ -168,32 +171,66 @@ _SEVERITY = list(Severity)
 _CONFIDENCE = list(Confidence)
 
 
-def group_repeats(findings: list[Finding]) -> list[Finding]:
+def _fold(text: str) -> str:
+    """Bỏ dấu, chữ hoa và dấu câu: OCR hay đọc sai dấu (Í→Ĩ, Ô→Ổ) mà chữ cái vẫn đúng."""
+    return " ".join(re.sub(r"[^\w]+", " ", normalize(text)).split())
+
+
+def _ratio(a: str, b: str) -> float:
+    return SequenceMatcher(None, a, b, autojunk=False).ratio()
+
+
+def group_repeats(findings: list[Finding], references: list[str] = ()) -> list[Finding]:
     """Gộp các nghi vấn OCR cùng tầng phân tích, đối tượng, danh mục và chữ gần giống nhau
-    thành một nghi vấn, ghi các đoạn xuất hiện vào `occurrences`. Giữ thứ tự ban đầu."""
-    groups: list[tuple[str, list[Finding]]] = []
+    thành một nghi vấn, ghi các đoạn xuất hiện vào `occurrences`. Giữ thứ tự ban đầu.
+    `references` là văn bản đáng tin hơn OCR (tiêu đề, mô tả, lời nói) để sửa trích dẫn."""
+    groups: list[tuple[list[str], list[Finding]]] = []
     for finding in findings:
         if finding.source_kind not in REPEAT_KINDS or finding.start is None:
             continue
-        text = normalize(finding.quote)
-        for head_text, members in groups:
+        text = _fold(finding.quote)
+        for texts, members in groups:
             head = members[0]
             same = (head.analyzer, head.entity, head.category) == (
                 finding.analyzer,
                 finding.entity,
                 finding.category,
             )
-            if same and SequenceMatcher(None, head_text, text).ratio() >= SAME_QUOTE_RATIO:
+            # So với mọi bản đã gộp: các bản đọc lệch nối nhau thành chuỗi vẫn về một nhóm.
+            if same and any(_ratio(seen, text) >= SAME_QUOTE_RATIO for seen in texts):
                 members.append(finding)
+                if text not in texts:
+                    texts.append(text)
                 break
         else:
-            groups.append((text, [finding]))
-    merged = {id(members[0]): _merge(members) for _, members in groups}
+            groups.append(([text], [finding]))
+    merged = {id(members[0]): _merge(members, references) for _, members in groups}
     grouped = {id(f) for _, members in groups for f in members}
     return [merged.get(id(f), f) for f in findings if id(f) in merged or id(f) not in grouped]
 
 
-def _merge(members: list[Finding]) -> Finding:
+def _reading(quotes: list[str], references: list[str]) -> str:
+    """Bản đọc tốt nhất của một dòng chữ OCR lặp lại: bỏ phiếu từng ký tự giữa các bản đọc có
+    độ dài phổ biến nhất, rồi nếu tiêu đề, mô tả hay lời nói có đúng câu đó (so sau khi bỏ dấu)
+    thì lấy nguyên văn từ đó, vì OCR hay sai dấu."""
+    length = Counter(len(q) for q in quotes).most_common(1)[0][0]
+    same = [q for q in quotes if len(q) == length]
+    voted = "".join(Counter(chars).most_common(1)[0][0] for chars in zip(*same, strict=True))
+    target = _fold(voted)
+    size = len(target.split())
+    best, best_ratio = voted, 0.9  # chỉ thay khi gần như trùng chữ cái
+    for text in references:
+        words = text.split()
+        for n in (size - 1, size, size + 1):
+            for i in range(max(0, len(words) - n + 1)):
+                candidate = " ".join(words[i : i + n]).strip(",.;:!?\"'“”()")
+                ratio = _ratio(_fold(candidate), target)
+                if ratio > best_ratio:
+                    best, best_ratio = candidate, ratio
+    return best
+
+
+def _merge(members: list[Finding], references: list[str]) -> Finding:
     if len(members) == 1:
         return members[0]
     # Nghi vấn OCR luôn có segment_id và start (hợp đồng C4).
@@ -213,8 +250,7 @@ def _merge(members: list[Finding]) -> Finding:
     return Finding.model_validate(
         {
             **head.model_dump(),
-            # Bản đọc gặp nhiều nhất thường là bản OCR đúng.
-            "quote": Counter(f.quote for f in members).most_common(1)[0][0],
+            "quote": _reading([f.quote for f in members], references),
             "triggers": [t.model_dump() for t in triggers],
             "severity": max((f.severity for f in members), key=_SEVERITY.index),
             "confidence": max((f.confidence for f in members), key=_CONFIDENCE.index),

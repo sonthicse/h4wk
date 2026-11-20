@@ -10,17 +10,32 @@ from h4wk.core.types import TranscriptKind
 from h4wk.media.files import atomic_output
 from h4wk.media.timeline import Segment, Timeline
 
+SEGMENT_MIN_S = 8
+SEGMENT_MAX_S = 30
+
+
+def _starts_sentence(previous: TranscriptSegment, sentence: TranscriptSegment) -> bool:
+    """Mẩu phụ đề mở đầu câu mới: mẩu trước kết thúc bằng dấu câu, hoặc mẩu này viết hoa
+    chữ đầu. Mẩu bắt đầu bằng chữ thường là phần tiếp của câu trước."""
+    text = sentence.text.lstrip(" -\"“'(")
+    return previous.text.rstrip().endswith((".", "?", "!", "…")) or not text[:1].islower()
+
 
 def group_segments(sentences: list[TranscriptSegment]) -> list[Segment]:
+    """Gom mẩu phụ đề thành đoạn dài từ SEGMENT_MIN_S giây, chỉ cắt ở ranh giới câu để một
+    câu không bị chia sang hai đoạn; câu quá dài thì cắt khi đoạn vượt SEGMENT_MAX_S giây."""
     groups: list[list[TranscriptSegment]] = []
     for sentence in sorted(sentences, key=lambda item: item.start):
-        if (
-            not groups
-            or max(s.end for s in groups[-1]) - groups[-1][0].start >= 8
-            or (max(sentence.end, *(s.end for s in groups[-1])) - groups[-1][0].start > 20)
-        ):
-            groups.append([])
-        groups[-1].append(sentence)
+        if groups:
+            group = groups[-1]
+            end = max(s.end for s in group)
+            full = max(sentence.end, end) - group[0].start > SEGMENT_MAX_S
+            if not full and (
+                end - group[0].start < SEGMENT_MIN_S or not _starts_sentence(group[-1], sentence)
+            ):
+                group.append(sentence)
+                continue
+        groups.append([sentence])
     return [
         Segment(
             id=f"seg_{i:04d}",

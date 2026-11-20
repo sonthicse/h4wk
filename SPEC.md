@@ -366,7 +366,7 @@ Hợp đồng C3 là `timeline.json`:
 
 Quy tắc ghép timeline:
 
-- Mỗi đoạn dài khoảng 8–20 giây, gom từ các câu trong transcript chính.
+- Mỗi đoạn dài từ 8 giây, gom từ các mẩu phụ đề trong transcript chính và chỉ cắt ở ranh giới câu (mẩu trước kết thúc bằng dấu câu, hoặc mẩu sau viết hoa chữ đầu), để một câu không bị chia sang hai đoạn. Câu quá dài thì cắt khi đoạn vượt 30 giây. Trên 21 transcript thật (đo ngày 2026-11-20), tỉ lệ ranh giới đoạn rơi vào giữa câu giảm từ 66% xuống 4%.
 - Keyframe nằm trong khoảng thời gian của đoạn nào thì gắn vào đoạn đó.
 - Transcript chính được chọn theo thứ tự `uploaded > stt > auto > supadata_ai` (cấu hình được). Các transcript khác vẫn được lưu và xem được trên giao diện, nhưng không dùng để phân tích.
 
@@ -437,7 +437,7 @@ Quy tắc:
 
 - Nghi vấn `visual` phải trích khung hình và nêu lý do dựa trên nội dung hình.
 - Nghi vấn `speech`, `ocr` và `visual` phải có `segment_id` và `start`, để bấm vào nghi vấn thì video phát từ `start − 2s`.
-- Nghi vấn `ocr` cùng tầng phân tích, đối tượng, danh mục và chữ gần giống nhau (OCR đọc lệch vài ký tự giữa các khung) được gộp thành một nghi vấn, ví dụ băng rôn chạy suốt video. `occurrences` liệt kê mỗi đoạn có chữ đó, theo thời gian; phần tử đầu trùng `segment_id` và `start` của nghi vấn. Nghi vấn chỉ ở một đoạn thì `occurrences` rỗng. Thanh thời gian ở màn chi tiết video tô mọi đoạn trong `occurrences`, bấm đoạn nào thì phát từ đầu đoạn đó − 2s.
+- Nghi vấn `ocr` cùng tầng phân tích, đối tượng, danh mục và chữ gần giống nhau (OCR đọc lệch vài ký tự giữa các khung) được gộp thành một nghi vấn, ví dụ băng rôn chạy suốt video. `occurrences` liệt kê mỗi đoạn có chữ đó, theo thời gian; phần tử đầu trùng `segment_id` và `start` của nghi vấn. Trích dẫn lấy từ bỏ phiếu từng ký tự giữa các bản đọc; nếu tiêu đề, mô tả hay lời nói có đúng câu đó (so sau khi bỏ dấu) thì lấy nguyên văn từ đó, vì OCR hay đọc sai dấu. Nghi vấn chỉ ở một đoạn thì `occurrences` rỗng. Thanh thời gian ở màn chi tiết video tô mọi đoạn trong `occurrences`, bấm đoạn nào thì phát từ đầu đoạn đó − 2s.
 - Mức tin cậy viết bằng chữ, không dùng phần trăm.
 - Nghi vấn là dữ liệu phái sinh. Mỗi lần chạy ghi vào một thư mục `analysis/<run_id>/` mới, nên kết quả các lần chạy trước vẫn còn nguyên.
 - Nghi vấn từ comment chỉ hiển thị nội dung comment và liên kết tới comment đó. Công cụ không có màn hình hồ sơ người bình luận.

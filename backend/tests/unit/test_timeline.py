@@ -22,6 +22,24 @@ def test_grouping_respects_maximum_and_keeps_long_sentence():
     ]
 
 
+def test_grouping_cuts_only_between_sentences():
+    sentences = [
+        TranscriptSegment(start=a, end=b, text=t)
+        for a, b, t in [
+            (0, 4, "Phía Việt Nam coi Trung Quốc"),
+            (4, 9, "là điểm tựa"),  # chữ thường: tiếp câu trước dù đoạn đã đủ 8 giây
+            (9, 12, "chiến lược quan trọng nhất"),
+            (12, 15, "Đó là lời khẳng định."),
+            (15, 20, "Ngày hôm sau"),
+            (20, 24, "tờ báo đăng tin"),
+            (24, 45, "tiếp nữa"),  # đoạn sẽ dài 33 giây: buộc cắt giữa câu
+        ]
+    ]
+    segments = group_segments(sentences)
+    assert [(s.start, s.end) for s in segments] == [(0, 12), (12, 24), (24, 45)]
+    assert segments[0].speech.endswith("Trung Quốc là điểm tựa chiến lược quan trọng nhất")
+
+
 def test_choose_transcript_respects_priority_and_ignores_empty():
     from h4wk.collectors.models import Transcript
     from h4wk.core.types import TranscriptKind
