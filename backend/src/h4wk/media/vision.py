@@ -13,6 +13,7 @@ from h4wk.media.files import atomic_output
 from h4wk.media.timeline import Visual
 
 logger = logging.getLogger(__name__)
+PROMPT_PATH = Path(__file__).parent / "prompts" / "vision.md"
 
 
 class Description(Contract):
@@ -32,7 +33,11 @@ def describe_images(images: list[tuple[str, Path]], output: Path) -> dict[str, V
         # Không gọi gateway và không ghi vision.json để giữ nguyên cache cũ.
         logger.warning("Skipping image descriptions: %s not found", gateway.config_path)
         return {}
-    config_hash = sha256(gateway.config_path.read_bytes()).hexdigest() if images else ""
+    prompt = PROMPT_PATH.read_text(encoding="utf-8") if images else ""
+    config_hash = ""
+    if images:
+        prompt_digest = sha256(prompt.encode("utf-8")).digest()
+        config_hash = sha256(gateway.config_path.read_bytes() + prompt_digest).hexdigest()
     adapter = TypeAdapter(dict[str, CachedVisual])
     cached = {}
     if output.exists():
@@ -55,8 +60,7 @@ def describe_images(images: list[tuple[str, Path]], output: Path) -> dict[str, V
             answer, route = gateway.describe_image_with_route(
                 "media.vision",
                 image,
-                "Mô tả hình ảnh và liệt kê dấu hiệu xúc phạm nhìn thấy. "
-                "Chỉ mô tả chi tiết quan sát được, cấm đoán danh tính người trong ảnh.",
+                prompt,
                 Description,
             )
         except GatewayError as error:

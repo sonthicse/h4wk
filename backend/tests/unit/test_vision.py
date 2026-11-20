@@ -59,6 +59,22 @@ def test_failed_image_is_skipped_then_retried_alone(monkeypatch, tmp_path, image
     assert [r.image for r in retry.requests] == [b"b"]
 
 
+def test_changed_prompt_invalidates_cache(monkeypatch, tmp_path, images):
+    prompt = tmp_path / "vision.md"
+    prompt.write_text("Mô tả hình ảnh.", encoding="utf-8")
+    monkeypatch.setattr(vision, "PROMPT_PATH", prompt)
+    output = tmp_path / "vision.json"
+    provider = ByImage(set())
+    _use(monkeypatch, tmp_path, provider)
+    vision.describe_images(images[:1], output)
+    vision.describe_images(images[:1], output)
+    assert len(provider.requests) == 1
+
+    prompt.write_text("Mô tả chi tiết hình ảnh.", encoding="utf-8")
+    vision.describe_images(images[:1], output)
+    assert len(provider.requests) == 2
+
+
 def test_missing_config_returns_nothing_without_error(monkeypatch, tmp_path, images):
     _use(monkeypatch, tmp_path, ByImage(set()), tmp_path / "none.toml")
     assert vision.describe_images(images, tmp_path / "vision.json") == {}
