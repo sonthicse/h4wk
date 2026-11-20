@@ -29,8 +29,7 @@ Chỉ tạo thành viên mà task cần. Task chỉ có backend thì không tạ
 ## Quy trình khi nhận "làm T<x>"
 
 1. **Hiểu yêu cầu.** Đọc mục T<x> trong `tasks/todo.md` (mô tả, nghiệm thu, file, phụ thuộc, người làm) và mục SPEC liên quan.
-2. **Kiểm tra điều kiện.**
-   - Task phụ thuộc chưa xong (xem dấu `[x]` ở `tasks/plan.md`): báo người dùng và đề xuất làm task phụ thuộc trước.
+2. **Kiểm tra điều kiện.** Task phụ thuộc chưa xong (xem dấu `[x]` ở `tasks/plan.md`): báo người dùng và đề xuất làm task phụ thuộc trước.
 3. **Khảo sát code.** Tra graph trước: `graphify query "<câu hỏi>"`, `graphify explain "<node>"`, `graphify path "<A>" "<B>"`, hoặc đọc `graphify-out/GRAPH_REPORT.md`; sau đó mới Read/`rg` đúng chỗ.
 4. **Chia việc.** Chia thành các bước nhỏ, độc lập, kiểm được. Mỗi bước ghi: ai làm, file nào (đường dẫn cụ thể), thứ tự và lý do, tiêu chí xong lấy từ mục nghiệm thu. Có API mới: backend gửi hợp đồng cho `ui` góp ý trước khi code. Tạo task list với phụ thuộc: bước code → bước review của `reviewer`.
 5. **Rủi ro và quyết định.** Nêu điểm dễ sai, thay đổi phá vỡ tương thích, giả định. Việc cần người dùng quyết (đổi hợp đồng C1–C5, đổi SPEC, thêm thư viện, lựa chọn thiết kế): hỏi theo quy tắc trong CLAUDE.md (vấn đề, ví dụ, lựa chọn, hệ quả, đề xuất) và **chờ trả lời trước khi giao việc**.

@@ -14,7 +14,7 @@ Kế hoạch nhắm tới một luồng K1 đa phương thức chạy trọn t�
 
 Tuần 1 dựng một luồng tối giản: dán link → yt-dlp → bản thu → transcript → khớp tĩnh → nghi vấn trên giao diện. Sau đó từng module được làm sâu dần theo các lát dọc. Năm hợp đồng C1–C5 được Thi viết ở T4, bản thu mẫu dựng ở T44, và hợp đồng được chốt tại checkpoint A.
 
-Thi là người chịu trách nhiệm chính. Kế hoạch được sắp để task của Thi không phải chờ task của Bảo: chỗ nào Thi cần phần của Bảo thì Thi làm trước với bản thu mẫu của T44, và nối vào khi phần của Bảo xong.
+Thi là người chịu trách nhiệm chính. Kế hoạch (cách chia ban đầu) được sắp để task của Thi không phải chờ task của Bảo: chỗ nào Thi cần phần của Bảo thì Thi làm trước với bản thu mẫu của T44, và nối vào khi phần của Bảo xong.
 
 ## Quyết định kiến trúc
 
