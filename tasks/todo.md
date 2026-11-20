@@ -378,10 +378,10 @@ Trước khi viết adapter Anthropic, đọc skill `claude-api`. Với các nh�
 
 Nghiệm thu:
 
-- [ ] Mỗi nhà cung cấp đã có key chạy được một lời gọi văn bản trong `-m live`, trả về đối tượng hợp lệ.
-- [ ] Mỗi nhà cung cấp có model đọc ảnh chạy được một lời gọi ảnh.
+- [x] Mỗi nhà cung cấp đã có key chạy được một lời gọi văn bản trong `-m live`, trả về đối tượng hợp lệ.
+- [x] Mỗi nhà cung cấp có model đọc ảnh chạy được một lời gọi ảnh.
 
-Đã triển khai ba adapter và kiểm thử qua SDK. Nghiệm thu live đang chờ API key.
+Đã triển khai ba adapter và kiểm thử qua SDK. Nghiệm thu live ngày 20/11: gemini (`gemini-3.6-flash`) và openrouter qua `openai_compat` (`nvidia/nemotron-3.5-super-vl:free`) qua cả lời gọi văn bản lẫn ảnh (4 passed). Anthropic bị bỏ qua vì chưa có key; có key thì chạy lại lệnh dưới.
 
 Kiểm tra: `uv run pytest -m live -k ai_provider`.
 
@@ -390,8 +390,10 @@ Người làm: Bảo. Phụ thuộc: T16. Cỡ: M.
 
 ### Checkpoint B
 
-- [ ] Có test chứng minh việc chuyển nguồn thu khi lỗi.
-- [ ] Đổi nhà cung cấp của một tác vụ AI trong `ai.toml` mà không sửa code, và lời gọi live vẫn chạy.
+- [x] Có test chứng minh việc chuyển nguồn thu khi lỗi.
+- [x] Đổi nhà cung cấp của một tác vụ AI trong `ai.toml` mà không sửa code, và lời gọi live vẫn chạy.
+
+Ghi chú 20/11: chuyển nguồn thu có `test_fault_injection_ytdlp_falls_back_to_supadata` trong `tests/unit/test_orchestrator.py`. Đổi tuyến `analysis.classify` trong `ai.toml` giữa gemini và openrouter rồi gọi `AIGateway.complete_structured` thật: cả hai lần trả về đối tượng hợp lệ, và `ai_calls.jsonl` ghi đúng nhà cung cấp đã chọn.
 
 ## Phase 3: Media đa phương thức
 
