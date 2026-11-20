@@ -149,9 +149,18 @@ def test_neutral_only_in_llm_json_and_invalid_verdicts_dropped(tmp_path):
         Finding.model_validate(raw)
     records = json.loads((out / "llm.json").read_text(encoding="utf-8"))
     kept = {r["item_id"]: r["kept"] for r in records}
-    assert kept == {ids["seg_0001"]: False, ids["seg_0003"]: True, ids["seg_0004"]: False}
+    assert kept == {
+        ids["seg_0001"]: False,
+        ids["seg_0002"]: False,  # đối tượng lạ
+        "i_999": False,  # mục lạ
+        ids["seg_0003"]: True,
+        ids["seg_0004"]: False,
+    }
     by_item = {r["item_id"]: r for r in records}
     assert "error" in by_item[ids["seg_0004"]] and "error" not in by_item[ids["seg_0003"]]
+    assert (
+        by_item[ids["seg_0002"]]["error"] == by_item["i_999"]["error"] == ("unknown item or entity")
+    )
 
 
 def test_missing_ai_config_keeps_static_findings(tmp_path):

@@ -2,8 +2,6 @@
 
 import json
 
-import pytest
-
 from h4wk.ai.base import ProviderReply, ProviderRequest
 from h4wk.ai.config import AI_CONFIG_PATH
 from h4wk.ai.gateway import AIGateway
@@ -200,11 +198,12 @@ def test_comment_failure_keeps_segment_part(tmp_path):
     _, findings, error = _run(tmp_path, Flaky(), data, timeline)
     assert [f.source_kind for f in findings if f.analyzer == "llm"] == ["speech"]
     assert error and "analysis.classify_comment" in error
+    records = json.loads((tmp_path / "out" / "llm.json").read_text(encoding="utf-8"))
+    assert {r["task"] for r in records} == {"analysis.classify"}
 
 
-@pytest.mark.parametrize("mentions", [0])
-def test_no_comment_hits_means_no_comment_request(tmp_path, mentions):
-    data, timeline = _data(n=10, mentions=mentions)
+def test_no_comment_hits_means_no_comment_request(tmp_path):
+    data, timeline = _data(n=10, mentions=0)
     provider = Judge()
     _, _, error = _run(tmp_path, provider, data, timeline)
     assert error is None and provider.requests == []

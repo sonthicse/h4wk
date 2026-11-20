@@ -206,6 +206,17 @@ def classify(
             item = by_id.get(verdict.item_id)
             if item is None or verdict.entity not in known:
                 log.warning("Dropped verdict with unknown item or entity: %s", verdict.item_id)
+                records.append(
+                    {
+                        "task": "analysis.classify",
+                        "item_id": verdict.item_id,
+                        "verdict": verdict.model_dump(mode="json"),
+                        "provider": route.provider,
+                        "model": route.model,
+                        "kept": False,
+                        "error": "unknown item or entity",
+                    }
+                )
                 continue
             kept = False
             error_text = None
