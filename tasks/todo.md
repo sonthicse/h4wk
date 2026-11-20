@@ -863,17 +863,3 @@ Nghiệm thu:
 - [ ] `npm run build` và `npm run lint` không lỗi.
 
 Người làm: Thi. Phụ thuộc: T49. Cỡ: M.
-
-### T43: Báo cáo môn học
-
-Viết báo cáo môn học: mục tiêu, kiến trúc, phương pháp lưu bằng chứng, cách phân tích, kết quả đo, giới hạn. Báo cáo giải thích lý do dùng khớp khuôn mặt (đảo ngược quy định trong mô tả gốc), các giới hạn đã áp dụng, và cơ sở theo Nghị định 13/2023.
-
-Nghiệm thu:
-
-- [ ] Hai người đã đọc và duyệt bản cuối.
-
-Kiểm tra: đọc và duyệt.
-
-Bản nháp ở `docs/report/bao-cao.md` (chưa duyệt).
-
-Người làm: cả hai. Phụ thuộc: T37. Cỡ: S.

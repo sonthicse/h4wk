@@ -93,7 +93,6 @@ flowchart LR
         T36["T36 Dữ liệu demo"]
         T37["T37 Diễn tập, đo và tối ưu thời gian xử lý"]
         T38["T38 Bảng so sánh tĩnh và LLM"]
-        T43["T43 Báo cáo môn học"]
     end
 
     CPA{{Checkpoint A}}
@@ -205,7 +204,6 @@ flowchart LR
     CPF --> T36
     T36 --> T37
     T24 --> T38
-    T37 --> T43
 ```
 
 ## Danh sách task
@@ -299,7 +297,6 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [ ] T36: Dữ liệu demo
 - [ ] T37: Diễn tập, đo và tối ưu thời gian xử lý
 - [ ] T38 (làm thêm): Bảng so sánh tĩnh và LLM
-- [ ] T43: Báo cáo môn học
 
 ## Chia việc
 
@@ -314,7 +311,7 @@ Từ 20/11/2026, Thi nhận làm cả các task của Bảo. Bảng dưới đâ
 | 2–3 | T14, T15, T45, T46 | T16, T17, T18–T22 | |
 | 4 | T25, T28, T29, T39, T42 | T23, T24, T26, T27, T40, T41 | |
 | 5–6 | T30, T31, T32, T33, T35 | T34 | |
-| 7 | | T38 | T36, T37, T43 |
+| 7 | | T38 | T36, T37 |
 
 Các chỗ cần phối hợp:
 
@@ -330,7 +327,7 @@ Các chỗ cần phối hợp:
 | Bốn thư viện GPU (faster-whisper, PaddleOCR, model khuôn mặt, model embedding ảnh) không cài chung được vì đòi phiên bản CUDA/cuDNN khác nhau | Cao | Spike T3 kiểm tra đầu tiên. Dự phòng: PaddleOCR chạy CPU, hoặc tách môi trường cho worker `gpu` |
 | YouTube chặn yt-dlp (bot check, PO token, cần JS runtime) trên máy demo | Cao | Spike T2 phát hiện sớm. YouTube API và Supadata làm nguồn dự phòng. yt-dlp hỗ trợ file cookies. Dữ liệu demo được thu và xử lý trước |
 | RSS cập nhật chậm hoặc thất thường | Trung bình | Đo ở T2. Nút Check now (T30) kiểm tra cả RSS lẫn YouTube API; nếu RSS chậm thì lúc demo dùng nút này |
-| Khớp khuôn mặt báo nhầm, hoặc bị xem là xử lý dữ liệu nhạy cảm không đúng cách | Trung bình | Chỉ so với các đối tượng đã khai báo, không lưu đặc trưng khuôn mặt không khớp, dấu hiệu khuôn mặt chỉ kéo đoạn vào LLM chứ không thành nghi vấn. Khi demo dùng khuôn mặt thành viên nhóm. Báo cáo môn học giải thích cơ sở pháp lý (T43) |
+| Khớp khuôn mặt báo nhầm, hoặc bị xem là xử lý dữ liệu nhạy cảm không đúng cách | Trung bình | Chỉ so với các đối tượng đã khai báo, không lưu đặc trưng khuôn mặt không khớp, dấu hiệu khuôn mặt chỉ kéo đoạn vào LLM chứ không thành nghi vấn. Khi demo dùng khuôn mặt thành viên nhóm. Báo cáo môn học giải thích cơ sở pháp lý |
 | Mỗi nhà cung cấp AI hỗ trợ đầu ra có cấu trúc và đọc ảnh theo cách khác nhau | Trung bình | Khai báo khả năng `vision`, `structured` cho từng model; Pydantic validate, gửi lại kèm thông báo lỗi, rồi chuyển nhà cung cấp (T16). Mỗi nhà cung cấp có test live (T17) |
 | Màn 2 chậm hơn mục tiêu | Thấp | Thời gian là mục tiêu, không bắt buộc. Đo ở checkpoint C. Gọi VLM song song có giới hạn, giảm số keyframe, dùng model STT nhỏ hơn |
 | Video có hàng nghìn comment làm việc thu thập và phân tích chậm | Thấp | Màn 2 dùng video ít comment. Phân tích comment chạy theo lô và có giới hạn cấu hình được |
