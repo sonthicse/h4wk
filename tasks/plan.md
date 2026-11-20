@@ -257,7 +257,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 4: Phân tích và rà soát (tuần 3)
 
-- [ ] T23: `analysis`: tầng LLM
+- [x] T23: `analysis`: tầng LLM
 - [x] T24: `analysis`: comment
 - [x] T25: `review`: backend hàng đợi và quyết định
 - [x] T26: UI Video detail: trình phát, transcript, thanh thời gian

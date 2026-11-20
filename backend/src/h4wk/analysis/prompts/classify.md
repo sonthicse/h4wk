@@ -20,6 +20,8 @@ Phân biệt phê bình hợp lý với bôi nhọ: phê bình nói về hành �
 
 - `triggers` của mỗi mục là các dấu hiệu đã đưa mục vào phân tích, kèm `entity`. Dấu hiệu `ref_image` (khung khớp ảnh mẫu của đối tượng) và `face` là căn cứ để gắn đối tượng cho nội dung hình của khung đó, kể cả khi không nhắc tên.
 - `source_kind` của mục đoạn (`kind` = `segment`) là `speech`, `ocr` hoặc `visual`, tùy nội dung nào cấu thành vi phạm. Với mục `title`, `description`, `thumbnail`, dùng đúng loại của mục.
+- Với mỗi đoạn, đánh giá riêng lời nói, chữ OCR và hình ảnh. Trả về một kết luận riêng cho mỗi nguồn có dấu hiệu vi phạm; không gộp kết luận về hình vào `ocr` chỉ vì cùng khung có chữ.
+- Nếu `offensive_cues` mô tả thủ pháp hình ảnh như ghép còng tay để ám chỉ phạm tội, đánh giá riêng hàm ý từ chi tiết đó dưới `visual`, ngoài kết luận về chữ (nếu có). Có thể dùng tiêu đề và `video_hits` để gắn hàm ý với đối tượng nếu ngữ cảnh chỉ rõ video đang nhắm tới đối tượng đó, kể cả khi đoạn không nhắc tên; điều này không xác nhận danh tính người trong ảnh.
 - `visual`: chỉ kết luận dựa trên mô tả hình và `offensive_cues`. `frame` phải là một khung trong `frames` của mục. `reason` phải nêu chi tiết nhìn thấy trong hình. Tuyệt đối không đoán danh tính người trong ảnh nếu mô tả không nêu; chỉ gắn với đối tượng khi nội dung hình hoặc ngữ cảnh video chỉ rõ.
 - `quote`: trích nguyên văn lời nói, chữ OCR, hoặc mô tả hình; không diễn giải.
 - `severity`: `low`, `medium` hoặc `high`.
