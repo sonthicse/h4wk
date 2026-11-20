@@ -68,7 +68,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 # Dự án h4wk
 
-Công cụ SOCMINT cho YouTube, bài tập lớn của nhóm 2 người (Thi chịu trách nhiệm chính; Bảo phụ trách AI, media, phân tích). Demo cuối tháng 12/2026.
+Công cụ SOCMINT cho YouTube, bài tập lớn của nhóm 2 người (Thi chịu trách nhiệm chính; từ 20/11/2026 Thi làm cả phần AI, media, phân tích trước đây của Bảo). Demo cuối tháng 12/2026.
 
 ## Đọc gì trước
 
@@ -105,7 +105,6 @@ cd web && npm run build && npm run lint
 
 - Vai trò định nghĩa ở `.claude/agents/`: `h4wk-lead` (trưởng nhóm), `h4wk-backend`, `h4wk-ui`, `h4wk-reviewer`. Bật bằng `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` trong `.claude/settings.local.json`.
 - Chạy trưởng nhóm bằng `claude --agent h4wk-lead` ở thư mục repo chính, rồi ra lệnh kiểu "làm T14", "làm phase 2". Trưởng nhóm lập kế hoạch, giao brief chi tiết cho thành viên, chờ review, tự merge rồi hỏi người dùng trước khi push.
-- Không giao cho team các task AI, media, phân tích của Bảo (T17, T18, T21–T24, T40, T41; `backend/src/h4wk/{ai,media,analysis}`).
 
 ## graphify
 

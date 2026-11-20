@@ -298,6 +298,8 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 Thi là người chịu trách nhiệm chính: viết các hợp đồng, phụ trách thu thập, lưu bằng chứng, chạy job, watchlist, Settings, phần lớn giao diện quản lý, và duyệt thay đổi hợp đồng sau checkpoint A. Bảo phụ trách AI, media, phân tích và màn chi tiết video.
 
+Từ 20/11/2026, Thi nhận làm cả các task của Bảo. Bảng dưới đây giữ lại để tham khảo cách chia ban đầu.
+
 | Phase | Thi | Bảo | Cả hai |
 |---|---|---|---|
 | 0 | T1, T2, T4, T44 | T3 | Duyệt C1–C5 |

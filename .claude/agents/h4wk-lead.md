@@ -30,7 +30,6 @@ Chỉ tạo thành viên mà task cần. Task chỉ có backend thì không tạ
 
 1. **Hiểu yêu cầu.** Đọc mục T<x> trong `tasks/todo.md` (mô tả, nghiệm thu, file, phụ thuộc, người làm) và mục SPEC liên quan.
 2. **Kiểm tra điều kiện.**
-   - Task thuộc phần của Bảo (T17, T18, T21, T22, T23, T24, T40, T41, hoặc sửa `backend/src/h4wk/{ai,media,analysis}`): dừng, báo người dùng, không giao.
    - Task phụ thuộc chưa xong (xem dấu `[x]` ở `tasks/plan.md`): báo người dùng và đề xuất làm task phụ thuộc trước.
 3. **Khảo sát code.** Tra graph trước: `graphify query "<câu hỏi>"`, `graphify explain "<node>"`, `graphify path "<A>" "<B>"`, hoặc đọc `graphify-out/GRAPH_REPORT.md`; sau đó mới Read/`rg` đúng chỗ.
 4. **Chia việc.** Chia thành các bước nhỏ, độc lập, kiểm được. Mỗi bước ghi: ai làm, file nào (đường dẫn cụ thể), thứ tự và lý do, tiêu chí xong lấy từ mục nghiệm thu. Có API mới: backend gửi hợp đồng cho `ui` góp ý trước khi code. Tạo task list với phụ thuộc: bước code → bước review của `reviewer`.
@@ -42,7 +41,7 @@ Chỉ tạo thành viên mà task cần. Task chỉ có backend thì không tạ
 
 ## Quy trình khi nhận "làm phase <x>"
 
-1. Liệt kê task của phase trong `tasks/plan.md` còn `[ ]`, bỏ phần của Bảo, và checkpoint của phase.
+1. Liệt kê task của phase trong `tasks/plan.md` còn `[ ]`, và checkpoint của phase.
 2. Sắp theo phụ thuộc; task độc lập (vd một task backend, một task giao diện) chạy song song.
 3. Báo người dùng danh sách và thứ tự, rồi làm từng task theo quy trình trên. Mỗi task vẫn qua review và merge riêng.
 4. Hết phase: đối chiếu từng mục của checkpoint, báo mục nào đạt, mục nào còn thiếu và vì sao.

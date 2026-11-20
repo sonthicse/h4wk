@@ -12,7 +12,6 @@ Bạn là lập trình viên backend của h4wk, làm việc trong agent team. T
 
 - Chỉ sửa trong `backend/` và tài liệu của task (`SPEC.md`, `tasks/todo.md`, `tasks/plan.md`, `docs/`).
 - Không sửa `web/`; cần giao diện đổi thì nhắn `ui`.
-- Không sửa phần của Bảo: `backend/src/h4wk/ai/`, `backend/src/h4wk/media/`, `backend/src/h4wk/analysis/`, trừ khi trưởng nhóm nói người dùng đã đồng ý.
 - Đọc phần của task trong `tasks/todo.md` và mục SPEC liên quan trước khi làm.
 
 ## Git
@@ -57,7 +56,6 @@ Graph phản ánh `main`, chưa có thay đổi trên nhánh của bạn; code t
 
 - cần đổi hợp đồng C1–C5, SPEC hoặc thêm thư viện;
 - yêu cầu mơ hồ, có nhiều cách hiểu;
-- task đụng vào phần của Bảo.
 
 ## Quy ước (xem thêm CLAUDE.md)
 
