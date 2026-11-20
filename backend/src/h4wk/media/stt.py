@@ -17,6 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 def _load_model(model_name: str):
+    # torch nạp sẵn thư viện CUDA (cuBLAS, cuDNN) của các gói nvidia-*-cu12 trong venv; không có
+    # torch (chỉ cài extra stt) thì ctranslate2 cần LD_LIBRARY_PATH tới nvidia/*/lib.
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        pass
     from faster_whisper import WhisperModel
 
     return WhisperModel(model_name, device="cuda")

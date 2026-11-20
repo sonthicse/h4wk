@@ -48,7 +48,7 @@ cd web && npm run dev
 
 Mở http://localhost:5173. Trang chủ hiện `API status: ok` nghĩa là đã cài đặt đúng.
 
-Job mức `full` cần worker GPU có CUDA. Trong `backend/`, chạy `uv run --extra stt --extra match huey_consumer h4wk.jobs.queue.huey_gpu -w 1`. Worker dùng model STT từ `H4WK_STT_MODEL` (mặc định `large-v3`). Extra `match` kéo theo torch, transformers và các thư viện CUDA 12.6; thiếu extra này thì bước khớp ảnh mẫu bị bỏ qua. Máy không có CUDA toolkit thì đặt `LD_LIBRARY_PATH` tới các thư mục `nvidia/*/lib` trong `.venv`. Với mức `text` hoặc `full` có ảnh, cấu hình tuyến `media.vision` trong `config/ai.toml` và khóa của nhà cung cấp trong `.env`.
+Job mức `full` cần worker GPU có CUDA. Trong `backend/`, chạy `uv run --extra stt --extra match huey_consumer h4wk.jobs.queue.huey_gpu -w 1`. Worker dùng model STT từ `H4WK_STT_MODEL` (mặc định `large-v3`). Extra `match` kéo theo torch, transformers và các thư viện CUDA 12.6; thiếu extra này thì bước khớp ảnh mẫu bị bỏ qua. Chỉ cài extra `stt` mà không cài `match` hoặc máy không có CUDA toolkit thì đặt `LD_LIBRARY_PATH` tới các thư mục `nvidia/*/lib` trong `.venv`. Với mức `text` hoặc `full` có ảnh, cấu hình tuyến `media.vision` trong `config/ai.toml` và khóa của nhà cung cấp trong `.env`.
 
 ## Kiểm tra trước khi commit
 
