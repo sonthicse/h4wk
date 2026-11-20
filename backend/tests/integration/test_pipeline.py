@@ -148,6 +148,45 @@ def test_llm_failure_keeps_job_done(
     assert run["action"] == "job.run" and "llm_error" in json.dumps(run)
 
 
+def test_vision_failure_for_one_image_keeps_job_done(
+    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from h4wk.ai.base import ProviderError, ProviderReply
+    from h4wk.ai.config import AI_CONFIG_PATH
+    from h4wk.ai.gateway import AIGateway
+    from h4wk.media import vision
+
+    class OneBad:
+        bad = None
+
+        def complete(self, request):  # noqa: ANN001, ANN201
+            if self.bad is None:
+                self.bad = request.image
+            if request.image == self.bad:
+                raise ProviderError("boom")
+            return ProviderReply('{"description":"Ảnh mẫu","offensive_cues":[]}')
+
+    gateway = AIGateway(
+        {"anthropic": OneBad()},
+        config_path=AI_CONFIG_PATH.with_suffix(".toml.example"),
+        log_dir=data_dir,
+    )
+    monkeypatch.setattr(vision, "AIGateway", lambda: gateway)
+    _entity(client)
+    r = client.post("/api/collect", json={"url": VIDEO})
+    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
+    assert job["status"] == "done", job["error"]
+    done = next(e for e in client.get("/api/events").json() if e["kind"] == "job_done")
+    assert "could not be described" in done["message"]
+    derived = data_dir / "videos" / job["video_id"] / "derived" / job["capture"]
+    timeline = Timeline.model_validate_json((derived / "timeline.json").read_bytes())
+    described = {v.frame for seg in timeline.segments for v in seg.visual}
+    cached = set(json.loads((derived / "vision.json").read_bytes()))
+    assert cached == described | {t.file for t in timeline.thumbnails if t.visual}
+    audit = [r for r in _lines(data_dir / "log" / "audit.jsonl") if r["action"] == "media.vision"]
+    assert audit and audit[0]["status"] == "error"
+
+
 @pytest.mark.parametrize(
     "url",
     [

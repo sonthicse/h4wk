@@ -179,6 +179,7 @@ def media(job_id: str) -> None:
             frames = extract_keyframes(out)
         timeline = transcripts.read_capture_timeline(cap_dir, out, _analysis_config())
         timeline.source_video_sha256 = source_hash
+        failed: list[str] = []
         if job.level == CollectLevel.METADATA:
             transcripts.write_timeline(out / "timeline.json", timeline)
         else:
@@ -186,16 +187,18 @@ def media(job_id: str) -> None:
             lines = ocr.process_ocr(cap_dir, out)
             job = _update(job_id, step="vlm", progress=65)
             thumbnails = list(dict.fromkeys(t.file for t in data.thumbnails if t.file))
-            enrich(timeline, cap_dir, out, frames, thumbnails, lines)
+            failed = enrich(timeline, cap_dir, out, frames, thumbnails, lines)
+            if failed:
+                audit.log(job.trigger, "media.vision", job.id, {"failed": failed}, status="error")
     except Exception as e:
         _fail(job_id, job.step or "media", e)
         return
     _update(job_id, status="queued", step="analyze", progress=70)
-    analyze(job_id)
+    analyze(job_id, len(failed))
 
 
 @huey.task()
-def analyze(job_id: str) -> None:
+def analyze(job_id: str, vision_failed: int = 0) -> None:
     job = _update(job_id, status="running", step="analyze", progress=75)
     try:
         cap = str(job.capture)
@@ -225,10 +228,15 @@ def analyze(job_id: str) -> None:
     job = _update(job_id, status="done", step=None, progress=100, run_id=run_id)
     message = f"Processed video {job.video_id}: {len(findings)} findings"
     detail = {"capture": cap, "run_id": run_id, "findings": len(findings)}
+    notes = []
+    if vision_failed:
+        notes.append(f"{vision_failed} images could not be described")
     if llm_error:
         short = llm_error[:200] + ("…" if len(llm_error) > 200 else "")
-        message += f" (LLM analysis skipped: {short})"
+        notes.append(f"LLM analysis skipped: {short}")
         detail["llm_error"] = llm_error
+    if notes:
+        message += f" ({'; '.join(notes)})"
     _event(job, "job_done", message)
     audit.log(job.trigger, "job.run", job.id, detail)
 

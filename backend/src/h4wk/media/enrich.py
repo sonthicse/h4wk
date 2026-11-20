@@ -17,14 +17,15 @@ def enrich(
     frames: list[Keyframe],
     thumbnails: list[str],
     lines: list[OcrLine],
-) -> None:
+) -> list[str]:
+    """Trả về các file ảnh không có mô tả (VLM lỗi)."""
     images = [(f.file, out / f.file) for f in frames] + [(f, capture / f) for f in thumbnails]
     visuals = describe_images(images, out / "vision.json")
     by_image = defaultdict(list)
     for line in lines:
         by_image[line.frame].append(OcrText(text=line.text, bbox=line.bbox))
     timeline.thumbnails = [
-        ThumbnailAnalysis(file=file, visual=visuals[file], ocr=by_image[file])
+        ThumbnailAnalysis(file=file, visual=visuals.get(file), ocr=by_image[file])
         for file in thumbnails
     ]
     speech = timeline.segments
@@ -44,9 +45,11 @@ def enrich(
             silent.end = frame.t
             segment = silent
         position = {"frame": frame.file, "t": frame.t}
-        segment.visual.append(FrameVisual(**position, **visuals[frame.file].model_dump()))
+        if frame.file in visuals:
+            segment.visual.append(FrameVisual(**position, **visuals[frame.file].model_dump()))
         segment.ocr.extend(FrameOcr(**position, **row.model_dump()) for row in by_image[frame.file])
     timeline.segments = sorted(segments, key=lambda s: s.start)
     for idx, segment in enumerate(timeline.segments, 1):
         segment.id = f"seg_{idx:04d}"
     write_timeline(out / "timeline.json", timeline)
+    return [file for file, _ in images if file not in visuals]
