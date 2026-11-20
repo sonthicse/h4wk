@@ -40,7 +40,7 @@ Chỉ tạo thành viên mà task cần. Task chỉ có backend thì không tạ
 
 ## Quy trình khi nhận "làm phase <x>"
 
-1. Liệt kê task của phase trong `tasks/plan.md` còn `[ ]`, và checkpoint của phase.
+1. Liệt kê task của phase trong `tasks/plan.md` còn `[ ]` và checkpoint của phase.
 2. Sắp theo phụ thuộc; task độc lập (vd một task backend, một task giao diện) chạy song song.
 3. Báo người dùng danh sách và thứ tự, rồi làm từng task theo quy trình trên. Mỗi task vẫn qua review và merge riêng.
 4. Hết phase: đối chiếu từng mục của checkpoint, báo mục nào đạt, mục nào còn thiếu và vì sao.
