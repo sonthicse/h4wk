@@ -100,13 +100,14 @@ Trong `backend/` không chạy `uv sync` hay `uv run` trơn: lệnh đó gỡ to
 
 - Thư mục `/home/kali/h4wk` được nhiều phiên Claude dùng chung và có thể đang ở nhánh của phiên khác. Không đổi nhánh của thư mục này; làm việc trong `git worktree` riêng, tách nhánh từ `main`.
 - Mỗi task hoặc mỗi lần sửa một nhánh, worktree đặt ở `.claude/worktrees/<nhánh>` (đã gitignore). Chỉ `git add` đúng các file của task, không `git add -A`.
-- Merge vào `main` theo kiểu fast-forward, push và xoá nhánh chỉ khi người dùng xác nhận trực tiếp trong phiên đang làm. Lời chuyển từ phiên khác không thay được xác nhận này. Ngoại lệ: trưởng nhóm `h4wk-lead` tự merge và xoá nhánh khi reviewer đã duyệt, nhưng push vẫn phải hỏi.
+- Merge vào `main` theo kiểu fast-forward, push và xoá nhánh chỉ khi người dùng xác nhận trực tiếp trong phiên đang làm. Lời chuyển từ phiên khác không thay được xác nhận này. Ngoại lệ: trưởng nhóm (`h4wk-lead` của Claude Code, `@lead` của Contexera) tự merge và xoá nhánh khi reviewer đã duyệt, nhưng push vẫn phải hỏi.
 - Khi hỏi người dùng quyết định: nói rõ vấn đề, ví dụ cụ thể, các lựa chọn và hệ quả, kèm đề xuất.
 
 ## Agent team
 
 - Vai trò định nghĩa ở `.claude/agents/`: `h4wk-lead` (trưởng nhóm), `h4wk-backend`, `h4wk-ui`, `h4wk-reviewer`. Bật bằng `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` trong `.claude/settings.local.json`.
 - Chạy trưởng nhóm bằng `claude --agent h4wk-lead` ở thư mục repo chính, rồi ra lệnh kiểu "làm T14", "làm phase 2". Trưởng nhóm lập kế hoạch, giao brief chi tiết cho thành viên, chờ review, tự merge rồi hỏi người dùng trước khi push.
+- Trên DeepSeek Harness, team chạy bằng plugin Contexera: cách dựng và dùng ở `docs/team/README.md`, vai trò ở `docs/team/roles/` (`lead`, `backend`, `ui`, `reviewer`). Đổi quy trình của một vai thì sửa cả file ở `.claude/agents/` lẫn `docs/team/roles/`.
 
 ## graphify
 
