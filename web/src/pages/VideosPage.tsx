@@ -108,14 +108,14 @@ export default function VideosPage() {
             )
           })}
           {videos.isPending && (
-            <TableRow>
+            <TableRow highlight={false}>
               <TableCell colSpan={6} className="text-center text-muted-foreground">
                 Loading…
               </TableCell>
             </TableRow>
           )}
           {videos.data && rows.length === 0 && (
-            <TableRow>
+            <TableRow highlight={false}>
               <TableCell colSpan={6} className="text-center text-muted-foreground">
                 {all.length === 0 ? 'No videos yet. Collect one to start.' : 'No videos match this search.'}
               </TableCell>

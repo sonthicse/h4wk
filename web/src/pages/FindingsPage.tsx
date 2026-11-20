@@ -256,14 +256,14 @@ export default function FindingsPage() {
             </TableRow>
           ))}
           {findings.isPending && (
-            <TableRow>
+            <TableRow highlight={false}>
               <TableCell colSpan={9} className="text-center text-muted-foreground">
                 Loading…
               </TableCell>
             </TableRow>
           )}
           {findings.data && rows.length === 0 && (
-            <TableRow>
+            <TableRow highlight={false}>
               <TableCell colSpan={9} className="text-center text-muted-foreground">
                 {allFindings.length === 0 ? 'No findings yet. Collect a video to analyze it.' : 'No findings match these filters.'}
               </TableCell>

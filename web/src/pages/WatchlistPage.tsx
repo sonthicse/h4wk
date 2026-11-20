@@ -61,7 +61,7 @@ export default function WatchlistPage() {
               <WatchlistRow key={item.id} item={item} />
             ))}
             {items.data?.length === 0 && (
-              <TableRow>
+              <TableRow highlight={false}>
                 <TableCell colSpan={8} className="text-center text-muted-foreground">
                   No channels in this watchlist yet. Add a channel link or @handle above.
                 </TableCell>

@@ -224,7 +224,7 @@ export default function CollectPage() {
               </TableRow>
             ))}
             {jobs.data?.length === 0 && (
-              <TableRow>
+              <TableRow highlight={false}>
                 <TableCell colSpan={6} className="text-center text-muted-foreground">
                   No jobs yet.
                 </TableCell>

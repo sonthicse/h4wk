@@ -58,20 +58,26 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+// highlight={false}: hàng trạng thái (Loading…, No items, lỗi) không cần nền hover.
+function TableRow({
+  className,
+  highlight = true,
+  ...props
+}: React.ComponentProps<"tr"> & { highlight?: boolean }) {
   const inBody = React.useContext(InTableBody)
   const row = (
     <tr
       data-slot="table-row"
       className={cn(
         "border-b transition-colors has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
-        !inBody && "hover:bg-muted/50",
+        // relative: tr phải được định vị thì chữ mới vẽ TRÊN nền highlight (absolute, z-index 0).
+        inBody ? highlight && "relative" : "hover:bg-muted/50",
         className
       )}
       {...props}
     />
   )
-  return inBody ? <HighlightItem asChild>{row}</HighlightItem> : row
+  return inBody && highlight ? <HighlightItem asChild>{row}</HighlightItem> : row
 }
 
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
