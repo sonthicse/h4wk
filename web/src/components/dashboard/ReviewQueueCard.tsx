@@ -18,7 +18,7 @@ function reviewLink(item: QueueItem) {
 function QueueItemRow({ item }: { item: QueueItem }) {
   const f = item.finding
   return (
-    <HoverItem className="focus-within:bg-muted">
+    <HoverItem className="rounded-md focus-within:bg-muted">
       <div className="flex gap-3 py-2.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">

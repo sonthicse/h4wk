@@ -54,7 +54,7 @@ function EventItem({ event }: { event: WatchEvent }) {
   const title = mainLine(event)
   const sub = [event.kind !== 'channel_added' ? event.channel_title : null, whatHappened(event)].filter(Boolean).join(' · ')
   return (
-    <HoverItem className="focus-within:bg-muted">
+    <HoverItem className="rounded-md focus-within:bg-muted">
       <div className="flex gap-3 py-2.5">
         <Icon className={failed ? 'mt-1 size-4 shrink-0 text-destructive' : 'mt-1 size-4 shrink-0 text-muted-foreground'} />
         <div className="min-w-0 flex-1">
