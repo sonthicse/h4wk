@@ -33,5 +33,6 @@ def test_vision_live(monkeypatch, tmp_path):
     assert set(result) == {file for file, _ in images}, "VLM không mô tả đủ 3 khung"
     cues = [c.lower() for c in result[f"frames/{HANDCUFFS}"].offensive_cues]
     assert any("còng" in c or "handcuff" in c for c in cues), cues
-    assert result[f"frames/{INSULT_TEXT}"].offensive_cues
+    cues = [c.lower() for c in result[f"frames/{INSULT_TEXT}"].offensive_cues]
+    assert any("lừa đảo" in c or "chữ" in c or "text" in c for c in cues), cues
     assert result[f"frames/{NORMAL}"].offensive_cues == []
