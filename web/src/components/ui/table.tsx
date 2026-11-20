@@ -1,5 +1,10 @@
 import * as React from "react"
 import { cn } from "cn"
+import { Highlight, HighlightItem } from "@animate-ui/react/primitives/effects/highlight"
+
+// Hàng trong TableBody được highlight khi hover (mode "parent": nền là một div đặt NGOÀI <table>, trong vùng chứa,
+// nên không chèn div vào tbody/tr). Hàng ở thead không bọc nên không có hiệu ứng.
+const InTableBody = React.createContext(false)
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
@@ -7,11 +12,13 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
       data-slot="table-container"
       className="relative w-full overflow-x-auto"
     >
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
+      <Highlight mode="parent" controlledItems hover click={false} className="rounded-md bg-muted/60">
+        <table
+          data-slot="table"
+          className={cn("w-full caption-bottom text-sm", className)}
+          {...props}
+        />
+      </Highlight>
     </div>
   )
 }
@@ -28,11 +35,13 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
-    <tbody
-      data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
-      {...props}
-    />
+    <InTableBody.Provider value={true}>
+      <tbody
+        data-slot="table-body"
+        className={cn("[&_tr:last-child]:border-0", className)}
+        {...props}
+      />
+    </InTableBody.Provider>
   )
 }
 
@@ -50,16 +59,19 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 }
 
 function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
-  return (
+  const inBody = React.useContext(InTableBody)
+  const row = (
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        "border-b transition-colors has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+        !inBody && "hover:bg-muted/50",
         className
       )}
       {...props}
     />
   )
+  return inBody ? <HighlightItem asChild>{row}</HighlightItem> : row
 }
 
 function TableHead({ className, ...props }: React.ComponentProps<"th">) {
