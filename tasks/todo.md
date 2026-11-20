@@ -647,7 +647,7 @@ Viết `docs/demo-checklist.md` gồm bước chuẩn bị máy (khởi động 
 
 Nghiệm thu:
 
-- [ ] Một người không viết checklist làm theo được từ đầu đến cuối.
+- [x] Một người không viết checklist làm theo được từ đầu đến cuối. (20/11: reviewer chạy theo checklist: lệnh khởi động, health, verify trên bản sao đủ 4 trường hợp, đối chiếu nhãn giao diện với code; các bước bấm UI chạy lại ở lần diễn tập T37)
 
 Kiểm tra: Bảo đọc và chạy thử checklist do Thi viết.
 

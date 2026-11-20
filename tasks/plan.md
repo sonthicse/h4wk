@@ -267,7 +267,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T39: Đối tượng và ảnh mẫu
 - [x] T40: `analysis`: khớp ảnh mẫu
 - [ ] T41: `analysis`: khớp khuôn mặt
-- [ ] T42: Checklist demo
+- [x] T42: Checklist demo
 
 ### Checkpoint D: màn 1 và màn 2 chạy được
 
