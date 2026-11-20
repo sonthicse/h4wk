@@ -35,4 +35,7 @@ def test_analysis_llm_live(tmp_path):
         data, timeline, [entity], None, "r_live", tmp_path / "out", gateway=gateway
     )
     assert error is None
-    assert any(f.analyzer == "llm" for f in findings)
+    llm_findings = [f for f in findings if f.analyzer == "llm"]
+    assert {"speech", "ocr", "visual"} <= {f.source_kind for f in llm_findings}
+    # Đoạn chỉ có ảnh chế, không ai nhắc tên, vẫn phải sinh nghi vấn visual.
+    assert any(f.source_kind == "visual" and f.segment_id == "seg_0003" for f in llm_findings)
