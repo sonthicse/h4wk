@@ -173,26 +173,24 @@ export default function ReviewQueuePage() {
           <ul className="min-h-0 space-y-1 overflow-y-auto pr-1">
             {queue.map((it) => (
               <HoverItem key={it.finding.id}>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => select(it)}
-                    aria-current={selected === it ? 'true' : undefined}
-                    className={cn(
-                      'w-full rounded-md border p-3 text-left transition-colors',
-                      selected === it && 'border-primary bg-muted',
-                    )}
-                  >
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant={severityVariant[it.finding.severity]}>{it.finding.severity}</Badge>
-                      <span>{it.finding.source_kind}</span>
-                      <span className="font-mono">{timeRange(it)}</span>
-                      <Badge variant={statusVariant[it.status]} className="ml-auto">{it.status}</Badge>
-                    </div>
-                    <p className="mt-2 line-clamp-2 text-sm">{it.finding.quote}</p>
-                    <p className="mt-1 truncate text-xs text-muted-foreground">{it.video.title ?? it.video.id}</p>
-                  </button>
-                </li>
+                <button
+                  type="button"
+                  onClick={() => select(it)}
+                  aria-current={selected === it ? 'true' : undefined}
+                  className={cn(
+                    'w-full rounded-md border p-3 text-left transition-colors',
+                    selected === it && 'border-primary bg-muted',
+                  )}
+                >
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant={severityVariant[it.finding.severity]}>{it.finding.severity}</Badge>
+                    <span>{it.finding.source_kind}</span>
+                    <span className="font-mono">{timeRange(it)}</span>
+                    <Badge variant={statusVariant[it.status]} className="ml-auto">{it.status}</Badge>
+                  </div>
+                  <p className="mt-2 line-clamp-2 text-sm">{it.finding.quote}</p>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">{it.video.title ?? it.video.id}</p>
+                </button>
               </HoverItem>
             ))}
             {queueQuery.isPending && <li className="p-6 text-center text-sm text-muted-foreground">Loading…</li>}

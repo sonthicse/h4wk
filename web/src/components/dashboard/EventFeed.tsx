@@ -54,8 +54,8 @@ function EventItem({ event }: { event: WatchEvent }) {
   const title = mainLine(event)
   const sub = [event.kind !== 'channel_added' ? event.channel_title : null, whatHappened(event)].filter(Boolean).join(' · ')
   return (
-    <HoverItem>
-      <li className="flex gap-3 px-2 py-2.5">
+    <HoverItem className="focus-within:bg-muted">
+      <div className="flex gap-3 py-2.5">
         <Icon className={failed ? 'mt-1 size-4 shrink-0 text-destructive' : 'mt-1 size-4 shrink-0 text-muted-foreground'} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
@@ -86,7 +86,7 @@ function EventItem({ event }: { event: WatchEvent }) {
           </p>
           {failed && event.error && <p className="mt-1 text-xs text-destructive">{event.error}</p>}
         </div>
-      </li>
+      </div>
     </HoverItem>
   )
 }

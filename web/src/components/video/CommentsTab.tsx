@@ -73,7 +73,7 @@ export default function CommentsTab({
     <HoverHighlight>
       <div className="space-y-2 py-2">
         {topLevel.map((c) => (
-          <HoverItem key={c.id}>
+          <HoverItem key={c.id} as="div">
             <div className="space-y-2">
               <CommentItem comment={c} findingId={findingByComment.get(c.id)} highlightId={highlightId} findingHref={findingHref} />
               {comments

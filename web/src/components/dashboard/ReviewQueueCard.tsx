@@ -18,8 +18,8 @@ function reviewLink(item: QueueItem) {
 function QueueItemRow({ item }: { item: QueueItem }) {
   const f = item.finding
   return (
-    <HoverItem>
-      <li className="flex gap-3 px-2 py-2.5">
+    <HoverItem className="focus-within:bg-muted">
+      <div className="flex gap-3 py-2.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <Link to={reviewLink(item)} className="line-clamp-2 text-sm font-medium hover:underline">
@@ -37,7 +37,7 @@ function QueueItemRow({ item }: { item: QueueItem }) {
             <span className="shrink-0">{f.category}</span>
           </p>
         </div>
-      </li>
+      </div>
     </HoverItem>
   )
 }

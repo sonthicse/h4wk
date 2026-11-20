@@ -93,22 +93,20 @@ export default function FindingTimeline({
           <ul className="space-y-1">
             {[...timed, ...untimed].map((f) => (
               <HoverItem key={f.id}>
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => onOpen(f)}
-                    className={cn(
-                      'flex w-full items-center gap-2 rounded px-2 py-1 text-left text-sm focus-visible:bg-muted focus-visible:outline-none',
-                      f.id === activeId && 'bg-muted',
-                    )}
-                  >
-                    <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
-                    <span className="w-44 shrink-0 font-mono text-xs text-muted-foreground">
-                      {timeRange(f)} · {f.sourceKind}
-                    </span>
-                    <span className="truncate">{f.quote}</span>
-                  </button>
-                </li>
+                <button
+                  type="button"
+                  onClick={() => onOpen(f)}
+                  className={cn(
+                    'flex w-full items-center gap-2 rounded px-2 py-1 text-left text-sm focus-visible:bg-muted focus-visible:outline-none',
+                    f.id === activeId && 'bg-muted',
+                  )}
+                >
+                  <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
+                  <span className="w-44 shrink-0 font-mono text-xs text-muted-foreground">
+                    {timeRange(f)} · {f.sourceKind}
+                  </span>
+                  <span className="truncate">{f.quote}</span>
+                </button>
               </HoverItem>
             ))}
           </ul>
