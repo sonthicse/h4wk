@@ -1,6 +1,6 @@
 from anthropic import Anthropic, APIError, transform_schema
 
-from h4wk.ai.base import ProviderError, ProviderReply, ProviderRequest
+from h4wk.ai.base import REQUEST_TIMEOUT_S, ProviderError, ProviderReply, ProviderRequest
 from h4wk.ai.providers.content import split_messages
 
 
@@ -35,7 +35,7 @@ class AnthropicProvider:
                 raise ProviderError("Anthropic does not support this schema") from error
             options["output_config"] = {"format": {"type": "json_schema", "schema": schema}}
         try:
-            with Anthropic(api_key=self.key, max_retries=0) as client:
+            with Anthropic(api_key=self.key, max_retries=0, timeout=REQUEST_TIMEOUT_S) as client:
                 reply = client.messages.create(
                     model=request.model, max_tokens=4096, messages=messages, **options
                 )

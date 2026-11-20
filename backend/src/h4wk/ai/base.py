@@ -3,6 +3,9 @@
 from dataclasses import dataclass
 from typing import Any, Protocol, TypedDict
 
+# Giới hạn thời gian mỗi lần gọi provider; tránh treo hàng đợi gpu (worker `-w 1`).
+REQUEST_TIMEOUT_S = 120
+
 
 class Message(TypedDict):
     role: str

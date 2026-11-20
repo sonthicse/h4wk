@@ -2,7 +2,7 @@ import httpx2
 from google import genai
 from google.genai import errors, types
 
-from h4wk.ai.base import ProviderError, ProviderReply, ProviderRequest
+from h4wk.ai.base import REQUEST_TIMEOUT_S, ProviderError, ProviderReply, ProviderRequest
 from h4wk.ai.providers.content import split_messages
 
 
@@ -24,7 +24,9 @@ class GeminiProvider:
             response_mime_type="application/json",
             response_json_schema=request.schema if request.structured else None,
         )
-        options = types.HttpOptions(retry_options=types.HttpRetryOptions(attempts=1))
+        options = types.HttpOptions(
+            timeout=REQUEST_TIMEOUT_S * 1000, retry_options=types.HttpRetryOptions(attempts=1)
+        )
         try:
             with genai.Client(api_key=self.key, http_options=options) as client:
                 reply = client.models.generate_content(

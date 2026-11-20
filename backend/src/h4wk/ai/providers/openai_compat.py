@@ -1,6 +1,6 @@
 from openai import APIError, OpenAI
 
-from h4wk.ai.base import ProviderError, ProviderReply, ProviderRequest
+from h4wk.ai.base import REQUEST_TIMEOUT_S, ProviderError, ProviderReply, ProviderRequest
 from h4wk.ai.providers.content import split_messages
 
 
@@ -35,7 +35,9 @@ class OpenAICompatProvider:
         else:
             options = {"response_format": {"type": "json_object"}}
         try:
-            with OpenAI(api_key=self.key, base_url=self.base_url, max_retries=0) as client:
+            with OpenAI(
+                api_key=self.key, base_url=self.base_url, max_retries=0, timeout=REQUEST_TIMEOUT_S
+            ) as client:
                 reply = client.chat.completions.create(
                     model=request.model, messages=messages, **options
                 )
