@@ -82,16 +82,16 @@
       "bytes": 194
     },
     "sources/ytdlp/h4wkDemo001.mp4": {
-      "sha256": "2bd4b1c312da3f036e3bd8376785c6e161b6a6c9a921e37f5996bedb1130ad77",
-      "bytes": 232745
+      "sha256": "fbb62d34b4f88249e654a35f1370cadff0870f0e2118808182b5d3c965124e6f",
+      "bytes": 234205
     },
     "sources/ytdlp/h4wkDemo001.vi-orig.vtt": {
       "sha256": "c6546bb36b102649e0ee105b3381487222f0730ba9ae0fe4f42125afba83b69d",
       "bytes": 429
     },
     "sources/ytdlp/maxres.jpg": {
-      "sha256": "dbbf2b6cbb46b987b1d15e351cf175b60816acc73d3fd298359577ea9f3848b3",
-      "bytes": 8062
+      "sha256": "74194dbf1fb3a80c2e6de232abffb6906a3d2e53ee6c1a31a657869bb9b06f92",
+      "bytes": 9156
     }
   },
   "previous_capture": null

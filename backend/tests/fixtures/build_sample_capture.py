@@ -16,6 +16,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import cv2
+import numpy as np
 from pydantic import TypeAdapter
 
 from h4wk.analysis.models import EntityHit, Finding
@@ -95,17 +97,23 @@ def make_media(tmp: Path) -> None:
     ffmpeg("-f", "lavfi", "-i", "testsrc2=s=256x256:d=1", "-frames:v", "1", str(tmp / "ref.png"))
     for name, text in [("big.txt", BIG_TEXT), ("meme.txt", MEME_TEXT), ("corner.txt", CORNER_TEXT)]:
         (tmp / name).write_text(text, encoding="utf-8")
+    cuffs = np.zeros((72, 168, 4), dtype=np.uint8)
+    silver = (205, 205, 205, 255)
+    for x in (34, 134):
+        cv2.circle(cuffs, (x, 36), 28, silver, 7, cv2.LINE_AA)
+    for x in (69, 84, 99):
+        cv2.ellipse(cuffs, (x, 36), (10, 5), 0, 0, 360, silver, 3, cv2.LINE_AA)
+    (tmp / "cuffs.png").write_bytes(cv2.imencode(".png", cuffs)[1].tobytes())
     vf = (
         "[1:v]scale=256:256[face];"
         "[2:v]crop=200:200:28:28,hue=h=40:s=0.6[ref];"
         "[0:v][face]overlay=192:52:enable='between(t,20,30)'[v1];"
         "[v1][ref]overlay=400:80:enable='between(t,30,38)'[v2];"
-        f"[v2]drawtext=fontfile={FONT_BOLD}:textfile={tmp / 'big.txt'}:fontsize=40:"
+        "[v2][4:v]overlay=236:242:enable='between(t,20,30)'[v3];"
+        f"[v3]drawtext=fontfile={FONT_BOLD}:textfile={tmp / 'big.txt'}:fontsize=40:"
         "fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,10,20)',"
         f"drawtext=fontfile={FONT_BOLD}:textfile={tmp / 'meme.txt'}:fontsize=36:"
         "fontcolor=red:x=(w-text_w)/2:y=315:enable='between(t,20,30)',"
-        "drawbox=x=232:y=270:w=60:h=22:t=5:color=silver:enable='between(t,20,30)',"
-        "drawbox=x=348:y=270:w=60:h=22:t=5:color=silver:enable='between(t,20,30)',"
         f"drawtext=fontfile={FONT}:textfile={tmp / 'corner.txt'}:fontsize=14:"
         "fontcolor=white:x=w-text_w-10:y=h-text_h-10:enable='between(t,34,35)'[v]"
     )
@@ -126,6 +134,8 @@ def make_media(tmp: Path) -> None:
         "lavfi",
         "-i",
         "sine=frequency=440:duration=40",
+        "-i",
+        str(tmp / "cuffs.png"),
         "-filter_complex",
         vf,
         "-map",
