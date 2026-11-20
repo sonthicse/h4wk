@@ -572,7 +572,7 @@ Nghiệm thu:
 - [x] Duyệt 10 nghi vấn liên tiếp mà không phải rời trang.
 - [x] Mỗi quyết định có một dòng tương ứng trong audit.
 
-Ghi chú: 19/11: quyết định bằng phím tắt và dòng audit `review.decide` đã kiểm với 1 nghi vấn. 20/11: duyệt 10 nghi vấn liên tiếp bằng phím `c`/`r`/`n` trên trình duyệt (bản sao dữ liệu), không rời trang, được 10 dòng ở `reviews.jsonl` và 10 dòng `review.decide` ở audit.
+Ghi chú: panel hiện khung hình kèm khung bao cho nghi vấn ocr/visual/thumbnail (dùng lại `FrameImage`). 19/11: quyết định bằng phím tắt và dòng audit `review.decide` đã kiểm với 1 nghi vấn. 20/11: duyệt 10 nghi vấn liên tiếp bằng phím `c`/`r`/`n` trên trình duyệt (bản sao dữ liệu), không rời trang, được 10 dòng ở `reviews.jsonl` và 10 dòng `review.decide` ở audit.
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 

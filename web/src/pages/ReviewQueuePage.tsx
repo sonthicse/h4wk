@@ -2,13 +2,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { listEntities } from '@/api/entities'
+import { frameUrl, getTimeline, toVideoFinding } from '@/api/videos'
+import { buildKeyframes } from '@/components/video/keyframes'
+import { FrameImage } from '@/components/video/KeyframeStrip'
 import { decide as postDecision, listQueue, type DecisionStatus, type QueueItem, type ReviewStatus } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { HoverHighlight, HoverItem } from '@/components/ui/hover-highlight'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { formatTime, severityVariant } from '@/lib/findings'
+import { formatTime, inSpans, severityVariant } from '@/lib/findings'
 import { formatVnDateTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +34,23 @@ function timeRange(item: QueueItem) {
 function videoLink(item: QueueItem) {
   const f = item.finding
   return `/videos/${encodeURIComponent(f.video_id)}?finding=${encodeURIComponent(f.id)}`
+}
+
+// Khung hình của nghi vấn ocr/visual/thumbnail kèm khung bao, dùng lại FrameImage của Video detail.
+function FramePreview({ item, entityNames }: { item: QueueItem; entityNames: Record<string, string> }) {
+  const f = item.finding
+  const timeline = useQuery({
+    queryKey: ['timeline', f.video_id, f.capture],
+    queryFn: () => getTimeline(f.video_id, f.capture),
+  })
+  const vf = toVideoFinding(item)
+  const frames = buildKeyframes(timeline.data, [vf], entityNames)
+  const frame =
+    frames.find((k) => k.id === vf.frame) ??
+    frames.find((k) => inSpans(vf, k.t)) ??
+    (vf.frame ? { id: vf.frame, t: vf.start ?? 0, ocr: [], faces: [], refImages: [], visual: null } : null)
+  if (!frame) return null
+  return <FrameImage frame={frame} src={frameUrl(f.video_id, frame.id, f.capture)} boxes className="w-full max-w-md" />
 }
 
 const views: { id: View; label: string }[] = [
@@ -57,6 +77,7 @@ export default function ReviewQueuePage() {
   const queueQuery = useQuery({ queryKey: ['review-queue'], queryFn: () => listQueue() })
   const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
   const entityName = (id: string) => entities.data?.find((e) => e.id === id)?.name ?? id
+  const entityNames = Object.fromEntries((entities.data ?? []).map((e) => [e.id, e.name]))
   const [view, setView] = useState<View>('unreviewed')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [rejecting, setRejecting] = useState(false)
@@ -216,9 +237,7 @@ export default function ReviewQueuePage() {
               </div>
 
               {['ocr', 'visual', 'thumbnail'].includes(f.source_kind) && (
-                <div className="flex h-40 items-center justify-center rounded-md bg-muted text-sm text-muted-foreground">
-                  Frame preview (T27)
-                </div>
+                <FramePreview item={selected} entityNames={entityNames} />
               )}
 
               <dl className="space-y-4">

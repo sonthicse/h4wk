@@ -20,7 +20,7 @@ const LABEL_ROOM = 28
 const DEFAULT_SIZE = { w: 854, h: 480 }
 
 // Ảnh keyframe thật, kèm các khung bao nếu `boxes`. Bbox tính theo pixel của ảnh nên quy về % theo kích thước thật.
-function FrameImage({
+export function FrameImage({
   frame,
   src,
   boxes = false,
