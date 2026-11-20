@@ -318,7 +318,7 @@ Module cho phép dùng nhiều nhà cung cấp LLM/VLM và đổi nhà cung cấ
 - `complete_structured(task, messages, schema: type[BaseModel]) -> BaseModel`
 - `describe_image(task, image, prompt, schema) -> BaseModel`
 
-`task` là tên tác vụ AI. V1 có ba tác vụ AI: `analysis.classify`, `analysis.classify_comment` và `media.vision`. Mỗi tác vụ AI được định tuyến tới một danh sách `(provider, model)` theo thứ tự ưu tiên trong `config/ai.toml`.
+`task` là tên tác vụ AI. V1 có bốn tác vụ AI: `analysis.classify`, `analysis.classify_comment` (dự phòng cho Jev), `analysis.video_verdict` và `media.vision`. Mỗi tác vụ AI được định tuyến tới một danh sách `(provider, model)` theo thứ tự ưu tiên trong `config/ai.toml`.
 
 Mỗi cặp `(provider, model)` khai báo hai khả năng: `vision` (đọc được ảnh) và `structured` (hỗ trợ JSON schema hoặc tool calling). Cấu hình gán `media.vision` cho model không có `vision` bị từ chối ngay khi nạp.
 
@@ -396,7 +396,9 @@ Bước 3 là tầng LLM, qua tác vụ AI `analysis.classify`. Các phần đư
 - trong video liên quan, mọi đoạn mà VLM ghi nhận `offensive_cues`, kể cả khi đoạn đó không nhắc tên, kèm ngữ cảnh cấp video (tiêu đề, mô tả, các dấu hiệu đã tìm được);
 - tiêu đề, mô tả và thumbnail có dấu hiệu hoặc có `offensive_cues`.
 
-Comment có dấu hiệu tên được gửi theo lô 20–50 comment qua tác vụ AI `analysis.classify_comment`.
+Comment có dấu hiệu tên được phân loại bằng Jev của TypeSafe (`POST https://api.typesafe.ai/v1/systemone`, key `TYPESAFE_API_KEY`), thay cho tác vụ AI `analysis.classify_comment` (quyết định ngày 2026-11-20; tác vụ này được giữ làm dự phòng khi Jev lỗi). Mỗi cặp (comment, đối tượng) là một request: `state` gồm tiêu đề video, tên và biệt danh đối tượng, comment cha và comment; câu hỏi `category` (choice, 7 danh mục C4), `severity` (score 3 mức), `about_target` (noul). Các request chạy song song với số luồng giới hạn. Không gộp nhiều comment vào một request: đo ngày 2026-11-20 trên 82 comment vi phạm đã gán nhãn, gửi từng comment bắt được 79–81, gửi lô 5, 15 và 60 comment chỉ bắt được 71, 70 và 68. Comment là vi phạm khi tổng xác suất các danh mục vi phạm từ 0,5; `confidence` lấy theo xác suất của danh mục được chọn; Jev không viết lý do nên `reason` ghi danh mục và xác suất; `quote` là toàn bộ comment.
+
+Bước 4 là kết luận theo video, qua tác vụ AI mới `analysis.video_verdict`. Video có ít nhất một nghi vấn vi phạm thì LLM đọc metadata video và các nghi vấn (đã gộp) rồi trả kết luận: `violation` (`yes`, `no`, `uncertain`), các danh mục chính, `severity`, `confidence`, tóm tắt lý do bằng tiếng Việt và danh sách `finding_id` làm căn cứ. Kết luận ghi ở `analysis/<run_id>/verdict.json` (cấu trúc `VideoVerdict`, thêm vào C4). Video không có nghi vấn vi phạm thì kết luận `no` mà không gọi LLM. Công cụ chỉ đề xuất kết luận; người duyệt xác nhận (10.8).
 
 Hợp đồng C4 gồm ba cấu trúc. Dấu hiệu (`hits.json`):
 
@@ -476,6 +478,8 @@ Nghiệm thu:
 - Lỗi của job hiển thị trên giao diện.
 
 ### 10.8 `review`
+
+Rà soát theo video (quyết định ngày 2026-11-20). Hàng đợi liệt kê từng video có kết luận `yes` hoặc `uncertain` ở lần chạy mới nhất, kèm kết luận, mức độ và số nghi vấn. Người duyệt xác nhận, bác bỏ hoặc đánh dấu cần thêm thông tin cho cả kết luận một lần; các nghi vấn hiện làm bằng chứng và không bắt buộc duyệt từng cái. Quyết định ghi vào `reviews.jsonl`, gắn với `video_id` và `run_id`. Video có kết luận `no` không vào hàng đợi, chỉ hiện ở danh sách video. Phần dưới đây mô tả hàng đợi theo nghi vấn hiện có, vẫn dùng được để xem từng nghi vấn.
 
 Hàng đợi rà soát chỉ hiện nghi vấn của lần chạy phân tích mới nhất cho mỗi bản thu. Tham số `latest_only` chỉ giữ bản thu mới nhất của mỗi video, để thu lại cùng một video không làm lặp nghi vấn. Hàng đợi sắp xếp theo mức độ, sau đó theo thời gian, và lọc được theo video, `source_kind` và trạng thái.
 

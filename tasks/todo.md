@@ -816,6 +816,54 @@ Kiểm tra: đọc và duyệt file kết quả.
 
 Người làm: Bảo. Phụ thuộc: T24. Cỡ: S.
 
+### T47: `analysis`: phân loại comment bằng Jev
+
+Thay `analysis.classify_comment` bằng Jev theo SPEC 10.6 (bước 3). Module `analysis/jev.py` gọi API bằng thư viện chuẩn hoặc httpx, đọc key qua `h4wk.core.secrets`, một request mỗi cặp (comment, đối tượng), chạy song song có giới hạn, thử lại khi 429 theo `retry-after`. Jev lỗi hẳn thì dùng tác vụ `analysis.classify_comment` như cũ. `ModelRef.provider` là `typesafe`, `analyzer` giữ `llm`.
+
+Nghiệm thu:
+
+- [ ] Gán nhãn đủ 124 dòng ở `data/eval/jev/trial.csv` (còn 42 dòng chưa gán); Jev đạt recall không thấp hơn LLM trên cùng bộ nhãn.
+- [ ] Test với Jev giả: comment vi phạm sinh nghi vấn đúng danh mục; 429 được thử lại; Jev lỗi thì chuyển sang LLM.
+- [ ] Thiếu `TYPESAFE_API_KEY` thì Settings báo thiếu key và job vẫn chạy bằng LLM.
+
+Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py`, chạy thật trên 8 video có comment.
+
+Người làm: Thi. Phụ thuộc: T24. Cỡ: M.
+
+### T48: `analysis`: kết luận theo video
+
+Bước 4 ở SPEC 10.6: tác vụ AI `analysis.video_verdict`, cấu trúc `VideoVerdict` trong C4, file `verdict.json`. Thêm ví dụ hợp lệ và bị từ chối vào `test_contracts.py`, chạy lại `h4wk schema export`.
+
+Nghiệm thu:
+
+- [ ] Video không có nghi vấn vi phạm có kết luận `no` mà không gọi LLM.
+- [ ] `finding_id` trong kết luận đều là nghi vấn của cùng lần chạy; đầu ra LLM sai schema không được ghi.
+- [ ] Trên video `1RUJ_6eruwA`, kết luận `yes` với danh mục `incitement` và tóm tắt nhắc tới băng rôn.
+
+Người làm: Thi. Phụ thuộc: T23. Cỡ: M.
+
+### T49: `review`: rà soát theo video (backend)
+
+SPEC 10.8: hàng đợi theo video (kết luận `yes` hoặc `uncertain` của lần chạy mới nhất), quyết định gắn với `video_id` và `run_id` trong `reviews.jsonl`, API liệt kê và ghi quyết định. Dựng lại chỉ mục (T45) đọc được quyết định mới.
+
+Nghiệm thu:
+
+- [ ] Video kết luận `no` không có trong hàng đợi.
+- [ ] Thu lại video thì kết luận mới bắt đầu ở trạng thái chưa rà soát, quyết định cũ vẫn còn.
+
+Người làm: Thi. Phụ thuộc: T48. Cỡ: M.
+
+### T50: UI rà soát theo video
+
+Review queue liệt kê video; mở một video thấy thẻ kết luận (danh mục, mức độ, tóm tắt) phía trên trình phát, bằng chứng nhóm theo loại (chữ trên hình, lời nói, comment, hình ảnh), bấm bằng chứng thì tua tới đúng chỗ. Nút xác nhận, bác bỏ, cần thêm thông tin cho cả video, có phím tắt như màn hiện tại.
+
+Nghiệm thu:
+
+- [ ] Video `1RUJ_6eruwA` duyệt xong bằng một lần bấm.
+- [ ] `npm run build` và `npm run lint` không lỗi.
+
+Người làm: Thi. Phụ thuộc: T49. Cỡ: M.
+
 ### T43: Báo cáo môn học
 
 Viết báo cáo môn học: mục tiêu, kiến trúc, phương pháp lưu bằng chứng, cách phân tích, kết quả đo, giới hạn. Báo cáo giải thích lý do dùng khớp khuôn mặt (đảo ngược quy định trong mô tả gốc), các giới hạn đã áp dụng, và cơ sở theo Nghị định 13/2023.
