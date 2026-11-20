@@ -145,6 +145,8 @@ def test_neutral_only_in_llm_json_and_invalid_verdicts_dropped(tmp_path):
     records = json.loads((out / "llm.json").read_text(encoding="utf-8"))
     kept = {r["item_id"]: r["kept"] for r in records}
     assert kept == {ids["seg_0001"]: False, ids["seg_0003"]: True, ids["seg_0004"]: False}
+    by_item = {r["item_id"]: r for r in records}
+    assert "error" in by_item[ids["seg_0004"]] and "error" not in by_item[ids["seg_0003"]]
 
 
 def test_missing_ai_config_keeps_static_findings(tmp_path):
@@ -220,6 +222,22 @@ def test_thumbnail_item_only_for_thumbnail_with_hit(tmp_path):
     assert thumbs[0].triggers[0].frame == first.file
 
 
+def test_static_finding_of_other_thumbnail_survives(tmp_path):
+    data, timeline = _data()
+    first = timeline.thumbnails[0]
+    a = first.model_copy(update={"ocr": [first.ocr[0].model_copy(update={"text": "TVM đồ hèn"})]})
+    b = a.model_copy(update={"file": "sources/ytdlp/other.jpg"})
+    timeline = timeline.model_copy(update={"thumbnails": [a, b]})
+    hits, static, _ = runner.analyze(data, timeline, [ENTITY], INSULT, "r", tmp_path / "s")
+    assert {f.frame for f in static if f.source_kind == "thumbnail"} == {a.file, b.file}
+    items = llm.build_items(data, timeline, hits)
+    item_a = next(i for i in items if i.kind == "thumbnail" and i.frames == [a.file])
+    provider = FakeProvider([_reply(_verdict(item_a.id, source_kind="thumbnail"))])
+    _, findings, _ = _run(tmp_path, provider, data, timeline)
+    thumbs = {(f.analyzer, f.frame) for f in findings if f.source_kind == "thumbnail"}
+    assert thumbs == {("llm", a.file), ("static", b.file)}
+
+
 def test_ambiguous_frame_drops_verdict(tmp_path):
     data, timeline = _data()
     segment = timeline.segments[2]
@@ -236,6 +254,7 @@ def test_ambiguous_frame_drops_verdict(tmp_path):
     assert findings == []
     records = json.loads((tmp_path / "out" / "llm.json").read_text(encoding="utf-8"))
     assert [(r["item_id"], r["kept"]) for r in records] == [(meme.id, False)]
+    assert "no valid frame" in records[0]["error"]
 
 
 def test_batches_of_eight(tmp_path):

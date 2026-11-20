@@ -138,6 +138,8 @@ def _finding(item: Item, verdict: Verdict, route, timeline: Timeline, run_id: st
             frame = verdict.frame if verdict.frame in item.frames else None
             if frame is None and len(item.frames) == 1:
                 frame = item.frames[0]
+            if frame is None:
+                raise ValueError("visual verdict has no valid frame among the item frames")
     else:
         kind = SourceKind(item.kind)
         frame = item.frames[0] if item.frames else None
@@ -206,19 +208,22 @@ def classify(
                 log.warning("Dropped verdict with unknown item or entity: %s", verdict.item_id)
                 continue
             kept = False
+            error_text = None
             if verdict.category not in NO_VIOLATION:
                 try:
                     findings.append(_finding(item, verdict, route, timeline, run_id))
                     kept = True
                 except (ValidationError, ValueError) as error:
                     log.warning("Dropped invalid verdict %s: %s", verdict.item_id, error)
-            records.append(
-                {
-                    "item_id": item.id,
-                    "verdict": verdict.model_dump(mode="json"),
-                    "provider": route.provider,
-                    "model": route.model,
-                    "kept": kept,
-                }
-            )
+                    error_text = str(error)
+            record = {
+                "item_id": item.id,
+                "verdict": verdict.model_dump(mode="json"),
+                "provider": route.provider,
+                "model": route.model,
+                "kept": kept,
+            }
+            if error_text:
+                record["error"] = error_text
+            records.append(record)
     return findings, records
