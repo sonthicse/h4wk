@@ -32,7 +32,7 @@ export default function LoginPage() {
   else if (signIn.error) error = 'Could not reach the server. Try again.'
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted">
+    <div className="flex min-h-svh items-center justify-center bg-muted px-4">
       <Card className="w-full max-w-md py-10">
         <CardHeader className="flex flex-col items-center gap-4 px-10">
           <Logo className="size-64 text-foreground" />
