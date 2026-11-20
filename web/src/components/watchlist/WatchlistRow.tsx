@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Loader2Icon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
+import { AnimateIcon } from '@animate-ui/react/icons'
+import { LoaderCircleIcon } from '@/components/animate-ui/icons/loader-circle'
+import { RefreshCwIcon } from '@/components/animate-ui/icons/refresh-cw'
+import { Trash2Icon } from '@/components/animate-ui/icons/trash-2'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
@@ -51,7 +54,7 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
         {item.title}
         {!item.initialized && (
           <span className="mt-1 flex items-center gap-1 text-xs font-normal text-muted-foreground">
-            <Loader2Icon className="size-3 animate-spin" />
+            <LoaderCircleIcon className="size-3" animate />
             Setting up…
           </span>
         )}
@@ -114,19 +117,23 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
             )}
           </span>
           <span title={item.enabled ? undefined : 'Enable the channel to check it'}>
-            <Button variant="outline" size="sm" disabled={check.isPending || !item.enabled} onClick={() => check.mutate()}>
-              {check.isPending ? <Loader2Icon className="animate-spin" /> : <RefreshCwIcon />}
-              Check now
-            </Button>
+            <AnimateIcon animateOnHover asChild>
+              <Button variant="outline" size="sm" disabled={check.isPending || !item.enabled} onClick={() => check.mutate()}>
+                {check.isPending ? <LoaderCircleIcon animate /> : <RefreshCwIcon />}
+                Check now
+              </Button>
+            </AnimateIcon>
           </span>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`Remove ${item.title}`}
-            onClick={() => setConfirming(true)}
-          >
-            <Trash2Icon />
-          </Button>
+          <AnimateIcon animateOnHover asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={`Remove ${item.title}`}
+              onClick={() => setConfirming(true)}
+            >
+              <Trash2Icon />
+            </Button>
+          </AnimateIcon>
         </div>
       </TableCell>
 

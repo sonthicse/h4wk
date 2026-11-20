@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckIcon, LoaderCircleIcon, PlusIcon } from 'lucide-react'
+import { AnimateIcon } from '@animate-ui/react/icons'
+import { CheckIcon } from '@/components/animate-ui/icons/check'
+import { LoaderCircleIcon } from '@/components/animate-ui/icons/loader-circle'
+import { PlusIcon } from '@/components/animate-ui/icons/plus'
 import { useState } from 'react'
 import AddProviderDialog from '@/components/settings/ai/AddProviderDialog'
 import { draftErrors, providerChanged, toDraft, toInput, type Draft } from '@/components/settings/ai/draft'
@@ -58,14 +61,14 @@ export default function AIProvidersPage() {
             </Badge>
           ) : savedAt ? (
             <span role="status" className="flex items-center gap-1 text-sm text-muted-foreground">
-              <CheckIcon className="size-4" /> Saved
+              <CheckIcon className="size-4" animate /> Saved
             </span>
           ) : null}
           <Button variant="outline" disabled={!dirty || save.isPending} onClick={() => edit(toDraft(saved))}>
             Discard
           </Button>
           <Button disabled={!dirty || errors.length > 0 || save.isPending} onClick={() => save.mutate()}>
-            {save.isPending && <LoaderCircleIcon className="animate-spin" />}
+            {save.isPending && <LoaderCircleIcon animate />}
             Save
           </Button>
         </div>
@@ -87,10 +90,12 @@ export default function AIProvidersPage() {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Providers</h2>
-          <Button variant="outline" onClick={() => setAdding(true)}>
-            <PlusIcon />
-            Add OpenAI-compatible
-          </Button>
+          <AnimateIcon animateOnHover asChild>
+            <Button variant="outline" onClick={() => setAdding(true)}>
+              <PlusIcon />
+              Add OpenAI-compatible
+            </Button>
+          </AnimateIcon>
         </div>
         <div className="grid grid-cols-1 items-start gap-3 xl:grid-cols-2">
           {draft.providers.map((p) => (

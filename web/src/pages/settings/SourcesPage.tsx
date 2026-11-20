@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Check, Loader2 } from 'lucide-react'
+import { CheckIcon } from '@/components/animate-ui/icons/check'
+import { LoaderCircleIcon } from '@/components/animate-ui/icons/loader-circle'
 import { useState } from 'react'
 import PriorityList from '@/components/settings/sources/PriorityList'
 import SourceCard from '@/components/settings/sources/SourceCard'
@@ -99,7 +100,7 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
             </Badge>
           ) : justSaved ? (
             <span role="status" className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Check className="size-4" /> Saved
+              <CheckIcon className="size-4" animate /> Saved
             </span>
           ) : null}
           <Button
@@ -113,7 +114,7 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
             Discard
           </Button>
           <Button disabled={!dirty || save.isPending} onClick={() => save.mutate()}>
-            {save.isPending && <Loader2 className="animate-spin" />}
+            {save.isPending && <LoaderCircleIcon animate />}
             Save
           </Button>
         </div>

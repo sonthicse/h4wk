@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { CircleCheck, CircleX, Loader2 } from 'lucide-react'
+import { CircleCheck, CircleX } from 'lucide-react'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { LoaderCircleIcon } from '@/components/animate-ui/icons/loader-circle'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -65,7 +66,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
             </p>
             {source.last_error && <p className="font-mono text-xs text-muted-foreground">{source.last_error}</p>}
             <Button size="sm" variant="outline" disabled={resume.isPending} onClick={() => resume.mutate()}>
-              {resume.isPending && <Loader2 className="animate-spin" />}
+              {resume.isPending && <LoaderCircleIcon animate />}
               Resume now
             </Button>
             {resume.isError && <p className="text-xs text-destructive">{resume.error.message}</p>}
@@ -134,7 +135,7 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
         <div className="space-y-2 border-t pt-3">
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" disabled={test.isPending} onClick={() => test.mutate()}>
-              {test.isPending && <Loader2 className="animate-spin" />}
+              {test.isPending && <LoaderCircleIcon animate />}
               {test.isPending ? 'Testing…' : 'Test connection'}
             </Button>
             {newKey && <span className="text-xs text-muted-foreground">Tests the saved key, not the new one. Save first.</span>}

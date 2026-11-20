@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
+import { LoaderCircleIcon } from '@/components/animate-ui/icons/loader-circle'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -144,6 +145,7 @@ export default function CollectPage() {
                 </Select>
               </div>
               <Button type="submit" disabled={!input.trim() || create.isPending}>
+                {create.isPending && <LoaderCircleIcon animate />}
                 {create.isPending ? 'Sending…' : 'Collect'}
               </Button>
             </div>

@@ -1,5 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
-import { LoaderCircleIcon, Trash2Icon } from 'lucide-react'
+import { AnimateIcon } from '@animate-ui/react/icons'
+import { LoaderCircleIcon } from '@/components/animate-ui/icons/loader-circle'
+import { Trash2Icon } from '@/components/animate-ui/icons/trash-2'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -57,13 +59,15 @@ export default function ProviderCard({ provider: p, isNew, changed, onChange, on
             title={changed ? 'Save changes before testing' : 'Send a small request with the saved settings'}
             onClick={() => test.mutate()}
           >
-            {test.isPending && <LoaderCircleIcon className="animate-spin" />}
+            {test.isPending && <LoaderCircleIcon animate />}
             {test.isPending ? 'Testing…' : 'Test'}
           </Button>
           {p.type === 'openai_compat' && (
-            <Button size="icon-sm" variant="ghost" aria-label={`Remove provider ${p.name}`} onClick={onRemove}>
-              <Trash2Icon />
-            </Button>
+            <AnimateIcon animateOnHover asChild>
+              <Button size="icon-sm" variant="ghost" aria-label={`Remove provider ${p.name}`} onClick={onRemove}>
+                <Trash2Icon />
+              </Button>
+            </AnimateIcon>
           )}
         </div>
       </CardHeader>
@@ -150,14 +154,16 @@ export default function ProviderCard({ provider: p, isNew, changed, onChange, on
                     {cap}
                   </label>
                 ))}
-                <Button
-                  size="icon-xs"
-                  variant="ghost"
-                  aria-label={`Remove model ${m.name}`}
-                  onClick={() => setModels(p.models.filter((_, j) => j !== i))}
-                >
-                  <Trash2Icon />
-                </Button>
+                <AnimateIcon animateOnHover asChild>
+                  <Button
+                    size="icon-xs"
+                    variant="ghost"
+                    aria-label={`Remove model ${m.name}`}
+                    onClick={() => setModels(p.models.filter((_, j) => j !== i))}
+                  >
+                    <Trash2Icon />
+                  </Button>
+                </AnimateIcon>
               </li>
             ))}
             {p.models.length === 0 && <li className="px-2 py-1.5 text-xs text-muted-foreground">No models. Add one below.</li>}

@@ -1,6 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
-import { Check, Copy, Download } from 'lucide-react'
+import { AnimateIcon } from '@animate-ui/react/icons'
 import { useState } from 'react'
+import { CheckIcon } from '@/components/animate-ui/icons/check'
+import { CopyIcon } from '@/components/animate-ui/icons/copy'
+import { DownloadIcon } from '@/components/animate-ui/icons/download'
+import { LoaderCircleIcon } from '@/components/animate-ui/icons/loader-circle'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +16,7 @@ import { formatBytes, shortHash, verifyStatusVariant } from './helpers'
 function CopyHash({ sha256 }: { sha256: string }) {
   const [copied, setCopied] = useState(false)
   return (
+    <AnimateIcon animateOnHover asChild>
     <Button
       variant="ghost"
       size="sm"
@@ -25,8 +30,9 @@ function CopyHash({ sha256 }: { sha256: string }) {
       }}
     >
       {shortHash(sha256)}
-      {copied ? <Check /> : <Copy />}
+      {copied ? <CheckIcon animate /> : <CopyIcon />}
     </Button>
+    </AnimateIcon>
   )
 }
 
@@ -50,6 +56,7 @@ export default function FilesTable({ videoId, captureId, capture }: { videoId: s
       <CardHeader className="flex items-center justify-between">
         <CardTitle>Files ({capture.files.length})</CardTitle>
         <Button onClick={() => verify.mutate()} disabled={verify.isPending}>
+          {verify.isPending && <LoaderCircleIcon animate />}
           {verify.isPending ? 'Verifying…' : 'Verify integrity'}
         </Button>
       </CardHeader>
@@ -98,15 +105,17 @@ export default function FilesTable({ videoId, captureId, capture }: { videoId: s
                   )}
                   <TableCell>
                     {f.status !== 'unexpected' && f.status !== 'missing' && (
-                      <Button asChild variant="ghost" size="icon-sm">
-                        <a
-                          href={captureFileUrl(videoId, captureId, f.path)}
-                          download={f.path.split('/').pop()}
-                          aria-label={`Download ${f.path}`}
-                        >
-                          <Download />
-                        </a>
-                      </Button>
+                      <AnimateIcon animateOnHover asChild>
+                        <Button asChild variant="ghost" size="icon-sm">
+                          <a
+                            href={captureFileUrl(videoId, captureId, f.path)}
+                            download={f.path.split('/').pop()}
+                            aria-label={`Download ${f.path}`}
+                          >
+                            <DownloadIcon />
+                          </a>
+                        </Button>
+                      </AnimateIcon>
                     )}
                   </TableCell>
                 </TableRow>
