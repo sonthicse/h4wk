@@ -54,8 +54,8 @@ Graph phản ánh `main`, chưa có thay đổi trên nhánh của bạn; code t
 
 ## Dừng lại và hỏi trưởng nhóm khi
 
-- cần đổi hợp đồng C1–C5, SPEC hoặc thêm thư viện.
-- yêu cầu mơ hồ, có nhiều cách hiểu;
+- cần đổi hợp đồng C1–C5, SPEC hoặc thêm thư viện;
+- yêu cầu mơ hồ, có nhiều cách hiểu.
 
 ## Quy ước (xem thêm CLAUDE.md)
 
