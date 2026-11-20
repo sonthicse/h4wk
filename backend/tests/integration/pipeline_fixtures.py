@@ -96,6 +96,13 @@ def fake_source(
         log_dir=data_dir,
     )
     monkeypatch.setattr(vision, "AIGateway", lambda: gateway)
+    # Tầng LLM của analysis: trả Answer hợp lệ, không có kết luận nào.
+    analysis_gateway = AIGateway(
+        {"anthropic": FakeProvider(repeat(ProviderReply('{"verdicts":[]}')))},
+        config_path=AI_CONFIG_PATH.with_suffix(".toml.example"),
+        log_dir=data_dir,
+    )
+    monkeypatch.setattr(pipeline, "AIGateway", lambda: analysis_gateway)
     return holder
 
 

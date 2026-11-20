@@ -43,8 +43,12 @@ class AIGateway:
         messages: list[Message],
         schema: type[M],
     ) -> M:
-        answer, _ = self._run(AiTask(task), messages, schema, image=None)
-        return answer
+        return self.complete_structured_with_route(task, messages, schema)[0]
+
+    def complete_structured_with_route[M: BaseModel](
+        self, task: AiTask | str, messages: list[Message], schema: type[M]
+    ) -> tuple[M, Route]:
+        return self._run(AiTask(task), messages, schema, image=None)
 
     def describe_image[M: BaseModel](
         self,

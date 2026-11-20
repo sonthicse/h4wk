@@ -25,6 +25,11 @@ def _lines(path: Path) -> list[dict]:
     return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines()]
 
 
+def _vision_calls(data_dir: Path) -> list[dict]:
+    rows = _lines(data_dir / "ai_calls.jsonl")
+    return [r for r in rows if r["task"] == "media.vision"]
+
+
 def test_full_flow_ends_with_findings(
     client: TestClient, data_dir: Path, fake_source: dict
 ) -> None:
@@ -89,12 +94,13 @@ def test_recent_capture_is_not_collected_again(
     caplog.set_level("INFO", logger=stt.__name__)
     _entity(client)
     first = client.post("/api/collect", json={"url": VIDEO}).json()[0]
-    initial_calls = (data_dir / "ai_calls.jsonl").read_bytes()
+    initial_calls = _vision_calls(data_dir)
     second = client.post("/api/collect", json={"url": VIDEO}).json()[0]
     j1 = client.get(f"/api/jobs/{first['id']}").json()
     j2 = client.get(f"/api/jobs/{second['id']}").json()
     assert j2["status"] == "done" and j2["capture"] == j1["capture"]
-    assert (data_dir / "ai_calls.jsonl").read_bytes() == initial_calls
+    # Chạy lại chỉ phân tích lại (analysis.classify); media.vision không được gọi thêm.
+    assert _vision_calls(data_dir) == initial_calls
     forced = client.post("/api/collect", json={"url": VIDEO, "force": True})
     j3 = client.get(f"/api/jobs/{forced.json()[0]['id']}").json()
     assert j3["status"] == "done", j3["error"]
@@ -112,6 +118,34 @@ def test_failed_step_marks_job_failed_and_audits(
     assert job["status"] == "failed" and job["error"]
     audit = _lines(data_dir / "log" / "audit.jsonl")
     assert audit[-1]["action"] == "job.run" and audit[-1]["status"] == "error"
+
+
+def test_llm_failure_keeps_job_done(
+    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from itertools import repeat
+
+    from h4wk.ai.base import ProviderReply
+    from h4wk.ai.config import AI_CONFIG_PATH
+    from h4wk.ai.fake import FakeProvider
+    from h4wk.ai.gateway import AIGateway
+    from h4wk.jobs import pipeline
+
+    broken = AIGateway(
+        {"anthropic": FakeProvider(repeat(ProviderReply("not json")))},
+        config_path=AI_CONFIG_PATH.with_suffix(".toml.example"),
+        log_dir=data_dir,
+    )
+    monkeypatch.setattr(pipeline, "AIGateway", lambda: broken)
+    _entity(client)
+    r = client.post("/api/collect", json={"url": VIDEO})
+    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
+    assert job["status"] == "done" and job["error"] is None
+    assert client.get("/api/findings").json(), "nghi vấn tĩnh vẫn còn"
+    done = next(e for e in client.get("/api/events").json() if e["kind"] == "job_done")
+    assert "LLM analysis skipped" in done["message"]
+    run = _lines(data_dir / "log" / "audit.jsonl")[-1]
+    assert run["action"] == "job.run" and "llm_error" in json.dumps(run)
 
 
 @pytest.mark.parametrize(

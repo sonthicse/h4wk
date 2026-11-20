@@ -8,6 +8,7 @@ from pathlib import Path
 
 from sqlmodel import Session, select
 
+from h4wk.ai.gateway import AIGateway
 from h4wk.analysis import runner
 from h4wk.analysis.models import Finding
 from h4wk.collectors.models import CollectLevel, Normalized
@@ -205,8 +206,14 @@ def analyze(job_id: str) -> None:
         )
         run_id = f"r_{new_ulid()}"
         # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
-        _hits, findings = runner.analyze(
-            n, timeline, load_entities(), None, run_id, derived / "analysis" / run_id
+        _hits, findings, llm_error = runner.analyze(
+            n,
+            timeline,
+            load_entities(),
+            None,
+            run_id,
+            derived / "analysis" / run_id,
+            gateway=AIGateway(),
         )
         with Session(get_engine()) as s:
             for f in findings:
@@ -216,13 +223,12 @@ def analyze(job_id: str) -> None:
         _fail(job_id, "analyze", e)
         return
     job = _update(job_id, status="done", step=None, progress=100, run_id=run_id)
-    _event(job, "job_done", f"Processed video {job.video_id}: {len(findings)} findings")
-    audit.log(
-        job.trigger,
-        "job.run",
-        job.id,
-        {"capture": cap, "run_id": run_id, "findings": len(findings)},
-    )
+    skipped = f" (LLM analysis skipped: {llm_error})" if llm_error else ""
+    _event(job, "job_done", f"Processed video {job.video_id}: {len(findings)} findings{skipped}")
+    detail = {"capture": cap, "run_id": run_id, "findings": len(findings)}
+    if llm_error:
+        detail["llm_error"] = llm_error
+    audit.log(job.trigger, "job.run", job.id, detail)
 
 
 def _latest_runs(root: Path) -> dict[tuple[str, str], str]:

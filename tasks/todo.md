@@ -492,9 +492,11 @@ Tầng LLM gửi tới tác vụ AI `analysis.classify` các phần sau:
 
 Nghiệm thu:
 
-- [ ] Đầu ra sai schema không bao giờ được ghi vào `findings.json`.
+- [x] Đầu ra sai schema không bao giờ được ghi vào `findings.json`.
 - [ ] Trên bản thu mẫu, LLM thật sinh được ít nhất một nghi vấn từ speech, một từ ocr và một từ visual.
 - [ ] Đoạn chỉ có ảnh chế, không ai nhắc tên, vẫn được gửi đi nhờ ngữ cảnh cấp video và sinh nghi vấn `visual`.
+
+Quyết định của người dùng: (1) không gọi được LLM thì giữ nghi vấn tĩnh, job vẫn `done`, sự kiện và audit ghi `llm_error`; (2) kết luận `neutral` hoặc `legitimate_criticism` chỉ ghi vào `llm.json`, không vào `findings.json`; (3) LLM kết luận vi phạm cho một mục thì bỏ nghi vấn tĩnh của đúng mục đó.
 
 Kiểm tra: `uv run pytest tests/unit/test_analysis_llm.py` (dùng `FakeProvider`) và `uv run pytest -m live -k analysis`.
 

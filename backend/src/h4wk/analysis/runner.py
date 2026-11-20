@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from h4wk.ai.gateway import AIGateway, GatewayError
+from h4wk.analysis import llm
 from h4wk.analysis.models import EntityHit, Finding, Trigger
 from h4wk.analysis.normalize import matches_name
 from h4wk.analysis.static import LexiconEntry, find_insult, load_lexicon
@@ -19,7 +21,8 @@ def analyze(
     lexicon: list[LexiconEntry] | None,
     run_id: str,
     output_dir: Path,
-) -> tuple[list[EntityHit], list[Finding]]:
+    gateway: AIGateway | None = None,
+) -> tuple[list[EntityHit], list[Finding], str | None]:
     if lexicon is None:
         lexicon = load_lexicon()
     hits: list[EntityHit] = []
@@ -78,10 +81,36 @@ def analyze(
     for comment in data.comments:
         scan(comment.text, "comment", comment_id=comment.id)
 
+    llm_error = None
+    records = None
+    if gateway is not None:
+        items = llm.build_items(data, timeline, hits)
+        if items:
+            try:
+                llm_findings, records = llm.classify(
+                    items, entities, data, timeline, hits, gateway, run_id
+                )
+            except GatewayError as error:
+                # Không gọi được LLM thì giữ nghi vấn tĩnh, job vẫn thành công.
+                llm_error = str(error)
+            else:
+                # LLM kết luận vi phạm cho một mục thì bỏ nghi vấn tĩnh của đúng mục đó.
+                replaced = {_slot(f) for f in llm_findings}
+                findings = [f for f in findings if _slot(f) not in replaced] + llm_findings
+
     output_dir.mkdir(parents=True, exist_ok=True)
     for filename, items in (("hits.json", hits), ("findings.json", findings)):
         content = [item.model_dump(mode="json", by_alias=True) for item in items]
-        (output_dir / filename).write_text(
-            json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
-    return hits, findings
+        _write(output_dir / filename, content)
+    if records is not None:
+        _write(output_dir / "llm.json", records)
+    return hits, findings, llm_error
+
+
+def _slot(finding: Finding) -> str:
+    """Mục chứa nghi vấn: segment với speech/ocr/visual, còn lại theo loại nguồn."""
+    return finding.segment_id or finding.source_kind.value
+
+
+def _write(path: Path, content: list) -> None:
+    path.write_text(json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

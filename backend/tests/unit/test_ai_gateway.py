@@ -45,6 +45,15 @@ def logs(tmp_path):
     ]
 
 
+def test_complete_structured_with_route(config, tmp_path):
+    gateway = AIGateway({"first": FakeProvider([OK])}, config_path=config, log_dir=tmp_path)
+    answer, route = gateway.complete_structured_with_route(
+        "analysis.classify", [{"role": "user", "content": "x"}], Answer
+    )
+    assert answer == Answer(label="ok")
+    assert (route.provider, route.model) == ("first", "text")
+
+
 def test_repair_invalid_json(config, tmp_path):
     first = FakeProvider([ProviderReply("oops"), OK])
     gateway = AIGateway({"first": first}, config_path=config, log_dir=tmp_path)
