@@ -20,7 +20,7 @@ cd h4wk
 
 # Backend
 cd backend
-uv sync              # tạo .venv và cài dependency
+uv sync --extra stt --extra match   # tạo .venv và cài dependency, kể cả STT và khớp ảnh (cần GPU)
 uv run h4wk init     # tạo data/ và config/*.toml từ config/*.toml.example
 cd ..
 
@@ -40,11 +40,13 @@ Mở hai terminal:
 
 ```bash
 # Terminal 1: API ở :8000
-cd backend && uv run uvicorn h4wk.api.app:app --reload
+cd backend && uv run --no-sync uvicorn h4wk.api.app:app --reload
 
 # Terminal 2: giao diện ở :5173, /api được proxy sang :8000
 cd web && npm run dev
 ```
+
+**Trong `backend/` không chạy `uv sync` hay `uv run` trơn:** lệnh đó gỡ torch và thư viện CUDA của extra. Dùng `uv run --no-sync ...`. Các bước chạy thử 3 màn demo nằm ở [docs/demo-checklist.md](docs/demo-checklist.md).
 
 Mở http://localhost:5173. Trang chủ hiện `API status: ok` nghĩa là đã cài đặt đúng.
 
