@@ -232,6 +232,32 @@ def resume_source(name: SourceName, actor: ActorDep) -> SourceInfo:
     return next(x for x in _sources_view().sources if x.name == name)
 
 
+class JevSettingsView(BaseModel):
+    key: KeyInfo
+
+
+_JEV_KEY = "TYPESAFE_API_KEY"
+
+
+@router.get("/jev")
+def get_jev() -> JevSettingsView:
+    return JevSettingsView(key=secrets.info(_JEV_KEY))
+
+
+@router.put("/jev/key")
+def put_jev_key(body: KeyBody, actor: ActorDep) -> KeyInfo:
+    secrets.put(_JEV_KEY, body.value)
+    audit.log(actor, "settings.key.set", _JEV_KEY)
+    return secrets.info(_JEV_KEY)
+
+
+@router.delete("/jev/key")
+def delete_jev_key(actor: ActorDep) -> KeyInfo:
+    secrets.delete(_JEV_KEY)
+    audit.log(actor, "settings.key.delete", _JEV_KEY)
+    return secrets.info(_JEV_KEY)
+
+
 # --------------------------------------------------------------------------- AI
 
 

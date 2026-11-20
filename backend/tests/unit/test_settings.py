@@ -191,6 +191,17 @@ def _stored(data_dir: Path) -> dict:
     return json.loads((data_dir / "secrets.json").read_text(encoding="utf-8"))
 
 
+def test_jev_key_lifecycle(client: TestClient, monkeypatch) -> None:
+    monkeypatch.setattr("h4wk.core.secrets.env_values", lambda: {})
+    assert client.get("/api/settings/jev").json()["key"]["set"] is False
+    result = client.put("/api/settings/jev/key", json={"value": AI_KEY})
+    assert result.status_code == 200
+    assert AI_KEY not in result.text
+    assert result.json()["origin"] == "settings"
+    assert client.get("/api/settings/jev").json() == {"key": result.json()}
+    assert client.delete("/api/settings/jev/key").json()["set"] is False
+
+
 def _key_deletes(data_dir: Path) -> list[str]:
     lines = (data_dir / "log" / "audit.jsonl").read_text(encoding="utf-8").splitlines()
     return [d["target"] for d in map(json.loads, lines) if d["action"] == "settings.key.delete"]
