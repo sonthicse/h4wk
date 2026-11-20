@@ -2,6 +2,7 @@
 (một dòng trong reviews.jsonl). hits.json và findings.json là mảng JSON (SPEC 10.6)."""
 
 from enum import StrEnum
+from itertools import pairwise
 from typing import Annotated, Literal, Self
 
 from pydantic import StringConstraints, model_validator
@@ -92,8 +93,27 @@ FindingId = Annotated[str, StringConstraints(pattern=r"^f_[0-9A-HJKMNP-TV-Z]{26}
 _TIMED_KINDS = {SourceKind.SPEECH, SourceKind.OCR, SourceKind.VISUAL}
 
 
+class Occurrence(Contract):
+    """Một chỗ nghi vấn xuất hiện trong video (một segment của timeline)."""
+
+    segment_id: str
+    start: NonNegFloat
+    end: NonNegFloat
+    frame: RelPath | None = None
+
+    @model_validator(mode="after")
+    def _order(self) -> Self:
+        if self.end < self.start:
+            raise ValueError("end must be >= start")
+        return self
+
+
 class Finding(Contract):
-    """Một nghi vấn (một phần tử của findings.json)."""
+    """Một nghi vấn (một phần tử của findings.json).
+
+    `occurrences` liệt kê mọi chỗ cùng một nội dung xuất hiện (vd băng rôn chạy suốt video
+    được OCR ở nhiều đoạn), theo thứ tự thời gian; `segment_id`, `start`, `end` là chỗ đầu tiên.
+    Rỗng khi nghi vấn chỉ ở một chỗ."""
 
     id: FindingId
     run_id: str
@@ -116,6 +136,7 @@ class Finding(Contract):
     severity: Severity
     confidence: Confidence
     reason: str
+    occurrences: list[Occurrence] = []
 
     @model_validator(mode="after")
     def _rules(self) -> Self:
@@ -129,6 +150,12 @@ class Finding(Contract):
             raise ValueError("a comment finding needs comment_id")
         if self.start is not None and self.end is not None and self.end < self.start:
             raise ValueError("end must be >= start")
+        if self.occurrences:
+            first = self.occurrences[0]
+            if (first.segment_id, first.start) != (self.segment_id, self.start):
+                raise ValueError("the first occurrence must match segment_id and start")
+            if any(a.start > b.start for a, b in pairwise(self.occurrences)):
+                raise ValueError("occurrences must be sorted by start")
         return self
 
 

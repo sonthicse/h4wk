@@ -22,6 +22,16 @@ export const severityRank: Record<Severity, number> = { high: 0, medium: 1, low:
 // Các nguồn có mốc thời gian trong video; nguồn còn lại (tiêu đề, mô tả, thumbnail, comment) thì không.
 export const timedSources = new Set(['speech', 'ocr', 'visual'])
 
+// Thời điểm t có nằm trong một đoạn của nghi vấn (bỏ đoạn rỗng end = start).
+export function inSpans(f: { spans: { start: number; end: number }[] }, t: number) {
+  return f.spans.some((s) => s.end > s.start && t >= s.start && t <= s.end)
+}
+
+// Nghi vấn có đoạn nào giao với [start, end) không.
+export function overlapsSpans(f: { spans: { start: number; end: number }[] }, start: number, end: number) {
+  return f.spans.some((s) => s.end > s.start && s.start < end && s.end > start)
+}
+
 export function formatTime(s: number) {
   const m = Math.floor(s / 60)
   const sec = Math.floor(s % 60)

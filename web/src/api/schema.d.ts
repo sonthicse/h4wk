@@ -1043,6 +1043,10 @@ export interface components {
         /**
          * Finding
          * @description Một nghi vấn (một phần tử của findings.json).
+         *
+         *     `occurrences` liệt kê mọi chỗ cùng một nội dung xuất hiện (vd băng rôn chạy suốt video
+         *     được OCR ở nhiều đoạn), theo thứ tự thời gian; `segment_id`, `start`, `end` là chỗ đầu tiên.
+         *     Rỗng khi nghi vấn chỉ ở một chỗ.
          */
         Finding: {
             /** Id */
@@ -1096,6 +1100,11 @@ export interface components {
             confidence: components["schemas"]["Confidence"];
             /** Reason */
             reason: string;
+            /**
+             * Occurrences
+             * @default []
+             */
+            occurrences: components["schemas"]["Occurrence"][];
         };
         /** FrameOcr */
         FrameOcr: {
@@ -1251,6 +1260,20 @@ export interface components {
             provider: string;
             /** Model */
             model: string;
+        };
+        /**
+         * Occurrence
+         * @description Một chỗ nghi vấn xuất hiện trong video (một segment của timeline).
+         */
+        Occurrence: {
+            /** Segment Id */
+            segment_id: string;
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+            /** Frame */
+            frame?: string | null;
         };
         /** OcrText */
         OcrText: {

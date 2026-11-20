@@ -189,6 +189,9 @@ def _finding(**over: Any) -> dict[str, Any]:
 
 FINDING = _finding()
 
+OCC_1 = {"segment_id": "seg_0007", "start": 92.4, "end": 104.1, "frame": "frames/000231.jpg"}
+OCC_2 = {"segment_id": "seg_0009", "start": 120.0, "end": 131.5}
+
 REVIEW: dict[str, Any] = {
     "finding_id": FID,
     "run_id": "r_20261118T160000",
@@ -272,6 +275,7 @@ VALID: list[tuple[Any, dict[str, Any]]] = [
     (Finding, FINDING),
     (Finding, _finding(category="incitement")),
     (Finding, _finding(category="state_secret")),
+    (Finding, _finding(occurrences=[OCC_1, OCC_2])),
     (ReviewDecision, REVIEW),
     (SourcesConfig, SOURCES),
     (AiConfig, AI),
@@ -443,6 +447,21 @@ def test_cap_values_match_manifest_what() -> None:
     assert Cap.VIDEO_METADATA.value == "video.metadata"
     assert Cap.MEDIA.value == "video.media"
     assert {lv.value for lv in CollectLevel} == {"metadata", "text", "full"}
+
+
+@pytest.mark.parametrize(
+    ("occurrences", "message"),
+    [
+        ([OCC_2, OCC_1], "first occurrence must match"),
+        ([OCC_1, {**OCC_2, "start": 50.0}], "sorted by start"),
+        ([OCC_1, {**OCC_2, "end": 100.0}], "end must be >= start"),
+        ([OCC_1, {**OCC_2, "note": "x"}], "Extra inputs are not permitted"),
+    ],
+    ids=["chỗ đầu khác start", "chưa sắp theo thời gian", "end < start", "trường lạ"],
+)
+def test_finding_occurrences_rejected_for_the_right_rule(occurrences, message) -> None:
+    with pytest.raises(ValidationError, match=message):
+        Finding.model_validate(_finding(occurrences=occurrences))
 
 
 def test_finding_start_zero_is_valid() -> None:

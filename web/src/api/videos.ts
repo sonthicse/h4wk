@@ -77,6 +77,8 @@ export type VideoFinding = {
   sourceKind: Schemas['SourceKind']
   start: number | null
   end: number | null
+  // Mọi đoạn nghi vấn xuất hiện (nghi vấn đã gộp, vd băng rôn chạy suốt video); nghi vấn một chỗ thì một đoạn.
+  spans: { start: number; end: number }[]
   quote: string
   severity: Severity
   entity: string
@@ -92,6 +94,11 @@ export function toVideoFinding({ finding: f }: QueueItem): VideoFinding {
     sourceKind: f.source_kind,
     start: f.start ?? null,
     end: f.end ?? null,
+    spans: f.occurrences?.length
+      ? f.occurrences.map((o) => ({ start: o.start, end: o.end }))
+      : f.start != null
+        ? [{ start: f.start, end: f.end ?? f.start }]
+        : [],
     quote: f.quote ?? '',
     severity: f.severity,
     entity: f.entity,

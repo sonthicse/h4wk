@@ -1,7 +1,7 @@
 import { Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { VideoFinding } from '@/api/videos'
-import { formatTime } from '@/lib/findings'
+import { formatTime, inSpans } from '@/lib/findings'
 import type { PlayerControls, VideoProps } from './usePlayer'
 
 // Trình phát thật trên <video>; không có media (hoặc nạp lỗi) thì hiện khung trống, thanh seek vẫn dùng được cho transcript/timeline.
@@ -20,13 +20,7 @@ export default function Player({
 }) {
   const { currentTime, duration, playing } = player
   const hasMedia = src !== null && !failed
-  const inFinding =
-    activeFinding &&
-    activeFinding.start !== null &&
-    activeFinding.end !== null &&
-    activeFinding.end > activeFinding.start &&
-    currentTime >= activeFinding.start &&
-    currentTime <= activeFinding.end
+  const inFinding = activeFinding && inSpans(activeFinding, currentTime)
 
   return (
     <div className="space-y-2">

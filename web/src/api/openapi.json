@@ -3285,6 +3285,14 @@
           "reason": {
             "type": "string",
             "title": "Reason"
+          },
+          "occurrences": {
+            "items": {
+              "$ref": "#/components/schemas/Occurrence"
+            },
+            "type": "array",
+            "title": "Occurrences",
+            "default": []
           }
         },
         "additionalProperties": false,
@@ -3304,7 +3312,7 @@
           "reason"
         ],
         "title": "Finding",
-        "description": "M\u1ed9t nghi v\u1ea5n (m\u1ed9t ph\u1ea7n t\u1eed c\u1ee7a findings.json)."
+        "description": "M\u1ed9t nghi v\u1ea5n (m\u1ed9t ph\u1ea7n t\u1eed c\u1ee7a findings.json).\n\n`occurrences` li\u1ec7t k\u00ea m\u1ecdi ch\u1ed7 c\u00f9ng m\u1ed9t n\u1ed9i dung xu\u1ea5t hi\u1ec7n (vd b\u0103ng r\u00f4n ch\u1ea1y su\u1ed1t video\n\u0111\u01b0\u1ee3c OCR \u1edf nhi\u1ec1u \u0111o\u1ea1n), theo th\u1ee9 t\u1ef1 th\u1eddi gian; `segment_id`, `start`, `end` l\u00e0 ch\u1ed7 \u0111\u1ea7u ti\u00ean.\nR\u1ed7ng khi nghi v\u1ea5n ch\u1ec9 \u1edf m\u1ed9t ch\u1ed7."
       },
       "FrameOcr": {
         "properties": {
@@ -3734,6 +3742,44 @@
           "model"
         ],
         "title": "ModelRef"
+      },
+      "Occurrence": {
+        "properties": {
+          "segment_id": {
+            "type": "string",
+            "title": "Segment Id"
+          },
+          "start": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Start"
+          },
+          "end": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "End"
+          },
+          "frame": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frame"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "segment_id",
+          "start",
+          "end"
+        ],
+        "title": "Occurrence",
+        "description": "M\u1ed9t ch\u1ed7 nghi v\u1ea5n xu\u1ea5t hi\u1ec7n trong video (m\u1ed9t segment c\u1ee7a timeline)."
       },
       "OcrText": {
         "properties": {

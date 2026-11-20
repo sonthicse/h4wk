@@ -77,7 +77,8 @@ function VideoView({
     video.duration_s ??
     Math.max(0, ...(timeline.data?.segments ?? []).map((s) => s.end), ...findings.map((f) => f.end ?? 0))
 
-  const startAt = finding && timedSources.has(finding.sourceKind) && finding.start !== null ? finding.start - LEAD_S : t
+  // ?t= (bấm một đoạn cụ thể của nghi vấn nhiều chỗ) được ưu tiên hơn start của nghi vấn.
+  const startAt = t ?? (finding && timedSources.has(finding.sourceKind) && finding.start !== null ? finding.start - LEAD_S : null)
   const hasTarget = startAt !== null
   const { controls: player, videoProps, failed } = usePlayer(durationHint, Math.max(startAt ?? 0, 0), hasTarget)
 
@@ -85,7 +86,8 @@ function VideoView({
   const findingHref = (id: string) => `${ownHref}?finding=${id}`
 
   // Bấm một nghi vấn: đổi ?finding=, trang dựng lại trình phát (xem key bên dưới) và nhảy tới đúng chỗ.
-  const openFinding = (f: VideoFinding) => setSearchParams({ finding: f.id })
+  const openFinding = (f: VideoFinding, at?: number) =>
+    setSearchParams(at === undefined ? { finding: f.id } : { finding: f.id, t: String(Math.max(0, at - LEAD_S)) })
 
   return (
     <div className="space-y-4">

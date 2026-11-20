@@ -8,7 +8,7 @@ from pathlib import Path
 from pydantic import TypeAdapter
 
 from h4wk.analysis.models import EntityHit, Finding
-from h4wk.analysis.runner import _slot, analyze
+from h4wk.analysis.runner import analyze, slots
 from h4wk.collectors.models import Normalized
 from h4wk.core.entities import load_entities
 from h4wk.media.timeline import Timeline
@@ -115,12 +115,12 @@ def collect_units(root: Path) -> list[Unit]:
         timeline = Timeline.model_validate_json(_read(derived / "timeline.json"))
         hits = _HITS.validate_json(_read(run / "hits.json"))
         findings = _FINDINGS.validate_json(_read(run / "findings.json"))
-        llm_slots = {_slot(f) for f in findings if f.analyzer == "llm"}
+        llm_slots = {slot for f in findings if f.analyzer == "llm" for slot in slots(f)}
         with tempfile.TemporaryDirectory() as tmp:
             _, static_findings, _ = analyze(
                 data, timeline, entities, None, "r_eval", Path(tmp), gateway=None
             )
-        static_slots = {_slot(f) for f in static_findings}
+        static_slots = {slot for f in static_findings for slot in slots(f)}
         thumbnails = {t.file for t in timeline.thumbnails}
         pending: list[tuple[str, str, str]] = []  # (place, kind, entity)
         for hit in hits:
@@ -128,8 +128,8 @@ def collect_units(root: Path) -> list[Unit]:
         # Nghi vấn không có hit cùng (vị trí, đối tượng): đoạn chỉ có offensive_cues,
         # hoặc LLM kết luận về đối tượng khác với hit.
         for finding in [*static_findings, *(f for f in findings if f.analyzer == "llm")]:
-            place, entity = _slot(finding)
-            pending.append((place, _finding_kind(finding), entity))
+            for place, entity in slots(finding):
+                pending.append((place, _finding_kind(finding), entity))
         seen: set[tuple[str, str]] = set()
         for place, kind, entity in pending:
             slot = (place, entity)

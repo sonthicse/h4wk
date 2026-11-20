@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { formatTime } from '@/lib/findings'
+import { formatTime, inSpans } from '@/lib/findings'
 import { cn } from '@/lib/utils'
 import { frameUrl, type VideoFinding } from '@/api/videos'
 import type { Bbox, Keyframe } from './keyframes'
@@ -94,7 +94,7 @@ export default function KeyframeStrip({
   activeFinding: VideoFinding | null
 }) {
   const src = (k: Keyframe) => frameUrl(videoId, k.id, capture)
-  const inRange = (k: Keyframe, f: VideoFinding) => f.start !== null && f.end !== null && f.end > f.start && k.t >= f.start && k.t <= f.end
+  const inRange = (k: Keyframe, f: VideoFinding) => inSpans(f, k.t)
   const [pickedId, setPickedId] = useState<string | null>(null)
 
   // Khi mở bằng ?finding= thì mặc định chọn khung nằm trong đoạn nghi vấn đó.

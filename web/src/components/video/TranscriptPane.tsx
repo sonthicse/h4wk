@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Transcript, VideoFinding } from '@/api/videos'
-import { formatTime } from '@/lib/findings'
+import { formatTime, overlapsSpans } from '@/lib/findings'
 import { cn } from '@/lib/utils'
 import type { PlayerControls } from './usePlayer'
 
@@ -55,9 +55,7 @@ export default function TranscriptPane({
       ) : (
         <div ref={listRef} className="relative min-h-0 flex-1 overflow-y-auto p-2">
           {transcript.segments.map((s, i) => {
-            const flagged = findings.filter(
-              (f) => f.start !== null && f.end !== null && f.start < s.end && f.end > s.start && f.end > f.start,
-            )
+            const flagged = findings.filter((f) => overlapsSpans(f, s.start, s.end))
             const isActive = i === activeIndex
             const isTarget = flagged.some((f) => f.id === activeId)
             return (

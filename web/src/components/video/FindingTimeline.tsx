@@ -16,7 +16,8 @@ const severityColor: Record<Severity, string> = {
   low: 'bg-sky-500',
 }
 
-// Thanh thời gian: tô đoạn có nghi vấn theo severity; bấm vào thanh để seek, bấm vào đoạn để nhảy tới start − 2s.
+// Thanh thời gian: tô mọi đoạn nghi vấn xuất hiện theo severity; bấm vào thanh để seek,
+// bấm vào một đoạn để mở nghi vấn và nhảy tới đầu đoạn đó − 2s.
 export default function FindingTimeline({
   findings,
   player,
@@ -26,7 +27,7 @@ export default function FindingTimeline({
   findings: VideoFinding[]
   player: PlayerControls
   activeId: string | null
-  onOpen: (f: VideoFinding) => void
+  onOpen: (f: VideoFinding, at?: number) => void
 }) {
   const { duration, currentTime } = player
   const timed = findings.filter(isTimed)
@@ -53,33 +54,36 @@ export default function FindingTimeline({
           if (duration > 0) player.seek(((e.clientX - box.left) / box.width) * duration)
         }}
       >
-        {duration > 0 && timed.map((f) => (
-          <Tooltip key={f.id}>
+        {duration > 0 && timed.flatMap((f) => f.spans.map((s, i) => (
+          <Tooltip key={`${f.id}:${i}`}>
             <TooltipTrigger asChild>
               <button
                 type="button"
-                aria-label={`Finding at ${timeRange(f)}: ${f.quote}`}
+                aria-label={`Finding at ${formatTime(s.start)}–${formatTime(s.end)}: ${f.quote}`}
                 className={cn(
                   'absolute inset-y-0 min-w-1.5 rounded-sm opacity-80 hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1',
                   severityColor[f.severity],
                   f.id === activeId && 'opacity-100 ring-2 ring-foreground',
                 )}
                 style={{
-                  left: `${(f.start! / duration) * 100}%`,
-                  width: `${(((f.end ?? f.start!) - f.start!) / duration) * 100}%`,
+                  left: `${(s.start / duration) * 100}%`,
+                  width: `${((s.end - s.start) / duration) * 100}%`,
                 }}
                 onClick={(e) => {
                   e.stopPropagation()
-                  onOpen(f)
+                  onOpen(f, s.start)
                 }}
               />
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
-              <p className="font-mono text-xs">{timeRange(f)} · {f.sourceKind}</p>
+              <p className="font-mono text-xs">
+                {formatTime(s.start)}–{formatTime(s.end)} · {f.sourceKind}
+                {f.spans.length > 1 && ` · ${i + 1} of ${f.spans.length} places`}
+              </p>
               <p>{f.quote}</p>
             </TooltipContent>
           </Tooltip>
-        ))}
+        )))}
         <div
           className="pointer-events-none absolute inset-y-[-3px] w-0.5 bg-foreground"
           style={{ left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
@@ -106,6 +110,9 @@ export default function FindingTimeline({
                     {timeRange(f)} · {f.sourceKind}
                   </span>
                   <span className="truncate">{f.quote}</span>
+                  {f.spans.length > 1 && (
+                    <Badge variant="outline" className="ml-auto shrink-0">{f.spans.length} places</Badge>
+                  )}
                 </button>
               </HoverItem>
             ))}

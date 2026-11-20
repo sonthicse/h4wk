@@ -1,12 +1,22 @@
 """Phân tích tĩnh văn bản theo các đối tượng cần bảo vệ."""
 
 import json
+from collections import Counter
+from difflib import SequenceMatcher
 from pathlib import Path
 
 from h4wk.ai.gateway import AIGateway, GatewayError
 from h4wk.analysis import comments, llm
-from h4wk.analysis.models import EntityHit, Finding, Trigger
-from h4wk.analysis.normalize import matches_name
+from h4wk.analysis.models import (
+    Confidence,
+    EntityHit,
+    Finding,
+    Occurrence,
+    Severity,
+    SourceKind,
+    Trigger,
+)
+from h4wk.analysis.normalize import matches_name, normalize
 from h4wk.analysis.static import LexiconEntry, find_insult, load_lexicon
 from h4wk.collectors.models import Normalized
 from h4wk.core.config_models import CommentSettings
@@ -116,6 +126,7 @@ def analyze(
             replaced = {_slot(f) for f in llm_findings}
             findings = [f for f in findings if _slot(f) not in replaced] + llm_findings
     llm_error = "; ".join(errors) or None
+    findings = group_repeats(findings)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     for filename, items in (("hits.json", hits), ("findings.json", findings)):
@@ -141,3 +152,73 @@ def _slot(finding: Finding) -> tuple[str, str]:
 
 def _write(path: Path, content: list) -> None:
     path.write_text(json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def slots(finding: Finding) -> list[tuple[str, str]]:
+    """Mọi mục chứa nghi vấn: mỗi chỗ xuất hiện một mục (nghi vấn đã gộp), còn lại như `_slot`."""
+    if finding.occurrences:
+        return [(o.segment_id, finding.entity) for o in finding.occurrences]
+    return [_slot(finding)]
+
+
+# Chữ OCR lặp lại ở nhiều đoạn (băng rôn, logo kênh) chỉ thành một nghi vấn.
+REPEAT_KINDS = {SourceKind.OCR}
+SAME_QUOTE_RATIO = 0.8  # OCR đọc lệch vài ký tự giữa các khung vẫn coi là cùng một dòng chữ
+_SEVERITY = list(Severity)
+_CONFIDENCE = list(Confidence)
+
+
+def group_repeats(findings: list[Finding]) -> list[Finding]:
+    """Gộp các nghi vấn OCR cùng tầng phân tích, đối tượng, danh mục và chữ gần giống nhau
+    thành một nghi vấn, ghi các đoạn xuất hiện vào `occurrences`. Giữ thứ tự ban đầu."""
+    groups: list[tuple[str, list[Finding]]] = []
+    for finding in findings:
+        if finding.source_kind not in REPEAT_KINDS or finding.start is None:
+            continue
+        text = normalize(finding.quote)
+        for head_text, members in groups:
+            head = members[0]
+            same = (head.analyzer, head.entity, head.category) == (
+                finding.analyzer,
+                finding.entity,
+                finding.category,
+            )
+            if same and SequenceMatcher(None, head_text, text).ratio() >= SAME_QUOTE_RATIO:
+                members.append(finding)
+                break
+        else:
+            groups.append((text, [finding]))
+    merged = {id(members[0]): _merge(members) for _, members in groups}
+    grouped = {id(f) for _, members in groups for f in members}
+    return [merged.get(id(f), f) for f in findings if id(f) in merged or id(f) not in grouped]
+
+
+def _merge(members: list[Finding]) -> Finding:
+    if len(members) == 1:
+        return members[0]
+    # Nghi vấn OCR luôn có segment_id và start (hợp đồng C4).
+    members = sorted(members, key=lambda f: f.start or 0.0)
+    head = members[0]
+    occurrences: dict[str, Occurrence] = {}
+    for f in members:
+        start, place = f.start or 0.0, str(f.segment_id)
+        occurrences.setdefault(
+            place, Occurrence(segment_id=place, start=start, end=f.end or start, frame=f.frame)
+        )
+    triggers = list({t.model_dump_json(): t for f in members for t in f.triggers}.values())
+    places = sorted(occurrences.values(), key=lambda o: o.start)
+    reason = head.reason
+    if len(places) > 1:
+        reason += f" Xuất hiện ở {len(places)} đoạn."
+    return Finding.model_validate(
+        {
+            **head.model_dump(),
+            # Bản đọc gặp nhiều nhất thường là bản OCR đúng.
+            "quote": Counter(f.quote for f in members).most_common(1)[0][0],
+            "triggers": [t.model_dump() for t in triggers],
+            "severity": max((f.severity for f in members), key=_SEVERITY.index),
+            "confidence": max((f.confidence for f in members), key=_CONFIDENCE.index),
+            "reason": reason,
+            "occurrences": [o.model_dump() for o in places] if len(places) > 1 else [],
+        }
+    )

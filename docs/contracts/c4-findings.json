@@ -25,7 +25,7 @@
     },
     "Finding": {
       "additionalProperties": false,
-      "description": "Một nghi vấn (một phần tử của findings.json).",
+      "description": "Một nghi vấn (một phần tử của findings.json).\n\n`occurrences` liệt kê mọi chỗ cùng một nội dung xuất hiện (vd băng rôn chạy suốt video\nđược OCR ở nhiều đoạn), theo thứ tự thời gian; `segment_id`, `start`, `end` là chỗ đầu tiên.\nRỗng khi nghi vấn chỉ ở một chỗ.",
       "properties": {
         "analyzer": {
           "enum": [
@@ -135,6 +135,14 @@
           ],
           "default": null
         },
+        "occurrences": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Occurrence"
+          },
+          "title": "Occurrences",
+          "type": "array"
+        },
         "quote": {
           "default": "",
           "title": "Quote",
@@ -226,6 +234,45 @@
         "model"
       ],
       "title": "ModelRef",
+      "type": "object"
+    },
+    "Occurrence": {
+      "additionalProperties": false,
+      "description": "Một chỗ nghi vấn xuất hiện trong video (một segment của timeline).",
+      "properties": {
+        "end": {
+          "minimum": 0,
+          "title": "End",
+          "type": "number"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        },
+        "segment_id": {
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "number"
+        }
+      },
+      "required": [
+        "segment_id",
+        "start",
+        "end"
+      ],
+      "title": "Occurrence",
       "type": "object"
     },
     "Severity": {
