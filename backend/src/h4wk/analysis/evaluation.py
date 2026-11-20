@@ -39,7 +39,8 @@ def place_of(
     """Trả (vị trí, loại mục) theo cùng quy tắc với `runner._slot`.
 
     `thumbnails` là tên các file thumbnail của timeline; frame khác (keyframe không thuộc
-    đoạn nào) có loại "frame"."""
+    đoạn nào) có loại "frame". Nếu `llm.py` sau này tạo mục cho keyframe lẻ thì phải sửa
+    `runner._slot` và hàm này cùng lúc."""
     if hit.comment_id:
         return hit.comment_id, "comment"
     if hit.segment_id:

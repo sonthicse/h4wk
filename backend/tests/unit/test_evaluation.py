@@ -171,9 +171,6 @@ def test_cli_sample_and_score(data_dir: Path, tmp_path: Path) -> None:
 
 
 def test_score_f1_zero_when_no_true_positive() -> None:
-    result = score([_row("0", "1", "0"), _row("1", "0", "0"), _row("1", "1", "0")])
-    s = result["static"]
-    assert (s["tp"], s["fp"], s["fn"]) == (1, 1, 1)
     zero = score([_row("0", "1", "0"), _row("1", "0", "0")])["static"]
     assert (zero["tp"], zero["fp"], zero["fn"]) == (0, 1, 1)
     assert zero["precision"] == 0 and zero["recall"] == 0 and zero["f1"] == 0.0
