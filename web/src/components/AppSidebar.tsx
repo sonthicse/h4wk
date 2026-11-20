@@ -43,16 +43,18 @@ function useActivePath() {
   return [...nav, settingsNav].find((i) => pathname === i.path || pathname.startsWith(`${i.path}/`))?.path ?? null
 }
 
-// Nền chỉ báo do Highlight vẽ và trượt giữa các mục, nên nền tĩnh của nút (hover, active) được tắt.
+// Nền chỉ báo do Highlight vẽ và trượt giữa các mục, nên nền active tĩnh của nút được tắt; hover giữ nền nhạt cho mục chưa chọn.
+// data-slot truyền lại vì thư viện ghi đè data-slot của vỏ và của nút bằng giá trị của nó.
 // HighlightItem thay cho SidebarMenuItem: vỏ <li> có đúng một con là nút (thư viện clone con để đặt z-index).
 function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: typeof FlagIcon }) {
   return (
-    <HighlightItem as="li" value={to} className="group/menu-item relative">
+    <HighlightItem as="li" value={to} className="group/menu-item" data-slot="sidebar-menu-item" data-sidebar="menu-item">
       <SidebarMenuButton
         asChild
+        data-slot="sidebar-menu-button"
         isActive={useActivePath() === to}
         tooltip={label}
-        className="hover:bg-transparent data-active:bg-transparent"
+        className="hover:bg-sidebar-accent/50 data-active:bg-transparent"
       >
         <NavLink to={to}>
           <Icon />
