@@ -52,10 +52,9 @@ export default function AIProvidersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="text-lg font-semibold">AI providers</h2>
-        <div className="flex items-center gap-3">
-          {save.isError && <span className="text-sm text-destructive">{save.error.message}</span>}
+        <div className="flex flex-wrap items-center gap-3">
           {dirty ? (
             <Badge variant="outline" className="border-amber-500 text-amber-600">
               Unsaved changes
@@ -74,6 +73,14 @@ export default function AIProvidersPage() {
           </Button>
         </div>
       </div>
+
+      {/* Lưu thất bại: hiện detail của API, bản nháp giữ nguyên để sửa rồi Save lại. */}
+      {save.isError && (
+        <Alert variant="destructive" role="alert">
+          <AlertTitle>Could not save</AlertTitle>
+          <AlertDescription>{save.error.message}</AlertDescription>
+        </Alert>
+      )}
 
       {errors.length > 0 && (
         <Alert variant="destructive">
