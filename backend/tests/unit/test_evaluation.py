@@ -23,8 +23,19 @@ def _hit(**kw) -> EntityHit:
 def test_place_of() -> None:
     assert place_of(_hit(via="comment", comment_id="c1")) == ("c1", "comment")
     assert place_of(_hit(via="speech", segment_id="seg_0001")) == ("seg_0001", "segment")
-    assert place_of(_hit(via="thumbnail", frame="a/maxres.jpg")) == ("a/maxres.jpg", "thumbnail")
-    assert place_of(_hit(via="ref_image", frame="a/maxres.jpg")) == ("a/maxres.jpg", "thumbnail")
+    thumbs = {"a/maxres.jpg"}
+    assert place_of(_hit(via="thumbnail", frame="a/maxres.jpg"), thumbs) == (
+        "a/maxres.jpg",
+        "thumbnail",
+    )
+    assert place_of(_hit(via="ref_image", frame="a/maxres.jpg"), thumbs) == (
+        "a/maxres.jpg",
+        "thumbnail",
+    )
+    assert place_of(_hit(via="ref_image", frame="frames/000009.jpg"), thumbs) == (
+        "frames/000009.jpg",
+        "frame",
+    )
     assert place_of(_hit(via="title")) == ("title", "title")
 
 
@@ -157,3 +168,35 @@ def test_cli_sample_and_score(data_dir: Path, tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     assert "| static |" in result.output
     assert "unlabelled: 0" in result.output
+
+
+def test_score_f1_zero_when_no_true_positive() -> None:
+    result = score([_row("0", "1", "0"), _row("1", "0", "0"), _row("1", "1", "0")])
+    s = result["static"]
+    assert (s["tp"], s["fp"], s["fn"]) == (1, 1, 1)
+    zero = score([_row("0", "1", "0"), _row("1", "0", "0")])["static"]
+    assert (zero["tp"], zero["fp"], zero["fn"]) == (0, 1, 1)
+    assert zero["precision"] == 0 and zero["recall"] == 0 and zero["f1"] == 0.0
+
+
+def test_llm_finding_without_hit_becomes_unit(data_dir: Path) -> None:
+    _entities(data_dir)
+    _build_capture(data_dir, "vidA", with_llm=True)
+    run = data_dir / "videos/vidA/derived" / CAPTURE / "analysis/01RUN"
+    findings = json.loads((run / "findings.json").read_text(encoding="utf-8"))
+    extra = next(f for f in findings if f["analyzer"] == "llm")
+    extra.update(
+        id="f_" + "0" * 26,
+        comment_id=None,
+        source_kind="speech",
+        segment_id="seg_0004",
+        start=1.0,
+        end=2.0,
+        triggers=[{"via": "speech", "segment_id": "seg_0004"}],
+    )
+    findings.append(extra)
+    (run / "findings.json").write_text(json.dumps(findings), encoding="utf-8")
+    hits = json.loads((run / "hits.json").read_text(encoding="utf-8"))
+    assert all(h.get("segment_id") != "seg_0004" for h in hits)  # đoạn này không có hit
+    unit = next(u for u in collect_units(data_dir) if u.place == "seg_0004")
+    assert unit.llm and not unit.static and unit.kind == "segment"

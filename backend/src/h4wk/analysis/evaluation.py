@@ -33,16 +33,29 @@ class Unit:
     unit_id: str = ""
 
 
-def place_of(hit: EntityHit) -> tuple[str, str]:
-    """Trả (vị trí, loại mục) theo cùng quy tắc với `runner._slot`."""
+def place_of(
+    hit: EntityHit, thumbnails: set[str] | frozenset[str] = frozenset()
+) -> tuple[str, str]:
+    """Trả (vị trí, loại mục) theo cùng quy tắc với `runner._slot`.
+
+    `thumbnails` là tên các file thumbnail của timeline; frame khác (keyframe không thuộc
+    đoạn nào) có loại "frame"."""
     if hit.comment_id:
         return hit.comment_id, "comment"
     if hit.segment_id:
         return hit.segment_id, "segment"
     via = hit.via.value
     if via in ("thumbnail", "ref_image") and hit.frame:
-        return hit.frame, "thumbnail"
+        return hit.frame, "thumbnail" if hit.frame in thumbnails else "frame"
     return via, via
+
+
+def _finding_kind(finding: Finding) -> str:
+    if finding.comment_id:
+        return "comment"
+    if finding.segment_id:
+        return "segment"
+    return finding.source_kind.value
 
 
 def _text(kind: str, place: str, data: Normalized, timeline: Timeline) -> str:
@@ -67,6 +80,12 @@ def _text(kind: str, place: str, data: Normalized, timeline: Timeline) -> str:
             cues = f" ({', '.join(v.offensive_cues)})" if v.offensive_cues else ""
             parts.append(f"Visual: {v.description}{cues}")
         return "\n".join(p for p in parts if p)
+    if kind == "frame":
+        for segment in timeline.segments:
+            for v in segment.visual:
+                if v.frame == place:
+                    return f"Visual: {v.description}"
+        return f"(keyframe {place})"
     thumbnail = next((t for t in timeline.thumbnails if t.file == place), None)
     if thumbnail is None:
         return ""
@@ -101,10 +120,18 @@ def collect_units(root: Path) -> list[Unit]:
                 data, timeline, entities, None, "r_eval", Path(tmp), gateway=None
             )
         static_slots = {_slot(f) for f in static_findings}
-        seen: set[tuple[str, str]] = set()
+        thumbnails = {t.file for t in timeline.thumbnails}
+        pending: list[tuple[str, str, str]] = []  # (place, kind, entity)
         for hit in hits:
-            place, kind = place_of(hit)
-            slot = (place, hit.entity)
+            pending.append((*place_of(hit, thumbnails), hit.entity))
+        # Nghi vấn không có hit cùng (vị trí, đối tượng): đoạn chỉ có offensive_cues,
+        # hoặc LLM kết luận về đối tượng khác với hit.
+        for finding in [*static_findings, *(f for f in findings if f.analyzer == "llm")]:
+            place, entity = _slot(finding)
+            pending.append((place, _finding_kind(finding), entity))
+        seen: set[tuple[str, str]] = set()
+        for place, kind, entity in pending:
+            slot = (place, entity)
             if slot in seen:
                 continue
             seen.add(slot)
@@ -115,7 +142,7 @@ def collect_units(root: Path) -> list[Unit]:
                     run_id=run.name,
                     place=place,
                     kind=kind,
-                    entity=hit.entity,
+                    entity=entity,
                     text=_text(kind, place, data, timeline),
                     static=slot in static_slots,
                     llm=slot in llm_slots,
@@ -156,9 +183,10 @@ def score(rows: list[dict]) -> dict[str, dict]:
                 tn += 1
         precision = tp / (tp + fp) if tp + fp else None
         recall = tp / (tp + fn) if tp + fn else None
-        f1 = 2 * precision * recall / (precision + recall) if precision and recall else None
-        if precision is not None and recall is not None and not (precision + recall):
+        if precision is None or recall is None:
             f1 = None
+        else:
+            f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
         result[layer] = {
             "tp": tp, "fp": fp, "fn": fn, "tn": tn,
             "precision": precision, "recall": recall, "f1": f1, "n": len(labelled),

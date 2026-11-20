@@ -219,12 +219,10 @@ def eval_score(
 ) -> None:
     """Chấm precision/recall của tầng tĩnh và tầng LLM theo nhãn đã gán."""
     predictions = {r["unit_id"]: r for r in _read_csv(dir / "predictions.csv")}
-    rows = [
-        {**r, **predictions[r["unit_id"]]}
-        for r in _read_csv(dir / "labels.csv")
-        if r["unit_id"] in predictions
-    ]
+    labels = _read_csv(dir / "labels.csv")
+    rows = [{**r, **predictions[r["unit_id"]]} for r in labels if r["unit_id"] in predictions]
     typer.echo(markdown_table(score(rows)))
+    typer.echo(f"missing predictions: {sum(1 for r in labels if r['unit_id'] not in predictions)}")
     typer.echo(f"unlabelled: {sum(1 for r in rows if r['label'] not in ('1', '0'))}")
 
 
