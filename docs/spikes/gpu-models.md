@@ -30,6 +30,8 @@ DINOv2 ViT-S/14 có giấy phép Apache-2.0 cho cả mã và trọng số. Lần
 
 ## Nhật ký khảo sát ngày 2026-11-18
 
+> Nhật ký này giữ lại để tham khảo. Kết quả đã kiểm chứng (cài chung và chạy inference) nằm ở mục "Kết quả ngày 2026-11-19" phía trên.
+
 Ngày khảo sát: 2026-11-18. **Chưa hoàn thành**: chưa kiểm chứng cài chung hoặc chạy inference; các phiên bản dưới đây là ứng viên để thử, không phải cấu hình đã chạy được.
 
 ### Môi trường quan sát được

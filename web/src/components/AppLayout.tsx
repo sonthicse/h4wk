@@ -14,7 +14,6 @@ export default function AppLayout() {
           <header className="flex h-12 items-center gap-2 border-b px-4">
             <SidebarTrigger />
             <Separator orientation="vertical" className="h-4" />
-            <span className="text-sm text-muted-foreground">Some pages still use mock data</span>
             <UserMenu />
           </header>
           <main className="p-6">

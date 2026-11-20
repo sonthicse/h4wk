@@ -240,7 +240,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T45: `core`: dựng lại database chỉ mục
 - [x] T46: `jobs`: chạy lại job bị treo và xử lý playlist
 - [x] T16: `ai-gateway`: lõi
-- [ ] T17: `ai-gateway`: provider anthropic, openai_compat, gemini (còn chạy live, cần API key)
+- [x] T17: `ai-gateway`: provider anthropic, openai_compat, gemini
 
 ### Checkpoint B: chuyển nguồn khi lỗi chạy được, đổi nhà cung cấp AI bằng cấu hình
 
