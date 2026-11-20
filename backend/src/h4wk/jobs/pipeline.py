@@ -223,7 +223,8 @@ def analyze(job_id: str) -> None:
         _fail(job_id, "analyze", e)
         return
     job = _update(job_id, status="done", step=None, progress=100, run_id=run_id)
-    skipped = f" (LLM analysis skipped: {llm_error})" if llm_error else ""
+    short = llm_error[:200] + ("…" if len(llm_error) > 200 else "") if llm_error else ""
+    skipped = f" (LLM analysis skipped: {short})" if llm_error else ""
     _event(job, "job_done", f"Processed video {job.video_id}: {len(findings)} findings{skipped}")
     detail = {"capture": cap, "run_id": run_id, "findings": len(findings)}
     if llm_error:

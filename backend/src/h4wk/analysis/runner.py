@@ -107,9 +107,15 @@ def analyze(
     return hits, findings, llm_error
 
 
-def _slot(finding: Finding) -> str:
-    """Mục chứa nghi vấn: segment với speech/ocr/visual, còn lại theo loại nguồn."""
-    return finding.segment_id or finding.source_kind.value
+def _slot(finding: Finding) -> tuple[str, str]:
+    """Mục chứa nghi vấn (cộng đối tượng): segment, file thumbnail, hoặc loại nguồn."""
+    if finding.segment_id:
+        place = finding.segment_id
+    elif finding.source_kind == "thumbnail" and finding.frame:
+        place = finding.frame
+    else:
+        place = finding.source_kind.value
+    return place, finding.entity
 
 
 def _write(path: Path, content: list) -> None:

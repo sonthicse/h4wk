@@ -114,7 +114,8 @@ def build_items(data: Normalized, timeline: Timeline, hits: list[EntityHit]) -> 
             )
     for thumbnail in timeline.thumbnails:
         cues = thumbnail.visual is not None and bool(thumbnail.visual.offensive_cues)
-        if "thumbnail" not in via and not cues:
+        hit = any(h.via == "thumbnail" and h.frame == thumbnail.file for h in hits)
+        if not hit and not cues:
             continue
         payload = {"ocr": [o.text for o in thumbnail.ocr]}
         if thumbnail.visual:
@@ -122,7 +123,7 @@ def build_items(data: Normalized, timeline: Timeline, hits: list[EntityHit]) -> 
                 "description": thumbnail.visual.description,
                 "offensive_cues": thumbnail.visual.offensive_cues,
             }
-        triggers = [Trigger(via="thumbnail")] if "thumbnail" in via else []
+        triggers = [Trigger(via="thumbnail", frame=thumbnail.file)] if hit else []
         add("thumbnail", None, [thumbnail.file], triggers, payload)
     return items
 
@@ -135,7 +136,8 @@ def _finding(item: Item, verdict: Verdict, route, timeline: Timeline, run_id: st
             raise ValueError(f"source_kind {kind} is invalid for a segment item")
         if kind == SourceKind.VISUAL:
             frame = verdict.frame if verdict.frame in item.frames else None
-            frame = frame or (item.frames[0] if item.frames else None)
+            if frame is None and len(item.frames) == 1:
+                frame = item.frames[0]
     else:
         kind = SourceKind(item.kind)
         frame = item.frames[0] if item.frames else None
@@ -210,7 +212,6 @@ def classify(
                     kept = True
                 except (ValidationError, ValueError) as error:
                     log.warning("Dropped invalid verdict %s: %s", verdict.item_id, error)
-                    continue
             records.append(
                 {
                     "item_id": item.id,
