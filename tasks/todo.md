@@ -816,14 +816,14 @@ Kiểm tra: đọc và duyệt file kết quả.
 
 Người làm: Bảo. Phụ thuộc: T24. Cỡ: S.
 
-### T47: `analysis`: phân loại comment bằng Jev
+### T47: `analysis`: phân loại comment và lời nói bằng Jev
 
-Thay `analysis.classify_comment` bằng Jev theo SPEC 10.6 (bước 3). Module `analysis/jev.py` gọi API bằng thư viện chuẩn hoặc httpx, đọc key qua `h4wk.core.secrets`, một request mỗi cặp (comment, đối tượng), chạy song song có giới hạn, thử lại khi 429 theo `retry-after`. Jev lỗi hẳn thì dùng tác vụ `analysis.classify_comment` như cũ. `ModelRef.provider` là `typesafe`, `analyzer` giữ `llm`.
+Thay `analysis.classify_comment` bằng Jev theo SPEC 10.6 (bước 3), và phân loại lời nói của từng đoạn có dấu hiệu bằng Jev (mỗi đoạn một request, kèm đoạn trước và sau). Module `analysis/jev.py` gọi API bằng thư viện chuẩn hoặc httpx, đọc key qua `h4wk.core.secrets`, một request mỗi cặp (comment, đối tượng), chạy song song có giới hạn, thử lại khi 429 theo `retry-after`. Jev lỗi hẳn thì dùng tác vụ `analysis.classify_comment` như cũ. `ModelRef.provider` là `typesafe`, `analyzer` giữ `llm`.
 
 Nghiệm thu:
 
 - [ ] Gán nhãn đủ 124 dòng ở `data/eval/jev/trial.csv` (còn 42 dòng chưa gán); Jev đạt recall không thấp hơn LLM trên cùng bộ nhãn.
-- [ ] Test với Jev giả: comment vi phạm sinh nghi vấn đúng danh mục; 429 được thử lại; Jev lỗi thì chuyển sang LLM.
+- [ ] Test với Jev giả: comment và đoạn lời nói vi phạm sinh nghi vấn đúng danh mục; 429 được thử lại; Jev lỗi thì chuyển sang LLM.
 - [ ] Thiếu `TYPESAFE_API_KEY` thì Settings báo thiếu key và job vẫn chạy bằng LLM.
 
 Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py`, chạy thật trên 8 video có comment.

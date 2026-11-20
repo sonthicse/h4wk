@@ -289,7 +289,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 6b: Rà soát theo video và Jev (thêm ngày 2026-11-20)
 
-- [ ] T47: `analysis`: phân loại comment bằng Jev
+- [ ] T47: `analysis`: phân loại comment và lời nói bằng Jev
 - [ ] T48: `analysis`: kết luận theo video
 - [ ] T49: `review`: rà soát theo video (backend)
 - [ ] T50: UI rà soát theo video

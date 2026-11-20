@@ -390,7 +390,7 @@ Một video được coi là liên quan tới đối tượng khi có ít nhất
 
 Bước 2 là tầng tĩnh. Từ điển tiếng Việt (`analysis/lexicon/vi_insults.txt`) chạy trên các vùng văn bản có dấu hiệu tên. Đối tượng thường là lãnh đạo Đảng và Nhà nước, vì nội dung xâm phạm an ninh quốc gia khi nhắc tên một người cụ thể thường nhắm vào những người này. Từ điển chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia (xúc phạm, phỉ báng; cáo buộc không bằng chứng; xuyên tạc, bịa đặt, giả mạo; kích động, chia rẽ, bạo lực; bí mật nhà nước), mỗi nhóm gắn một `category` của C4 (lần lượt `insult`, `unsupported_accusation`, `fabrication`, `incitement`, `state_secret`). Có cụm từ trong từ điển thì sinh nghi vấn `analyzer: "static"` với `category` của nhóm, và `reason` ghi nhóm cùng cụm từ khớp. Dấu hiệu tên đơn thuần chỉ được ghi vào `hits.json`, không vào hàng đợi.
 
-Bước 3 là tầng LLM, qua tác vụ AI `analysis.classify`. Các phần được gửi đi:
+Bước 3 là tầng LLM, qua tác vụ AI `analysis.classify`. Riêng lời nói của các đoạn có dấu hiệu được phân loại bằng Jev như comment (quyết định ngày 2026-11-20): mỗi cặp (đoạn, đối tượng) một request, `state` gồm tiêu đề video, đối tượng, lời nói của đoạn trước, đoạn đó và đoạn sau (đoạn đã gom theo câu ở 10.5, nên một câu không bị chia đôi); `quote` là lời nói của đoạn. Phần OCR, hình ảnh, tiêu đề, mô tả và thumbnail vẫn qua LLM. Các phần được gửi tới LLM:
 
 - đoạn có dấu hiệu (tên, khuôn mặt, ảnh mẫu), kèm một đoạn trước và một đoạn sau làm ngữ cảnh;
 - trong video liên quan, mọi đoạn mà VLM ghi nhận `offensive_cues`, kể cả khi đoạn đó không nhắc tên, kèm ngữ cảnh cấp video (tiêu đề, mô tả, các dấu hiệu đã tìm được);
