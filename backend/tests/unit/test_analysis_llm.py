@@ -1,14 +1,14 @@
 """T23: tầng LLM của analysis, dùng FakeProvider."""
 
 import json
-from itertools import repeat
+from itertools import chain, repeat
 from pathlib import Path
 
 import pytest
 
 from h4wk.ai.base import ProviderReply
 from h4wk.ai.config import AI_CONFIG_PATH
-from h4wk.ai.fake import FakeProvider
+from h4wk.ai.fake import FakeProvider as _FakeProvider
 from h4wk.ai.gateway import AIGateway
 from h4wk.analysis import llm, runner
 from h4wk.analysis.models import Category, EntityHit, Finding
@@ -21,6 +21,11 @@ SAMPLE = Path(__file__).resolve().parents[1] / "fixtures/captures/h4wkDemo001"
 CAPTURE = "20261118T160000"
 ENTITY = Entity(id="e_01", name="Trần Văn Mẫu", aliases=["Mẫu Ca"], abbreviations=["TVM"])
 INSULT = [LexiconEntry("đồ hèn", "insult", Category.INSULT)]
+
+
+def FakeProvider(replies):  # noqa: N802
+    """Sau các lời đáp định sẵn (cho phần đoạn), phần comment nhận danh sách kết luận rỗng."""
+    return _FakeProvider(chain(replies, repeat(ProviderReply('{"verdicts":[]}'))))
 
 
 def _data() -> tuple[Normalized, Timeline]:

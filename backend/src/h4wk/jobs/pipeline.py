@@ -219,6 +219,7 @@ def analyze(job_id: str, vision_failed: int = 0) -> None:
             run_id,
             derived / "analysis" / run_id,
             gateway=AIGateway(),
+            comment_settings=_analysis_config().comments,
         )
         with Session(get_engine()) as s:
             for f in findings:

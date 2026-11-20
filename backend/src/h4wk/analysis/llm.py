@@ -217,6 +217,7 @@ def classify(
                     log.warning("Dropped invalid verdict %s: %s", verdict.item_id, error)
                     error_text = str(error)
             record = {
+                "task": "analysis.classify",
                 "item_id": item.id,
                 "verdict": verdict.model_dump(mode="json"),
                 "provider": route.provider,

@@ -258,7 +258,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 ### Phase 4: Phân tích và rà soát (tuần 3)
 
 - [ ] T23: `analysis`: tầng LLM
-- [ ] T24: `analysis`: comment
+- [x] T24: `analysis`: comment
 - [x] T25: `review`: backend hàng đợi và quyết định
 - [ ] T26: UI Video detail: trình phát, transcript, thanh thời gian (API ở `api/videos.py` và giao diện đã nối; chờ nghiệm thu)
 - [ ] T27: UI Video detail: dải khung hình, comment, lịch sử bản thu (giao diện đã nối API; chờ nghiệm thu)

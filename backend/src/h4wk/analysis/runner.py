@@ -4,11 +4,12 @@ import json
 from pathlib import Path
 
 from h4wk.ai.gateway import AIGateway, GatewayError
-from h4wk.analysis import llm
+from h4wk.analysis import comments, llm
 from h4wk.analysis.models import EntityHit, Finding, Trigger
 from h4wk.analysis.normalize import matches_name
 from h4wk.analysis.static import LexiconEntry, find_insult, load_lexicon
 from h4wk.collectors.models import Normalized
+from h4wk.core.config_models import CommentSettings
 from h4wk.core.entities import Entity
 from h4wk.core.ids import new_ulid
 from h4wk.media.timeline import Timeline
@@ -22,6 +23,7 @@ def analyze(
     run_id: str,
     output_dir: Path,
     gateway: AIGateway | None = None,
+    comment_settings: CommentSettings | None = None,
 ) -> tuple[list[EntityHit], list[Finding], str | None]:
     if lexicon is None:
         lexicon = load_lexicon()
@@ -81,22 +83,35 @@ def analyze(
     for comment in data.comments:
         scan(comment.text, "comment", comment_id=comment.id)
 
-    llm_error = None
-    records = None
+    errors: list[str] = []
+    records: list[dict] | None = None
     if gateway is not None:
+        settings = comment_settings or CommentSettings()
         items = llm.build_items(data, timeline, hits)
+        selected = comments.select_comments(data, hits, settings)
+        parts = []
         if items:
-            try:
-                llm_findings, records = llm.classify(
-                    items, entities, data, timeline, hits, gateway, run_id
+            parts.append(
+                lambda: llm.classify(items, entities, data, timeline, hits, gateway, run_id)
+            )
+        if selected:
+            parts.append(
+                lambda: comments.classify_comments(
+                    selected, entities, data, hits, gateway, run_id, timeline, settings
                 )
+            )
+        for part in parts:
+            try:
+                llm_findings, part_records = part()
             except GatewayError as error:
-                # Không gọi được LLM thì giữ nghi vấn tĩnh, job vẫn thành công.
-                llm_error = str(error)
-            else:
-                # LLM kết luận vi phạm cho một mục thì bỏ nghi vấn tĩnh của đúng mục đó.
-                replaced = {_slot(f) for f in llm_findings}
-                findings = [f for f in findings if _slot(f) not in replaced] + llm_findings
+                # Một phần lỗi thì giữ nghi vấn tĩnh của nó; phần kia vẫn chạy.
+                errors.append(str(error))
+                continue
+            records = (records or []) + part_records
+            # LLM kết luận vi phạm cho một mục thì bỏ nghi vấn tĩnh của đúng mục đó.
+            replaced = {_slot(f) for f in llm_findings}
+            findings = [f for f in findings if _slot(f) not in replaced] + llm_findings
+    llm_error = "; ".join(errors) or None
 
     output_dir.mkdir(parents=True, exist_ok=True)
     for filename, items in (("hits.json", hits), ("findings.json", findings)):
@@ -109,7 +124,9 @@ def analyze(
 
 def _slot(finding: Finding) -> tuple[str, str]:
     """Mục chứa nghi vấn (cộng đối tượng): segment, file thumbnail, hoặc loại nguồn."""
-    if finding.segment_id:
+    if finding.comment_id:
+        place = finding.comment_id
+    elif finding.segment_id:
         place = finding.segment_id
     elif finding.source_kind == "thumbnail" and finding.frame:
         place = finding.frame

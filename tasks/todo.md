@@ -509,8 +509,8 @@ Comment và reply có dấu hiệu tên (từ T11) được gửi tới tác v�
 
 Nghiệm thu:
 
-- [ ] Một video có 500 comment chạy xong với số lời gọi LLM không quá ⌈số comment có dấu hiệu / kích thước lô⌉.
-- [ ] `comment_id` của nghi vấn trỏ đúng tới comment.
+- [x] Một video có 500 comment chạy xong với số lời gọi LLM không quá ⌈số comment có dấu hiệu / kích thước lô⌉.
+- [x] `comment_id` của nghi vấn trỏ đúng tới comment.
 
 Kiểm tra: `uv run pytest tests/unit/test_analysis_comments.py`.
 
