@@ -199,6 +199,8 @@ def media(job_id: str) -> None:
 
 @huey.task()
 def analyze(job_id: str, vision_failed: int = 0) -> None:
+    # vision_failed chỉ để ghi vào sự kiện. Recovery gọi lại analyze(job_id) nên mất số này
+    # (giới hạn đã chấp nhận); audit media.vision vẫn còn.
     job = _update(job_id, status="running", step="analyze", progress=75)
     try:
         cap = str(job.capture)

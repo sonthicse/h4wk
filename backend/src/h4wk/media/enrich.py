@@ -33,6 +33,8 @@ def enrich(
     i = 0
     silent = None
     for frame in frames:
+        if frame.file not in visuals and not by_image[frame.file]:
+            continue  # khung không có mô tả lẫn OCR thì không tạo segment rỗng
         while i < len(speech) and speech[i].end < frame.t:
             i += 1
             silent = None

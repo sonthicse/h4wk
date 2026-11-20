@@ -62,3 +62,38 @@ def test_failed_image_is_skipped_then_retried_alone(monkeypatch, tmp_path, image
 def test_missing_config_returns_nothing_without_error(monkeypatch, tmp_path, images):
     _use(monkeypatch, tmp_path, ByImage(set()), tmp_path / "none.toml")
     assert vision.describe_images(images, tmp_path / "vision.json") == {}
+
+
+def test_missing_config_keeps_existing_cache(monkeypatch, tmp_path, images):
+    output = tmp_path / "vision.json"
+    _use(monkeypatch, tmp_path, ByImage(set()))
+    vision.describe_images(images[:2], output)
+    before = output.read_bytes()
+    _use(monkeypatch, tmp_path, ByImage(set()), tmp_path / "none.toml")
+    assert vision.describe_images(images, output) == {}
+    assert output.read_bytes() == before
+    assert len(json.loads(before)) == 2
+
+
+def test_failed_image_keeps_its_old_cache_row(monkeypatch, tmp_path, images):
+    output = tmp_path / "vision.json"
+    _use(monkeypatch, tmp_path, ByImage(set()))
+    vision.describe_images(images, output)
+    images[1][1].write_bytes(b"changed")  # cache của ảnh b lỗi thời, lần này VLM lỗi
+    _use(monkeypatch, tmp_path, ByImage({b"changed"}))
+    result = vision.describe_images(images, output)
+    assert set(result) == {"frames/a.jpg", "frames/c.jpg"}
+    assert set(json.loads(output.read_text(encoding="utf-8"))) == {f for f, _ in images}
+
+
+def test_enrich_skips_frames_without_visual_or_ocr(monkeypatch, tmp_path):
+    from h4wk.media import enrich as enrich_module
+    from h4wk.media.keyframes import Keyframe
+    from h4wk.media.timeline import Timeline
+
+    monkeypatch.setattr(enrich_module, "describe_images", lambda images, output: {})
+    timeline = Timeline(schema="h4wk.timeline/1", video_id="v", capture="20261118T160000")
+    frame = Keyframe(file="frames/000001.jpg", t=3.0, scene=1, hash="0" * 16)
+    failed = enrich_module.enrich(timeline, tmp_path, tmp_path, [frame], [], [])
+    assert failed == ["frames/000001.jpg"]
+    assert timeline.segments == []

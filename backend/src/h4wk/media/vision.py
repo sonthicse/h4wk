@@ -28,12 +28,11 @@ class CachedVisual(Visual):
 def describe_images(images: list[tuple[str, Path]], output: Path) -> dict[str, Visual]:
     gateway = AIGateway()
 
-    # Chưa có ai.toml: mỗi ảnh sẽ gặp GatewayError và bị bỏ, job vẫn chạy tiếp.
-    config_hash = (
-        sha256(gateway.config_path.read_bytes()).hexdigest()
-        if images and gateway.config_path.exists()
-        else ""
-    )
+    if images and not gateway.config_path.exists():
+        # Không gọi gateway và không ghi vision.json để giữ nguyên cache cũ.
+        logger.warning("Skipping image descriptions: %s not found", gateway.config_path)
+        return {}
+    config_hash = sha256(gateway.config_path.read_bytes()).hexdigest() if images else ""
     adapter = TypeAdapter(dict[str, CachedVisual])
     cached = {}
     if output.exists():
@@ -75,9 +74,12 @@ def describe_images(images: list[tuple[str, Path]], output: Path) -> dict[str, V
     with ThreadPoolExecutor(max_workers=2) as pool:
         rows = list(pool.map(describe, images))
     results = {file: row for file, row in rows if row is not None}
-    if results != cached or not output.exists():
+    # Ảnh lỗi giữ lại dòng cache cũ (nếu có) để không mất dữ liệu đã có.
+    failed = [file for file, row in rows if row is None]
+    stored = {**{f: cached[f] for f in failed if f in cached}, **results}
+    if stored != cached or not output.exists():
         with atomic_output(output) as temporary:
-            temporary.write_bytes(adapter.dump_json(results, indent=2))
+            temporary.write_bytes(adapter.dump_json(stored, indent=2))
     return {
         file: Visual(**row.model_dump(exclude={"image_sha256", "config_sha256"}))
         for file, row in results.items()
