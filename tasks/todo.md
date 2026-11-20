@@ -742,7 +742,7 @@ Nghiệm thu:
 - [ ] Đổi nhà cung cấp của `analysis.classify` trên giao diện rồi chạy phân tích lại thì nghi vấn ghi đúng nhà cung cấp mới.
 - [ ] Đổi nhà cung cấp của `media.vision` thì `vision.json` lần sau ghi đúng nhà cung cấp mới.
 
-Giao diện đã nối API T32 (team làm theo đồng ý của người dùng); hai ô nghiệm thu chờ T17, T23.
+Giao diện đã nối API T32 (team làm theo đồng ý của người dùng); hai ô nghiệm thu chờ T23 (T17 đã xong, không còn là điều kiện chờ).
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 

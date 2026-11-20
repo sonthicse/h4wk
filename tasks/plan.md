@@ -281,7 +281,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 - [x] T32: Backend settings và lưu secret
 - [x] T33: UI Settings → Sources
-- [ ] T34: UI Settings → AI providers (giao diện đã nối API T32; nghiệm thu chờ T17, T23)
+- [ ] T34: UI Settings → AI providers (giao diện đã nối API T32; nghiệm thu chờ T23)
 - [ ] T35: UI Dashboard (số liệu đã khớp; còn đo thời gian tải trang với dữ liệu demo)
 
 ### Checkpoint F: đạt toàn bộ tiêu chí thành công ở SPEC §8
