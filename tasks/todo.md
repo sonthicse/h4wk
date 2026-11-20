@@ -466,7 +466,7 @@ Kết quả OCR và VLM được gắn vào đoạn theo thời gian `t` của k
 Nghiệm thu:
 
 - [x] Timeline T44 tổng hợp có đủ speech, ocr, visual và khối thumbnails, và validate được theo C3 trong kiểm thử API. STT, nhận dạng OCR và nhà cung cấp VLM được mô phỏng trong kiểm thử này.
-- [ ] Màn Collect hiện đủ các bước collect → transcribe → frames → OCR/VLM → analyze.
+- [x] Màn Collect hiện đủ các bước collect → transcribe → frames → OCR/VLM → analyze.
 
 Kiểm tra: `uv run pytest tests/integration/test_pipeline.py`.
 
@@ -540,7 +540,7 @@ Backend có endpoint stream bản proxy, hỗ trợ Range. Trang Video detail c�
 
 Nghiệm thu:
 
-- [ ] Bấm một nghi vấn trong bảng thì video nhảy đúng tới vị trí đó và đoạn tương ứng được tô sáng.
+- [x] Bấm một nghi vấn trong bảng thì video nhảy đúng tới vị trí đó và đoạn tương ứng được tô sáng.
 
 Kiểm tra: `npm run build`, rồi kiểm tra thủ công trên 2 video.
 
@@ -555,8 +555,8 @@ Trang có dải keyframe; bấm vào một khung thì video seek tới thời đ
 
 Nghiệm thu:
 
-- [ ] Nghi vấn từ OCR hiện đúng khung hình kèm khung bao.
-- [ ] Nghi vấn từ comment mở đúng comment.
+- [x] Nghi vấn từ OCR hiện đúng khung hình kèm khung bao.
+- [x] Nghi vấn từ comment mở đúng comment.
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
@@ -569,10 +569,10 @@ Trang hiển thị danh sách nghi vấn với các bộ lọc. Panel bên cạn
 
 Nghiệm thu:
 
-- [ ] Duyệt 10 nghi vấn liên tiếp mà không phải rời trang.
-- [ ] Mỗi quyết định có một dòng tương ứng trong audit.
+- [x] Duyệt 10 nghi vấn liên tiếp mà không phải rời trang.
+- [x] Mỗi quyết định có một dòng tương ứng trong audit.
 
-Ghi chú: 19/11: quyết định bằng phím tắt và dòng audit `review.decide` đã kiểm với 1 nghi vấn; chưa đủ 10 nghi vấn để kiểm duyệt liên tiếp.
+Ghi chú: 19/11: quyết định bằng phím tắt và dòng audit `review.decide` đã kiểm với 1 nghi vấn. 20/11: duyệt 10 nghi vấn liên tiếp bằng phím `c`/`r`/`n` trên trình duyệt (bản sao dữ liệu), không rời trang, được 10 dòng ở `reviews.jsonl` và 10 dòng `review.decide` ở audit.
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 

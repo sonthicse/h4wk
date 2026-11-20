@@ -122,7 +122,7 @@ export default function CollectPage() {
               if (input.trim()) create.mutate()
             }}
           >
-            <div className="flex items-end gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
               <div className="flex-1 space-y-2">
                 <Label htmlFor="collect-input">Video, playlist or channel link</Label>
                 <Input

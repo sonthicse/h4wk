@@ -143,10 +143,10 @@ export default function ReviewQueuePage() {
   const f = selected?.finding
 
   return (
-    <div className="flex h-[calc(100svh-3rem-3rem)] flex-col gap-4">
+    <div className="flex flex-col gap-4 lg:h-[calc(100svh-3rem-3rem)]">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Review queue</h1>
-        <p className="flex items-center gap-1 text-xs text-muted-foreground">
+        <p className="hidden items-center gap-1 md:flex text-xs text-muted-foreground">
           <Kbd>j</Kbd>/<Kbd>k</Kbd> move · <Kbd>c</Kbd> confirm · <Kbd>r</Kbd> reject · <Kbd>n</Kbd> needs info
         </p>
       </div>
@@ -168,9 +168,9 @@ export default function ReviewQueuePage() {
         ))}
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <HoverHighlight>
-          <ul className="min-h-0 space-y-1 overflow-y-auto pr-1">
+          <ul className="max-h-72 min-h-0 space-y-1 overflow-y-auto pr-1 lg:max-h-none">
             {queue.map((it) => (
               <HoverItem key={it.finding.id}>
                 <button

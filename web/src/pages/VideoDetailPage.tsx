@@ -91,7 +91,7 @@ function VideoView({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 md:flex-row">
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold">{video.title}</h1>
           <p className="text-sm text-muted-foreground">
@@ -116,7 +116,7 @@ function VideoView({
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_24rem] items-start gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_24rem] items-start gap-6">
         <div className="min-w-0 space-y-6">
           <div className="max-w-3xl">
             <Player
@@ -160,7 +160,7 @@ function VideoView({
             </TabsContent>
           </Tabs>
         </div>
-        <div className="sticky top-4 h-[calc(100vh-7rem)]">
+        <div className="h-96 lg:sticky lg:top-4 lg:h-[calc(100vh-7rem)]">
           <TranscriptPane
             transcripts={transcripts.data ?? []}
             findings={findings}

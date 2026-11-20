@@ -143,7 +143,7 @@ export default function KeyframeStrip({
       </div>
 
       {selected ? (
-        <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 rounded-lg border p-3">
+        <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 rounded-lg border p-3">
           <div className="space-y-2">
             <FrameImage frame={selected} src={src(selected)} boxes className="w-full" />
             <ul className="flex flex-wrap gap-3 text-xs">

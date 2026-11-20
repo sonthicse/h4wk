@@ -251,7 +251,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T19: Keyframe theo mức thay đổi
 - [x] T20: OCR trên keyframe và thumbnail
 - [ ] T21: VLM mô tả keyframe và thumbnail (còn test live, cần API key)
-- [ ] T22: Timeline đầy đủ (còn màn Collect hiện đủ các bước)
+- [ ] T22: Timeline đầy đủ (màn Collect đã nghiệm thu 20/11; còn đo thời gian xử lý trên máy demo)
 
 ### Checkpoint C: đo thời gian màn 2, kiểm tra timeline của video thật
 
@@ -260,9 +260,9 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [ ] T23: `analysis`: tầng LLM
 - [x] T24: `analysis`: comment
 - [x] T25: `review`: backend hàng đợi và quyết định
-- [ ] T26: UI Video detail: trình phát, transcript, thanh thời gian (API ở `api/videos.py` và giao diện đã nối; chờ nghiệm thu)
-- [ ] T27: UI Video detail: dải khung hình, comment, lịch sử bản thu (giao diện đã nối API; chờ nghiệm thu)
-- [ ] T28: UI Review queue (giao diện đã nối API T25; chờ nghiệm thu)
+- [x] T26: UI Video detail: trình phát, transcript, thanh thời gian
+- [x] T27: UI Video detail: dải khung hình, comment, lịch sử bản thu
+- [x] T28: UI Review queue
 - [x] T29: UI Evidence và Verify integrity
 - [x] T39: Đối tượng và ảnh mẫu
 - [x] T40: `analysis`: khớp ảnh mẫu
