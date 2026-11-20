@@ -1,16 +1,19 @@
 """Luồng collect → media → analyze (T12). Mỗi bước là một task Huey; media chạy trên hàng
 đợi gpu. Mỗi bước cập nhật trạng thái và tiến độ của job trong chỉ mục."""
 
+import json
+import logging
 import os
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from pydantic import TypeAdapter
 from sqlmodel import Session, select
 
 from h4wk.ai.gateway import AIGateway
-from h4wk.analysis import runner
-from h4wk.analysis.models import Finding
+from h4wk.analysis import refimages, runner
+from h4wk.analysis.models import EntityHit, Finding
 from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import Target, TargetKind, parse_target
@@ -18,7 +21,7 @@ from h4wk.core import audit, events
 from h4wk.core.config import config_dir, data_dir
 from h4wk.core.config_models import AnalysisConfig, SourcesConfig, load_toml
 from h4wk.core.db import FindingRow, JobRow, finding_row, get_engine
-from h4wk.core.entities import load_entities
+from h4wk.core.entities import REF_FILE, load_entities, refs_dir
 from h4wk.core.ids import new_ulid
 from h4wk.core.types import VN_TZ
 from h4wk.evidence.models import Manifest, Trigger
@@ -26,10 +29,12 @@ from h4wk.evidence.writer import CAPTURE_TS_FORMAT, list_captures
 from h4wk.jobs.queue import huey, huey_gpu
 from h4wk.media import ocr, stt, transcripts
 from h4wk.media.enrich import enrich
-from h4wk.media.keyframes import extract_keyframes
+from h4wk.media.keyframes import Keyframe, extract_keyframes
 from h4wk.media.timeline import Timeline
 
 _stt_worker = stt.SttWorker(os.getenv("H4WK_STT_MODEL", "large-v3"))
+_ref_embedder = refimages.DinoEmbedder()
+logger = logging.getLogger(__name__)
 
 RECENT = timedelta(minutes=10)
 
@@ -158,6 +163,49 @@ def collect(job_id: str) -> None:
     media(job_id)
 
 
+def _match(
+    job: JobRow,
+    cap_dir: Path,
+    out: Path,
+    frames: list[Keyframe],
+    thumbnails: list[str],
+    timeline: Timeline,
+) -> None:
+    """Khớp keyframe và thumbnail cục bộ với ảnh mẫu; ghi ref_hits.json."""
+    if not _analysis_config().ref_image.enabled:
+        return
+    refs = {}
+    for entity in load_entities():
+        folder = refs_dir(entity.id, "image")
+        files = (
+            sorted(p for p in folder.glob("*") if REF_FILE.match(p.name)) if folder.is_dir() else []
+        )
+        if files:
+            refs[entity.id] = files
+    if not refs:
+        return
+    images = [(f.file, out / f.file) for f in frames] + [
+        (t, cap_dir / t) for t in thumbnails if (cap_dir / t).is_file()
+    ]
+    try:
+        matches = refimages.match_refs(
+            images,
+            refs,
+            _ref_embedder,
+            _analysis_config().ref_image.threshold,
+            out / "embeddings.npz",
+        )
+    except ImportError:
+        logger.warning("Skipping reference image matching: torch is not installed")
+        audit.log(job.trigger, "media.match", job.id, {"skipped": "torch not installed"})
+        return
+    hits = refimages.to_hits(matches, timeline, {f.file: f.t for f in frames})
+    content = [h.model_dump(mode="json", by_alias=True) for h in hits]
+    (out / "ref_hits.json").write_text(
+        json.dumps(content, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 @huey_gpu.task()
 def media(job_id: str) -> None:
     job = _update(job_id, status="running", step="media", progress=45)
@@ -190,6 +238,8 @@ def media(job_id: str) -> None:
             failed = enrich(timeline, cap_dir, out, frames, thumbnails, lines)
             if failed:
                 audit.log(job.trigger, "media.vision", job.id, {"failed": failed}, status="error")
+            job = _update(job_id, step="match", progress=68)
+            _match(job, cap_dir, out, frames, thumbnails, timeline)
     except Exception as e:
         _fail(job_id, job.step or "media", e)
         return
@@ -210,6 +260,12 @@ def analyze(job_id: str, vision_failed: int = 0) -> None:
             (_video_dir(job) / "captures" / cap / "normalized.json").read_text("utf-8")
         )
         run_id = f"r_{new_ulid()}"
+        ref_path = derived / "ref_hits.json"
+        ref_hits = (
+            TypeAdapter(list[EntityHit]).validate_json(ref_path.read_bytes())
+            if ref_path.is_file()
+            else []
+        )
         # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
         _hits, findings, llm_error = runner.analyze(
             n,
@@ -220,6 +276,7 @@ def analyze(job_id: str, vision_failed: int = 0) -> None:
             derived / "analysis" / run_id,
             gateway=AIGateway(),
             comment_settings=_analysis_config().comments,
+            extra_hits=ref_hits,
         )
         with Session(get_engine()) as s:
             for f in findings:

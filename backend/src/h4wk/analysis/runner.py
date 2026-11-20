@@ -24,6 +24,7 @@ def analyze(
     output_dir: Path,
     gateway: AIGateway | None = None,
     comment_settings: CommentSettings | None = None,
+    extra_hits: list[EntityHit] | None = None,
 ) -> tuple[list[EntityHit], list[Finding], str | None]:
     if lexicon is None:
         lexicon = load_lexicon()
@@ -82,6 +83,9 @@ def analyze(
             scan(item.text, "thumbnail", frame=thumbnail.file, bbox=item.bbox)
     for comment in data.comments:
         scan(comment.text, "comment", comment_id=comment.id)
+
+    # Dấu hiệu ảnh mẫu (T40) không có văn bản nên không qua tầng tĩnh; gộp trước khi chọn mục.
+    hits.extend(extra_hits or [])
 
     errors: list[str] = []
     records: list[dict] | None = None

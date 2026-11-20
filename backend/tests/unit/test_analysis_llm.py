@@ -279,3 +279,18 @@ def test_batches_of_eight(tmp_path):
     provider = FakeProvider(repeat(_reply()))
     llm.classify(items, [ENTITY], data, timeline, hits, _gateway(provider, tmp_path), "r")
     assert len(provider.requests) == 2
+
+
+def test_ref_image_hit_on_thumbnail_makes_thumbnail_item(tmp_path):
+    data, timeline = _data()
+    first = timeline.thumbnails[0]
+    timeline = timeline.model_copy(
+        update={"thumbnails": [first.model_copy(update={"visual": None})]}
+    )
+    hits = [
+        EntityHit(entity="e_01", via="ref_image", frame=first.file, bbox=(0, 0, 10, 10), score=0.9)
+    ]
+    items = llm.build_items(data, timeline, hits)
+    thumbs = [i for i in items if i.kind == "thumbnail"]
+    assert [t.frames for t in thumbs] == [[first.file]]
+    assert [t.via for t in thumbs[0].triggers] == ["ref_image"]

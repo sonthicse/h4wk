@@ -236,3 +236,87 @@ def test_ytdlp_disabled_still_collects_text(
     normalized = json.loads((cap / "normalized.json").read_bytes())
     assert normalized["video"]["id"] == "h4wkDemo001" and normalized["media"] == []
     assert normalized["comments"] and any(t["name"] == "maxres" for t in normalized["thumbnails"])
+
+
+class _SameVectorEmbedder:
+    """Mọi ô cắt đều trùng ảnh mẫu (cosine 1), dùng để kiểm luồng mà không cần model."""
+
+    name = "same"
+
+    def embed(self, images):  # noqa: ANN001, ANN201
+        import numpy as np
+
+        return np.ones((len(images), 4)) / 2.0
+
+
+def _add_ref_image(data_dir: Path, entity_id: str = "e_01") -> None:
+    import shutil
+
+    folder = data_dir / "entities" / entity_id / "refs" / "image"
+    folder.mkdir(parents=True)
+    ref = Path(__file__).resolve().parents[1] / "fixtures/refs/e_01/image/ref_01.png"
+    shutil.copyfile(ref, folder / "0123456789abcdef.png")
+
+
+def test_ref_image_hits_reach_hits_json(
+    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from h4wk.jobs import pipeline
+
+    monkeypatch.setattr(pipeline, "_ref_embedder", _SameVectorEmbedder())
+    _entity(client)
+    _add_ref_image(data_dir)
+    r = client.post("/api/collect", json={"url": VIDEO})
+    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
+    assert job["status"] == "done", job["error"]
+    derived = data_dir / "videos" / job["video_id"] / "derived" / job["capture"]
+    ref_hits = json.loads((derived / "ref_hits.json").read_text(encoding="utf-8"))
+    assert ref_hits and {h["via"] for h in ref_hits} == {"ref_image"}
+    assert (derived / "embeddings.npz").is_file()
+    run = next((derived / "analysis").iterdir())
+    hits = json.loads((run / "hits.json").read_text(encoding="utf-8"))
+    assert {h["frame"] for h in hits if h["via"] == "ref_image"} == {h["frame"] for h in ref_hits}
+
+
+def test_ref_image_disabled_skips_matching(
+    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from h4wk.core.config import config_dir
+    from h4wk.jobs import pipeline
+
+    class Boom:
+        name = "boom"
+
+        def embed(self, images):  # noqa: ANN001, ANN201
+            raise AssertionError("không được gọi")
+
+    monkeypatch.setattr(pipeline, "_ref_embedder", Boom())
+    (config_dir() / "analysis.toml").write_text("[ref_image]\nenabled = false\n", encoding="utf-8")
+    _entity(client)
+    _add_ref_image(data_dir)
+    r = client.post("/api/collect", json={"url": VIDEO})
+    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
+    assert job["status"] == "done", job["error"]
+    derived = data_dir / "videos" / job["video_id"] / "derived" / job["capture"]
+    assert not (derived / "ref_hits.json").exists()
+
+
+def test_missing_torch_skips_matching_and_job_is_done(
+    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from h4wk.jobs import pipeline
+
+    class NoTorch:
+        name = "no-torch"
+
+        def embed(self, images):  # noqa: ANN001, ANN201
+            raise ImportError("No module named 'torch'")
+
+    monkeypatch.setattr(pipeline, "_ref_embedder", NoTorch())
+    _entity(client)
+    _add_ref_image(data_dir)
+    r = client.post("/api/collect", json={"url": VIDEO})
+    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
+    assert job["status"] == "done", job["error"]
+    rows = [x for x in _lines(data_dir / "log" / "audit.jsonl") if x["action"] == "media.match"]
+    assert rows and rows[0]["detail"]["skipped"] == "torch not installed"

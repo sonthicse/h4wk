@@ -114,8 +114,10 @@ def build_items(data: Normalized, timeline: Timeline, hits: list[EntityHit]) -> 
             )
     for thumbnail in timeline.thumbnails:
         cues = thumbnail.visual is not None and bool(thumbnail.visual.offensive_cues)
-        hit = any(h.via == "thumbnail" and h.frame == thumbnail.file for h in hits)
-        if not hit and not cues:
+        thumb_hits = [
+            h for h in hits if h.via in ("thumbnail", "ref_image") and h.frame == thumbnail.file
+        ]
+        if not thumb_hits and not cues:
             continue
         payload = {"ocr": [o.text for o in thumbnail.ocr]}
         if thumbnail.visual:
@@ -123,7 +125,7 @@ def build_items(data: Normalized, timeline: Timeline, hits: list[EntityHit]) -> 
                 "description": thumbnail.visual.description,
                 "offensive_cues": thumbnail.visual.offensive_cues,
             }
-        triggers = [Trigger(via="thumbnail", frame=thumbnail.file)] if hit else []
+        triggers = [_trigger(h) for h in thumb_hits]
         add("thumbnail", None, [thumbnail.file], triggers, payload)
     return items
 

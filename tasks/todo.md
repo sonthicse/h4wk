@@ -616,8 +616,10 @@ Model embedding chọn ở T3 tính embedding cho ảnh mẫu loại `image`, ch
 
 Nghiệm thu:
 
-- [ ] Ảnh mẫu bị cắt một nửa, đổi màu hoặc ghép vào góc khung vẫn khớp trong clip thử.
-- [ ] Clip không chứa ảnh mẫu không sinh dấu hiệu nào.
+- [x] Ảnh mẫu bị cắt một nửa, đổi màu hoặc ghép vào góc khung vẫn khớp trong clip thử.
+- [x] Clip không chứa ảnh mẫu không sinh dấu hiệu nào.
+
+Ghi chú: 20/11: bước `match` chạy trên hàng đợi gpu sau VLM, cần extra `match` (thiếu torch thì bỏ qua và ghi audit `media.match`). Ngưỡng mặc định 0,75, đo bằng `uv run --extra match pytest -m live tests/live/test_refimages_live.py -s`: khớp 0,834 (cắt nửa) đến 0,971 (đổi hue), khung T44 có ảnh mẫu 0,898; không khớp 0,486 và 0,549. Mới có hai khung âm tính nên cần kiểm lại trên video thật.
 
 Kiểm tra: `uv run pytest tests/unit/test_refimages.py`.
 
