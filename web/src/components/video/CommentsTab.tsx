@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { Badge } from '@/components/ui/badge'
+import { HoverHighlight, HoverItem } from '@/components/ui/hover-highlight'
 import { formatVnDateTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { VideoComment } from '@/api/videos'
@@ -69,17 +70,21 @@ export default function CommentsTab({
   const ids = new Set(comments.map((c) => c.id))
   const topLevel = comments.filter((c) => !c.parent_id || !ids.has(c.parent_id))
   return (
-    <div className="space-y-2 py-2">
-      {topLevel.map((c) => (
-        <div key={c.id} className="space-y-2">
-          <CommentItem comment={c} findingId={findingByComment.get(c.id)} highlightId={highlightId} findingHref={findingHref} />
-          {comments
-            .filter((r) => r.parent_id === c.id)
-            .map((r) => (
-              <CommentItem key={r.id} comment={r} findingId={findingByComment.get(r.id)} highlightId={highlightId} findingHref={findingHref} nested />
-            ))}
-        </div>
-      ))}
-    </div>
+    <HoverHighlight>
+      <div className="space-y-2 py-2">
+        {topLevel.map((c) => (
+          <HoverItem key={c.id}>
+            <div className="space-y-2">
+              <CommentItem comment={c} findingId={findingByComment.get(c.id)} highlightId={highlightId} findingHref={findingHref} />
+              {comments
+                .filter((r) => r.parent_id === c.id)
+                .map((r) => (
+                  <CommentItem key={r.id} comment={r} findingId={findingByComment.get(r.id)} highlightId={highlightId} findingHref={findingHref} nested />
+                ))}
+            </div>
+          </HoverItem>
+        ))}
+      </div>
+    </HoverHighlight>
   )
 }

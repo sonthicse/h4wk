@@ -1,3 +1,4 @@
+import { CountingNumber } from '@animate-ui/react/primitives/texts/counting-number'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import ActivityChart from '@/components/dashboard/ActivityChart'
@@ -29,7 +30,9 @@ function StatCard({ label, value, to }: { label: string; value: number; to: stri
       <Card className="h-full">
         <CardHeader>
           <CardDescription>{label}</CardDescription>
-          <CardTitle className="text-3xl tabular-nums">{value}</CardTitle>
+          <CardTitle className="text-3xl tabular-nums">
+            <CountingNumber number={value} />
+          </CardTitle>
         </CardHeader>
       </Card>
     </Link>

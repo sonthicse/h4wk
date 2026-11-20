@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { listQueue, type QueueItem } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { HoverHighlight, HoverItem } from '@/components/ui/hover-highlight'
 import { formatTime, severityVariant } from '@/lib/findings'
 
 const POLL_MS = 5000
@@ -17,25 +18,27 @@ function reviewLink(item: QueueItem) {
 function QueueItemRow({ item }: { item: QueueItem }) {
   const f = item.finding
   return (
-    <li className="flex gap-3 py-2.5">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-2">
-          <Link to={reviewLink(item)} className="line-clamp-2 text-sm font-medium hover:underline">
-            {f.quote}
-          </Link>
-          <Badge variant={severityVariant[f.severity]} className="shrink-0">
-            {f.severity}
-          </Badge>
+    <HoverItem>
+      <li className="flex gap-3 px-2 py-2.5">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <Link to={reviewLink(item)} className="line-clamp-2 text-sm font-medium hover:underline">
+              {f.quote}
+            </Link>
+            <Badge variant={severityVariant[f.severity]} className="shrink-0">
+              {f.severity}
+            </Badge>
+          </div>
+          <p className="mt-0.5 flex justify-between gap-2 text-xs text-muted-foreground">
+            <span className="truncate">
+              {item.video.title ?? item.video.id} · {f.source_kind}
+              {f.start != null && ` · ${formatTime(f.start)}`}
+            </span>
+            <span className="shrink-0">{f.category}</span>
+          </p>
         </div>
-        <p className="mt-0.5 flex justify-between gap-2 text-xs text-muted-foreground">
-          <span className="truncate">
-            {item.video.title ?? item.video.id} · {f.source_kind}
-            {f.start != null && ` · ${formatTime(f.start)}`}
-          </span>
-          <span className="shrink-0">{f.category}</span>
-        </p>
-      </div>
-    </li>
+      </li>
+    </HoverItem>
   )
 }
 
@@ -60,11 +63,13 @@ export default function ReviewQueueCard() {
           <p className="text-sm text-muted-foreground">Nothing left to review.</p>
         )}
         {pending.length > 0 && (
-          <ol className="divide-y">
-            {pending.slice(0, MAX_ITEMS).map((it) => (
-              <QueueItemRow key={it.finding.id} item={it} />
-            ))}
-          </ol>
+          <HoverHighlight>
+            <ol className="divide-y">
+              {pending.slice(0, MAX_ITEMS).map((it) => (
+                <QueueItemRow key={it.finding.id} item={it} />
+              ))}
+            </ol>
+          </HoverHighlight>
         )}
         <Link to="/review" className="mt-2 inline-block text-sm text-muted-foreground underline">
           Open review queue

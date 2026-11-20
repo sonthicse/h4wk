@@ -5,6 +5,7 @@ import { listEntities } from '@/api/entities'
 import { decide as postDecision, listQueue, type DecisionStatus, type QueueItem, type ReviewStatus } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { HoverHighlight, HoverItem } from '@/components/ui/hover-highlight'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { formatTime, severityVariant } from '@/lib/findings'
@@ -168,37 +169,41 @@ export default function ReviewQueuePage() {
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4">
-        <ul className="min-h-0 space-y-1 overflow-y-auto pr-1">
-          {queue.map((it) => (
-            <li key={it.finding.id}>
-              <button
-                type="button"
-                onClick={() => select(it)}
-                aria-current={selected === it ? 'true' : undefined}
-                className={cn(
-                  'w-full rounded-md border p-3 text-left transition-colors hover:bg-muted/50',
-                  selected === it && 'border-primary bg-muted',
-                )}
-              >
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Badge variant={severityVariant[it.finding.severity]}>{it.finding.severity}</Badge>
-                  <span>{it.finding.source_kind}</span>
-                  <span className="font-mono">{timeRange(it)}</span>
-                  <Badge variant={statusVariant[it.status]} className="ml-auto">{it.status}</Badge>
-                </div>
-                <p className="mt-2 line-clamp-2 text-sm">{it.finding.quote}</p>
-                <p className="mt-1 truncate text-xs text-muted-foreground">{it.video.title ?? it.video.id}</p>
-              </button>
-            </li>
-          ))}
-          {queueQuery.isPending && <li className="p-6 text-center text-sm text-muted-foreground">Loading…</li>}
-          {queueQuery.error && (
-            <li className="p-6 text-center text-sm text-destructive">Could not load the queue: {queueQuery.error.message}</li>
-          )}
-          {queueQuery.data && queue.length === 0 && (
-            <li className="p-6 text-center text-sm text-muted-foreground">Nothing left to review here.</li>
-          )}
-        </ul>
+        <HoverHighlight>
+          <ul className="min-h-0 space-y-1 overflow-y-auto pr-1">
+            {queue.map((it) => (
+              <HoverItem key={it.finding.id}>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => select(it)}
+                    aria-current={selected === it ? 'true' : undefined}
+                    className={cn(
+                      'w-full rounded-md border p-3 text-left transition-colors',
+                      selected === it && 'border-primary bg-muted',
+                    )}
+                  >
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge variant={severityVariant[it.finding.severity]}>{it.finding.severity}</Badge>
+                      <span>{it.finding.source_kind}</span>
+                      <span className="font-mono">{timeRange(it)}</span>
+                      <Badge variant={statusVariant[it.status]} className="ml-auto">{it.status}</Badge>
+                    </div>
+                    <p className="mt-2 line-clamp-2 text-sm">{it.finding.quote}</p>
+                    <p className="mt-1 truncate text-xs text-muted-foreground">{it.video.title ?? it.video.id}</p>
+                  </button>
+                </li>
+              </HoverItem>
+            ))}
+            {queueQuery.isPending && <li className="p-6 text-center text-sm text-muted-foreground">Loading…</li>}
+            {queueQuery.error && (
+              <li className="p-6 text-center text-sm text-destructive">Could not load the queue: {queueQuery.error.message}</li>
+            )}
+            {queueQuery.data && queue.length === 0 && (
+              <li className="p-6 text-center text-sm text-muted-foreground">Nothing left to review here.</li>
+            )}
+          </ul>
+        </HoverHighlight>
 
         {/* key theo nghi vấn để panel cuộn lại về đầu mỗi khi chuyển nghi vấn. */}
         <section key={f?.id} className="min-h-0 overflow-y-auto rounded-md border p-4">

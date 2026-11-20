@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { HoverHighlight, HoverItem } from '@/components/ui/hover-highlight'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Severity, VideoFinding } from '@/api/videos'
 import { formatTime, severityVariant, timedSources } from '@/lib/findings'
@@ -88,26 +89,30 @@ export default function FindingTimeline({
       {findings.length === 0 ? (
         <p className="text-sm text-muted-foreground">No findings in this video.</p>
       ) : (
-        <ul className="space-y-1">
-          {[...timed, ...untimed].map((f) => (
-            <li key={f.id}>
-              <button
-                type="button"
-                onClick={() => onOpen(f)}
-                className={cn(
-                  'flex w-full items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-muted focus-visible:bg-muted focus-visible:outline-none',
-                  f.id === activeId && 'bg-muted',
-                )}
-              >
-                <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
-                <span className="w-44 shrink-0 font-mono text-xs text-muted-foreground">
-                  {timeRange(f)} · {f.sourceKind}
-                </span>
-                <span className="truncate">{f.quote}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <HoverHighlight>
+          <ul className="space-y-1">
+            {[...timed, ...untimed].map((f) => (
+              <HoverItem key={f.id}>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => onOpen(f)}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded px-2 py-1 text-left text-sm focus-visible:bg-muted focus-visible:outline-none',
+                      f.id === activeId && 'bg-muted',
+                    )}
+                  >
+                    <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
+                    <span className="w-44 shrink-0 font-mono text-xs text-muted-foreground">
+                      {timeRange(f)} · {f.sourceKind}
+                    </span>
+                    <span className="truncate">{f.quote}</span>
+                  </button>
+                </li>
+              </HoverItem>
+            ))}
+          </ul>
+        </HoverHighlight>
       )}
     </div>
   )
