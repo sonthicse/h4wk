@@ -7,9 +7,9 @@ Tên trang, nút và nhãn trong các bước là chữ tiếng Anh đang hiện
 ## 1. Chuẩn bị máy
 
 - [ ] **GPU.** `nvidia-smi` liệt kê GPU và phiên bản CUDA, không báo lỗi.
-- [ ] **Cấu hình AI.** `config/ai.toml` có hai tuyến `"media.vision"` và `"analysis.classify"` (mẫu ở `config/ai.toml.example`). Model của `media.vision` phải đọc được ảnh (`vision = true`).
+- [ ] **Cấu hình AI.** `config/ai.toml` có ba tuyến `"media.vision"`, `"analysis.classify"` và `"analysis.classify_comment"` (mẫu ở `config/ai.toml.example`). Model của `media.vision` phải đọc được ảnh (`vision = true`).
 - [ ] **Key.** Có key của nhà cung cấp đã chọn trong `.env` hoặc trong Settings → AI providers (key nhập ở Settings được ưu tiên). Giao diện chỉ hiện bản che của key.
-- [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync --extra stt --extra match && uv run --no-sync h4wk init`, rồi `cd web && npm install`.
+- [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync --extra stt --extra match && uv run --no-sync h4wk init`, rồi `cd ../web && npm install` (từ thư mục `backend/`).
 
 > **Cảnh báo:** trong `backend/` **không chạy `uv sync` hay `uv run` trơn**. Hai lệnh này đồng bộ lại môi trường theo extra mặc định và gỡ torch cùng các thư viện CUDA của extra `stt`, `match`. Mọi lệnh dùng `uv run --no-sync ...`. Riêng worker GPU dùng `uv run --extra stt --extra match ...` như bên dưới.
 
@@ -33,7 +33,7 @@ Kết quả mong đợi: cả bốn tiến trình chạy không lỗi, Dashboard
 
 - [ ] **Videos** liệt kê ít nhất 10 video, trạng thái đã xử lý xong.
 - [ ] Mở **Dashboard**: có thống kê, sự kiện gần đây và các nghi vấn nổi bật của video.
-- [ ] Mở **Review queue**. Hàng đợi có ít nhất một nghi vấn từ lời nói (`speech`), một từ chữ OCR (`ocr`) và một từ hình ảnh (`visual`). Cột `source_kind` hiện ở mỗi mục.
+- [ ] Mở **Review queue**. Hàng đợi có ít nhất một nghi vấn từ lời nói (`speech`), một từ chữ OCR (`ocr`) và một từ hình ảnh (`visual`). Mỗi mục có nhãn loại `speech`, `ocr` hoặc `visual`.
 - [ ] Có ít nhất một nghi vấn `visual` nằm ở đoạn không ai nhắc tên đối tượng, tìm ra nhờ khuôn mặt mẫu, ảnh mẫu hoặc ngữ cảnh cả video. Xem phần Reason và Triggers (`via`, `score`) ở chi tiết bên phải.
 
 Với mỗi loại nghi vấn (speech, ocr, visual), chọn một mục rồi bấm **Open in video**:
@@ -92,8 +92,8 @@ cd backend
 uv run --no-sync h4wk verify "$C"                 # tất cả OK
 ```
 
-- [ ] Sửa 1 byte một file: `printf 'x' >> "$C/normalized.json"`, chạy lại `verify` → file đó báo `FAIL`, các file khác OK, mã thoát 1.
-- [ ] Xoá một file (khác file vừa sửa, vd một ảnh trong `$C/sources/`): báo `missing` đúng file đó.
+- [ ] Thêm 1 byte vào một file: `printf 'x' >> "$C/normalized.json"`, chạy lại `verify` → file đó báo `FAIL`, các file khác OK, mã thoát 1.
+- [ ] Xoá một file (khác file vừa sửa, vd `$C/sources/ytdlp/0.jpg`): báo `missing` đúng file đó.
 - [ ] Thêm file lạ: `echo hi > "$C/lạ.txt"` → báo `unexpected` đúng file đó.
 - [ ] Dọn: `rm -rf "$T"`.
 

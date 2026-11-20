@@ -21,7 +21,7 @@ cd h4wk
 # Backend
 cd backend
 uv sync --extra stt --extra match   # tạo .venv và cài dependency, kể cả STT và khớp ảnh (cần GPU)
-uv run h4wk init     # tạo data/ và config/*.toml từ config/*.toml.example
+uv run --no-sync h4wk init     # tạo data/ và config/*.toml từ config/*.toml.example
 cd ..
 
 # Frontend
@@ -55,11 +55,11 @@ Job mức `full` cần worker GPU có CUDA. Trong `backend/`, chạy `uv run --e
 ## Kiểm tra trước khi commit
 
 ```bash
-cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check .
+cd backend && uv run --no-sync pytest && uv run --no-sync ruff check . && uv run --no-sync ruff format --check .
 cd web && npm run build && npm run lint
 ```
 
-Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run pytest -m live`.
+Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run --no-sync pytest -m live`.
 
 Các lệnh khác (tạo tài khoản, worker, verify bản thu…) có ở [SPEC.md §4](SPEC.md#4-lệnh); lệnh nào chưa có thì sẽ được thêm dần theo task.
 
