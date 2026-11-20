@@ -36,7 +36,7 @@ export default function AddChannelCard() {
       </CardHeader>
       <CardContent className="space-y-2">
         <form
-          className="flex items-end gap-3"
+          className="flex flex-col gap-3 sm:flex-row sm:items-end"
           onSubmit={(e) => {
             e.preventDefault()
             setAdded(null)

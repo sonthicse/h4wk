@@ -274,7 +274,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 ### Phase 5: Watchlist (tuần 4)
 
 - [ ] T30: `watchlist` backend: RSS, Check now, sự kiện (backend xong; còn chạy thủ công màn 3)
-- [ ] T31: UI Watchlist và dòng sự kiện (giao diện đã nối API T30; chờ nghiệm thu)
+- [x] T31: UI Watchlist và dòng sự kiện
 
 ### Checkpoint E (cuối tuần 4): ba màn demo chạy trọn
 
@@ -283,7 +283,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T32: Backend settings và lưu secret
 - [x] T33: UI Settings → Sources
 - [ ] T34: UI Settings → AI providers (giao diện đã nối API T32; ô `analysis.classify` chờ T23, ô `media.vision` nghiệm thu được ngay)
-- [ ] T35: UI Dashboard (số liệu đã khớp; còn đo thời gian tải trang với dữ liệu demo)
+- [x] T35: UI Dashboard
 
 ### Checkpoint F: đạt toàn bộ tiêu chí thành công ở SPEC §8
 

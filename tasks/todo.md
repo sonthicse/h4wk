@@ -691,9 +691,9 @@ Trang Watchlist cho thêm kênh, bật/tắt, chọn mức thu, bấm Check now 
 
 Nghiệm thu:
 
-- [ ] Làm trọn màn 3 chỉ bằng giao diện, và thấy sự kiện trên dashboard.
+- [x] Làm trọn màn 3 chỉ bằng giao diện, và thấy sự kiện trên dashboard.
 
-Ghi chú: 19/11: Check now và poll RSS chạy (BBC có 1 video mới, sự kiện `new upload` hiện trên dashboard); chưa thêm kênh bằng giao diện.
+Ghi chú: 19/11: Check now và poll RSS chạy (BBC có 1 video mới, sự kiện `new upload` hiện trên dashboard). 20/11: thêm `@VTV24` mức `metadata` bằng giao diện, 10 job thu ban đầu xong, Collected = 10, 10 sự kiện `job_done` hiện trên Dashboard; Check now báo "No new videos"; bật/tắt, đổi level, xoá kênh đều lưu đúng. Chưa thấy `New video detected` vì kênh không có video mới lúc thử. Lưu ý: bước `media` của job `metadata` cũng xếp trên hàng GPU, nên cần worker GPU chạy.
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
@@ -760,7 +760,7 @@ Hoàn thiện trang dashboard đã có từ T31: số kênh, số video, số l�
 Nghiệm thu:
 
 - [x] Số liệu khớp với chỉ mục. (Nghiệm thu 19/11 trên Chrome: 4 kênh, 41 video, 45 bản thu, 1 nghi vấn medium, needs_info 1, khớp thư mục `data/` và `index.db`.)
-- [ ] Trang tải dưới 1 giây với dữ liệu demo. (19/11: API `/api/dashboard` mất 0,02 s nhưng chưa đo trang ở bản build production.)
+- [x] Trang tải dưới 1 giây với dữ liệu demo. (20/11: bản build production, 77 video và 231 nghi vấn, số liệu hiện xong trong 283–339 ms cả 5 lần; xem `docs/spikes/latency.md`.)
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
