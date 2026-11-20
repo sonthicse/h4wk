@@ -818,15 +818,16 @@ Người làm: Bảo. Phụ thuộc: T24. Cỡ: S.
 
 ### T47: `analysis`: phân loại comment và lời nói bằng Jev
 
-Thay `analysis.classify_comment` bằng Jev theo SPEC 10.6 (bước 3), và phân loại lời nói của từng đoạn có dấu hiệu bằng Jev (mỗi đoạn một request, kèm đoạn trước và sau). Module `analysis/jev.py` gọi API bằng thư viện chuẩn hoặc httpx, đọc key qua `h4wk.core.secrets`, một request mỗi cặp (comment, đối tượng), chạy song song có giới hạn, thử lại khi 429 theo `retry-after`. Jev lỗi hẳn thì dùng tác vụ `analysis.classify_comment` như cũ. `ModelRef.provider` là `typesafe`, `analyzer` giữ `llm`.
+Theo SPEC 10.6 (bước 3): Jev xét mọi đoạn lời nói và mọi comment của video, không chỉ chỗ nhắc tên; câu hỏi `category`, `target` (đối tượng hoặc `none`), `severity`. Module `analysis/jev.py` gọi API bằng thư viện chuẩn hoặc httpx, đọc key qua `h4wk.core.secrets`, một request mỗi đoạn hoặc comment, chạy song song có giới hạn, thử lại khi 429 theo `retry-after`. Bỏ tác vụ `analysis.classify_comment` và module `analysis/comments.py`; lời nói không gửi LLM nữa. Không có LLM dự phòng. `ModelRef.provider` là `typesafe`, `analyzer` giữ `llm`. `h4wk init` thêm sẵn đối tượng "Đảng và Nhà nước Việt Nam".
 
 Nghiệm thu:
 
 - [ ] Gán nhãn đủ 124 dòng ở `data/eval/jev/trial.csv` (còn 42 dòng chưa gán); Jev đạt recall không thấp hơn LLM trên cùng bộ nhãn.
-- [ ] Test với Jev giả: comment và đoạn lời nói vi phạm sinh nghi vấn đúng danh mục; 429 được thử lại; Jev lỗi thì chuyển sang LLM.
-- [ ] Thiếu `TYPESAFE_API_KEY` thì Settings báo thiếu key và job vẫn chạy bằng LLM.
+- [ ] Chạy thử trên mọi đoạn và comment của 8 video có sẵn, gán nhãn khoảng 50 mục không nhắc tên ai mà Jev đánh dấu, ghi precision vào `docs/eval/`.
+- [ ] Test với Jev giả: đoạn và comment vi phạm sinh nghi vấn đúng danh mục và đối tượng; `target` là `none` thì không sinh nghi vấn; 429 được thử lại; Jev lỗi thì job vẫn xong, lỗi ghi vào `llm_error`.
+- [ ] Thiếu `TYPESAFE_API_KEY` thì Settings báo thiếu key; job vẫn chạy, comment và lời nói chỉ có tầng tĩnh.
 
-Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py`, chạy thật trên 8 video có comment.
+Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py`, chạy thật trên 8 video có sẵn.
 
 Người làm: Thi. Phụ thuộc: T24. Cỡ: M.
 
