@@ -80,10 +80,12 @@ def transcript_from_supadata(d: dict[str, Any]) -> Transcript:
         for c in d.get("content") or []
     ]
     rows = [r for r in rows if r[2]]
+    rows.sort(key=lambda r: r[0])  # sort ổn định: nguồn có thể xếp không theo thời gian
     segments = []
     for i, (start, end, text) in enumerate(rows):
         if i + 1 < len(rows):
-            end = min(end, rows[i + 1][0])  # phụ đề tự động hay hiện chồng lên câu sau
+            # phụ đề tự động hay hiện chồng lên câu sau; end không bao giờ nhỏ hơn start
+            end = max(start, min(end, rows[i + 1][0]))
         segments.append(TranscriptSegment(start=round(start, 3), end=round(end, 3), text=text))
     return Transcript(
         kind=TranscriptKind.SUPADATA_AI, lang=d.get("lang") or "vi", segments=segments

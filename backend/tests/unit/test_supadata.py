@@ -203,3 +203,27 @@ def test_generate_timeout_is_blocked(supadata_api, tmp_path: Path) -> None:
     c.client = httpx2.Client(transport=httpx2.MockTransport(handler))
     with pytest.raises(Blocked, match="not retried"):
         c.fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
+
+
+def test_transcript_out_of_order_is_sorted() -> None:
+    d = {
+        "lang": "vi",
+        "content": [
+            {"text": "b", "offset": 30000, "duration": 5000},
+            {"text": "a", "offset": 29060, "duration": 4000},
+        ],
+    }
+    segments = s.transcript_from_supadata(d).segments
+    assert [x.text for x in segments] == ["a", "b"]
+    assert all(x.end >= x.start for x in segments)
+
+
+def test_transcript_same_start_does_not_fail() -> None:
+    d = {
+        "content": [
+            {"text": "a", "offset": 1000, "duration": 2000},
+            {"text": "b", "offset": 1000, "duration": 2000},
+        ]
+    }
+    segments = s.transcript_from_supadata(d).segments
+    assert segments[0].end == segments[0].start

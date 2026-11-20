@@ -167,11 +167,13 @@ def _segments_from_json3(data: dict[str, Any]) -> list[TranscriptSegment]:
         text = "".join(s.get("utf8", "") for s in ev.get("segs") or []).strip()
         if text:
             events.append((ev["tStartMs"] / 1000, ev.get("dDurationMs", 0) / 1000, text))
+    events.sort(key=lambda e: e[0])  # sort ổn định: nguồn có thể xếp không theo thời gian
     segments = []
     for i, (start, dur, text) in enumerate(events):
         end = start + dur
         if i + 1 < len(events):
-            end = min(end, events[i + 1][0])  # phụ đề tự động hiện chồng lên câu sau
+            # phụ đề tự động hiện chồng lên câu sau; end không bao giờ nhỏ hơn start
+            end = max(start, min(end, events[i + 1][0]))
         segments.append(TranscriptSegment(start=round(start, 3), end=round(end, 3), text=text))
     return segments
 

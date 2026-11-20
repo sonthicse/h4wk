@@ -111,3 +111,21 @@ def test_channel_from_video_info() -> None:
     c = y.channel_from_video_info(info)
     assert c.title == "Kênh thử nghiệm h4wk" and c.handle == "@h4wkdemo"
     assert c.id == info["channel_id"] and c.description == ""
+
+
+def test_json3_events_out_of_order_are_sorted() -> None:
+    def ev(start_ms: int, dur_ms: int, text: str) -> dict:
+        return {"tStartMs": start_ms, "dDurationMs": dur_ms, "segs": [{"utf8": text}]}
+
+    segments = y._segments_from_json3({"events": [ev(30000, 5000, "b"), ev(29060, 4000, "a")]})
+    assert [s.text for s in segments] == ["a", "b"]
+    assert all(s.end >= s.start for s in segments)
+
+
+def test_json3_events_same_start_do_not_fail() -> None:
+    def ev(text: str) -> dict:
+        return {"tStartMs": 1000, "dDurationMs": 2000, "segs": [{"utf8": text}]}
+
+    segments = y._segments_from_json3({"events": [ev("a"), ev("b")]})
+    assert segments[0].end == segments[0].start
+    assert [s.text for s in segments] == ["a", "b"]
