@@ -3,7 +3,8 @@
 from dataclasses import dataclass
 from typing import Any, Protocol, TypedDict
 
-# Giới hạn thời gian mỗi lần gọi provider; tránh treo hàng đợi gpu (worker `-w 1`).
+# Timeout cho từng bước connect/read/write của httpx (không phải tổng thời gian);
+# kết nối treo không nhận byte nào bị cắt sau 120 giây, tránh kẹt hàng đợi gpu (`-w 1`).
 REQUEST_TIMEOUT_S = 120
 
 

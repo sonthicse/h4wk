@@ -198,54 +198,16 @@ def test_unsupported_anthropic_schema_allows_gateway_fallback():
         AnthropicProvider("test").complete(req)
 
 
-def _setup_gateway(name, monkeypatch, tmp_path):
-    from h4wk.ai.gateway import AIGateway
-
-    monkeypatch.setenv(name.upper() + "_API_KEY", "test-only")
-    settings = (
-        'type = "openai_compat"\nbase_url = "https://private.example/v1"'
-        if name == "openai"
-        else f'type = "{name}"'
-    )
-    config_path = tmp_path / "ai.toml"
-    config_path.write_text(
-        f"[providers.{name}]\n{settings}\n[providers.{name}.models.model]\n"
-        f'structured = true\n[tasks]\n"analysis.classify" = '
-        f'[{{provider="{name}",model="model"}}]\n',
-        encoding="utf-8",
-    )
-    return AIGateway(config_path=config_path, log_dir=tmp_path)
-
-
-@pytest.mark.parametrize("name", ["anthropic", "gemini", "openai"])
-def test_request_timeout_is_set(name, monkeypatch, tmp_path):
-    import httpx2
-    from pydantic import BaseModel
-
-    from h4wk.ai.base import REQUEST_TIMEOUT_S
-
-    class Result(BaseModel):
-        label: str
-
-    seen = []
-
-    def send(client, request, **kwargs):
-        seen.append(request.extensions["timeout"]["read"])
-        raise httpx2.ReadTimeout("timed out", request=request)
-
-    monkeypatch.setattr(httpx2.Client, "send", send)
-    gateway = _setup_gateway(name, monkeypatch, tmp_path)
-    with pytest.raises(Exception):  # noqa: B017 - chỉ cần lấy timeout từ request
-        gateway.complete_structured("analysis.classify", [{"role": "user", "content": "x"}], Result)
-    assert seen
-    assert all(abs(read - REQUEST_TIMEOUT_S) < 1 for read in seen)
-
-
 @pytest.mark.parametrize("name", ["anthropic", "gemini", "openai"])
 def test_timeout_raises_provider_error(name, monkeypatch):
     import httpx2
 
+    from h4wk.ai.base import REQUEST_TIMEOUT_S
+
+    seen = {}
+
     def send(client, request, **kwargs):
+        seen.update(request.extensions["timeout"])
         raise httpx2.ReadTimeout("timed out", request=request)
 
     monkeypatch.setattr(httpx2.Client, "send", send)
@@ -256,3 +218,4 @@ def test_timeout_raises_provider_error(name, monkeypatch):
     }[name]()
     with pytest.raises(ProviderError):
         provider.complete(request(False))
+    assert abs(seen["read"] - REQUEST_TIMEOUT_S) < 1
