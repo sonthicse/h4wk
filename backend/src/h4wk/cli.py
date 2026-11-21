@@ -22,7 +22,7 @@ from h4wk.analysis.models import (
 from h4wk.collectors.models import Normalized
 from h4wk.core.auth import create_user
 from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
-from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig
+from h4wk.core.config_models import AnalysisConfig, SourcesConfig
 from h4wk.core.db import get_engine
 from h4wk.core.entities import Entity, add_entity, load_entities
 from h4wk.evidence.models import Manifest
@@ -49,7 +49,6 @@ CONTRACTS: dict[str, object] = {
     "c4-verdict": VideoVerdict,
     "c4-review-decision": ReviewDecision,
     "c5-sources": SourcesConfig,
-    "c5-ai": AiConfig,
     "c5-analysis": AnalysisConfig,
     "c5-entities": list[Entity],
 }

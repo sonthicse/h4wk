@@ -1043,9 +1043,9 @@ Theo SPEC-jev-only §4. Xoá package `h4wk.ai`, `tests/unit/test_ai_gateway.py`,
 
 Nghiệm thu:
 
-- [ ] `grep -rn "h4wk.ai\|AiConfig\|ai.toml\|describe_image\|media.vision\|video_verdict" backend/src config` không còn kết quả (trừ `test_init.py` dùng tên file mẫu bất kỳ).
-- [ ] Test Settings: không response nào chứa key đầy đủ (gồm `/api/settings/jev`); `GET /api/settings/ai` trả 404.
-- [ ] `test_contracts.py` và `test_settings_core.py` không còn ví dụ C5 `ai`; `h4wk schema export` không còn `c5-ai.json`; backend pytest, ruff qua.
+- [x] `grep -rn "h4wk.ai\|AiConfig\|ai.toml\|describe_image\|media.vision\|video_verdict" backend/src config` không còn kết quả (trừ `test_init.py` dùng tên file mẫu bất kỳ).
+- [x] Test Settings: không response nào chứa key đầy đủ (gồm `/api/settings/jev`); `GET /api/settings/ai` trả 404.
+- [x] `test_contracts.py` và `test_settings_core.py` không còn ví dụ C5 `ai`; `h4wk schema export` không còn `c5-ai.json`; backend pytest, ruff qua.
 
 File: `ai/` (xoá), `core/config_models.py`, `core/settings.py`, `api/settings.py`, `cli.py`, `config/ai.toml.example` (xoá), `.env.example`, tests.
 Người làm: agent backend. Phụ thuộc: T60. Cỡ: M (phần lớn là xoá).

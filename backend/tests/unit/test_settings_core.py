@@ -6,13 +6,13 @@ import tomllib
 from pathlib import Path
 
 from h4wk.core import secrets, settings, tomlw
-from h4wk.core.config_models import AiConfig, SourcesConfig, load_toml
+from h4wk.core.config_models import SourcesConfig, load_toml
 
 REPO_CONFIG = Path(__file__).parents[3] / "config"
 
 
 def test_toml_round_trip_of_examples(tmp_path: Path) -> None:
-    for name, model in [("sources", SourcesConfig), ("ai", AiConfig)]:
+    for name, model in [("sources", SourcesConfig)]:
         cfg = load_toml(REPO_CONFIG / f"{name}.toml.example", model)
         text = tomlw.dumps(cfg.model_dump(mode="json", exclude_none=True, by_alias=True))
         assert model.model_validate(tomllib.loads(text)) == cfg

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from h4wk.core import tomlw
 from h4wk.core.config import config_dir
-from h4wk.core.config_models import AiConfig, SourcesConfig, load_toml
+from h4wk.core.config_models import SourcesConfig, load_toml
 
 # Tên nguồn → tên secret chứa API key (yt-dlp không cần key).
 SOURCE_KEYS: dict[str, str | None] = {
@@ -21,18 +21,9 @@ def sources_path() -> Path:
     return config_dir() / "sources.toml"
 
 
-def ai_path() -> Path:
-    return config_dir() / "ai.toml"
-
-
 def load_sources() -> SourcesConfig:
     path = sources_path()
     return load_toml(path, SourcesConfig) if path.exists() else SourcesConfig()
-
-
-def load_ai() -> AiConfig:
-    path = ai_path()
-    return load_toml(path, AiConfig) if path.exists() else AiConfig(providers={})
 
 
 def _write(path: Path, model: BaseModel) -> None:
@@ -45,7 +36,3 @@ def _write(path: Path, model: BaseModel) -> None:
 
 def save_sources(cfg: SourcesConfig) -> None:
     _write(sources_path(), cfg)
-
-
-def save_ai(cfg: AiConfig) -> None:
-    _write(ai_path(), cfg)

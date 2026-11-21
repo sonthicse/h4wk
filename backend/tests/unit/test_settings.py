@@ -9,9 +9,6 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session
 
-from h4wk.ai import providers as ai_providers
-from h4wk.ai.base import ProviderReply
-from h4wk.ai.fake import FakeProvider
 from h4wk.collectors.base import Health
 from h4wk.collectors.models import Cap
 from h4wk.collectors.orchestrator import Orchestrator
@@ -23,12 +20,12 @@ from h4wk.core.types import VN_TZ
 
 REPO_CONFIG = Path(__file__).parents[3] / "config"
 YT_KEY = "AIzaSyTHISISAFULLSECRETKEY0001"
-AI_KEY = "sk-ant-THISISAFULLSECRETKEY0002"
+AI_KEY = "sk-jev-THISISAFULLSECRETKEY0002"
 
 
 @pytest.fixture
 def cfg(config_dir: Path) -> Path:
-    for name in ("sources", "ai"):
+    for name in ("sources",):
         shutil.copy(REPO_CONFIG / f"{name}.toml.example", config_dir / f"{name}.toml")
     return config_dir
 
@@ -39,11 +36,10 @@ def test_no_response_contains_full_secret(
     monkeypatch.setattr(YouTubeApiCollector, "health_check", lambda self: Health(True, "ok"))
     bodies = [
         client.put("/api/settings/sources/youtube_api/key", json={"value": YT_KEY}),
-        client.put("/api/settings/ai/providers/anthropic/key", json={"value": AI_KEY}),
+        client.put("/api/settings/jev/key", json={"value": AI_KEY}),
         client.get("/api/settings/sources"),
-        client.get("/api/settings/ai"),
+        client.get("/api/settings/jev"),
         client.put("/api/settings/sources", json={}),
-        client.put("/api/settings/ai", json={}),
         client.post("/api/settings/sources/youtube_api/test"),
         client.get("/api/events"),
         client.get("/openapi.json"),
@@ -131,60 +127,9 @@ def test_source_tests(client: TestClient, cfg, monkeypatch: pytest.MonkeyPatch) 
     assert client.put("/api/settings/sources/ytdlp/key", json={"value": "x"}).status_code == 400
 
 
-def test_ai_replace_validate_delete(client: TestClient, cfg) -> None:
-    ai = client.get("/api/settings/ai").json()
-    tasks = ai["tasks"]
-    bad = {**tasks, "media.vision": [{"provider": "glm", "model": "glm-4.7"}]}
-    r = client.put("/api/settings/ai", json={"tasks": bad})
-    assert r.status_code == 422 and isinstance(r.json()["detail"], list)
-    assert "cannot read images" in json.dumps(r.json()["detail"])
-    providers = {
-        p["name"]: {k: p[k] for k in ("type", "base_url", "models")} for p in ai["providers"]
-    }
-    providers["local-llm"] = {
-        "type": "openai_compat",
-        "base_url": "http://localhost:8080/v1",
-        "models": {"m1": {"vision": False, "structured": True}},
-    }
-    r = client.put("/api/settings/ai", json={"providers": providers})
-    assert r.status_code == 200 and "local-llm" in {p["name"] for p in r.json()["providers"]}
-    assert client.put("/api/settings/ai", json={"providers": {"Bad Name": {}}}).status_code == 422
-    assert client.delete("/api/settings/ai/providers/anthropic").status_code == 409
-    r = client.delete("/api/settings/ai/providers/local-llm")
-    assert "local-llm" not in {p["name"] for p in r.json()["providers"]}
-
-
-def test_ai_provider_test(client: TestClient, cfg, monkeypatch) -> None:
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    monkeypatch.setattr("h4wk.core.secrets.env_values", lambda: {})
-    r = client.post("/api/settings/ai/providers/anthropic/test").json()
-    assert r["ok"] is False and r["detail"] == "missing API key"
-    client.put("/api/settings/ai/providers/anthropic/key", json={"value": AI_KEY})
-    fake = FakeProvider([ProviderReply('{"ok": true}')])
-    monkeypatch.setattr("h4wk.api.settings.make_provider", lambda *a: fake)
-    r = client.post("/api/settings/ai/providers/anthropic/test", json={}).json()
-    assert r["ok"] is True and r["latency_ms"] is not None
-    assert ai_providers.key_name("local-llm") == "LOCAL_LLM_API_KEY"
-
-
-def _providers(client: TestClient) -> dict:
-    return {
-        p["name"]: {k: p[k] for k in ("type", "base_url", "models")}
-        for p in client.get("/api/settings/ai").json()["providers"]
-    }
-
-
-def _add_local(client: TestClient) -> dict:
-    providers = _providers(client)
-    providers["local-llm"] = {
-        "type": "openai_compat",
-        "base_url": "http://localhost:8080/v1",
-        "models": {"m1": {"vision": False, "structured": True}},
-    }
-    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
-    client.put("/api/settings/ai/providers/local-llm/key", json={"value": AI_KEY})
-    client.put("/api/settings/ai/providers/anthropic/key", json={"value": YT_KEY})
-    return providers
+def test_ai_routes_are_gone(client: TestClient, cfg) -> None:
+    assert client.get("/api/settings/ai").status_code == 404
+    assert client.put("/api/settings/ai", json={}).status_code in (404, 405)
 
 
 def _stored(data_dir: Path) -> dict:
@@ -200,91 +145,3 @@ def test_jev_key_lifecycle(client: TestClient, monkeypatch) -> None:
     assert result.json()["origin"] == "settings"
     assert client.get("/api/settings/jev").json() == {"key": result.json()}
     assert client.delete("/api/settings/jev/key").json()["set"] is False
-
-
-def _key_deletes(data_dir: Path) -> list[str]:
-    lines = (data_dir / "log" / "audit.jsonl").read_text(encoding="utf-8").splitlines()
-    return [d["target"] for d in map(json.loads, lines) if d["action"] == "settings.key.delete"]
-
-
-def test_put_ai_removing_provider_deletes_its_key(client: TestClient, cfg, data_dir: Path) -> None:
-    providers = _add_local(client)
-    del providers["local-llm"]
-    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
-    stored = _stored(data_dir)
-    assert "LOCAL_LLM_API_KEY" not in stored and "ANTHROPIC_API_KEY" in stored
-    assert _key_deletes(data_dir)[-1] == "LOCAL_LLM_API_KEY"
-
-
-def test_put_ai_422_keeps_keys(client: TestClient, cfg, data_dir: Path) -> None:
-    providers = _add_local(client)
-    del providers["local-llm"]
-    providers["Bad Name"] = {}
-    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 422
-    assert "LOCAL_LLM_API_KEY" in _stored(data_dir)
-    assert _key_deletes(data_dir) == []
-
-
-def test_delete_provider_deletes_its_key(client: TestClient, cfg, data_dir: Path) -> None:
-    _add_local(client)
-    assert client.delete("/api/settings/ai/providers/local-llm").status_code == 200
-    assert "LOCAL_LLM_API_KEY" not in _stored(data_dir)
-    assert _key_deletes(data_dir) == ["LOCAL_LLM_API_KEY"]
-
-
-def _twins(client: TestClient, data_dir: Path) -> dict:
-    """Hai provider a-b và a_b cùng ra tên key A_B_API_KEY, key đã lưu."""
-    providers = _providers(client)
-    for name in ("a-b", "a_b"):
-        providers[name] = {
-            "type": "openai_compat",
-            "base_url": "http://localhost:8080/v1",
-            "models": {"m1": {"vision": False, "structured": True}},
-        }
-    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
-    client.put("/api/settings/ai/providers/a-b/key", json={"value": AI_KEY})
-    assert "A_B_API_KEY" in _stored(data_dir)
-    return providers
-
-
-def test_shared_key_name_survives_removing_one_provider(
-    client: TestClient, cfg, data_dir: Path
-) -> None:
-    providers = _twins(client, data_dir)
-    del providers["a_b"]
-    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
-    assert "A_B_API_KEY" in _stored(data_dir) and _key_deletes(data_dir) == []
-
-
-def test_shared_key_name_survives_delete_endpoint(client: TestClient, cfg, data_dir: Path) -> None:
-    _twins(client, data_dir)
-    assert client.delete("/api/settings/ai/providers/a_b").status_code == 200
-    assert "A_B_API_KEY" in _stored(data_dir) and _key_deletes(data_dir) == []
-
-
-def test_rename_in_one_put_keeps_key(client: TestClient, cfg, data_dir: Path) -> None:
-    providers = _providers(client)
-    providers["a_b"] = {
-        "type": "openai_compat",
-        "base_url": "http://localhost:8080/v1",
-        "models": {"m1": {"vision": False, "structured": True}},
-    }
-    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
-    client.put("/api/settings/ai/providers/a_b/key", json={"value": AI_KEY})
-    providers["a-b"] = providers.pop("a_b")
-    assert client.put("/api/settings/ai", json={"providers": providers}).status_code == 200
-    assert "A_B_API_KEY" in _stored(data_dir) and _key_deletes(data_dir) == []
-
-
-def test_removing_provider_without_key_writes_no_audit(
-    client: TestClient, cfg, data_dir: Path
-) -> None:
-    providers = _providers(client)
-    providers["local-llm"] = {
-        "type": "openai_compat",
-        "base_url": "http://localhost:8080/v1",
-        "models": {"m1": {"vision": False, "structured": True}},
-    }
-    client.put("/api/settings/ai", json={"providers": providers})
-    assert client.delete("/api/settings/ai/providers/local-llm").status_code == 200
-    assert _key_deletes(data_dir) == []

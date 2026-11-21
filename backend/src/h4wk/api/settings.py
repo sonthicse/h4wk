@@ -4,21 +4,19 @@ có bản che. Mọi thao tác ghi có audit nhưng không ghi giá trị key.""
 import re
 from datetime import datetime
 from time import perf_counter
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, ValidationError
 from sqlmodel import Session
 
-from h4wk.ai.base import ProviderError, ProviderRequest
-from h4wk.ai.providers import key_name, make_provider
 from h4wk.api.deps import current_actor
 from h4wk.collectors import quota, registry
 from h4wk.collectors.models import Cap
 from h4wk.collectors.orchestrator import Settings as RouteSettings
 from h4wk.collectors.providers import supadata
 from h4wk.core import audit, secrets, settings
-from h4wk.core.config_models import AiConfig, ModelCaps, Route, SourcesConfig
+from h4wk.core.config_models import SourcesConfig
 from h4wk.core.db import SourceStateRow, as_aware, get_engine
 from h4wk.core.secrets import KeyInfo
 from h4wk.core.types import VN_TZ, VnDatetime
@@ -75,24 +73,6 @@ class TestResult(BaseModel):
     ok: bool
     detail: str
     latency_ms: int | None = None
-
-
-class ProviderInfo(BaseModel):
-    name: str
-    type: Literal["anthropic", "openai_compat", "gemini", "ollama"]
-    base_url: str | None
-    models: dict[str, ModelCaps]
-    key: KeyInfo
-
-
-class AiSettings(BaseModel):
-    providers: list[ProviderInfo]
-    tasks: dict[str, list[Route]]
-
-
-class AiUpdate(BaseModel):
-    providers: dict[str, dict[str, Any]] | None = None  # có thì thay toàn bộ
-    tasks: dict[str, list[dict[str, str]]] | None = None  # có thì thay toàn bộ
 
 
 def _invalid(e: ValidationError) -> HTTPException:
@@ -256,147 +236,3 @@ def delete_jev_key(actor: ActorDep) -> KeyInfo:
     secrets.delete(_JEV_KEY)
     audit.log(actor, "settings.key.delete", _JEV_KEY)
     return secrets.info(_JEV_KEY)
-
-
-# --------------------------------------------------------------------------- AI
-
-
-def _ai_view() -> AiSettings:
-    cfg = settings.load_ai()
-    return AiSettings(
-        providers=[
-            ProviderInfo(
-                name=name,
-                type=p.type,
-                base_url=str(p.base_url) if p.base_url else None,
-                models=p.models,
-                key=secrets.info(key_name(name)),
-            )
-            for name, p in cfg.providers.items()
-        ],
-        tasks={str(t): routes for t, routes in cfg.tasks.items()},
-    )
-
-
-@router.get("/ai")
-def get_ai() -> AiSettings:
-    return _ai_view()
-
-
-def _drop_key(provider: str, actor: str) -> None:
-    """Xoá key trong secrets.json của provider đã gỡ (key từ .env không xoá được)."""
-    key = key_name(provider)
-    if secrets.delete(key):
-        audit.log(actor, "settings.key.delete", key)
-
-
-@router.put("/ai")
-def put_ai(body: AiUpdate, actor: ActorDep) -> AiSettings:
-    old = settings.load_ai()
-    data = old.model_dump(mode="json", exclude_none=True)
-    if body.providers is not None:
-        bad = [n for n in body.providers if not PROVIDER_NAME.match(n)]
-        if bad:
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_CONTENT,
-                [{"loc": ["providers", n], "msg": "use a-z, 0-9, _ or -"} for n in bad],
-            )
-        data["providers"] = body.providers
-    if body.tasks is not None:
-        data["tasks"] = body.tasks
-    try:
-        cfg = AiConfig.model_validate(data)
-    except ValidationError as e:
-        audit.log(actor, "settings.ai", None, {"error": "invalid"}, status="error")
-        raise _invalid(e) from None
-    settings.save_ai(cfg)
-    audit.log(actor, "settings.ai", None, {"providers": list(cfg.providers)})
-    kept = {key_name(n) for n in cfg.providers}
-    for name in old.providers.keys() - cfg.providers.keys():
-        if key_name(name) not in kept:  # tên khác nhau có thể cùng ra một tên key
-            _drop_key(name, actor)
-    return _ai_view()
-
-
-@router.delete("/ai/providers/{name}")
-def delete_provider(name: str, actor: ActorDep) -> AiSettings:
-    cfg = settings.load_ai()
-    if name not in cfg.providers:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "provider not found")
-    used = [str(t) for t, routes in cfg.tasks.items() if any(r.provider == name for r in routes)]
-    if used:
-        raise HTTPException(status.HTTP_409_CONFLICT, f"provider is used by: {', '.join(used)}")
-    data = cfg.model_dump(mode="json", exclude_none=True)
-    del data["providers"][name]
-    settings.save_ai(AiConfig.model_validate(data))
-    audit.log(actor, "settings.ai.delete_provider", name)
-    if key_name(name) not in {key_name(n) for n in data["providers"]}:
-        _drop_key(name, actor)
-    return _ai_view()
-
-
-def _provider_key(name: str) -> str:
-    if name not in settings.load_ai().providers:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "provider not found")
-    return key_name(name)
-
-
-@router.put("/ai/providers/{name}/key")
-def put_ai_key(name: str, body: KeyBody, actor: ActorDep) -> KeyInfo:
-    key = _provider_key(name)
-    secrets.put(key, body.value)
-    audit.log(actor, "settings.key.set", key)
-    return secrets.info(key)
-
-
-@router.delete("/ai/providers/{name}/key")
-def delete_ai_key(name: str, actor: ActorDep) -> KeyInfo:
-    key = _provider_key(name)
-    secrets.delete(key)
-    audit.log(actor, "settings.key.delete", key)
-    return secrets.info(key)
-
-
-class TestBody(BaseModel):
-    model: str | None = None
-
-
-@router.post("/ai/providers/{name}/test")
-def test_provider(
-    name: str, actor: ActorDep, body: Annotated[TestBody | None, Body()] = None
-) -> TestResult:
-    """Gọi thật một câu ngắn tới nhà cung cấp để kiểm tra key và model."""
-    cfg = settings.load_ai()
-    p = cfg.providers.get(name)
-    if p is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "provider not found")
-    model = (body.model if body else None) or next(iter(p.models), None)
-    provider = make_provider(name, p, secrets.all_keys())
-    if model is None or model not in p.models:
-        result = TestResult(ok=False, detail="unknown model")
-    elif provider is None:
-        result = TestResult(ok=False, detail="missing API key")
-    else:
-        schema = {
-            "type": "object",
-            "properties": {"ok": {"type": "boolean"}},
-            "required": ["ok"],
-            "additionalProperties": False,
-        }
-        request = ProviderRequest(
-            model,
-            [{"role": "user", "content": 'Reply with the JSON object {"ok": true}.'}],
-            schema,
-            p.models[model].structured,
-            None,
-        )
-        start = perf_counter()
-        try:
-            provider.complete(request)
-            result = TestResult(ok=True, detail=f"{name}/{model} answered")
-        except ProviderError as e:
-            cause = e.__cause__
-            result = TestResult(ok=False, detail=f"{e}: {cause}" if cause else str(e))
-        result.latency_ms = int((perf_counter() - start) * 1000)
-    audit.log(actor, "settings.ai.test", name, {"ok": result.ok})
-    return result

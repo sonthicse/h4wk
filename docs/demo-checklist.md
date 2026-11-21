@@ -7,7 +7,7 @@ Tên trang, nút và nhãn trong các bước là chữ tiếng Anh đang hiện
 ## 1. Chuẩn bị máy
 
 - [ ] **GPU.** `nvidia-smi` liệt kê GPU và phiên bản CUDA, không báo lỗi.
-- [ ] **Cấu hình AI.** `config/ai.toml` có ba tuyến `"media.vision"`, `"analysis.classify"` và `"analysis.video_verdict"` (mẫu ở `config/ai.toml.example`). Model của `media.vision` phải đọc được ảnh (`vision = true`).
+- [ ] **Khóa Jev.** `TYPESAFE_API_KEY` có trong `.env` hoặc nhập ở Settings → Jev.
 - [ ] **Key.** Có key của nhà cung cấp đã chọn trong `.env` hoặc trong Settings → AI providers (key nhập ở Settings được ưu tiên). Giao diện chỉ hiện bản che của key.
 - [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync --extra stt --extra match && uv run --no-sync h4wk init`, rồi `cd ../web && npm install` (từ thư mục `backend/`).
 
@@ -103,7 +103,7 @@ Kết quả mong đợi: OK với bản thu nguyên vẹn; FAIL, `missing`, `une
 
 | Triệu chứng | Nguyên nhân và cách xử lý |
 | --- | --- |
-| Gemini hoặc OpenRouter báo 429 | Hết quota. Ảnh lỗi bị bỏ qua, phân tích LLM có thể bị bỏ qua và event có ghi chú. Đổi nhà cung cấp ở Settings → AI providers hoặc chờ quota. |
+| Gemini hoặc OpenRouter báo 429 | Hết quota. Ảnh lỗi bị bỏ qua, phân tích LLM có thể bị bỏ qua và event có ghi chú. Chờ quota rồi chạy lại. |
 | `No module named 'faster_whisper'` | Worker GPU chạy thiếu `--extra stt`. Chạy lại đúng lệnh ở mục 1. |
 | Thiếu `libcublas` hoặc cuDNN | Chưa cài extra `match`, hoặc chưa đặt `LD_LIBRARY_PATH` tới các thư mục `nvidia/*/lib` trong `backend/.venv`. |
 | torch hoặc thư viện CUDA biến mất | Lỡ chạy `uv sync` hoặc `uv run` trơn. Cài lại: `uv sync --extra stt --extra match`, rồi dùng `--no-sync`. |

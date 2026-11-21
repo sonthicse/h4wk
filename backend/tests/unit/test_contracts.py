@@ -14,7 +14,7 @@ from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
 from h4wk.cli import export_schemas
 from h4wk.collectors.models import Cap, CollectLevel, Normalized
 from h4wk.core.config import REPO_ROOT
-from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig, load_toml
+from h4wk.core.config_models import AnalysisConfig, SourcesConfig, load_toml
 from h4wk.core.entities import Entity
 from h4wk.evidence.models import Manifest
 from h4wk.media.timeline import Timeline
@@ -199,31 +199,6 @@ SOURCES: dict[str, Any] = {
     },
 }
 
-AI: dict[str, Any] = {
-    "providers": {
-        "anthropic": {
-            "type": "anthropic",
-            "models": {
-                "claude-sonnet-5-5": {"vision": True, "structured": True},
-                "claude-haiku-5-5": {"vision": True, "structured": True},
-            },
-        },
-        "deepseek": {
-            "type": "openai_compat",
-            "base_url": "https://api.deepseek.com",
-            "models": {"some-text-model": {"vision": False, "structured": False}},
-        },
-    },
-    "tasks": {
-        "analysis.video_verdict": [{"provider": "anthropic", "model": "claude-sonnet-5-5"}],
-        "analysis.classify_comment": [
-            {"provider": "deepseek", "model": "some-text-model"},
-            {"provider": "anthropic", "model": "claude-haiku-5-5"},
-        ],
-        "media.vision": [{"provider": "anthropic", "model": "claude-sonnet-5-5"}],
-    },
-}
-
 ANALYSIS: dict[str, Any] = {
     "transcript_priority": ["uploaded", "stt", "auto", "supadata_ai"],
     "face": {"enabled": True},
@@ -264,22 +239,6 @@ VALID: list[tuple[Any, dict[str, Any]]] = [
     (Finding, _finding(occurrences=[OCC_1, OCC_2])),
     (ReviewDecision, REVIEW),
     (SourcesConfig, SOURCES),
-    (AiConfig, AI),
-    (
-        AiConfig,
-        {
-            **AI,
-            "providers": {
-                **AI["providers"],
-                "ollama": {
-                    "type": "ollama",
-                    "base_url": "http://192.168.1.10:11434/v1",
-                    "models": {"qwen2.5vl:7b": {"vision": True, "structured": False}},
-                },
-            },
-            "tasks": {"media.vision": [{"provider": "ollama", "model": "qwen2.5vl:7b"}]},
-        },
-    ),
     (AnalysisConfig, ANALYSIS),
 ]
 
@@ -375,54 +334,6 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (SourcesConfig, _set("priority", {"video.media": ["tiktok"]})(SOURCES), "nguồn lạ"),
     (SourcesConfig, _set("priority", {"video.media": ["ytdlp", "ytdlp"]})(SOURCES), "trùng nguồn"),
     (SourcesConfig, _set("sources.youtube_api.api_key", "AIza…")(SOURCES), "secret trong toml"),
-    # C5: ai
-    (
-        AiConfig,
-        {**AI, "tasks": {"media.vision": [{"provider": "deepseek", "model": "some-text-model"}]}},
-        "media.vision gán cho model không có vision",
-    ),
-    (
-        AiConfig,
-        {
-            **AI,
-            "providers": {
-                **AI["providers"],
-                "deepseek": {
-                    "type": "openai_compat",
-                    "models": {"m": {"vision": False, "structured": False}},
-                },
-            },
-            "tasks": {},
-        },
-        "openai_compat thiếu base_url",
-    ),
-    (
-        AiConfig,
-        {
-            **AI,
-            "providers": {
-                **AI["providers"],
-                "ollama": {
-                    "type": "ollama",
-                    "models": {"qwen2.5vl:7b": {"vision": True, "structured": False}},
-                },
-            },
-            "tasks": {},
-        },
-        "ollama thiếu base_url",
-    ),
-    (
-        AiConfig,
-        {**AI, "tasks": {"analysis.video_verdict": [{"provider": "openai", "model": "gpt"}]}},
-        "route tới provider chưa khai báo",
-    ),
-    (
-        AiConfig,
-        {**AI, "tasks": {"analysis.video_verdict": [{"provider": "anthropic", "model": "x"}]}},
-        "route tới model chưa khai báo",
-    ),
-    (AiConfig, {**AI, "tasks": {"media.ocr": []}}, "tác vụ AI ngoài 3 tác vụ V1"),
-    (AiConfig, {**AI, "tasks": {"analysis.video_verdict": []}}, "danh sách route rỗng"),
     # C5: analysis
     (AnalysisConfig, _set("transcript_priority", ["uploaded", "uploaded"])(ANALYSIS), "trùng loại"),
     (AnalysisConfig, _set("comments", {"batch_size": 100})(ANALYSIS), "lô ngoài 20–50"),
@@ -494,12 +405,6 @@ def test_legacy_validator_leaves_wrong_types_to_pydantic(patch: dict[str, Any]) 
         Timeline.model_validate({**TIMELINE, **patch})
 
 
-def test_ollama_without_base_url_rejected_for_the_right_rule() -> None:
-    data = next(d for _, d, why in REJECTED if why == "ollama thiếu base_url")
-    with pytest.raises(ValidationError, match="an ollama provider needs base_url"):
-        AiConfig.model_validate(data)
-
-
 # ------------------------------------------------------------ quy ước chung
 
 
@@ -553,19 +458,11 @@ def test_hits_and_findings_files_are_lists() -> None:
 
 @pytest.mark.parametrize(
     ("name", "model"),
-    [("sources", SourcesConfig), ("ai", AiConfig), ("analysis", AnalysisConfig)],
+    [("sources", SourcesConfig), ("analysis", AnalysisConfig)],
 )
 def test_config_examples_load(name: str, model: type[BaseModel]) -> None:
     path = REPO_ROOT / "config" / f"{name}.toml.example"
     model.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))
-
-
-@pytest.mark.parametrize("task", ["analysis.classify", "analysis.classify_comment"])
-def test_legacy_route_is_ignored(tmp_path: Path, caplog, task: str) -> None:
-    path = tmp_path / "ai.toml"
-    path.write_text(f'[providers]\n[tasks]\n"{task}" = []\n', encoding="utf-8")
-    assert load_toml(path, AiConfig).tasks == {}
-    assert f"Ignoring legacy {task} route" in caplog.text
 
 
 @pytest.mark.parametrize("concurrency", [0, 17])
@@ -596,7 +493,6 @@ def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
         "c4-verdict.json",
         "c4-video-review-decision.json",
         "c5-sources.json",
-        "c5-ai.json",
         "c5-analysis.json",
         "c5-entities.json",
     }
