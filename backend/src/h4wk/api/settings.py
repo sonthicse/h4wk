@@ -1,7 +1,6 @@
 """API Settings (T32): nguồn thu, nhà cung cấp AI, API key. Key chỉ gửi lên; response chỉ
 có bản che. Mọi thao tác ghi có audit nhưng không ghi giá trị key."""
 
-import re
 from datetime import datetime
 from time import perf_counter
 from typing import Annotated, Literal
@@ -24,7 +23,6 @@ from h4wk.core.types import VN_TZ, VnDatetime
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 ActorDep = Annotated[str, Depends(current_actor)]
 SourceName = Literal["ytdlp", "youtube_api", "supadata"]
-PROVIDER_NAME = re.compile(r"^[a-z0-9_-]{1,32}$")
 
 
 class SourceUsage(BaseModel):

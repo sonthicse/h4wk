@@ -325,7 +325,7 @@ Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend ở 
 - [x] T58: `media`: C3 bỏ mô tả ảnh, mọi keyframe vào timeline (backend)
 - [x] T59: `analysis`: Jev nhận keyframe và thumbnail (backend)
 - [x] T60: `analysis`: kết luận theo video bằng quy tắc (backend)
-- [ ] T61: Bỏ `ai-gateway` và cấu hình C5 `ai.toml` (backend)
+- [x] T61: Bỏ `ai-gateway` và cấu hình C5 `ai.toml` (backend)
 - [ ] T62: UI Settings → Jev: key, thử kết nối, usage (ui)
 - [ ] T63: UI màn video và Collect bỏ mô tả ảnh và bước VLM (ui)
 - [ ] T65: `analysis`: nhật ký request Jev, API usage và thử kết nối (backend)
