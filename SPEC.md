@@ -19,9 +19,8 @@ Dự án đang ở giai đoạn thử nghiệm. Một số hạn chế được 
 | `core` | Đối tượng và ảnh mẫu của đối tượng, 2 tài khoản, nhật ký, database chỉ mục, cấu hình và lưu secret | không có | Mô hình Đối tượng, `audit.log()`, C5: định dạng file cấu hình |
 | `evidence-store` | Bản thu được khoá chống sửa nhầm, manifest, SHA-256, tách dữ liệu gốc và phái sinh, kiểm tra toàn vẹn | `core` | C1: cấu trúc bản thu |
 | `collectors` | Hợp đồng adapter, danh sách nguồn thu, điều phối theo thứ tự ưu tiên và chuyển nguồn khi lỗi; adapter yt-dlp, YouTube API, Supadata | `evidence-store` | C2: mô hình dữ liệu chung, giao diện `Collector` |
-| `ai-gateway` | Nhiều nhà cung cấp LLM/VLM, định tuyến theo tác vụ AI, kiểm tra đầu ra có cấu trúc, chuyển nhà cung cấp khi lỗi, ghi chi phí | `core` | Giao diện `AIGateway` |
-| `media-pipeline` | Bản 480p, tách audio, speech-to-text, keyframe theo mức thay đổi, OCR, VLM, ghép timeline | `evidence-store`, `ai-gateway` | C3: cấu trúc timeline |
-| `analysis` | Tìm dấu hiệu đối tượng (tên, khuôn mặt, ảnh mẫu), lọc tĩnh rồi LLM trên timeline, tiêu đề, mô tả, thumbnail và comment | `media-pipeline`, `ai-gateway`, `core` | C4: dấu hiệu, nghi vấn và quyết định rà soát |
+| `media-pipeline` | Bản 480p, tách audio, speech-to-text, keyframe theo mức thay đổi, OCR, ghép timeline | `evidence-store` | C3: cấu trúc timeline |
+| `analysis` | Tìm dấu hiệu đối tượng (tên, khuôn mặt, ảnh mẫu), lọc tĩnh rồi Jev (nhận cả văn bản lẫn keyframe, thumbnail) trên timeline, tiêu đề, mô tả, thumbnail và comment, kết luận theo video bằng quy tắc | `media-pipeline`, `core` | C4: dấu hiệu, nghi vấn và quyết định rà soát |
 | `jobs` | Chạy tác vụ nền, nối luồng thu → xử lý → phân tích, tiến độ, thử lại khi lỗi | `collectors`, `media-pipeline`, `analysis` | API gửi job và xem tiến độ |
 | `review` | Hàng đợi rà soát, quyết định kèm nhật ký | `analysis`, `evidence-store` | không có |
 | `watchlist` | Kiểm tra RSS của kênh, phát hiện video mới, nút Check now, dòng sự kiện | `collectors`, `jobs` | không có |
@@ -36,8 +35,7 @@ Một số từ dùng thống nhất trong các tài liệu:
 | Từ | Nghĩa |
 |---|---|
 | nguồn thu | Một adapter thu thập: yt-dlp, YouTube API, Supadata |
-| nhà cung cấp AI | Một dịch vụ LLM/VLM: Anthropic, OpenAI, DeepSeek… |
-| tác vụ AI | Khoá định tuyến trong `ai.toml`, ví dụ `analysis.classify` |
+| Jev | Dịch vụ phân loại TypeSafe (`systemone`), nhà cung cấp AI duy nhất; nhận văn bản và ảnh |
 | bước | Một bước trong luồng xử lý của một job, ví dụ transcribe, OCR |
 | task | Một hạng mục công việc T1–T46 trong `tasks/todo.md` |
 | bản thu | Kết quả một lần thu, nằm trong `captures/<ts>/` |
@@ -59,7 +57,7 @@ Một số từ dùng thống nhất trong các tài liệu:
 | OCR | PaddleOCR PP-OCRv5 (phát hiện mobile, nhận dạng tiếng Việt vi-latin-rec-v4) | Chạy bằng worker CPU riêng. Bộ nhận dạng tiếng Việt có giấy phép CC BY-NC 4.0 (phi thương mại) |
 | Khớp khuôn mặt | OpenCV YuNet (phát hiện) và SFace (so khớp), chạy cục bộ trên CPU | Ngưỡng cosine 0,363. [YuNet: MIT](https://huggingface.co/opencv/face_detection_yunet#license); [SFace: Apache-2.0](https://huggingface.co/opencv/face_recognition_sface#license). Chưa nghiệm thu chất lượng trên ảnh thành viên |
 | Khớp ảnh mẫu | DINOv2 ViT-S/14, cần `torch` | Giấy phép Apache-2.0. Spike T3: ảnh cắt 10% mỗi cạnh và ảnh giảm bão hoà còn cosine 0,91 và 0,96 so với ảnh gốc |
-| LLM/VLM | Lớp riêng với 3 loại adapter: Anthropic SDK, OpenAI-compatible (OpenAI, DeepSeek, Qwen/DashScope, Zhipu GLM, Moonshot Kimi, OpenRouter…), Google GenAI | Tên model đặt trong file cấu hình |
+| Phân loại nội dung (Jev) | TypeSafe `systemone`, model `jev-latest`; nhận văn bản và tối đa 4 ảnh mỗi request (header `TypeSafe-Danger-Zone-Images: true`) | Key `TYPESAFE_API_KEY` trong `.env` hoặc Settings |
 | Frontend | React, Vite, TypeScript, React Router, TanStack Query, Tailwind và shadcn/ui | Giao diện tiếng Anh. Trình phát dùng thẻ `<video>` với lớp phủ tự viết |
 | Chất lượng code | `ruff` (lint và format), `pytest`; `oxlint` và `tsc` cho frontend | |
 
@@ -121,7 +119,7 @@ h4wk/
 │       └── fixtures/           ← bản thu mẫu, raw response đã ghi sẵn, video ngắn tự quay
 ├── web/                        ← React app
 │   └── src/{pages,components,api,lib}/
-├── config/                     ← sources.toml, ai.toml, analysis.toml (không chứa secret; có bản *.example)
+├── config/                     ← sources.toml, analysis.toml (không chứa secret; có bản *.example)
 └── data/                       ← đã .gitignore; xem C1
 ```
 
@@ -156,7 +154,7 @@ class YtDlpCollector(Collector):
 |---|---|---|
 | Unit | Ghi manifest, SHA-256, verify; chuyển raw sang dữ liệu chung cho từng adapter bằng raw response đã ghi sẵn (không gọi mạng); khớp tên với danh sách ví dụ đúng và phản ví dụ; kiểm tra C3, C4; tầng AI chạy với `FakeProvider` | `tests/unit` |
 | Integration | Toàn luồng: thu bằng adapter giả → xử lý một video ngắn tự quay trong fixtures → `analysis` với `FakeProvider` → nghi vấn hợp lệ trong hàng đợi. Worker bị tắt giữa chừng rồi bật lại | `tests/integration` |
-| Live (`-m live`) | Mỗi adapter gọi thật với 1 video; mỗi nhà cung cấp AI gọi thật 1 request | chạy tay, không bắt buộc trước khi commit |
+| Live (`-m live`) | Mỗi adapter gọi thật với 1 video; Jev gọi thật 1 request | chạy tay, không bắt buộc trước khi commit |
 | Demo | Checklist diễn tập 3 màn demo (T42), chạy cuối mỗi tuần từ tuần 3 | `docs/demo-checklist.md` |
 | Đánh giá (làm thêm) | Bảng so sánh tĩnh và LLM trên khoảng 50 đoạn tự gán nhãn | làm nếu còn thời gian |
 
@@ -168,14 +166,14 @@ Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải 
 
 ### Màn 1: dữ liệu chuẩn bị sẵn
 
-- [ ] Hệ thống có sẵn ít nhất 10 video thật đã xử lý xong. Hàng đợi có ít nhất một nghi vấn từ lời nói, một từ chữ OCR và một từ hình ảnh (`visual`).
+- [ ] Hệ thống có sẵn ít nhất 10 video thật đã xử lý xong. Hàng đợi có ít nhất một nghi vấn từ lời nói, một từ chữ OCR và một từ hình ảnh (`visual`, do Jev xét keyframe).
 - [ ] Có ít nhất một nghi vấn từ hình ảnh nằm ở đoạn không ai nhắc tên đối tượng, được tìm ra nhờ khuôn mặt mẫu, ảnh mẫu hoặc ngữ cảnh của cả video.
 - [ ] Bấm vào một nghi vấn thì video phát từ `start − 2s`. Đoạn bị nghi được tô màu trên thanh thời gian, transcript chạy theo, và khung hình hiện ra kèm khung bao của chữ OCR, khuôn mặt hoặc ảnh mẫu đã khớp.
 - [ ] Thao tác Confirm, Reject (bắt buộc ghi lý do) và Needs info được ghi vào nhật ký cùng người làm, thời điểm và lý do. Nghi vấn chỉ chuyển sang confirmed khi analyst bấm Confirm.
 
 ### Màn 2: dán link trực tiếp
 
-- [ ] Dán link một video. Giao diện hiện tiến độ từng bước (collect → transcribe → frames → OCR/VLM → match → analyze) cho tới khi có nghi vấn.
+- [ ] Dán link một video. Giao diện hiện tiến độ từng bước (collect → transcribe → frames → OCR → match → analyze) cho tới khi có nghi vấn.
 - [ ] Mục tiêu: video dài tối đa 5 phút xử lý xong trong khoảng 5 phút.
 
 ### Màn 3: watchlist
@@ -192,7 +190,8 @@ Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải 
 
 - [ ] Tắt yt-dlp trên trang Settings thì metadata và comment vẫn thu được qua YouTube API. Manifest ghi trạng thái của mọi nguồn có thể lấy từng loại dữ liệu, kể cả nguồn bị tắt (`disabled`). Loại dữ liệu không còn nguồn nào (ví dụ video) được ghi `no_source`, và job vẫn phân tích phần văn bản.
 - [ ] Khi giả lập yt-dlp bị chặn, hệ thống tự chuyển sang nguồn tiếp theo, ghi `status: "blocked"` vào manifest, và tạm ngưng yt-dlp sau 5 lần lỗi liên tiếp.
-- [ ] Đổi nhà cung cấp cho tác vụ AI phân loại và cho tác vụ AI mô tả hình trên trang Settings mà không sửa code. Settings chỉ cho chọn nhà cung cấp và model, không có lựa chọn theo quốc gia, và không cho gán tác vụ mô tả hình cho model không đọc được ảnh.
+- [ ] Jev nhận keyframe và thumbnail: mỗi request có ảnh gửi đúng đường dẫn ảnh của video và header ảnh, request không có ảnh không có header; trên video `1RUJ_6eruwA`, đoạn có chữ "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" sinh nghi vấn `ocr` kèm khung hình.
+- [ ] Trang Settings → Jev hiện usage (lượt gọi, token vào/ra do TypeSafe báo, theo kỳ và nguồn) khớp `data/jev_calls.jsonl`; không hiển thị hạn mức, số dư hay USD.
 - [ ] Mỗi transcript mang nhãn loại: `uploaded`, `auto`, `supadata_ai` hoặc `stt`.
 - [ ] API key nhập trên giao diện được lưu ở server và không bao giờ được trả về trình duyệt; giao diện chỉ hiện giá trị đã che dạng `sk-…abcd`.
 
@@ -201,7 +200,7 @@ Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải 
 | Tuần | Việc | Mốc |
 |---|---|---|
 | 1 | Chốt C1–C5. Chạy các spike: yt-dlp tải được trên WSL, độ trễ RSS trên kênh tin tức đăng thường xuyên, bốn thư viện GPU cùng chạy trong một môi trường. Dựng luồng tối giản chạy qua `jobs`: dán link → yt-dlp → bản thu và manifest → transcript → khớp tên tĩnh → 1 nghi vấn trên một trang đơn giản | Luồng tối giản chạy từ đầu đến cuối |
-| 2–3 | YouTube API, Supadata, chuyển nguồn khi lỗi; keyframe, OCR, VLM, timeline; `ai-gateway`; LLM cho `analysis`, gồm cả comment; khớp khuôn mặt và ảnh mẫu; màn chi tiết video; hàng đợi rà soát | Màn 1 và màn 2 chạy được ở dạng thô |
+| 2–3 | YouTube API, Supadata, chuyển nguồn khi lỗi; keyframe, OCR, timeline; Jev cho `analysis`, gồm cả comment và ảnh; khớp khuôn mặt và ảnh mẫu; màn chi tiết video; hàng đợi rà soát | Màn 1 và màn 2 chạy được ở dạng thô |
 | 4 | Watchlist RSS và Check now; dòng sự kiện | Ba màn demo chạy trọn |
 | 5 | Giao diện Settings đầy đủ 7 mục, dashboard | Đạt toàn bộ tiêu chí ở phần 8 |
 | 6 | Dữ liệu demo, diễn tập, viết báo cáo môn học | |
@@ -218,7 +217,7 @@ Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh m
 
 `audit.log(actor, action, target, detail, status)` ghi thêm một dòng vào `data/log/audit.jsonl`, kể cả đăng nhập và đổi Settings. Secret nằm trong `data/secrets.json` (quyền 0600) hoặc trong `.env`, và API chỉ trả về giá trị đã che.
 
-Hợp đồng C5 là định dạng của `config/sources.toml`, `config/ai.toml` và `config/analysis.toml`, viết bằng Pydantic. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
+Hợp đồng C5 là định dạng của `config/sources.toml` và `config/analysis.toml`, viết bằng Pydantic. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
 
 Hạn chế được chấp nhận: tài khoản, watchlist, danh sách video đã biết và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại đối tượng, video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên.
 
@@ -311,24 +310,9 @@ Với mỗi loại dữ liệu, orchestrator lấy từ một nguồn: thử cá
 
 Nghiệm thu: thêm một adapter mới chỉ cần một file trong `providers/` và một dòng đăng ký.
 
-### 10.4 `ai-gateway`
+### 10.4 `ai-gateway` (đã bỏ)
 
-Module cho phép dùng nhiều nhà cung cấp LLM/VLM và đổi nhà cung cấp bằng cấu hình. Giao diện gồm hai hàm:
-
-- `complete_structured(task, messages, schema: type[BaseModel]) -> BaseModel`
-- `describe_image(task, image, prompt, schema) -> BaseModel`
-
-`task` là tên tác vụ AI. V1 có ba tác vụ AI: `analysis.classify`, `analysis.video_verdict` và `media.vision`. Comment và lời nói dùng Jev, không qua `ai-gateway`. Mỗi tác vụ AI được định tuyến tới một danh sách `(provider, model)` theo thứ tự ưu tiên trong `config/ai.toml`.
-
-Mỗi cặp `(provider, model)` khai báo hai khả năng: `vision` (đọc được ảnh) và `structured` (hỗ trợ JSON schema hoặc tool calling). Cấu hình gán `media.vision` cho model không có `vision` bị từ chối ngay khi nạp.
-
-Có ba loại adapter. `anthropic` và `gemini` dùng SDK riêng của nhà cung cấp. `openai_compat` nhận `base_url`, nên một adapter dùng chung được cho OpenAI, DeepSeek, Qwen/DashScope, GLM, Kimi và OpenRouter. Loại nhà cung cấp `ollama` dùng lại adapter `openai_compat` với `base_url` của máy chủ Ollama và không cần key.
-
-Với đầu ra có cấu trúc, adapter dùng JSON schema hoặc tool calling khi model có `structured`; nếu không thì dùng JSON mode và đặt schema trong prompt. Mọi đầu ra đều qua Pydantic validate. Đầu ra sai được gửi lại kèm thông báo lỗi, tối đa 2 lần, sau đó gateway chuyển sang nhà cung cấp tiếp theo.
-
-Mỗi lần gọi ghi `provider`, `model`, số token, chi phí ước tính, độ trễ và trạng thái vào `data/ai_calls.jsonl`.
-
-Nghiệm thu: sau khi đổi `analysis.classify` hoặc `media.vision` sang nhà cung cấp khác trong Settings, lần chạy tiếp theo dùng nhà cung cấp mới, và kết quả ghi đúng `provider`, `model`.
+Phase 6d (quyết định của Thi ngày 2026-11-21) bỏ hẳn `ai-gateway` và mọi nhà cung cấp LLM/VLM (Ollama, Gemini, OpenRouter, Anthropic). Jev là nhà cung cấp AI duy nhất: Jev nhận thẳng văn bản, keyframe và thumbnail, còn kết luận theo video tính bằng quy tắc (10.6). Lý do: bớt một hạ tầng phải chạy (máy GPU Ollama, key cloud), bớt code phải giải thích khi demo; chất lượng phân loại ảnh không cần cao với bài tập môn học. Yêu cầu "LLM và VLM dùng được nhiều nhà cung cấp" trong `docs/intent/socmint-youtube.md` vì vậy không còn hiệu lực. Không còn `config/ai.toml`, `data/ai_calls.jsonl` mới, API `/api/settings/ai*`; file cũ của người dùng không bị xoá, chỉ không được đọc. Lời gọi Jev ghi vào `data/jev_calls.jsonl` (10.6).
 
 ### 10.5 `media-pipeline`
 
@@ -337,9 +321,8 @@ Module chỉ xử lý media; mọi việc liên quan tới đối tượng nằm
 1. Tạo bản proxy 480p (mp4, H.264, dùng cả để phát trên trình duyệt) và audio 16 kHz một kênh.
 2. Speech-to-text có mốc thời gian (`kind=stt`). Ở mức thu `full`, bước này luôn chạy, kể cả khi đã có phụ đề.
 3. Tách cảnh. Trong mỗi cảnh, giải mã 2 khung mỗi giây và giữ làm khung ứng viên khi pHash toàn khung hoặc độ khác biệt theo từng ô (lưới 4×4) vượt ngưỡng.
-4. OCR trên khung ứng viên và thumbnail, có bbox. Sau OCR, chọn keyframe từ khung ứng viên: giữ khung có dòng chữ chưa thấy ở keyframe ngay trước (OCR đọc lệch vài ký tự không tính là chữ mới), hoặc khác về hình với mọi keyframe đã giữ (cosine embedding DINOv2 dưới 0,85). Không có model ảnh thì chỉ bỏ khung trùng hash. Keyframe ghi ở `frames/selected.json`; timeline, VLM và khớp ảnh mẫu chỉ dùng keyframe.
-5. VLM mô tả keyframe và thumbnail qua tác vụ AI `media.vision`, chạy song song với số luồng giới hạn. Ngoài phần mô tả, VLM liệt kê các dấu hiệu xúc phạm nhìn thấy được (`offensive_cues`), ví dụ ảnh ghép còng tay, vẽ sừng, chữ chửi. Prompt cấm VLM đoán danh tính người trong ảnh.
-6. Ghép timeline.
+4. OCR trên khung ứng viên và thumbnail, có bbox. Sau OCR, chọn keyframe từ khung ứng viên: giữ khung có dòng chữ chưa thấy ở keyframe ngay trước (OCR đọc lệch vài ký tự không tính là chữ mới), hoặc khác về hình với mọi keyframe đã giữ (cosine embedding DINOv2 dưới 0,85). Không có model ảnh thì chỉ bỏ khung trùng hash. Keyframe ghi ở `frames/selected.json`; timeline, Jev và khớp ảnh mẫu chỉ dùng keyframe.
+5. Ghép timeline. Mọi keyframe đều vào timeline (`frames`), kể cả khung không có chữ; không còn bước mô tả ảnh.
 
 Các bước dùng GPU chạy trên hàng đợi `gpu`, mỗi lúc một bước.
 
@@ -352,14 +335,13 @@ Hợp đồng C3 là `timeline.json`:
   "source_video_sha256": "…", "transcript_kind": "uploaded|auto|supadata_ai|stt",
   "thumbnails": [{
     "file": "thumbnails/maxres.jpg",
-    "ocr": [{"text": "…", "bbox": [x, y, w, h]}],
-    "visual": {"description": "…", "offensive_cues": ["…"], "provider": "…", "model": "…"}
+    "ocr": [{"text": "…", "bbox": [x, y, w, h]}]
   }],
   "segments": [{
     "id": "seg_0007", "start": 92.4, "end": 104.1,
     "speech": "…",
-    "ocr": [{"frame": "frames/000231.jpg", "t": 95.0, "text": "…", "bbox": [x, y, w, h]}],
-    "visual": [{"frame": "frames/000231.jpg", "t": 95.0, "description": "…", "offensive_cues": ["…"], "provider": "…", "model": "…"}]
+    "frames": [{"frame": "frames/000231.jpg", "t": 95.0}],
+    "ocr": [{"frame": "frames/000231.jpg", "t": 95.0, "text": "…", "bbox": [x, y, w, h]}]
   }]
 }
 ```
@@ -382,7 +364,7 @@ V1 chỉ có bộ phân tích cho K1 (bôi nhọ đối tượng). Đầu vào g
 
 Bước 1 tìm dấu hiệu đối tượng (`hits`). Mỗi dấu hiệu ghi đối tượng, nơi tìm thấy (`via`), vị trí (đoạn, khung hình, comment), bbox và điểm số nếu có.
 
-- Tên (`via`: `speech`, `ocr`, `title`, `description`, `comment`, `thumbnail`). Văn bản được chuẩn hoá NFC, bỏ dấu, chuyển chữ thường. Tên đầy đủ và biệt danh được so theo ranh giới từ; mỗi từ dài từ 4 ký tự trở lên được sai tối đa 1 ký tự, từ ngắn hơn phải khớp chính xác. Viết tắt phải khớp đủ ký tự theo ranh giới từ, không phân biệt hoa thường. Bỏ dấu làm một số tên trùng nhau (An và Ân); tầng LLM xử lý các trường hợp này.
+- Tên (`via`: `speech`, `ocr`, `title`, `description`, `comment`, `thumbnail`). Văn bản được chuẩn hoá NFC, bỏ dấu, chuyển chữ thường. Tên đầy đủ và biệt danh được so theo ranh giới từ; mỗi từ dài từ 4 ký tự trở lên được sai tối đa 1 ký tự, từ ngắn hơn phải khớp chính xác. Viết tắt phải khớp đủ ký tự theo ranh giới từ, không phân biệt hoa thường. Bỏ dấu làm một số tên trùng nhau (An và Ân); Jev xử lý các trường hợp này.
 - Khuôn mặt (`via: face`). Model chạy trên máy phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng. Giới hạn bắt buộc: chỉ so với các đối tượng đã khai báo; không đặt tên hay xác định danh tính bất kỳ người nào khác; đặc trưng của khuôn mặt không khớp không được lưu. Có thể tắt bằng `analysis.toml`.
 - Ảnh mẫu (`via: ref_image`). Embedding của keyframe, thumbnail và các ô cắt theo lưới được so với embedding của ảnh mẫu, để bắt trường hợp ảnh gốc bị cắt, ghép hay đổi màu.
 
@@ -390,18 +372,23 @@ Một video được coi là liên quan tới đối tượng khi có ít nhất
 
 Bước 2 là tầng tĩnh. Từ điển tiếng Việt (`analysis/lexicon/vi_insults.txt`) chạy trên các vùng văn bản có dấu hiệu tên. Đối tượng thường là lãnh đạo Đảng và Nhà nước, vì nội dung xâm phạm an ninh quốc gia khi nhắc tên một người cụ thể thường nhắm vào những người này. Từ điển chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia (xúc phạm, phỉ báng; cáo buộc không bằng chứng; xuyên tạc, bịa đặt, giả mạo; kích động, chia rẽ, bạo lực; bí mật nhà nước), mỗi nhóm gắn một `category` của C4 (lần lượt `insult`, `unsupported_accusation`, `fabrication`, `incitement`, `state_secret`). Có cụm từ trong từ điển thì sinh nghi vấn `analyzer: "static"` với `category` của nhóm, và `reason` ghi nhóm cùng cụm từ khớp. Dấu hiệu tên đơn thuần chỉ được ghi vào `hits.json`, không vào hàng đợi.
 
-Bước 3 phân loại nội dung. Lời nói và comment dùng Jev, phần còn lại dùng LLM (quyết định ngày 2026-11-20). Jev xét **mọi** đoạn lời nói và **mọi** comment của video, không chỉ chỗ nhắc tên, vì nội dung nói xấu Đảng, Nhà nước, chế độ thường không gọi tên ai (ví dụ "hắn chỉ giỏi đàn áp", "chế độ này mục nát"). Mỗi đoạn lời nói là một request, `state` gồm tiêu đề video, danh sách đối tượng, lời nói của đoạn trước, đoạn đó và đoạn sau (đoạn đã gom theo câu ở 10.5); mỗi comment là một request, `state` gồm tiêu đề video, danh sách đối tượng, comment cha và comment. Câu hỏi: `category` (choice, 7 danh mục C4), `target` (choice: từng đối tượng, cộng `none`), `severity` (score 3 mức). Nội dung là vi phạm khi tổng xác suất các danh mục vi phạm từ 0,5 và `target` khác `none`; nghi vấn gắn với đối tượng được chọn. `quote` là lời nói của đoạn hoặc toàn bộ comment; Jev không viết lý do nên `reason` ghi danh mục và xác suất; `confidence` lấy theo xác suất của danh mục được chọn. Các request chạy song song với số luồng giới hạn, thử lại khi 429. Không gộp nhiều mục vào một request: đo ngày 2026-11-20 trên 82 comment vi phạm đã gán nhãn, gửi từng comment bắt được 79–81, gửi lô 5, 15 và 60 comment chỉ bắt được 71, 70 và 68. Không có LLM dự phòng: Jev lỗi hẳn thì lời nói và comment chỉ còn tầng tĩnh, và lỗi ghi vào `llm_error` của job như hiện nay.
+Bước 3 phân loại nội dung bằng Jev cho mọi nguồn (quyết định ngày 2026-11-20 và 2026-11-21). Jev xét **mọi** đoạn lời nói, comment, tiêu đề, mô tả, đoạn timeline có keyframe hoặc OCR và thumbnail, không chỉ chỗ nhắc tên, vì nội dung nói xấu Đảng, Nhà nước, chế độ thường không gọi tên ai (ví dụ "hắn chỉ giỏi đàn áp", "chế độ này mục nát"). Mỗi mục là một request; không gộp nhiều mục vào một request (đo ngày 2026-11-20 trên 82 comment vi phạm đã gán nhãn: gửi từng comment bắt được 79–81, gửi lô 5, 15 và 60 comment chỉ bắt được 71, 70 và 68).
+
+- Cấu hình câu hỏi R10: `state` gồm `protected_targets`, `source_type`, `text`, `video_title` và ngữ cảnh theo loại (`parent_comment` cho comment; `speech_before`, `speech_after` cho lời nói). Câu hỏi: `category` (choice, 7 danh mục C4), `severity` (score 0–2), `is_attack`, `target` (choice: từng đối tượng, cộng `none`). `protected_targets` và `target` sinh từ danh sách đối tượng (tên, biệt danh, viết tắt, mô tả).
+- Giữ nghi vấn khi `is_attack.noul ≥ 0,5` và `target.choice ≠ "none"`; nghi vấn gắn với đối tượng được chọn. `severity` lấy từ điểm Jev: dưới 0,5 là `low`, dưới 1,5 là `medium`, còn lại `high`. `category` là danh mục có xác suất cao nhất; `confidence` theo xác suất đó: từ 0,85 là `highly_likely`, từ 0,6 là `likely`, còn lại `unverified`. Jev không viết lý do nên `reason` ghi danh mục và xác suất; giao diện không hiện `reason` của nghi vấn Jev. Nghi vấn tầng tĩnh luôn `medium` và `unverified`.
+- Ảnh gửi thẳng cho Jev. Mỗi đoạn timeline có keyframe hoặc OCR là một request: `text` là các dòng OCR chưa gửi ở đoạn trước, ghép bằng ` | ` (có thể rỗng); ảnh là tối đa 4 keyframe của đoạn, lấy cách đều. `source_kind` là `ocr` khi có chữ, `visual` khi chỉ có ảnh; `frame` là khung có chữ đầu tiên, hoặc keyframe đầu tiên. Mỗi thumbnail là một request gồm ảnh thumbnail và chữ OCR của nó (`source_kind: thumbnail`). Chỉ gửi keyframe và thumbnail của video; ảnh khuôn mặt mẫu và ảnh mẫu của đối tượng không bao giờ gửi cho Jev.
+- Ảnh gửi dạng JPEG chất lượng 85, thu nhỏ để cạnh dài không quá 1024 px rồi phóng to nếu cạnh ngắn dưới 320 px (API từ chối kích thước như 270×480 hoặc 640×200). Chỉ request có ảnh mới gửi header `TypeSafe-Danger-Zone-Images: true`. Ảnh quá dài vẫn có thể bị từ chối; khi đó request lỗi được ghi như lỗi Jev khác.
+- Các request chạy song song với số luồng giới hạn (`jev.concurrency` trong `analysis.toml`), thử lại khi 429. Jev không tất định; không cache theo hash ảnh. Không có nhà cung cấp dự phòng: Jev lỗi hoặc thiếu key thì job vẫn xong, lỗi ghi vào `llm_error` của job, và tầng tĩnh, khớp tên, ảnh mẫu, khuôn mặt vẫn chạy.
+- Theo dõi usage: mỗi request đã gửi ghi đúng một dòng vào `data/jev_calls.jsonl` (kể cả thử kết nối, retry 429 gộp trong một dòng): thời điểm, video/bản thu/run (null khi thử kết nối), nguồn, số ảnh, token vào/ra, có giữ nghi vấn không, trạng thái, số retry. Không ghi nội dung, ảnh hay key. Chỉ cộng token hợp lệ do TypeSafe báo trong `usage`; thiếu thì null, vẫn đếm lượt gọi. Không ước tính token, USD hay credit; không hiển thị hạn mức hoặc số dư.
 
 Đối tượng có thể là tổ chức. `h4wk init` thêm sẵn đối tượng "Đảng và Nhà nước Việt Nam" (biệt danh như Đảng, Đảng Cộng sản, nhà nước, chế độ, chính quyền, chính phủ; viết tắt ĐCSVN, ĐCS) khi danh sách đối tượng còn trống.
 
-Phần gửi LLM qua tác vụ AI `analysis.classify` (OCR, hình ảnh, tiêu đề, mô tả, thumbnail):
+Bước 4 là kết luận theo video bằng quy tắc, không gọi AI (`verdict.decide`). Kết luận ghi ở `analysis/<run_id>/verdict.json` (cấu trúc `VideoVerdict`, thêm vào C4):
 
-- đoạn có dấu hiệu (tên, khuôn mặt, ảnh mẫu), kèm một đoạn trước và một đoạn sau làm ngữ cảnh;
-- trong video liên quan, mọi đoạn mà VLM ghi nhận `offensive_cues`, kể cả khi đoạn đó không nhắc tên, kèm ngữ cảnh cấp video (tiêu đề, mô tả, các dấu hiệu đã tìm được);
-- tiêu đề, mô tả và thumbnail có dấu hiệu hoặc có `offensive_cues`.
-
-
-Bước 4 là kết luận theo video, qua tác vụ AI mới `analysis.video_verdict`. Video có ít nhất một nghi vấn vi phạm thì LLM đọc metadata video và các nghi vấn (đã gộp) rồi trả kết luận: `violation` (`yes`, `no`, `uncertain`), các danh mục chính, `severity`, `confidence`, tóm tắt lý do bằng tiếng Việt và danh sách `finding_id` làm căn cứ. Kết luận ghi ở `analysis/<run_id>/verdict.json` (cấu trúc `VideoVerdict`, thêm vào C4). Video không có nghi vấn vi phạm thì kết luận `no` mà không gọi LLM. Công cụ chỉ đề xuất kết luận; người duyệt xác nhận (10.8).
+- Không có nghi vấn vi phạm (danh mục khác `legitimate_criticism`, `neutral`) của đúng run: `violation: no`, `confidence: highly_likely`, tóm tắt "Không có nghi vấn vi phạm."
+- Có ít nhất một nghi vấn vi phạm `highly_likely`: `violation: yes`; còn lại `uncertain`. Nghi vấn tầng tĩnh (`unverified`) không tự đẩy kết luận lên `yes`. Thi chốt quy tắc này ngày 2026-11-21, chấp nhận nhiều video ra `yes` do precision của Jev thấp (T47: 18% trên mẫu không khớp tên); người duyệt vẫn xác nhận từng video (10.8).
+- `categories` xếp theo số nghi vấn giảm dần; `severity` là mức cao nhất; `confidence` là của nghi vấn xếp đầu; `finding_ids` là 10 nghi vấn đầu khi xếp theo `severity` rồi xác suất Jev. `summary` sinh theo mẫu, ví dụ "12 nghi vấn vi phạm; danh mục: insult (8), incitement (4); mức cao nhất: high." `model` luôn `null`.
+- `h4wk verdict` bỏ qua run đã có `verdict.json`, trừ khi có `--force`.
 
 Hợp đồng C4 gồm ba cấu trúc. Dấu hiệu (`hits.json`):
 
@@ -416,7 +403,7 @@ Nghi vấn (`findings.json`):
 {
   "id": "f_…", "run_id": "…", "video_id": "…", "capture": "…",
   "analyzer": "static|llm", "analyzer_version": "0.1.0",
-  "model": {"provider": "…", "model": "…"},
+  "model": {"provider": "typesafe", "model": "jev-1.14.0"},
   "source_kind": "speech|ocr|visual|title|description|thumbnail|comment",
   "triggers": [{"via": "face", "frame": "frames/000231.jpg", "bbox": [x, y, w, h], "score": 0.82}],
   "segment_id": "seg_0007", "comment_id": null,
@@ -440,7 +427,7 @@ Quyết định rà soát (một dòng trong `reviews.jsonl`):
 
 Quy tắc:
 
-- Nghi vấn `visual` phải trích khung hình và nêu lý do dựa trên nội dung hình.
+- Nghi vấn `visual` phải trích khung hình.
 - Nghi vấn `speech`, `ocr` và `visual` phải có `segment_id` và `start`, để bấm vào nghi vấn thì video phát từ `start − 2s`.
 - Nghi vấn `ocr` cùng tầng phân tích, đối tượng, danh mục và chữ gần giống nhau (OCR đọc lệch vài ký tự giữa các khung) được gộp thành một nghi vấn, ví dụ băng rôn chạy suốt video. `occurrences` liệt kê mỗi đoạn có chữ đó, theo thời gian; phần tử đầu trùng `segment_id` và `start` của nghi vấn. Trích dẫn lấy từ bỏ phiếu từng ký tự giữa các bản đọc; nếu tiêu đề, mô tả hay lời nói có đúng câu đó (so sau khi bỏ dấu) thì lấy nguyên văn từ đó, vì OCR hay đọc sai dấu. Nghi vấn chỉ ở một đoạn thì `occurrences` rỗng. Thanh thời gian ở màn chi tiết video tô mọi đoạn trong `occurrences`, bấm đoạn nào thì phát từ đầu đoạn đó − 2s.
 - Mức tin cậy viết bằng chữ, không dùng phần trăm.
@@ -450,8 +437,8 @@ Quy tắc:
 Nghiệm thu:
 
 - Bộ khớp tên đạt toàn bộ danh sách ví dụ đúng và phản ví dụ trong test (T11).
-- Đầu ra LLM sai schema không bao giờ được ghi vào `findings.json`.
-- Trên video mẫu, một đoạn chỉ có ảnh chế mà không ai nhắc tên vẫn sinh nghi vấn `visual`.
+- Đầu ra Jev sai schema không bao giờ được ghi vào `findings.json`.
+- Trên video mẫu với Jev giả, mỗi đoạn có keyframe gửi đúng đường dẫn keyframe cho Jev, kể cả đoạn không ai nhắc tên.
 
 ### 10.7 `jobs`
 
@@ -462,7 +449,7 @@ Mức thu quyết định những gì được thu và xử lý. Mặc định l
 | Mức | Thu | Xử lý và phân tích |
 |---|---|---|
 | `metadata` | Metadata, thumbnail | Phân tích tiêu đề, mô tả |
-| `text` | Thêm phụ đề tiếng Việt, comment | Thêm OCR và VLM trên thumbnail; phân tích transcript, comment |
+| `text` | Thêm phụ đề tiếng Việt, comment | Thêm OCR trên thumbnail; phân tích transcript, comment |
 | `full` | Thêm video 720p, audio | Toàn bộ các bước ở 10.5 và 10.6 |
 
 Đầu vào ở màn Collect:
@@ -522,8 +509,8 @@ Settings gồm 7 mục:
 3. Thứ tự ưu tiên giữa các nguồn trong từng loại dữ liệu, kéo thả được. Loại dữ liệu nào không còn nguồn đang bật thì hiện cảnh báo.
 4. Nút Test connection cho từng nguồn.
 5. Trạng thái từng nguồn (đang chạy, tạm ngưng) và quota, credit đã dùng.
-6. Danh sách nhà cung cấp AI: nhập key, nhập `base_url` cho loại OpenAI-compatible, nút Test.
-7. Bảng gán mỗi tác vụ AI với danh sách nhà cung cấp và model theo thứ tự ưu tiên.
+6. Jev (`/settings/jev`): API key (đã che, nhập, xoá), nút Test connection.
+7. Usage của Jev: lượt gọi, token vào/ra do TypeSafe báo, theo kỳ (hôm nay, 7 ngày, 30 ngày theo giờ Việt Nam) và theo nguồn, 5 lỗi gần nhất; không có hạn mức hay số dư.
 
 Nghiệm thu: chạy được trên Chrome bản mới nhất ở độ rộng từ 1280 px trở lên. Không cần hỗ trợ màn hình điện thoại.
 
@@ -534,7 +521,7 @@ Luôn làm:
 - Chạy `pytest` và `ruff` trước khi commit.
 - Dùng giờ Việt Nam và đặt tên theo ID của YouTube.
 - Ghi nhật ký cho mọi thao tác, kể cả thao tác thất bại.
-- Validate mọi đầu ra của LLM/VLM.
+- Validate mọi đầu ra của Jev.
 - Lưu dữ liệu thô nguyên văn.
 
 Cần Thi đồng ý trước khi:
@@ -542,7 +529,7 @@ Cần Thi đồng ý trước khi:
 - Thay đổi C1–C5 sau cuối tuần 1.
 - Thêm dependency nặng ngoài danh sách ở phần 3.
 - Thêm module mới hoặc thay đổi phạm vi.
-- Gửi một loại dữ liệu mới tới nhà cung cấp AI.
+- Gửi một loại dữ liệu mới tới Jev.
 
 Không bao giờ:
 
@@ -551,7 +538,7 @@ Không bao giờ:
 - Sửa hoặc xoá file trong `captures/` ngoài `CaptureWriter`.
 - Tự động chuyển nghi vấn sang trạng thái confirmed.
 - Dùng khớp khuôn mặt để xác định danh tính người không phải đối tượng đã khai báo, hoặc lưu đặc trưng của khuôn mặt không khớp.
-- Gửi ảnh khuôn mặt mẫu cho nhà cung cấp AI bên ngoài; khớp khuôn mặt chỉ chạy trên máy.
+- Gửi ảnh khuôn mặt mẫu cho Jev hay bất kỳ dịch vụ bên ngoài nào; khớp khuôn mặt chỉ chạy trên máy.
 - Làm màn hình hay chức năng lập hồ sơ từng người bình luận.
 
 ## 12. Ngoài phạm vi (để V2)
@@ -572,7 +559,7 @@ Không bao giờ:
 
 ## 13. Quyết định đã chốt và việc còn treo
 
-Việc còn treo: model cụ thể cho từng tác vụ AI, model khớp khuôn mặt và model khớp ảnh mẫu, chốt khi làm spike T3 và `ai-gateway`.
+Việc còn treo: model khớp khuôn mặt và model khớp ảnh mẫu, chốt khi làm spike T3.
 
 Các quyết định đã chốt:
 
@@ -583,8 +570,8 @@ Các quyết định đã chốt:
 - Mọi thời gian trong dữ liệu, nhật ký và giao diện dùng giờ Việt Nam (UTC+07:00).
 - `id` của nghi vấn là `f_<ULID>`, duy nhất trong toàn hệ thống. Không có khái niệm case; cả hệ thống là một cuộc theo dõi. Quyết định Reject bắt buộc có lý do, kiểm tra ngay trong hợp đồng C4.
 - Phân tích lại một video thì mọi nghi vấn của lần chạy mới phải được rà soát lại; quyết định cũ không tự áp dụng.
-- Comment được gửi nguyên văn cho nhà cung cấp AI, kể cả tên và ID người bình luận.
-- `config/ai.toml.example` cấu hình sẵn nhiều nhà cung cấp: Anthropic, OpenAI, Gemini và các nhà OpenAI-compatible như DeepSeek, Qwen, GLM, Kimi. Settings chỉ cho chọn nhà cung cấp và model, không có lựa chọn theo quốc gia.
+- Comment được gửi nguyên văn cho Jev, kể cả tên và ID người bình luận.
+- Ngày 2026-11-21 Thi chốt Jev là nhà cung cấp AI duy nhất, bỏ `ai-gateway`, VLM và mô tả ảnh (10.4); đảo yêu cầu đa nhà cung cấp trong `docs/intent/socmint-youtube.md`.
 - Có khớp khuôn mặt, với các giới hạn ở 10.6 và phần 11. Điều này đảo ngược quy định "không nhận diện khuôn mặt" trong mô tả gốc (mục 13, 14); dữ liệu khuôn mặt là dữ liệu cá nhân nhạy cảm theo Nghị định 13/2023, và báo cáo môn học giải thích lý do thay đổi. Ngày 2026-11-21 Thi đổi quyết định: đối tượng demo là nhân vật công chúng Tô Lâm, ảnh khuôn mặt mẫu là ảnh chân dung công khai trên Wikimedia Commons (ghi nguồn và giấy phép trong báo cáo), nghiệm thu trên video thật đã thu; không còn quay video có khuôn mặt thành viên nhóm.
 - Nhóm không có kênh YouTube riêng. Màn 3 theo dõi kênh tin tức đăng thường xuyên, nên chỉ trình diễn việc phát hiện và tự xử lý video mới, không trình diễn nghi vấn mới.
 - Thi là người chịu trách nhiệm chính và duyệt mọi thay đổi hợp đồng sau checkpoint A.

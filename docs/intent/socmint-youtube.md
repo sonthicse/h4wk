@@ -12,11 +12,11 @@ Một luồng K1 (bôi nhọ đối tượng) đa phương thức chạy trọn 
 3. Transcript tiếng Việt có mốc thời gian.
 4. Phân tích hình ảnh. Khung hình được trích theo mức thay đổi, sau đó:
    - OCR đọc chữ chèn trên hình, ví dụ "[Tên] LỪA ĐẢO" hay chữ trên thumbnail;
-   - VLM (qua API) mô tả hình ảnh và liệt kê dấu hiệu xúc phạm như ảnh ghép, ảnh chế, ảnh đặt cạnh hình tiêu cực;
+   - keyframe và thumbnail được gửi thẳng cho Jev cùng chữ OCR (không còn bước VLM mô tả ảnh; quyết định ngày 21/11/2026);
    - khuôn mặt trong hình được so với ảnh khuôn mặt mẫu của đối tượng, bằng model chạy trên máy;
    - hình được so với ảnh mẫu hay bị dùng lại của đối tượng (ảnh chân dung quen thuộc, logo).
 5. Timeline đa phương thức: lời nói, chữ trên hình và mô tả khung hình gắn chung một mốc thời gian.
-6. Phân tích K1 trong module `analysis`, trên timeline, tiêu đề, mô tả, thumbnail và comment. Tầng tĩnh khớp tên và biệt danh không phân biệt dấu, kết hợp từ điển từ xúc phạm. Tầng LLM trả về đầu ra có cấu trúc gồm phân loại, mức độ, lý do, trích dẫn và mốc thời gian. Một đoạn chỉ có ảnh chế mà không ai nhắc tên vẫn được phân tích, nhờ khuôn mặt mẫu, ảnh mẫu hoặc ngữ cảnh của cả video. LLM và VLM dùng được nhiều nhà cung cấp, kể cả các nhà cung cấp Trung Quốc.
+6. Phân tích K1 trong module `analysis`, trên timeline, tiêu đề, mô tả, thumbnail và comment. Tầng tĩnh khớp tên và biệt danh không phân biệt dấu, kết hợp từ điển từ xúc phạm. Tầng Jev trả về phân loại, mức độ và đối tượng bị nhắm tới; kết luận theo video tính bằng quy tắc. Một đoạn chỉ có ảnh chế mà không ai nhắc tên vẫn được phân tích, nhờ khuôn mặt mẫu, ảnh mẫu hoặc ngữ cảnh của cả video. Yêu cầu ban đầu là LLM và VLM dùng được nhiều nhà cung cấp; Thi đã đảo yêu cầu này ngày 21/11/2026: Jev (TypeSafe) là nhà cung cấp AI duy nhất, nhận cả ảnh (xem SPEC.md 10.4).
 7. Hàng đợi rà soát.
 
 Ngoài luồng trên còn có watchlist kênh: hệ thống phát hiện video mới qua RSS, tự thu, tự phân tích và đưa nghi vấn vào hàng đợi.
@@ -42,11 +42,11 @@ Buổi demo cũng trình diễn giao diện chỉnh nguồn để cho thấy ki�
 ## Ràng buộc
 
 - Nhóm có nhiều thời gian nên thời gian không phải ràng buộc; các mốc thời gian xử lý là mục tiêu, không bắt buộc. Việc viết code có AI coding agent hỗ trợ.
-- Tiền API (LLM, VLM, speech-to-text, Supadata) không giới hạn.
+- Tiền API (Jev, speech-to-text, Supadata) không giới hạn.
 - Backend Python (FastAPI), frontend React, giao diện tiếng Anh. Cả hai thành viên thạo Python nhưng yếu frontend, nên cần đọc lại code do agent sinh ra để trả lời được câu hỏi của người chấm.
 - Chạy trực tiếp trên máy, không dùng Docker.
 - Khớp khuôn mặt chỉ so với các đối tượng đã khai báo, chạy trên máy, không lưu đặc trưng của khuôn mặt không khớp, và khi demo dùng ảnh chân dung công khai của nhân vật công chúng là đối tượng (đổi ngày 2026-11-21, xem SPEC §13).
-- Comment được gửi nguyên văn cho nhà cung cấp AI. Settings chỉ cho chọn nhà cung cấp, không chọn theo quốc gia.
+- Comment được gửi nguyên văn cho Jev.
 
 ## Ngoài phạm vi
 
@@ -66,7 +66,7 @@ Ngày 2026-11-18, khi viết spec, nhóm đổi các điểm sau so với bản 
 
 - Giao diện viết bằng tiếng Anh.
 - Thu toàn bộ comment và đưa comment vào phân tích K1.
-- LLM/VLM dùng nhiều nhà cung cấp; comment gửi nguyên văn; Settings không có lựa chọn theo quốc gia.
+- Comment gửi nguyên văn cho Jev; yêu cầu nhiều nhà cung cấp LLM/VLM đã bị đảo ngày 21/11/2026.
 - Bỏ ảnh chụp trang và xuất báo cáo khỏi V1.
 - Module phân tích đặt tên là `analysis`.
 - Bỏ giới hạn 120 giờ công.

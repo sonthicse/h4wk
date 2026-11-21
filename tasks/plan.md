@@ -330,7 +330,7 @@ Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend ở 
 - [x] T63: UI màn video và Collect bỏ mô tả ảnh và bước VLM (ui)
 - [x] T65: `analysis`: nhật ký Jev, thống kê token TypeSafe báo và thử kết nối (backend)
 - [x] T66: UI Dashboard, Videos, Entities, Login theo bản phác (ui)
-- [ ] T64: Gộp SPEC-jev-only.md vào SPEC.md và sửa tài liệu ý định
+- [x] T64: Gộp SPEC-jev-only.md vào SPEC.md và sửa tài liệu ý định
 
 Thứ tự: T58 → (T59, T60 song song) → T61 sau T60; T65 sau T59 → T62 sau T61 và T65; T63 sau T58 và T60; T66 làm ngay được (dòng Jev ở Dashboard chờ T65) → T64 sau tất cả → Checkpoint 6d.
 

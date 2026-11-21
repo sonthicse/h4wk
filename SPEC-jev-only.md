@@ -1,6 +1,6 @@
 # Spec Delta: Jev thay toàn bộ LLM và VLM
 
-Status: approved (2026-11-21)
+Status: implemented (2026-11-22); nội dung đã gộp vào SPEC.md
 
 Kế hoạch: [tasks/plan.md](tasks/plan.md) Phase 6d (T58–T66). Bản phác giao diện: [docs/design/phase-6d/](docs/design/phase-6d/README.md).
 

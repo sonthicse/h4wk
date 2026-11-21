@@ -1128,7 +1128,7 @@ Sửa SPEC.md: §8 (bỏ tiêu chí đổi nhà cung cấp AI, thêm tiêu chí 
 
 Nghiệm thu:
 
-- [ ] `grep -n "ai-gateway\|media.vision\|video_verdict\|ai.toml\|Ollama\|VLM" SPEC.md docs/intent/socmint-youtube.md CLAUDE.md` chỉ còn câu ghi lý do đã bỏ.
+- [x] `grep -n "ai-gateway\|media.vision\|video_verdict\|ai.toml\|Ollama\|VLM" SPEC.md docs/intent/socmint-youtube.md CLAUDE.md` chỉ còn câu ghi lý do đã bỏ.
 - [ ] Reviewer đối chiếu SPEC.md với code trên `main`: C3, C5, quy tắc kết luận khớp.
 
 File: `SPEC.md`, `SPEC-jev-only.md`, `docs/intent/socmint-youtube.md`, `CLAUDE.md`, `tasks/plan.md`.
