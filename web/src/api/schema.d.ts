@@ -1201,6 +1201,16 @@ export interface components {
              */
             occurrences: components["schemas"]["Occurrence"][];
         };
+        /**
+         * Frame
+         * @description Keyframe thuộc một đoạn; ảnh gửi thẳng cho Jev, không có mô tả.
+         */
+        Frame: {
+            /** Frame */
+            frame: string;
+            /** T */
+            t: number;
+        };
         /** FrameOcr */
         FrameOcr: {
             /** Text */
@@ -1212,24 +1222,6 @@ export interface components {
                 number,
                 number
             ];
-            /** Frame */
-            frame: string;
-            /** T */
-            t: number;
-        };
-        /** FrameVisual */
-        FrameVisual: {
-            /** Description */
-            description: string;
-            /**
-             * Offensive Cues
-             * @default []
-             */
-            offensive_cues: string[];
-            /** Provider */
-            provider: string;
-            /** Model */
-            model: string;
             /** Frame */
             frame: string;
             /** T */
@@ -1490,10 +1482,10 @@ export interface components {
              */
             ocr: components["schemas"]["FrameOcr"][];
             /**
-             * Visual
+             * Frames
              * @default []
              */
-            visual: components["schemas"]["FrameVisual"][];
+            frames: components["schemas"]["Frame"][];
         };
         /**
          * Severity
@@ -1670,7 +1662,6 @@ export interface components {
              * @default []
              */
             ocr: components["schemas"]["OcrText"][];
-            visual?: components["schemas"]["Visual"] | null;
         };
         /** Timeline */
         Timeline: {
@@ -1943,23 +1934,6 @@ export interface components {
             decisions: components["schemas"]["VideoReviewDecision"][];
             /** Findings */
             findings: components["schemas"]["Finding"][];
-        };
-        /**
-         * Visual
-         * @description Mô tả của VLM. Không chứa danh tính người trong ảnh.
-         */
-        Visual: {
-            /** Description */
-            description: string;
-            /**
-             * Offensive Cues
-             * @default []
-             */
-            offensive_cues: string[];
-            /** Provider */
-            provider: string;
-            /** Model */
-            model: string;
         };
         /** WatchCreate */
         WatchCreate: {

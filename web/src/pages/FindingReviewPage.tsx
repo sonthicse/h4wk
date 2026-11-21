@@ -48,7 +48,7 @@ function FramePreview({ item, entityNames }: { item: QueueItem; entityNames: Rec
   const frame =
     frames.find((k) => k.id === vf.frame) ??
     frames.find((k) => inSpans(vf, k.t)) ??
-    (vf.frame ? { id: vf.frame, t: vf.start ?? 0, ocr: [], faces: [], refImages: [], visual: null } : null)
+    (vf.frame ? { id: vf.frame, t: vf.start ?? 0, ocr: [], faces: [], refImages: [] } : null)
   if (!frame) return null
   return <FrameImage frame={frame} src={frameUrl(f.video_id, frame.id, f.capture)} boxes className="w-full max-w-md" />
 }

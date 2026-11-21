@@ -157,25 +157,6 @@ export default function KeyframeStrip({
           </div>
           <dl className="space-y-3 text-sm">
             <div>
-              <dt className="text-xs text-muted-foreground">VLM description</dt>
-              <dd>{selected.visual?.description ?? 'Not analysed.'}</dd>
-              {selected.visual && (
-                <dd className="font-mono text-xs text-muted-foreground">
-                  {selected.visual.provider}/{selected.visual.model}
-                </dd>
-              )}
-            </div>
-            {selected.visual && selected.visual.offensiveCues.length > 0 && (
-              <div>
-                <dt className="text-xs text-muted-foreground">Offensive cues</dt>
-                <dd className="mt-1 flex flex-wrap gap-1">
-                  {selected.visual.offensiveCues.map((c) => (
-                    <Badge key={c} variant="destructive">{c}</Badge>
-                  ))}
-                </dd>
-              </div>
-            )}
-            <div>
               <dt className="text-xs text-muted-foreground">OCR text</dt>
               <dd>
                 {selected.ocr.length === 0 ? (

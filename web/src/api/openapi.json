@@ -3615,6 +3615,27 @@
         "title": "Finding",
         "description": "M\u1ed9t nghi v\u1ea5n (m\u1ed9t ph\u1ea7n t\u1eed c\u1ee7a findings.json).\n\n`occurrences` li\u1ec7t k\u00ea m\u1ecdi ch\u1ed7 c\u00f9ng m\u1ed9t n\u1ed9i dung xu\u1ea5t hi\u1ec7n (vd b\u0103ng r\u00f4n ch\u1ea1y su\u1ed1t video\n\u0111\u01b0\u1ee3c OCR \u1edf nhi\u1ec1u \u0111o\u1ea1n), theo th\u1ee9 t\u1ef1 th\u1eddi gian; `segment_id`, `start`, `end` l\u00e0 ch\u1ed7 \u0111\u1ea7u ti\u00ean.\nR\u1ed7ng khi nghi v\u1ea5n ch\u1ec9 \u1edf m\u1ed9t ch\u1ed7."
       },
+      "Frame": {
+        "properties": {
+          "frame": {
+            "type": "string",
+            "title": "Frame"
+          },
+          "t": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "T"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "frame",
+          "t"
+        ],
+        "title": "Frame",
+        "description": "Keyframe thu\u1ed9c m\u1ed9t \u0111o\u1ea1n; \u1ea3nh g\u1eedi th\u1eb3ng cho Jev, kh\u00f4ng c\u00f3 m\u00f4 t\u1ea3."
+      },
       "FrameOcr": {
         "properties": {
           "text": {
@@ -3660,49 +3681,6 @@
           "t"
         ],
         "title": "FrameOcr"
-      },
-      "FrameVisual": {
-        "properties": {
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "offensive_cues": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Offensive Cues",
-            "default": []
-          },
-          "provider": {
-            "type": "string",
-            "title": "Provider"
-          },
-          "model": {
-            "type": "string",
-            "title": "Model"
-          },
-          "frame": {
-            "type": "string",
-            "title": "Frame"
-          },
-          "t": {
-            "type": "number",
-            "minimum": 0.0,
-            "title": "T"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "description",
-          "provider",
-          "model",
-          "frame",
-          "t"
-        ],
-        "title": "FrameVisual"
       },
       "HTTPValidationError": {
         "properties": {
@@ -4369,12 +4347,12 @@
             "title": "Ocr",
             "default": []
           },
-          "visual": {
+          "frames": {
             "items": {
-              "$ref": "#/components/schemas/FrameVisual"
+              "$ref": "#/components/schemas/Frame"
             },
             "type": "array",
-            "title": "Visual",
+            "title": "Frames",
             "default": []
           }
         },
@@ -4881,16 +4859,6 @@
             "type": "array",
             "title": "Ocr",
             "default": []
-          },
-          "visual": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Visual"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "additionalProperties": false,
@@ -5683,39 +5651,6 @@
           "findings"
         ],
         "title": "VideoVerdictDetail"
-      },
-      "Visual": {
-        "properties": {
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "offensive_cues": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Offensive Cues",
-            "default": []
-          },
-          "provider": {
-            "type": "string",
-            "title": "Provider"
-          },
-          "model": {
-            "type": "string",
-            "title": "Model"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "description",
-          "provider",
-          "model"
-        ],
-        "title": "Visual",
-        "description": "M\u00f4 t\u1ea3 c\u1ee7a VLM. Kh\u00f4ng ch\u1ee9a danh t\u00ednh ng\u01b0\u1eddi trong \u1ea3nh."
       },
       "WatchCreate": {
         "properties": {

@@ -35,8 +35,8 @@ const stepClass: Record<StepStatus, string> = {
 // và trạng thái chung. Bước "media" là lúc chuẩn bị, ngay trước bước con đầu tiên sau collect.
 // Bước match có từ T40; job cũ hoặc job bị bỏ qua bước match vẫn hiện done.
 const STEPS_BY_LEVEL: Record<string, string[]> = {
-  full: ['collect', 'transcribe', 'frames', 'ocr', 'vlm', 'match', 'analyze'],
-  text: ['collect', 'ocr', 'vlm', 'match', 'analyze'],
+  full: ['collect', 'transcribe', 'frames', 'ocr', 'match', 'analyze'],
+  text: ['collect', 'ocr', 'match', 'analyze'],
   metadata: ['collect', 'analyze'],
 }
 
@@ -198,7 +198,7 @@ export default function CollectPage() {
                 <TableCell className="max-w-80">
                   <div className="truncate font-mono text-xs">{job.target}</div>
                   {job.error && <p className="mt-1 text-xs whitespace-normal text-destructive">{job.error}</p>}
-                  {/* Bước VLM/OCR cần nhà cung cấp AI có key; backend báo "no AI provider available" khi thiếu. */}
+                  {/* Bước phân tích cần nhà cung cấp AI có key; backend báo "no AI provider available" khi thiếu. */}
                   {job.error?.includes('no AI provider available') && (
                     <p className="mt-1 text-xs">
                       <Link to="/settings/ai" className="underline">
