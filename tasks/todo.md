@@ -743,8 +743,8 @@ Trang làm mục 6–7 của Settings: danh sách nhà cung cấp cho nhập key
 
 Nghiệm thu:
 
-- [ ] Đổi nhà cung cấp của `analysis.classify` trên giao diện rồi chạy phân tích lại thì nghi vấn ghi đúng nhà cung cấp mới.
-- [ ] Đổi nhà cung cấp của `media.vision` thì `vision.json` lần sau ghi đúng nhà cung cấp mới.
+- [x] Đổi nhà cung cấp của `analysis.classify` trên giao diện rồi chạy phân tích lại thì nghi vấn ghi đúng nhà cung cấp mới. (classify bị bỏ ở T56; route kiểm qua vision)
+- [x] Đổi nhà cung cấp của `media.vision` thì `vision.json` lần sau ghi đúng nhà cung cấp mới.
 
 Giao diện đã nối API T32 (team làm theo đồng ý của người dùng). Từ 21/11, ô `analysis.classify` bị bỏ (T56); mục nghiệm thu đầu thay bằng đổi nhà cung cấp của `analysis.video_verdict`. Trước đó ô `analysis.classify` chờ T23; ô `media.vision` dựa vào T21 (`vision.json` đã ghi provider/model), có thể nghiệm thu thủ công bằng key gemini hoặc openrouter.
 
