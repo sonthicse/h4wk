@@ -56,14 +56,12 @@
             <button type="button" aria-pressed="false" style="height: 36px; padding: 0 12px; border: none; border-left: 1px solid #d4d4d4; background: #ffffff; font: inherit; color: #404040;">30 days</button>
           </div>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-          <span style="display: flex; justify-content: space-between; font-size: 13px;"><span style="font-weight: 500;">Credits this month</span><span style="color: #737373;">[used] / [limit] · [left] left</span></span>
-          <span style="height: 8px; border-radius: 4px; background: #f0f0f0;"><span style="display: block; width: 23%; height: 8px; border-radius: 4px; background: #171717;"></span></span>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px;">
+        <p style="margin: 0; font-size: 13px; color: #737373;">Token counts reported by TypeSafe. Totals include only reported counts.</p>
+        <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px;">
           <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Requests</span><span style="font-size: 22px; font-weight: 600;">2,266</span><span style="font-size: 12px; color: #737373;">8 videos</span></div>
           <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">With images</span><span style="font-size: 22px; font-weight: 600;">[n]</span><span style="font-size: 12px; color: #737373;">keyframes + thumbnails</span></div>
-          <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Credits used</span><span style="font-size: 22px; font-weight: 600;">[credits]</span><span style="font-size: 12px; color: #737373;">in this period</span></div>
+          <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Input tokens</span><span style="font-size: 22px; font-weight: 600;">[tokens]</span></div>
+          <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Output tokens</span><span style="font-size: 22px; font-weight: 600;">[tokens]</span></div>
           <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Findings kept</span><span style="font-size: 22px; font-weight: 600;">1,072</span><span style="font-size: 12px; color: #737373;">47% of requests</span></div>
           <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Failed</span><span style="font-size: 22px; font-weight: 600;">0</span><span style="font-size: 12px; color: #737373;">429 retried: 0</span></div>
         </div>
@@ -73,7 +71,8 @@
             <tr style="text-align: left; color: #737373; border-bottom: 1px solid #e5e5e5;">
               <th scope="col" style="padding: 6px 8px; font-weight: 500;">Source</th>
               <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Requests</th>
-              <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Credits</th>
+              <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Input tokens</th>
+              <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Output tokens</th>
               <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Kept</th>
               <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Failed</th>
             </tr>
@@ -83,7 +82,8 @@
               <tr style="border-bottom: 1px solid #f0f0f0;">
                 <th scope="row" style="padding: 6px 8px; font-weight: 400; text-align: left;">{{r.name}}</th>
                 <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.req}}</td>
-                <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.tok}}</td>
+                <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.inTok}}</td>
+                <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.outTok}}</td>
                 <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.kept}}</td>
                 <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.failed}}</td>
               </tr>
@@ -105,11 +105,11 @@ class Component extends DCLogic {
     return {
       h: 1080,
       rows: [
-        { name: 'Title and description', req: '16', tok: '[credits]', kept: '[n]', failed: '0' },
-        { name: 'Speech segments', req: '[n]', tok: '[credits]', kept: '[n]', failed: '0' },
-        { name: 'Comments', req: '[n]', tok: '[credits]', kept: '[n]', failed: '0' },
-        { name: 'Keyframes (images + OCR)', req: '[n]', tok: '[credits]', kept: '[n]', failed: '0' },
-        { name: 'Thumbnails (image + OCR)', req: '[n]', tok: '[credits]', kept: '[n]', failed: '0' },
+        { name: 'Title and description', req: '16', inTok: '[tokens]', outTok: '[tokens]', kept: '[n]', failed: '0' },
+        { name: 'Speech segments', req: '[n]', inTok: '[tokens]', outTok: '[tokens]', kept: '[n]', failed: '0' },
+        { name: 'Comments', req: '[n]', inTok: '[tokens]', outTok: '[tokens]', kept: '[n]', failed: '0' },
+        { name: 'Keyframes (images + OCR)', req: '[n]', inTok: '[tokens]', outTok: '[tokens]', kept: '[n]', failed: '0' },
+        { name: 'Thumbnails (image + OCR)', req: '[n]', inTok: '[tokens]', outTok: '[tokens]', kept: '[n]', failed: '0' },
       ],
     };
   }
