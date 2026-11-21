@@ -454,7 +454,7 @@ Nghiệm thu:
 - [x] Test với `FakeProvider` cho ra `vision.json` hợp lệ (trong `tests/integration/test_pipeline.py`).
 - [ ] Test live với 3 khung mẫu đã biết trước dấu hiệu (một ảnh ghép còng tay, một ảnh có chữ chửi, một ảnh bình thường): hai khung đầu có `offensive_cues` đúng loại, khung thứ ba không có.
 
-Kiểm tra tích hợp với nhà cung cấp giả bằng `uv run pytest tests/integration/test_pipeline.py -k full_flow`. Nghiệm thu VLM thật cần API key.
+Kiểm tra tích hợp với nhà cung cấp giả bằng `uv run pytest tests/integration/test_pipeline.py -k full_flow`. Từ 21/11, test live dùng Ollama `qwen3-vl:4b` (T52), không cần API key.
 
 File: `src/h4wk/media/vision.py`, `media/prompts/vision.md`, tests.
 Người làm: Bảo. Phụ thuộc: T17, T19. Cỡ: S.
@@ -746,7 +746,7 @@ Nghiệm thu:
 - [ ] Đổi nhà cung cấp của `analysis.classify` trên giao diện rồi chạy phân tích lại thì nghi vấn ghi đúng nhà cung cấp mới.
 - [ ] Đổi nhà cung cấp của `media.vision` thì `vision.json` lần sau ghi đúng nhà cung cấp mới.
 
-Giao diện đã nối API T32 (team làm theo đồng ý của người dùng). Ô `analysis.classify` chờ T23; ô `media.vision` dựa vào T21 (`vision.json` đã ghi provider/model), có thể nghiệm thu thủ công bằng key gemini hoặc openrouter.
+Giao diện đã nối API T32 (team làm theo đồng ý của người dùng). Từ 21/11, ô `analysis.classify` bị bỏ (T56); mục nghiệm thu đầu thay bằng đổi nhà cung cấp của `analysis.video_verdict`. Trước đó ô `analysis.classify` chờ T23; ô `media.vision` dựa vào T21 (`vision.json` đã ghi provider/model), có thể nghiệm thu thủ công bằng key gemini hoặc openrouter.
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
@@ -806,7 +806,7 @@ Người làm: cả hai. Phụ thuộc: T36. Cỡ: S.
 
 ### T38 (làm thêm): Bảng so sánh tĩnh và LLM
 
-Gán nhãn tay khoảng 50 đoạn, tính precision và recall của tầng tĩnh và tầng LLM để đưa vào báo cáo môn học.
+Gán nhãn tay khoảng 50 đoạn, tính precision và recall của tầng tĩnh và tầng LLM để đưa vào báo cáo môn học. Từ 21/11, tầng phân loại văn bản là Jev (T55, T56), nên bảng so tầng tĩnh với Jev.
 
 Nghiệm thu:
 
@@ -817,6 +817,8 @@ Kiểm tra: đọc và duyệt file kết quả.
 Người làm: Bảo. Phụ thuộc: T24. Cỡ: S.
 
 ### T47: `analysis`: phân loại comment và lời nói bằng Jev
+
+Từ 21/11: cấu hình câu hỏi được thay bằng R10 ở T54; mục nghiệm thu về 42 dòng chưa gán được thay bằng phép đo của T54.
 
 Theo SPEC 10.6 (bước 3): Jev xét mọi đoạn lời nói và mọi comment của video, không chỉ chỗ nhắc tên; câu hỏi `category`, `target` (đối tượng hoặc `none`), `severity`. Module `analysis/jev.py` gọi API bằng thư viện chuẩn hoặc httpx, đọc key qua `h4wk.core.secrets`, một request mỗi đoạn hoặc comment, chạy song song có giới hạn, thử lại khi 429 theo `retry-after`. Bỏ tác vụ `analysis.classify_comment` và module `analysis/comments.py`; lời nói không gửi LLM nữa. Không có LLM dự phòng. `ModelRef.provider` là `typesafe`, `analyzer` giữ `llm`. `h4wk init` thêm sẵn đối tượng "Đảng và Nhà nước Việt Nam".
 
@@ -864,3 +866,118 @@ Nghiệm thu:
 - [x] `npm run build` và `npm run lint` không lỗi.
 
 Người làm: Thi. Phụ thuộc: T49. Cỡ: M.
+
+## Phase 6c: AI cục bộ và Jev cho mọi văn bản (thêm ngày 2026-11-21)
+
+Spec: [SPEC-local-ai.md](../SPEC-local-ai.md). Ollama chạy ở máy GPU riêng trong LAN; IP chỉ ghi trong `config/ai.toml` (không commit). Kết quả đo dùng làm căn cứ: `data/eval/jev/tune/REPORT.md` (Jev R10) và `data/eval/ollama/REPORT.md` (chọn `qwen3-vl:4b`).
+
+Thứ tự: T51 → (T52, T54, T56 song song) → T53 sau T52 → T55 sau T54 → T57.
+
+### T51: `ai-gateway`: nhà cung cấp `ollama`
+
+C5 thêm `type = "ollama"`: bắt buộc `base_url`, không cần key, dùng adapter `openai_compat`. Settings thêm được nhà cung cấp Ollama, thẻ Ollama không có ô API key, route tới Ollama không báo thiếu key.
+
+Nghiệm thu:
+
+- [x] Test hợp đồng: ví dụ hợp lệ, ví dụ thiếu `base_url` bị chặn đúng quy tắc; `make_provider` tạo được provider Ollama khi không có key.
+- [x] Backend pytest, ruff; web build, lint qua.
+
+Đã làm ở nhánh `feat/ollama-provider` (commit `9c8037d`).
+
+Người làm: Thi. Phụ thuộc: T17, T34. Cỡ: M.
+
+### T52: `media`: mô tả ảnh qua Ollama, cache theo từng ảnh
+
+Merge nhánh `feat/t21-vision-live` trước (đã có làm mới cache theo prompt). Prompt `media.vision` thêm câu “Trả lời ngắn gọn, không cần suy luận dài.”. Request tới nhà cung cấp loại `ollama` có thời gian chờ 300 giây và `max_tokens` 1024; nhà cung cấp khác giữ nguyên 120 giây. `vision.json` được ghi lại sau mỗi ảnh mô tả xong (ghi nguyên tử, hai luồng không ghi đè lẫn nhau). Khoá cache một ảnh gồm hash ảnh, prompt, `provider` và `model`; bỏ hash của toàn bộ `ai.toml`.
+
+Nghiệm thu:
+
+- [ ] Test: ảnh đã có trong cache với cùng prompt và route thì không gọi gateway; sửa tuyến `analysis.video_verdict` không làm mô tả lại ảnh; đổi prompt thì mô tả lại.
+- [ ] Test: dừng (ném lỗi) sau ảnh thứ 2 của 4 ảnh, chạy lại thì chỉ gọi gateway cho 2 ảnh còn lại.
+- [ ] Test: provider Ollama gửi `timeout=300` và `max_tokens=1024`; provider `openai_compat` khác không đổi.
+- [ ] Chạy thật trên một video ngắn có sẵn với `config/ai.toml` trỏ Ollama: `vision.json` ghi `provider: ollama`, `model: qwen3-vl:4b`; ghi thời gian mỗi ảnh vào `docs/eval/local-ai.md`.
+
+Kiểm tra: `cd backend && uv run --no-sync pytest tests/unit/test_vision.py tests/unit/test_ai_providers.py`.
+
+File: `media/vision.py`, `media/prompts/vision.md`, `ai/providers/__init__.py` hoặc `ai/providers/openai_compat.py`, `ai/base.py`, tests.
+Người làm: Thi. Phụ thuộc: T51, T21. Cỡ: M.
+
+### T53: `analysis`: kết luận theo video bằng model cục bộ
+
+Đổi tuyến mặc định của `analysis.video_verdict` (và `media.vision`) trong `config/ai.toml.example` thành `ollama/qwen3-vl:4b` trước, sau đó Gemini, OpenRouter, Anthropic. Viết script đánh giá chạy `verdict.decide` qua gateway thật trên các bản thu đã có nghi vấn vi phạm, ghi kết quả ra `data/eval/verdict-local/`.
+
+Nghiệm thu:
+
+- [ ] Trên ít nhất 5 video có nghi vấn vi phạm: JSON hợp lệ (ngay lần đầu hoặc sau lượt sửa của gateway), tóm tắt tiếng Việt có dấu, `finding_ids` thuộc cùng lần chạy; Thi chấm đạt ít nhất 4/5.
+- [ ] Tắt Ollama thì kết luận chuyển sang tuyến cloud kế tiếp có key, `model` trong `verdict.json` ghi đúng tuyến đó.
+- [ ] Ghi số liệu (thời gian, số lượt sửa JSON, điểm chấm) vào `docs/eval/local-ai.md`.
+
+Kiểm tra: chạy script đánh giá; `uv run --no-sync pytest tests/unit/test_verdict.py`.
+
+File: `config/ai.toml.example`, `docs/eval/local-ai.md`, script trong `data/eval/verdict-local/` (không commit).
+Người làm: Thi. Phụ thuộc: T52. Cỡ: S.
+
+### T54: `analysis`: Jev cấu hình R10 cho lời nói và comment
+
+Áp `data/eval/jev/tune/final_questions.json` vào `analysis/jev.py`: `state` có `protected_targets`, `source_type`, `text` và ngữ cảnh theo loại; câu hỏi `category` (criteria `{what, examples}`), `severity`, `is_attack`, `target`; bỏ `about_protected`. Giữ nghi vấn khi `is_attack.noul ≥ 0,5` và `target.choice ≠ "none"`. `protected_targets` và `target.criteria` sinh từ danh sách đối tượng (tên, biệt danh, viết tắt), không viết cứng. Cập nhật SPEC-local-ai.md nếu cách mô tả đối tượng khác R10.
+
+Nghiệm thu:
+
+- [ ] Test với Jev giả: `is_attack` 0,49 thì không giữ, 0,5 thì giữ; `target` là `none` thì không giữ; hai đối tượng sinh hai khoá trong `target.criteria`.
+- [ ] Chạy `analysis/jev.py` mới trên bộ test 119 mục của `data/eval/jev/tune/` (gọi API thật): P và R trong khoảng ±0,02 so với R10 (P 0,754 / R 0,920). Lệch hơn thì ghi nguyên nhân và hỏi Thi trước khi chỉnh.
+- [ ] Đóng T47: thay mục “gán nốt 42 dòng” bằng kết quả này.
+
+Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py`.
+
+File: `analysis/jev.py`, `tests/unit/test_jev.py`, script đối chiếu trong `data/eval/jev/tune/`.
+Người làm: Thi. Phụ thuộc: T47. Cỡ: M.
+
+### T55: `analysis`: Jev cho tiêu đề, mô tả, OCR, hình ảnh và thumbnail
+
+Thêm vào Jev các mục: tiêu đề video (`source_kind: title`), mô tả video (`description`), mỗi đoạn timeline có OCR hoặc mô tả ảnh (`text` là các dòng OCR không trùng ghép bằng ` | ` cùng mô tả ảnh và `offensive_cues`; `source_kind` là `ocr` khi có chữ, `visual` khi chỉ có hình; kèm `frame`), mỗi thumbnail có OCR hoặc mô tả ảnh (`thumbnail`). Xét mọi mục loại này, không chỉ mục có dấu hiệu tên. `quote` là văn bản đã gửi; `reason` ghi danh mục và xác suất như hiện nay.
+
+Nghiệm thu:
+
+- [ ] Test với Jev giả: mỗi loại nguồn sinh nghi vấn đúng `source_kind`, `segment_id`, `start`, `frame`; dòng OCR lặp giữa các keyframe chỉ gửi một lần.
+- [ ] Chạy thật trên `1RUJ_6eruwA`: dòng chữ “CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ” sinh nghi vấn `ocr` hoặc `visual` từ Jev.
+- [ ] Ghi số request Jev thêm cho mỗi video vào `docs/eval/local-ai.md`.
+
+Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py tests/integration/test_pipeline.py`.
+
+File: `analysis/jev.py`, `analysis/runner.py`, tests.
+Người làm: Thi. Phụ thuộc: T54. Cỡ: M.
+
+### T56: Bỏ tác vụ AI `analysis.classify`
+
+Xoá `analysis/llm.py` và lời gọi trong `analysis/runner.py`. C5 bỏ `AiTask.CLASSIFY`; cấu hình cũ còn tuyến `analysis.classify` vẫn đọc được, tuyến bị bỏ qua và ghi cảnh báo (như `analysis.classify_comment`). Trang Settings bỏ dòng `analysis.classify`. Cập nhật `ai.toml.example`, chạy lại `h4wk schema export` và sinh lại kiểu API. `analysis/evaluation.py` (T38) chuyển sang so tầng tĩnh với Jev.
+
+Nghiệm thu:
+
+- [ ] Test hợp đồng: cấu hình có `analysis.classify` nạp được, có cảnh báo, `tasks` không còn khoá này; ví dụ hợp lệ và bị từ chối được cập nhật.
+- [ ] `grep -rn "analysis.classify"` trong `backend/src`, `web/src`, `config/ai.toml.example` không còn kết quả (trừ chỗ đọc cấu hình cũ).
+- [ ] Backend pytest, ruff; web build, lint qua.
+
+Kiểm tra: lệnh test, lint và build chung.
+
+File: `analysis/llm.py` (xoá), `analysis/runner.py`, `core/config_models.py`, `web/src/api/settings.ts`, `web/src/components/settings/ai/TaskRoutes.tsx`, tests, `docs/contracts/c5-ai.json`.
+Người làm: Thi. Phụ thuộc: T55 (để không mất phân loại OCR/hình ở giữa hai task; làm song song được nếu merge sau T55). Cỡ: M.
+
+### T57: UI ẩn lý do của nghi vấn Jev
+
+Danh sách nghi vấn và màn rà soát không hiện `reason` của nghi vấn có `model.provider` là `typesafe`. Nghi vấn tầng tĩnh vẫn hiện nhóm và cụm từ khớp. `reason` vẫn nằm trong `findings.json`.
+
+Nghiệm thu:
+
+- [ ] Mở `1RUJ_6eruwA`: không còn chuỗi `Jev:` trên giao diện; nghi vấn tĩnh vẫn có dòng Reason.
+- [ ] `npm run build` và `npm run lint` không lỗi.
+
+Kiểm tra: build và kiểm tra thủ công.
+
+File: `web/src/pages/FindingsPage.tsx`, `web/src/pages/FindingReviewPage.tsx`.
+Người làm: Thi. Phụ thuộc: không. Cỡ: S.
+
+### Checkpoint 6c
+
+- [ ] Xử lý một video thật ở mức `full` với cấu hình mẫu mới: `ai_calls.jsonl` không có lời gọi cloud cho `media.vision` và `analysis.video_verdict` khi Ollama chạy.
+- [ ] Đủ 8 tiêu chí thành công của SPEC-local-ai.md.
+- [ ] Gộp SPEC-local-ai.md vào SPEC.md (§10.4, §10.5, §10.6, §13), đổi `Status` thành `implemented`.

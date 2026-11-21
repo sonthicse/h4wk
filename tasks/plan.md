@@ -292,6 +292,32 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T49: `review`: rà soát theo video (backend)
 - [x] T50: UI rà soát theo video
 
+### Phase 6c: AI cục bộ và Jev cho mọi văn bản (thêm ngày 2026-11-21)
+
+Spec: [SPEC-local-ai.md](../SPEC-local-ai.md). VLM và LLM kết luận chạy cục bộ qua Ollama (`qwen3-vl:4b` trên máy GPU riêng), nhà cloud giữ làm tuyến dự phòng; mọi phân loại văn bản qua Jev cấu hình R10; bỏ `analysis.classify`.
+
+- [x] T51: `ai-gateway`: nhà cung cấp `ollama`
+- [ ] T52: `media`: mô tả ảnh qua Ollama, cache theo từng ảnh
+- [ ] T53: `analysis`: kết luận theo video bằng model cục bộ
+- [ ] T54: `analysis`: Jev cấu hình R10 cho lời nói và comment
+- [ ] T55: `analysis`: Jev cho tiêu đề, mô tả, OCR, hình ảnh và thumbnail
+- [ ] T56: Bỏ tác vụ AI `analysis.classify`
+- [ ] T57: UI ẩn lý do của nghi vấn Jev
+
+Thứ tự: T51 → T52, T54, T57 song song → T53 sau T52; T55 sau T54; T56 sau T55.
+
+Rủi ro:
+
+| Rủi ro | Mức | Cách xử lý |
+|---|---|---|
+| Video dài (342 keyframe × ~42 giây) mất vài giờ cho bước mô tả ảnh | Cao cho màn 2 | Cache theo từng ảnh để chạy tiếp được (T52); màn 2 dùng video ngắn (T36, T37) |
+| `qwen3-vl:4b` lặp từ tới hết context | Trung bình | Câu “trả lời ngắn gọn”, `max_tokens` 1024, gateway sửa JSON tối đa 2 lần rồi chuyển tuyến |
+| Kết quả Jev R10 dựa trên nhãn do agent gán | Trung bình | T54 đối chiếu lại số liệu; Thi xem mẫu khi chạy thật |
+| Thêm mục cho Jev (mọi đoạn có OCR/hình) làm tăng số request | Thấp | Jev rẻ và nhanh; bỏ dòng OCR trùng; ghi số request ở T55 |
+| Máy Ollama tắt khi demo | Trung bình | Giữ tuyến cloud dự phòng có key |
+
+### Checkpoint 6c: một video thật chạy trọn với VLM và kết luận cục bộ, đủ 8 tiêu chí của SPEC-local-ai.md
+
 ### Phase 7: Demo (tuần 6)
 
 - [ ] T36: Dữ liệu demo
