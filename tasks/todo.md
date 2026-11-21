@@ -452,7 +452,8 @@ Gọi `gateway.describe_image("media.vision", …)` cho từng keyframe và thum
 Nghiệm thu:
 
 - [x] Test với `FakeProvider` cho ra `vision.json` hợp lệ (trong `tests/integration/test_pipeline.py`).
-- [ ] Test live với 3 khung mẫu đã biết trước dấu hiệu (một ảnh ghép còng tay, một ảnh có chữ chửi, một ảnh bình thường): hai khung đầu có `offensive_cues` đúng loại, khung thứ ba không có.
+- [x] Đổi prompt làm mới cache ảnh (test trong `tests/unit/test_vision.py`).
+- Test live 3 khung chuyển sang T52. Nemotron đạt 2/3 lượt; Ollama `qwen3-vl:4b` đạt 0/2 lượt trước khi áp dụng timeout 300 giây và `max_tokens` 1024.
 
 Kiểm tra tích hợp với nhà cung cấp giả bằng `uv run pytest tests/integration/test_pipeline.py -k full_flow`. Từ 21/11, test live dùng Ollama `qwen3-vl:4b` (T52), không cần API key.
 
@@ -895,6 +896,7 @@ Nghiệm thu:
 - [ ] Test: ảnh đã có trong cache với cùng prompt và route thì không gọi gateway; sửa tuyến `analysis.video_verdict` không làm mô tả lại ảnh; đổi prompt thì mô tả lại.
 - [ ] Test: dừng (ném lỗi) sau ảnh thứ 2 của 4 ảnh, chạy lại thì chỉ gọi gateway cho 2 ảnh còn lại.
 - [ ] Test: provider Ollama gửi `timeout=300` và `max_tokens=1024`; provider `openai_compat` khác không đổi.
+- [ ] Test live 3 khung của T21 đạt 3/3 lượt với `ollama/qwen3-vl:4b`: ảnh ghép còng tay và ảnh có chữ chửi có `offensive_cues` đúng loại, ảnh bình thường không có.
 - [ ] Chạy thật trên một video ngắn có sẵn với `config/ai.toml` trỏ Ollama: `vision.json` ghi `provider: ollama`, `model: qwen3-vl:4b`; ghi thời gian mỗi ảnh vào `docs/eval/local-ai.md`.
 
 Kiểm tra: `cd backend && uv run --no-sync pytest tests/unit/test_vision.py tests/unit/test_ai_providers.py`.
