@@ -11,6 +11,7 @@ from pathlib import Path
 
 import cv2
 
+from h4wk.analysis import jev_log
 from h4wk.analysis.models import Finding, ModelRef, Trigger
 from h4wk.core import secrets
 from h4wk.core.ids import new_ulid
@@ -189,11 +190,30 @@ def _call(key, state, questions, images=()):
             with error:
                 if error.code != 429 or attempt == 4:
                     raise RuntimeError(f"HTTP {error.code}") from error
+                jev_log.count_retry()
                 try:
                     delay = float(error.headers.get("retry-after") or 2)
                 except ValueError:
                     delay = 2
             time.sleep(delay)
+
+
+def test_connection() -> dict:
+    """Một câu hỏi `noul` ngắn để thử key; không ghi nhật ký usage, không trả nội dung."""
+    key = secrets.get("TYPESAFE_API_KEY")
+    if not key:
+        return {"ok": False, "error": "TYPESAFE_API_KEY is not set"}
+    questions = {"is_attack": {"type": "noul", "instructions": "Is this text an attack?"}}
+    started = time.perf_counter()
+    try:
+        reply = _call(key, {"text": "Xin chào"}, questions)
+    except (OSError, RuntimeError, ValueError) as error:
+        return {"ok": False, "error": jev_log.error_status(str(error))}
+    return {
+        "ok": True,
+        "model": reply.get("model"),
+        "latency_ms": round((time.perf_counter() - started) * 1000),
+    }
 
 
 def _location(kind, item_id, text, hits, target, *, segment=None, frame=None):
@@ -300,7 +320,7 @@ def classify(
             **({"parent_comment": parent} if parent else {}),
         )
 
-    def request(item):
+    def judge(item):
         item_id, content, (kind, segment, frame, images) = item
         record = {
             "task": "jev",
@@ -313,6 +333,7 @@ def classify(
         }
         try:
             reply = _call(key, {**shared, **content}, questions, images)
+            record["usage"] = reply.get("usage")
             answers = record["answers"] = reply["answers"]
             record["model"] = reply["model"]
             target = answers["target"]["choice"]
@@ -346,6 +367,22 @@ def classify(
         except (OSError, RuntimeError, ValueError, TypeError, KeyError) as error:
             record["error"] = str(error)
             return None, record
+
+    def request(item):
+        jev_log.take_retries()  # đếm 429 riêng cho request logic này (cùng luồng với _call)
+        finding, record = judge(item)
+        jev_log.record(
+            video_id=timeline.video_id,
+            capture=timeline.capture,
+            run_id=run_id,
+            source_kind=record["source_kind"],
+            images=len(item[2][3]),
+            reply={"usage": record.get("usage")},
+            kept=record["kept"],
+            status=jev_log.error_status(record["error"]) if "error" in record else "ok",
+            retries_429=jev_log.take_retries(),
+        )
+        return finding, record
 
     findings, records = [], []
     with ThreadPoolExecutor(max_workers=settings.concurrency) as pool:

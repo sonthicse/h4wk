@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, ValidationError
 from sqlmodel import Session
 
+from h4wk.analysis import jev, jev_log
 from h4wk.api.deps import current_actor
 from h4wk.collectors import quota, registry
 from h4wk.collectors.models import Cap
@@ -234,3 +235,106 @@ def delete_jev_key(actor: ActorDep) -> KeyInfo:
     secrets.delete(_JEV_KEY)
     audit.log(actor, "settings.key.delete", _JEV_KEY)
     return secrets.info(_JEV_KEY)
+
+
+JEV_SOURCES = ("speech", "ocr", "visual", "thumbnail", "comment", "metadata")
+
+
+class JevSourceUsage(BaseModel):
+    source: str
+    requests: int
+    input_tokens: int
+    output_tokens: int
+    kept: int
+    errors: int
+
+
+class JevError(BaseModel):
+    at: VnDatetime
+    status: str
+    source: str
+    video_id: str
+
+
+class JevLimit(BaseModel):
+    used: int
+    limit: int | None
+    left: int | None
+    unit: str
+
+
+class JevUsage(BaseModel):
+    period: Literal["today", "7d", "30d"]
+    since: VnDatetime
+    until: VnDatetime
+    requests: int
+    image_requests: int
+    input_tokens: int
+    output_tokens: int
+    kept: int
+    errors: int
+    retries_429: int
+    by_source: list[JevSourceUsage]  # luôn đủ 6 nguồn
+    recent_errors: list[JevError]  # tối đa 5, mới trước
+    limit: JevLimit | None  # credit; None cho tới khi có cách tính credit
+
+
+class JevTestResult(BaseModel):
+    ok: bool
+    model: str | None = None
+    latency_ms: int | None = None
+    error: str | None = None
+
+
+@router.get("/jev/usage")
+def jev_usage(period: Literal["today", "7d", "30d"] = "7d") -> JevUsage:
+    now = datetime.now(VN_TZ)
+    since = jev_log.period_start(period, now)
+    rows = jev_log.read(since)
+    summary = jev_log.summarize(rows)
+    total, by_source = summary["total"], summary["by_source"]
+    errors = sorted((r for r in rows if r.get("status") != "ok"), key=lambda r: r["at"])
+    return JevUsage(
+        period=period,
+        since=since,
+        until=now,
+        requests=total["requests"],
+        image_requests=total["image_requests"],
+        input_tokens=total["input_tokens"],
+        output_tokens=total["output_tokens"],
+        kept=total["kept"],
+        errors=total["errors"],
+        retries_429=total["retries_429"],
+        by_source=[
+            JevSourceUsage(
+                source=name, **{k: by_source.get(name, {}).get(k, 0) for k in _SOURCE_KEYS}
+            )
+            for name in JEV_SOURCES
+        ],
+        recent_errors=[
+            JevError(
+                at=r["at"],
+                status=r["status"],
+                source=jev_log.source_of(r.get("source_kind", "")),
+                video_id=r.get("video_id", ""),
+            )
+            for r in reversed(errors[-jev_log.RECENT_ERRORS :])
+        ],
+        limit=None,
+    )
+
+
+_SOURCE_KEYS = ("requests", "input_tokens", "output_tokens", "kept", "errors")
+
+
+@router.post("/jev/test")
+def test_jev(actor: ActorDep) -> JevTestResult:
+    result = JevTestResult(**jev.test_connection())
+    audit.log(
+        actor,
+        "settings.jev.test",
+        _JEV_KEY,
+        {"ok": result.ok, "latency_ms": result.latency_ms},
+        status="ok" if result.ok else "error",
+    )
+    return result

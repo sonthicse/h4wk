@@ -66,6 +66,7 @@ class Dashboard(BaseModel):
     activity: list[DayActivity]  # 14 ngày, cũ trước, theo giờ Việt Nam
     youtube_quota: Usage | None  # quota YouTube API hôm nay
     supadata_credits: Usage | None  # credit Supadata trong kỳ; None khi chưa có key hoặc lỗi
+    jev_usage: Usage | None  # credit Jev trong tháng; None cho tới khi có cách tính credit
     top_video: TopVideo | None
 
 
@@ -135,5 +136,6 @@ def dashboard(latest_only: bool = False) -> Dashboard:
         ],
         youtube_quota=Usage(used=u.used, limit=u.limit),
         supadata_credits=Usage(used=c.used, limit=c.limit) if c else None,
+        jev_usage=None,
         top_video=top,
     )
