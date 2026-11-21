@@ -44,3 +44,11 @@ Bản sao capture `20261120T132008` của `1RUJ_6eruwA` (sau T58), `max_comments
 - Nghi vấn theo nguồn: 6 lời nói, 10 OCR, 2 thumbnail, 1 tiêu đề (19). Trong 10 nghi vấn OCR, chỉ 2 mục có ảnh kèm theo (`seg_0002:ocr`, `seg_0004:ocr`); các mục còn lại thuộc đoạn không có keyframe trong timeline và chỉ gửi chữ. Dòng "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" (OCR nhiễu dấu) xuất hiện ở cả hai nhóm, ví dụ `frames/000014.jpg`. Đoạn `seg_0001` chỉ có ảnh sinh một request `visual`, không bị giữ.
 - Cả 8 request có ảnh đều không lỗi.
 - Chưa đối chiếu độ chính xác của nghi vấn bằng người; số trên chỉ xác nhận request có ảnh chạy được và sinh nghi vấn đúng loại nguồn.
+
+## T65: Đơn vị thống kê và giá niêm yết
+
+Đối chiếu tài liệu công khai ngày 21/11/2026, không gọi thêm API suy luận:
+
+- [Models](https://docs.typesafe.ai/models) niêm yết Jev 1.13 và 1.14 ở mức **0,042 USD mỗi triệu token đầu vào**: “You pay per input token. Output tokens are free.” Đây là đơn giá USD, không phải công thức quy đổi credit hay số dư tài khoản.
+- [OpenAPI](https://api.typesafe.ai/openapi.json), được [Swagger](https://api.typesafe.ai/docs) trỏ tới, chỉ liệt kê `/v1/models` và `/v1/systemone`. `Usage` trả `input_tokens` (token đầu vào tính phí) và `output_tokens`; không có trường credit hay API số dư được công bố trong schema này.
+- Vì chưa có nguồn chính thức để xác định credit đã dùng hoặc còn lại, T65 thống kê token vào/ra và giữ `limit: null` trong API thống kê, `jev_usage: null` trên Dashboard trong lúc chờ chốt. Không suy credit từ token hoặc giá USD.
