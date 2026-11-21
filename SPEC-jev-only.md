@@ -104,7 +104,7 @@ Giao diện theo bản phác Thi duyệt ngày 2026-11-21 (`docs/design/phase-6d
 - Settings: mục "AI providers" đổi thành "Jev" (`/settings/jev`). Thẻ API key rộng hết trang (key đã che, nhập, xoá, Test connection) và thẻ Usage (§6). Bỏ danh sách nhà cung cấp, hộp thêm nhà cung cấp, bảng tuyến tác vụ.
 - Màn video: cột trái gồm trình phát (khung bao OCR, khuôn mặt, ảnh mẫu vẽ đè lên video ở keyframe), Timeline, Keyframes, Findings, Comments/Captures; cột phải gồm Transcript (dropdown chọn loại transcript) và Evidence. Keyframe, nghi vấn, transcript và trình phát liên kết hai chiều. Bỏ "VLM description" và dấu hiệu. Thẻ kết luận không hiện `model` khi `null`. Chuyển động dùng animate-ui.
 - Các bước job ở Collect bỏ `vlm`.
-- Dashboard: thẻ Review (hàng đợi) và Events đổi chỗ; thẻ Usage thêm dòng Jev, mỗi nguồn ghi đã dùng, hạn mức và còn lại.
+- Dashboard: thẻ Review (hàng đợi) và Events đổi chỗ. Thẻ Usage giữ số đã dùng, hạn mức và số còn lại cho YouTube API và Supadata. Dòng Jev chỉ hiện riêng token vào/ra do TypeSafe báo trong tháng hiện tại theo giờ Việt Nam (§6), không có hạn mức hay số dư.
 - Ngày giờ ở Videos (Latest capture) và Collect (Started) theo dạng `HH:MM dd/mm/yyyy`, giờ Việt Nam.
 - Login: thẻ cao hơn, logo lớn ở trên, chữ "Sign in" dưới logo.
 - Entities: dòng cảnh báo dữ liệu khuôn mặt ghi việc dùng ảnh công khai của nhân vật công chúng.
