@@ -56,8 +56,8 @@ export default function EntitiesPage() {
         <AlertTitle>Face images are sensitive personal data</AlertTitle>
         <AlertDescription>
           Under Decree 13/2023/NĐ-CP, face images are sensitive personal data. They are matched only on this machine,
-          only against the entities listed here, and are never sent to AI providers. For the demo, the team uses its
-          own members' faces as entities.
+          only against the entities listed here, and are never sent to AI providers. The demo uses public portraits of
+          a public figure (Wikimedia Commons).
         </AlertDescription>
       </Alert>
 

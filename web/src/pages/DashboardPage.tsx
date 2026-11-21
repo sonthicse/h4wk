@@ -145,11 +145,11 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-4">
             <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findings_by_severity} variant={severityVariant} />
             <Breakdown title="Review" to="/review" centerLabel={d.videos_by_review_status ? 'videos' : 'findings'} keys={statuses} counts={d.videos_by_review_status ?? d.findings_by_status} variant={statusVariant} />
-            <EventFeed />
-            <ReviewQueueCard />
             <div className="col-span-2">
-              <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} />
+              <ReviewQueueCard />
             </div>
+            <EventFeed />
+            <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} />
           </div>
         </div>
       </div>

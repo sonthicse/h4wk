@@ -33,10 +33,10 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-muted px-4">
-      <Card className="w-full max-w-md py-10">
+      <Card className="w-full max-w-md min-h-140 justify-center py-12">
         <CardHeader className="flex flex-col items-center gap-4 px-10">
-          <Logo className="size-64 text-foreground" />
-          <CardTitle className="text-xl">
+          <Logo className="size-28 text-foreground" />
+          <CardTitle className="text-2xl">
             <h1>Sign in</h1>
           </CardTitle>
         </CardHeader>

@@ -17,8 +17,8 @@ function Meter({ label, note, usage, unit }: { label: string; note: string; usag
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2 text-sm">
         <span className="font-medium">{label}</span>
-        <span className="tabular-nums">
-          {used.toLocaleString('en-US')} / {limit.toLocaleString('en-US')} {unit}
+        <span className="tabular-nums text-muted-foreground">
+          {used.toLocaleString('en-US')} / {limit.toLocaleString('en-US')} {unit} · {Math.max(limit - used, 0).toLocaleString('en-US')} left
         </span>
       </div>
       <Progress value={(used / limit) * 100} aria-label={`${label} used`} />
