@@ -10,7 +10,7 @@ import type { PlayerControls } from './usePlayer'
 
 const MAX_GROUPS = 10
 
-type Group = { key: string; first: VideoFinding; count: number; severity: Severity }
+type Group = { key: string; first: VideoFinding; count: number; severity: Severity; ids: Set<string> }
 
 // Gộp nghi vấn cùng nguồn và cùng quote (khoá bỏ dấu); dòng đại diện là nghi vấn sớm nhất của nhóm.
 function groupFindings(list: VideoFinding[]): Group[] {
@@ -19,10 +19,11 @@ function groupFindings(list: VideoFinding[]): Group[] {
     const key = `${f.sourceKind}:${mergeKey(f.quote)}`
     const g = map.get(key)
     if (!g) {
-      map.set(key, { key, first: f, count: 1, severity: f.severity })
+      map.set(key, { key, first: f, count: 1, severity: f.severity, ids: new Set([f.id]) })
       continue
     }
     g.count++
+    g.ids.add(f.id)
     if (severityRank[f.severity] < severityRank[g.severity]) g.severity = f.severity
     if (f.start !== null && (g.first.start === null || f.start < g.first.start)) g.first = f
   }
@@ -121,14 +122,14 @@ export default function FindingTimeline({
       ) : (
         <HoverHighlight>
           <ul className="space-y-1">
-            {shown.map(({ key, first: f, count, severity }) => (
+            {shown.map(({ key, first: f, count, severity, ids }) => (
               <HoverItem key={key}>
                 <button
                   type="button"
                   onClick={() => onOpen(f)}
                   className={cn(
                     'flex w-full items-center gap-2 rounded px-2 py-1 text-left text-sm focus-visible:bg-muted focus-visible:outline-none',
-                    f.id === activeId && 'bg-muted',
+                    activeId !== null && ids.has(activeId) && 'bg-muted',
                   )}
                 >
                   <Badge variant={severityVariant[severity]}>{severity}</Badge>
