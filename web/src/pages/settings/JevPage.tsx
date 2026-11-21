@@ -191,8 +191,8 @@ function UsageCard() {
               />
               <Stat label="Failed" value={num(u.errors)} note={`429 retried: ${num(u.retries_429)}`} />
             </div>
+            <span className="block text-xs text-muted-foreground">By source</span>
             <Table>
-              <caption className="pb-1.5 text-left text-xs text-muted-foreground">By source</caption>
               <TableHeader>
                 <TableRow>
                   <TableHead>Source</TableHead>
