@@ -18,18 +18,33 @@ const groups: { label: string; kinds: Kind[] }[] = [
 const MAX_ROWS = 5
 const sevRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
 
-type Row = { key: string; first: QueueItem; count: number; from: number | null; to: number | null; basis: boolean }
+type Row = { key: string; text: string; first: QueueItem; count: number; from: number | null; to: number | null; basis: boolean }
 
-// Gộp các nghi vấn cùng quote (bỏ khoảng trắng thừa, không phân biệt hoa thường) thành một dòng.
+// Khoá gộp: bỏ dấu (NFD, bỏ dấu kết hợp, đ -> d), bỏ ký tự điều khiển/ẩn, gộp khoảng trắng, không phân biệt hoa thường.
+function mergeKey(q: string): string {
+  return q
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/đ/gi, 'd')
+    .replace(/[\p{Cc}\p{Cf}]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+}
+
+// Gộp các nghi vấn có cùng khoá bỏ dấu thành một dòng.
 function mergeRows(list: QueueItem[], basis: Set<string>): Row[] {
   const map = new Map<string, Row>()
+  const variants = new Map<string, Map<string, number>>()
   for (const it of list) {
     const f = it.finding
-    const key = f.quote.replace(/\s+/g, ' ').trim().toLowerCase()
+    const key = mergeKey(f.quote)
     const t = f.start ?? null
     const row = map.get(key)
+    variants.get(key)?.set(f.quote, (variants.get(key)?.get(f.quote) ?? 0) + 1)
     if (!row) {
-      map.set(key, { key, first: it, count: 1, from: t, to: t, basis: basis.has(f.id) })
+      variants.set(key, new Map([[f.quote, 1]]))
+      map.set(key, { key, text: f.quote, first: it, count: 1, from: t, to: t, basis: basis.has(f.id) })
       continue
     }
     row.count++
@@ -42,6 +57,8 @@ function mergeRows(list: QueueItem[], basis: Set<string>): Row[] {
       if (row.to === null || t > row.to) row.to = t
     }
   }
+  // Dòng gộp hiện bản gốc xuất hiện nhiều nhất.
+  for (const [key, row] of map) row.text = [...variants.get(key)!].sort((a, b) => b[1] - a[1])[0][0]
   return [...map.values()].sort(
     (a, b) =>
       Number(b.basis) - Number(a.basis) ||
@@ -68,12 +85,12 @@ function Group({ label, rows, onOpen, total }: { label: string; rows: Row[]; tot
                 onClick={() => onOpen(r.first)}
                 className="flex w-full items-start gap-2 rounded px-2 py-1 text-left text-sm hover:bg-muted"
               >
-                <span className="w-24 shrink-0 font-mono text-xs text-muted-foreground">
+                <span className="w-32 shrink-0 whitespace-nowrap font-mono text-xs text-muted-foreground">
                   {r.count > 1 && `×${r.count} · `}
                   {r.from != null ? formatTime(r.from) : '—'}
                   {r.count > 1 && r.to != null && r.to !== r.from && `–${formatTime(r.to)}`}
                 </span>
-                <span className="line-clamp-2 min-w-0 flex-1">{f.quote}</span>
+                <span className="line-clamp-2 min-w-0 flex-1">{r.text}</span>
                 <Badge variant="outline" className="shrink-0">{f.category}</Badge>
                 {r.basis && <Badge className="shrink-0">basis</Badge>}
               </button>
