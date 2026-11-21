@@ -23,7 +23,7 @@ Mở 4 terminal:
 Kiểm tra:
 
 - [ ] `curl -s localhost:8000/api/health` trả HTTP 200. (Kiểm mã: `curl -s -o /dev/null -w "%{http_code}\n" localhost:8000/api/health`.)
-- [ ] Mở http://localhost:5173, đăng nhập. Chưa có tài khoản thì tạo: `cd backend && uv run --no-sync h4wk user create <tên>` (lệnh hỏi mật khẩu). Đăng nhập xong vào thẳng **Dashboard**.
+- [ ] Mở http://localhost:3000, đăng nhập. Chưa có tài khoản thì tạo: `cd backend && uv run --no-sync h4wk user create <tên>` (lệnh hỏi mật khẩu). Đăng nhập xong vào thẳng **Dashboard**.
 
 Kết quả mong đợi: cả bốn tiến trình chạy không lỗi, Dashboard mở được.
 

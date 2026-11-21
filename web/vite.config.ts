@@ -10,6 +10,9 @@ export default defineConfig({
     alias: { '@': path.resolve(__dirname, './src') },
   },
   server: {
+    // Giao diện chạy cố định ở cổng 3000; cổng bận thì báo lỗi thay vì tự đổi cổng khác.
+    port: 3000,
+    strictPort: true,
     // Dùng 127.0.0.1 thay cho localhost để tránh lệch IPv6 (::1) trên WSL
     proxy: { '/api': 'http://127.0.0.1:8000' },
     allowedHosts: [

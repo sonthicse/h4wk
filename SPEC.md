@@ -86,7 +86,7 @@ uv run ruff check . --fix && uv run ruff format .
 # Frontend (trong web/)
 npm install
 npm run gen:api                                     # sinh kiểu TypeScript từ OpenAPI
-npm run dev                                         # chạy ở :5173, proxy /api sang :8000
+npm run dev                                         # chạy ở :3000, proxy /api sang :8000
 npm run build && npm run lint && npx tsc --noEmit
 ```
 

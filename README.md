@@ -42,13 +42,13 @@ Mở hai terminal:
 # Terminal 1: API ở :8000
 cd backend && uv run --no-sync uvicorn h4wk.api.app:app --reload
 
-# Terminal 2: giao diện ở :5173, /api được proxy sang :8000
+# Terminal 2: giao diện ở :3000, /api được proxy sang :8000
 cd web && npm run dev
 ```
 
 **Trong `backend/` không chạy `uv sync` hay `uv run` trơn:** lệnh đó gỡ torch và thư viện CUDA của extra. Dùng `uv run --no-sync ...`. Các bước chạy thử 3 màn demo nằm ở [docs/demo-checklist.md](docs/demo-checklist.md).
 
-Mở http://localhost:5173. Trang chủ hiện `API status: ok` nghĩa là đã cài đặt đúng.
+Mở http://localhost:3000. Trang chủ hiện `API status: ok` nghĩa là đã cài đặt đúng.
 
 Job mức `full` cần worker GPU có CUDA. Trong `backend/`, chạy `uv run --extra stt --extra match huey_consumer h4wk.jobs.queue.huey_gpu -w 1`. Worker dùng model STT từ `H4WK_STT_MODEL` (mặc định `large-v3`). Extra `match` kéo theo torch, transformers và các thư viện CUDA 12.6; thiếu extra này thì bước khớp ảnh mẫu bị bỏ qua. Chỉ cài extra `stt` mà không cài `match` hoặc máy không có CUDA toolkit thì đặt `LD_LIBRARY_PATH` tới các thư mục `nvidia/*/lib` trong `.venv`. Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
 
