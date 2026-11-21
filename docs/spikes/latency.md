@@ -26,7 +26,7 @@ Kết quả: số liệu hiện xong trong 283–339 ms cả 5 lần, đạt ng�
 |---|---|
 | 10 job ban đầu (13:40:04) | cả 10 `done`, cập nhật cuối 14:03:34 |
 | Video mới → `new_video` | video đăng 16:20:27, sự kiện 16:34:38 (trễ ~14 phút, khớp RSS YouTube cache tới 15 phút) |
-| `new_video` → `job_done` (mức `metadata`) | 2–17 giây cho cả 27 video, 0 job lỗi |
+| `new_video` → `job_done` (mức `metadata`) | 2,12–13,66 giây theo cặp `job_id` (27/27 cặp), 0 job lỗi |
 | Check now ngay sau poll | trả `new_videos: []`, số job của kênh giữ nguyên 37 → 37, không tạo job trùng |
 
 Ảnh Watchlist: `docs/spikes/img/t30-watchlist.png`.
