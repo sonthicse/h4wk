@@ -992,7 +992,7 @@ Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend: nh�
 
 Thứ tự: T58 → (T59, T60 song song) → T61 sau T60; T65 sau T59 → T62 sau T61 và T65; T63 sau T58 và T60; T66 làm ngay được (dòng Jev ở Dashboard chờ T65) → T64 → Checkpoint 6d.
 
-Bản phác giao diện: `docs/design/phase-6d/` (đọc `README.md` ở đó) và canvas https://claude.ai/artifact/Bk9dxR1XysygA9CSnvRnEr. Mọi task UI gửi ảnh chụp cho Thi duyệt trước khi merge.
+Bản phác giao diện: `docs/design/phase-6d/` (đọc `README.md` ở đó; đây là nguồn chuẩn, không cần mở canvas). Mọi task UI dùng animate-ui cho chuyển động và gửi ảnh chụp cho Thi duyệt trước khi merge.
 
 Lệnh chung của backend: `cd backend && uv run --no-sync pytest && uv run --no-sync ruff check . && uv run --no-sync ruff format --check .`. Sinh lại kiểu API: không chạy `npm run gen:api` (gọi `uv run` trơn, gỡ torch); chạy phần Python của script với `uv run --no-sync`, rồi `npx -y openapi-typescript@7.13.0 src/api/openapi.json -o src/api/schema.d.ts` trong `web/`.
 
@@ -1065,26 +1065,35 @@ Người làm: agent ui. Phụ thuộc: T61, T65. Cỡ: M.
 
 ### T63: UI màn video và Collect bỏ mô tả ảnh và bước VLM
 
-Theo SPEC-jev-only §5 và bản phác `docs/design/phase-6d/Video.dc.html`, `Collect.dc.html`. Dải keyframe đọc `frames` thay `visual`. Khung keyframe đang chọn: ảnh lớn có khung bao (OCR vàng, khuôn mặt đỏ, ảnh mẫu xanh) và chú giải; bên phải là "Jev findings on this frame" (các nghi vấn Jev có `frame` là khung này hoặc đoạn chứa khung, mỗi thẻ có mức độ, danh mục, nguồn, thời điểm, trích dẫn, bấm thì mở nghi vấn), rồi "OCR text" và "Matched references". Bỏ "VLM description" và "Offensive cues". Thẻ kết luận không hiện model khi `model` null. Collect: danh sách bước bỏ `vlm`; cột Started theo dạng `HH:MM dd/mm/yyyy`. Sinh lại kiểu API sau T58, T60 (rebase sau T62 nếu T62 merge trước).
+Theo SPEC-jev-only §5 và bản phác `docs/design/phase-6d/Video.dc.html`, `Collect.dc.html`. Màn video bố cục lại:
+
+- Cột trái từ trên xuống: trình phát, Timeline, Keyframes, Findings, tab Comments/Captures. Cột phải: Transcript, dưới nó là Evidence.
+- Khung bao (OCR vàng, khuôn mặt đỏ, ảnh mẫu xanh, có nhãn) vẽ đè lên trình phát khi thời điểm đang xem cách một keyframe không quá 1 giây; nút "Boxes on/off" trên thanh điều khiển; chú giải ngay dưới trình phát. Bỏ khung ảnh lớn riêng của keyframe và các mục "VLM description", "Offensive cues", "OCR text", "Matched references" cũ (thông tin đã nằm trên khung bao).
+- Thanh tua của trình phát và Timeline tô các đoạn có nghi vấn, có vạch chỉ thời điểm đang xem.
+- Dải keyframe đọc `frames` thay `visual`; khung có nghi vấn mang nhãn "flagged".
+- Findings: danh sách nghi vấn của video xếp theo thời gian (nghi vấn không có thời điểm như title, comment xuống cuối), mỗi dòng có thời điểm, mức độ, nguồn, danh mục, trích dẫn.
+- Liên kết: bấm keyframe thì tua tới khung đó; bấm nghi vấn thì tua tới `start` − 2 s, chọn keyframe tương ứng và tô dòng transcript; khi video chạy, keyframe, nghi vấn và dòng transcript ở thời điểm hiện tại được tô và tự cuộn vào khung nhìn. Chuyển động dùng animate-ui.
+- Transcript: dropdown chọn loại transcript (stt, auto, uploaded, supadata_ai: các loại có trong bản thu), mặc định là transcript chính dùng để phân tích và có ghi chú như vậy; dòng có nghi vấn tô đỏ nhạt.
+- Thẻ kết luận không hiện model khi `model` null. Collect: danh sách bước bỏ `vlm`; cột Started theo dạng `HH:MM dd/mm/yyyy`. Sinh lại kiểu API sau T58, T60 (rebase sau T62 nếu T62 merge trước).
 
 Nghiệm thu:
 
 - [ ] Ảnh chụp màn video của `1RUJ_6eruwA` (timeline cũ) và một video vừa xử lý lại (timeline mới) khớp bản phác; gửi Thi duyệt trước khi merge.
-- [ ] Bấm khung tua đúng chỗ; bấm thẻ nghi vấn trong khung mở đúng nghi vấn; không còn chữ "VLM".
+- [ ] Bấm keyframe, nghi vấn hay dòng transcript đều tua đúng chỗ và ba phần cùng tô đúng mục; khung bao hiện trên trình phát ở keyframe có OCR hoặc khuôn mặt; không còn chữ "VLM".
 - [ ] `npm run build`, `npm run lint` không lỗi.
 
-File: `web/src/components/video/keyframes.ts`, `web/src/components/video/KeyframeStrip.tsx`, `web/src/components/video/VerdictCard.tsx`, `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
-Người làm: agent ui. Phụ thuộc: T58, T60. Cỡ: M.
+File: `web/src/pages/VideoDetailPage.tsx`, `web/src/components/video/` (`Player.tsx`, `KeyframeStrip.tsx`, `keyframes.ts`, `FindingTimeline.tsx`, `TranscriptPane.tsx`, `EvidencePanel.tsx`, `VerdictCard.tsx`), `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
+Người làm: agent ui. Phụ thuộc: T58, T60. Cỡ: L (bố cục lại cả màn; nếu quá một phiên thì tách phần Collect và thẻ kết luận ra trước).
 
 ### T65: `analysis`: nhật ký request Jev, API usage và thử kết nối
 
-Theo SPEC-jev-only §6. Mỗi request Jev ghi một dòng vào `data/jev_calls.jsonl` (ghi nối, không xoá): `at` (giờ Việt Nam), `video_id`, `capture`, `run_id`, `source_kind`, `images` (số ảnh), `input_tokens`, `output_tokens` (từ `usage` của phản hồi), `kept`, `status` (`ok` hoặc mã lỗi), `retries_429`. Không ghi nội dung văn bản hay ảnh. API:
+Theo SPEC-jev-only §6. Usage của Jev tính theo credit của TypeSafe. Mỗi request Jev ghi một dòng vào `data/jev_calls.jsonl` (ghi nối, không xoá): `at` (giờ Việt Nam), `video_id`, `capture`, `run_id`, `source_kind`, `images` (số ảnh), `credits`, `input_tokens`, `output_tokens` (từ `usage` của phản hồi), `kept`, `status` (`ok` hoặc mã lỗi), `retries_429`. Không ghi nội dung văn bản hay ảnh. API:
 
-- `GET /api/settings/jev/usage?period=today|7d|30d`: tổng request, số request có ảnh, token vào/ra, số nghi vấn giữ lại, số lỗi, số lần 429, bảng theo nguồn (tiêu đề và mô tả gộp một dòng), 5 lỗi gần nhất (mã, nguồn, video, thời điểm); phần hạn mức: `used`, `limit`, `left` của tháng hiện tại.
+- `GET /api/settings/jev/usage?period=today|7d|30d`: tổng request, số request có ảnh, credit đã dùng, số nghi vấn giữ lại, số lỗi, số lần 429, bảng theo nguồn (request, credit, giữ lại, lỗi; tiêu đề và mô tả gộp một dòng), 5 lỗi gần nhất (mã, nguồn, video, thời điểm); phần hạn mức: credit `used`, `limit`, `left` của tháng hiện tại.
 - `POST /api/settings/jev/test`: gọi Jev một câu hỏi `noul` ngắn, trả `ok`, `model`, `latency_ms` hoặc lỗi; có audit, không ghi key.
-- Dashboard (`GET /api/dashboard`): thêm usage Jev theo tháng (`used`, `limit`, `left`) để hiện cạnh YouTube API và Supadata.
+- Dashboard (`GET /api/dashboard`): thêm credit Jev theo tháng (`used`, `limit`, `left`) để hiện cạnh YouTube API và Supadata.
 
-Hạn mức: trước khi làm, thử xem API TypeSafe có trả hạn mức còn lại (header hoặc endpoint) không. Có thì dùng số đó. Không có thì C5 `analysis.toml` thêm `jev.monthly_request_limit` (mặc định trống: không hiện `limit`, `left`), kèm ví dụ hợp lệ và bị từ chối trong `test_contracts.py`; ghi kết quả thử vào `docs/eval/jev.md`.
+Credit và hạn mức: trước khi làm, thử xem phản hồi hoặc header của API TypeSafe có số credit mỗi request và số credit còn lại không (hoặc endpoint tài khoản). Có thì dùng đúng số đó. Không có số credit mỗi request thì hỏi Thi cách quy đổi từ token trước khi làm tiếp. Không có số còn lại thì C5 `analysis.toml` thêm `jev.monthly_credit_limit` (mặc định trống: không hiện `limit`, `left`), kèm ví dụ hợp lệ và bị từ chối trong `test_contracts.py`. Ghi kết quả thử vào `docs/eval/jev.md`.
 
 Nghiệm thu:
 
@@ -1099,7 +1108,7 @@ Người làm: agent backend. Phụ thuộc: T59. Cỡ: M.
 
 Theo bản phác `docs/design/phase-6d/Dashboard.dc.html`, `Videos.dc.html`, `Entities.dc.html`, `Login.dc.html`.
 
-- Dashboard: cột phải đổi chỗ, thẻ Review (hàng đợi) rộng hai cột ở chỗ Events cũ, Events xuống chỗ Review cũ; thẻ Usage có thêm dòng Jev với thanh tiến độ, mỗi dòng (YouTube API, Supadata, Jev) ghi đã dùng / hạn mức và còn lại.
+- Dashboard: cột phải đổi chỗ, thẻ Review (hàng đợi) rộng hai cột ở chỗ Events cũ, Events xuống chỗ Review cũ; thẻ Usage có thêm dòng Jev (credit) với thanh tiến độ, mỗi dòng (YouTube API, Supadata, Jev) ghi đã dùng / hạn mức và còn lại.
 - Videos: cột Latest capture hiện ngày giờ theo dạng `HH:MM dd/mm/yyyy`, giờ Việt Nam (vd `13:20 20/11/2026`).
 - Entities: dòng cảnh báo dữ liệu khuôn mặt ghi rằng khi demo dùng ảnh chân dung công khai của nhân vật công chúng (SPEC §13).
 - Login: thẻ cao hơn (khoảng 560 px), logo lớn ở giữa phía trên, chữ "Sign in" ngay dưới logo, rồi Username, Password, nút Sign in.

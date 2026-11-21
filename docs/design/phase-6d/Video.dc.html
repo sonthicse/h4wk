@@ -49,37 +49,48 @@
         </div>
       </section>
 
-      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start;">
-        <div style="display: flex; flex-direction: column; gap: 18px; min-width: 0;">
-          <div style="aspect-ratio: 16 / 9; border-radius: 8px; background: #18181b; position: relative;">
-            <span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg></span>
-            <span style="position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,0.2);"><span style="display: block; width: 12%; height: 4px; background: #dc2626;"></span></span>
-          </div>
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start;">
+        <div style="display: flex; flex-direction: column; gap: 14px; min-width: 0;">
 
-          <section style="display: flex; flex-direction: column; gap: 8px;">
-            <h2 style="margin: 0; font-size: 14px; font-weight: 500;">Evidence</h2>
-            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;">
-              <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px;"><span style="display: block; font-size: 12px; color: #737373;">On-screen text</span><span style="font-size: 20px; font-weight: 600;">[n]</span></a>
-              <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px;"><span style="display: block; font-size: 12px; color: #737373;">Speech</span><span style="font-size: 20px; font-weight: 600;">[n]</span></a>
-              <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px;"><span style="display: block; font-size: 12px; color: #737373;">Images</span><span style="font-size: 20px; font-weight: 600;">[n]</span></a>
-              <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px;"><span style="display: block; font-size: 12px; color: #737373;">Comments</span><span style="font-size: 20px; font-weight: 600;">[n]</span></a>
+          <section aria-label="Player" style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="position: relative; aspect-ratio: 16 / 9; border-radius: 8px; background: #18181b; overflow: hidden;">
+              <span style="position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); color: #a1a1aa; font-size: 12px;">[video, paused at 0:14]</span>
+              <div style="position: absolute; left: 38%; top: 14%; width: 18%; height: 36%; border: 2px solid #ef4444; border-radius: 2px;"><span style="position: absolute; left: -2px; bottom: 0; background: rgba(0,0,0,0.7); color: #fca5a5; font-size: 11px; padding: 0 4px; white-space: nowrap;">Tô Lâm · face 0.87</span></div>
+              <div style="position: absolute; left: 6%; top: 70%; width: 88%; height: 13%; border: 2px solid #facc15; border-radius: 2px;"><span style="position: absolute; left: -2px; top: -20px; background: rgba(0,0,0,0.7); color: #fde047; font-size: 11px; padding: 0 4px; white-space: nowrap;">CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ</span></div>
+              <span style="position: absolute; right: 10px; top: 10px; font-family: 'Geist Mono', monospace; font-size: 11px; color: #fafafa; background: rgba(0,0,0,0.55); border-radius: 4px; padding: 1px 6px;">keyframe 0:14</span>
+              <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 12px; background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0)); display: flex; align-items: center; gap: 10px; color: #fafafa;">
+                <button type="button" aria-label="Play" style="width: 32px; height: 32px; border: none; border-radius: 6px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg></button>
+                <span style="font-family: 'Geist Mono', monospace; font-size: 12px;">0:14 / 1:12</span>
+                <span style="flex-grow: 1; position: relative; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.25);">
+                  <span style="position: absolute; left: 0; width: 19%; height: 4px; border-radius: 2px; background: #fafafa;"></span>
+                  <span style="position: absolute; left: 0; width: 13%; top: -3px; height: 10px; border-radius: 2px; background: rgba(239,68,68,0.55);"></span>
+                  <span style="position: absolute; left: 62%; width: 9%; top: -3px; height: 10px; border-radius: 2px; background: rgba(245,158,11,0.6);"></span>
+                </span>
+                <button type="button" aria-pressed="true" style="height: 28px; padding: 0 8px; border: 1px solid rgba(255,255,255,0.35); border-radius: 6px; background: transparent; color: #fafafa; font: inherit; font-size: 12px;">Boxes on</button>
+              </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 12px; color: #404040;">
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 12px; border: 2px solid #facc15; box-sizing: border-box;"></span>OCR text</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 12px; border: 2px solid #ef4444; box-sizing: border-box;"></span>Face match</span>
+              <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 12px; border: 2px solid #22d3ee; box-sizing: border-box;"></span>Reference image match</span>
+              <span style="margin-left: auto; color: #737373;">Boxes show while the video is within 1 s of a keyframe</span>
             </div>
           </section>
 
-          <section style="display: flex; flex-direction: column; gap: 8px;">
+          <section aria-label="Timeline" style="display: flex; flex-direction: column; gap: 6px;">
             <h2 style="margin: 0; font-size: 14px; font-weight: 500;">Timeline</h2>
             <div style="position: relative; height: 28px; border-radius: 6px; background: #f5f5f5;">
-              <span style="position: absolute; left: 2%; width: 10%; top: 0; bottom: 0; background: rgba(220,38,38,0.6); border-radius: 4px;"></span>
-              <span style="position: absolute; left: 20%; width: 6%; top: 0; bottom: 0; background: rgba(245,158,11,0.7); border-radius: 4px;"></span>
-              <span style="position: absolute; left: 44%; width: 8%; top: 0; bottom: 0; background: rgba(245,158,11,0.7); border-radius: 4px;"></span>
-              <span style="position: absolute; left: 70%; width: 12%; top: 0; bottom: 0; background: rgba(220,38,38,0.6); border-radius: 4px;"></span>
+              <span style="position: absolute; left: 0; width: 13%; top: 0; bottom: 0; background: rgba(220,38,38,0.55); border-radius: 4px;"></span>
+              <span style="position: absolute; left: 24%; width: 6%; top: 0; bottom: 0; background: rgba(245,158,11,0.6); border-radius: 4px;"></span>
+              <span style="position: absolute; left: 62%; width: 9%; top: 0; bottom: 0; background: rgba(245,158,11,0.6); border-radius: 4px;"></span>
+              <span aria-hidden="true" style="position: absolute; left: 19%; top: -4px; bottom: -4px; width: 2px; background: #171717;"></span>
             </div>
           </section>
 
-          <section style="display: flex; flex-direction: column; gap: 10px;">
+          <section aria-label="Keyframes" style="display: flex; flex-direction: column; gap: 6px;">
             <h2 style="margin: 0; font-size: 14px; font-weight: 500;">Keyframes</h2>
             <div style="display: flex; gap: 6px; overflow: hidden;">
-              <sc-for list="{{strip}}" as="k" hint-placeholder-count="6">
+              <sc-for list="{{strip}}" as="k" hint-placeholder-count="7">
                 <button type="button" aria-label="Keyframe at {{k.t}}" style="{{k.style}}">
                   <span style="display: block; aspect-ratio: 16 / 9; border-radius: 4px; background: #27272a;"></span>
                   <span style="display: flex; justify-content: space-between; align-items: center; font-family: 'Geist Mono', monospace; font-size: 11px; color: #525252;">{{k.t}}
@@ -88,36 +99,26 @@
                 </button>
               </sc-for>
             </div>
-            <div style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 12px;">
-              <div style="position: relative; aspect-ratio: 16 / 9; border-radius: 4px; background: #27272a; overflow: hidden;">
-                <span style="position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); color: #a1a1aa; font-size: 12px;">[keyframe image]</span>
-                <div style="position: absolute; left: 38%; top: 16%; width: 18%; height: 36%; border: 2px solid #ef4444;"><span style="position: absolute; left: -2px; bottom: 0; background: rgba(0,0,0,0.7); color: #fca5a5; font-size: 11px; padding: 0 4px; white-space: nowrap;">Tô Lâm · face 0.87</span></div>
-                <div style="position: absolute; left: 6%; top: 74%; width: 88%; height: 14%; border: 2px solid #facc15;"><span style="position: absolute; left: -2px; top: -20px; background: rgba(0,0,0,0.7); color: #fde047; font-size: 11px; padding: 0 4px; white-space: nowrap;">CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ</span></div>
-                <span style="position: absolute; right: 4px; bottom: 4px; font-family: 'Geist Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.7);">frame @ 0:14</span>
-              </div>
-              <ul style="margin: 0; padding: 0; list-style: none; display: flex; gap: 12px; font-size: 12px;">
-                <li style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 12px; border: 2px solid #facc15; box-sizing: border-box;"></span>OCR text</li>
-                <li style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 12px; border: 2px solid #ef4444; box-sizing: border-box;"></span>Face match</li>
-                <li style="display: flex; align-items: center; gap: 4px;"><span style="width: 12px; height: 12px; border: 2px solid #22d3ee; box-sizing: border-box;"></span>Reference image match</li>
-              </ul>
-              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <span style="font-size: 12px; color: #737373;">Jev findings on this frame</span>
-                  <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
-                    <span style="display: flex; flex-wrap: wrap; gap: 4px;"><span style="font-size: 11px; background: #dc2626; color: #fff; border-radius: 6px; padding: 0 6px;">high</span><span style="font-size: 11px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 0 6px;">unsupported_accusation</span><span style="font-size: 11px; color: #737373;">ocr · 0:12</span></span>
-                    <span style="font-size: 12px;">CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ</span>
-                  </a>
-                  <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
-                    <span style="display: flex; flex-wrap: wrap; gap: 4px;"><span style="font-size: 11px; background: #f59e0b; border-radius: 6px; padding: 0 6px;">medium</span><span style="font-size: 11px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 0 6px;">insult</span><span style="font-size: 11px; color: #737373;">visual · 0:14</span></span>
-                    <span style="font-size: 12px; color: #737373;">Image only</span>
-                  </a>
-                </div>
-                <dl style="margin: 0; display: flex; flex-direction: column; gap: 10px;">
-                  <div><dt style="font-size: 12px; color: #737373;">OCR text</dt><dd style="margin: 2px 0 0; font-family: 'Geist Mono', monospace; font-size: 12px;">BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN<br>CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ</dd></div>
-                  <div><dt style="font-size: 12px; color: #737373;">Matched references</dt><dd style="margin: 2px 0 0;">Tô Lâm · face 0.87</dd></div>
-                </dl>
-              </div>
+          </section>
+
+          <section aria-label="Findings" style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h2 style="margin: 0; font-size: 14px; font-weight: 500;">Findings</h2>
+              <span style="font-size: 12px; color: #737373;">sorted by time · the one under the playhead is highlighted</span>
             </div>
+            <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px;">
+              <sc-for list="{{findings}}" as="f" hint-placeholder-count="6">
+                <li>
+                  <a href="#" style="{{f.style}}">
+                    <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #525252; width: 40px; flex-shrink: 0;">{{f.t}}</span>
+                    <span style="{{f.sev}}">{{f.sevText}}</span>
+                    <span style="font-size: 11px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 1px 6px; flex-shrink: 0;">{{f.src}}</span>
+                    <span style="font-size: 12px; color: #404040; flex-shrink: 0;">{{f.cat}}</span>
+                    <span style="font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{f.quote}}</span>
+                  </a>
+                </li>
+              </sc-for>
+            </ul>
           </section>
 
           <section style="display: flex; flex-direction: column; gap: 8px;">
@@ -125,16 +126,35 @@
               <button type="button" role="tab" aria-selected="true" style="height: 32px; padding: 0 12px; border: none; border-radius: 6px; background: #fff; font: inherit;">Comments (1)</button>
               <button type="button" role="tab" aria-selected="false" style="height: 32px; padding: 0 12px; border: none; border-radius: 6px; background: transparent; font: inherit; color: #525252;">Captures (2)</button>
             </div>
-            <div style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px; font-size: 13px;"><span style="font-weight: 500;">[author]</span> <span style="color: #737373;">· [date]</span><p style="margin: 4px 0 0;">[comment text]</p></div>
+            <div style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px; font-size: 13px;"><span style="font-weight: 500;">[author]</span> <span style="color: #737373;">· [time dd/mm/yyyy]</span><p style="margin: 4px 0 0;">[comment text]</p></div>
           </section>
         </div>
 
-        <aside aria-label="Transcript" style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;"><h2 style="margin: 0; font-size: 14px; font-weight: 500;">Transcript</h2><span style="font-size: 11px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 0 6px;">stt</span></div>
-          <sc-for list="{{lines}}" as="l" hint-placeholder-count="8">
-            <p style="{{l.style}}"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #737373;">{{l.t}}</span> {{l.text}}</p>
-          </sc-for>
-        </aside>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <aside aria-label="Transcript" style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+              <h2 style="margin: 0; font-size: 14px; font-weight: 500;">Transcript</h2>
+              <label for="tr-kind" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Transcript source</label>
+              <select id="tr-kind" style="height: 32px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 0 8px; font: inherit; font-size: 13px; background: #fff;">
+                <option>stt · speech-to-text (used for analysis)</option>
+                <option>auto · YouTube auto captions</option>
+                <option>uploaded · creator subtitles</option>
+                <option>supadata_ai</option>
+              </select>
+            </div>
+            <sc-for list="{{lines}}" as="l" hint-placeholder-count="8">
+              <p style="{{l.style}}"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #737373;">{{l.t}}</span> {{l.text}}</p>
+            </sc-for>
+          </aside>
+
+          <section aria-label="Evidence" style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <h2 style="margin: 0; font-size: 14px; font-weight: 500;">Evidence</h2>
+            <a href="#" style="display: flex; justify-content: space-between; text-decoration: none; color: inherit; padding: 6px 8px; border-radius: 6px; background: #fafafa;"><span>On-screen text</span><span style="font-weight: 600;">[n]</span></a>
+            <a href="#" style="display: flex; justify-content: space-between; text-decoration: none; color: inherit; padding: 6px 8px; border-radius: 6px; background: #fafafa;"><span>Speech</span><span style="font-weight: 600;">[n]</span></a>
+            <a href="#" style="display: flex; justify-content: space-between; text-decoration: none; color: inherit; padding: 6px 8px; border-radius: 6px; background: #fafafa;"><span>Images</span><span style="font-weight: 600;">[n]</span></a>
+            <a href="#" style="display: flex; justify-content: space-between; text-decoration: none; color: inherit; padding: 6px 8px; border-radius: 6px; background: #fafafa;"><span>Comments</span><span style="font-weight: 600;">[n]</span></a>
+          </section>
+        </div>
       </div>
     </main>
   </div>
@@ -143,21 +163,33 @@
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
 class Component extends DCLogic {
   renderVals() {
-    const base = 'width: 92px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; padding: 3px; border-radius: 6px; border: none; background: transparent; font: inherit; text-align: left;';
+    const base = 'width: 96px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; padding: 3px; border-radius: 6px; border: none; background: transparent; font: inherit; text-align: left;';
     const picked = base + ' background: #f5f5f5; outline: 2px solid #171717;';
-    const rows = [['0:00', false], ['0:06', false], ['0:12', true], ['0:14', true], ['0:31', false], ['0:47', true]];
+    const rows = [['0:00', true], ['0:06', true], ['0:12', true], ['0:14', true], ['0:31', false], ['0:47', true], ['1:05', false]];
     const p = 'margin: 0; font-size: 13px; line-height: 1.45; padding: 4px 6px; border-radius: 6px;';
     const hot = p + ' background: #fef2f2;';
+    const sev = (s) => 'font-size: 11px; border-radius: 6px; padding: 1px 6px; flex-shrink: 0; ' + (s === 'high' ? 'background: #dc2626; color: #fff;' : 'background: #f59e0b; color: #0a0a0a;');
+    const row = 'display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 8px; text-decoration: none; color: inherit;';
+    const on = row + ' background: #f5f5f5; border-color: #171717;';
+    const f = (t, s, src, cat, quote, active) => ({ t, sev: sev(s), sevText: s, src, cat, quote, style: active ? on : row });
     return {
       h: 1500,
       strip: rows.map(([t, flagged]) => ({ t, flagged, style: t === '0:14' ? picked : base })),
+      findings: [
+        f('0:00', 'medium', 'speech', 'incitement', 'Bắt cóc người, phá nhà dân, chính quyền Tô Lâm mới là kẻ khủng bố…'),
+        f('0:12', 'high', 'ocr', 'unsupported_accusation', 'CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ', true),
+        f('0:14', 'medium', 'visual', 'insult', 'Image only · Tô Lâm face 0.87', true),
+        f('0:47', 'medium', 'ocr', 'incitement', 'BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN'),
+        f('—', 'high', 'title', 'unsupported_accusation', 'BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN, CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ'),
+        f('—', 'medium', 'comment', 'insult', '[comment text]'),
+      ],
       lines: [
         { t: '0:00', text: 'Bắt cóc người, phá nhà dân, chính quyền Tô Lâm mới là kẻ khủng bố…', style: hot },
-        { t: '0:09', text: '[transcript]', style: p },
+        { t: '0:09', text: '[transcript]', style: hot },
         { t: '0:18', text: '[transcript]', style: p },
         { t: '0:27', text: '[transcript]', style: p },
-        { t: '0:36', text: '[transcript]', style: hot },
-        { t: '0:45', text: '[transcript]', style: p },
+        { t: '0:36', text: '[transcript]', style: p },
+        { t: '0:45', text: '[transcript]', style: hot },
         { t: '0:54', text: '[transcript]', style: p },
         { t: '1:03', text: '[transcript]', style: p },
       ],

@@ -1,8 +1,8 @@
 # Bản phác giao diện Phase 6d
 
-Thi duyệt ngày 2026-11-21. Bản xem được: canvas https://claude.ai/artifact/Bk9dxR1XysygA9CSnvRnEr (Thi chia sẻ công khai). Các file `.dc.html` ở đây là bản sao để agent đọc khi không mở được canvas: mỗi file là một màn, viết bằng HTML với style inline; `{{…}}`, `<sc-for>`, `<sc-if>`, `<dc-import>` là cú pháp của canvas, không phải React.
+Thi duyệt ngày 2026-11-21. Đây là nguồn chuẩn cho agent: đọc các file ở đây, không cần mở canvas gốc. Mỗi file `.dc.html` là một màn, viết bằng HTML với style inline; `{{…}}`, `<sc-for>`, `<sc-if>`, `<dc-import>` là cú pháp của canvas, không phải React.
 
-Cách dùng: làm theo bố cục, nội dung, nhãn và định dạng trong bản phác, nhưng dựng bằng component có sẵn trong `web/src/components/ui` (shadcn) và màu theo `web/src/index.css`, không chép style inline. Chỗ ghi `[n]`, `[tokens]`, `[used]`, `[limit]`, `[left]` là số lấy từ API; ô xám là ảnh hoặc video.
+Cách dùng: làm theo bố cục, nội dung, nhãn và định dạng trong bản phác, nhưng dựng bằng component có sẵn trong `web/src/components/ui` (shadcn) và màu theo `web/src/index.css`, không chép style inline. Chuyển động (chọn keyframe, đổi dòng đang phát, hiện/ẩn khung bao, đổi tab, số đếm) dùng animate-ui (`@animate-ui/react`, registry `@animate-ui` trong `web/components.json`, icon ở `web/src/components/animate-ui/icons`), như các màn đã có; không thêm thư viện animation khác. Chỗ ghi `[n]`, `[tokens]`, `[used]`, `[limit]`, `[left]` là số lấy từ API; ô xám là ảnh hoặc video.
 
 | File | Màn | Task |
 |---|---|---|

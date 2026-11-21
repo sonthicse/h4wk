@@ -334,7 +334,7 @@ Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend ở 
 
 Thứ tự: T58 → (T59, T60 song song) → T61 sau T60; T65 sau T59 → T62 sau T61 và T65; T63 sau T58 và T60; T66 làm ngay được (dòng Jev ở Dashboard chờ T65) → T64 sau tất cả → Checkpoint 6d.
 
-Bản phác giao diện (Thi duyệt 21/11): `docs/design/phase-6d/` và canvas https://claude.ai/artifact/Bk9dxR1XysygA9CSnvRnEr.
+Bản phác giao diện (Thi duyệt 21/11): `docs/design/phase-6d/`, là nguồn chuẩn cho agent.
 
 - T58 trước hết vì đổi hợp đồng C3, mọi task sau đọc timeline mới.
 - T59 và T60 làm song song được; cả hai sửa `jobs/pipeline.py` ở chỗ khác nhau, merge lần lượt và rebase.

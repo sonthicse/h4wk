@@ -102,7 +102,7 @@ Còn lại:
 Giao diện theo bản phác Thi duyệt ngày 2026-11-21 (`docs/design/phase-6d/`).
 
 - Settings: mục "AI providers" đổi thành "Jev" (`/settings/jev`). Thẻ API key rộng hết trang (key đã che, nhập, xoá, Test connection) và thẻ Usage (§6). Bỏ danh sách nhà cung cấp, hộp thêm nhà cung cấp, bảng tuyến tác vụ.
-- Màn video: khung keyframe đang chọn bỏ "VLM description" và dấu hiệu; chỗ đó hiện "Jev findings on this frame" (nghi vấn Jev của khung hoặc đoạn chứa khung), rồi chữ OCR và ảnh mẫu đã khớp. Thẻ kết luận không hiện `model` khi `null`.
+- Màn video: cột trái gồm trình phát (khung bao OCR, khuôn mặt, ảnh mẫu vẽ đè lên video ở keyframe), Timeline, Keyframes, Findings, Comments/Captures; cột phải gồm Transcript (dropdown chọn loại transcript) và Evidence. Keyframe, nghi vấn, transcript và trình phát liên kết hai chiều. Bỏ "VLM description" và dấu hiệu. Thẻ kết luận không hiện `model` khi `null`. Chuyển động dùng animate-ui.
 - Các bước job ở Collect bỏ `vlm`.
 - Dashboard: thẻ Review (hàng đợi) và Events đổi chỗ; thẻ Usage thêm dòng Jev, mỗi nguồn ghi đã dùng, hạn mức và còn lại.
 - Ngày giờ ở Videos (Latest capture) và Collect (Started) theo dạng `HH:MM dd/mm/yyyy`, giờ Việt Nam.
@@ -111,9 +111,9 @@ Giao diện theo bản phác Thi duyệt ngày 2026-11-21 (`docs/design/phase-6d
 
 ### 6. Theo dõi usage của Jev
 
-- Mỗi request Jev ghi một dòng vào `data/jev_calls.jsonl`: thời điểm, video, bản thu, run, nguồn, số ảnh, token vào và ra, có giữ nghi vấn không, trạng thái hoặc mã lỗi, số lần thử lại vì 429. Không ghi nội dung văn bản hay ảnh.
-- API tổng hợp theo kỳ (hôm nay, 7 ngày, 30 ngày) và theo nguồn, 5 lỗi gần nhất, hạn mức tháng (đã dùng, hạn mức, còn lại); API thử kết nối gọi Jev một câu ngắn.
-- Hạn mức lấy từ API TypeSafe nếu có; không có thì cấu hình `jev.monthly_request_limit` trong `analysis.toml` (để trống thì không hiện hạn mức).
+- Usage tính theo credit của TypeSafe. Mỗi request Jev ghi một dòng vào `data/jev_calls.jsonl`: thời điểm, video, bản thu, run, nguồn, số ảnh, credit, token vào và ra, có giữ nghi vấn không, trạng thái hoặc mã lỗi, số lần thử lại vì 429. Không ghi nội dung văn bản hay ảnh.
+- API tổng hợp theo kỳ (hôm nay, 7 ngày, 30 ngày) và theo nguồn, 5 lỗi gần nhất, credit trong tháng (đã dùng, hạn mức, còn lại); API thử kết nối gọi Jev một câu ngắn.
+- Credit mỗi request và credit còn lại lấy từ API TypeSafe nếu có; không có số còn lại thì cấu hình `jev.monthly_credit_limit` trong `analysis.toml` (để trống thì không hiện hạn mức).
 
 ## Tiêu chí thành công
 
