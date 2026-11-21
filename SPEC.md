@@ -152,8 +152,8 @@ class YtDlpCollector(Collector):
 
 | Mức | Kiểm tra gì | Ở đâu |
 |---|---|---|
-| Unit | Ghi manifest, SHA-256, verify; chuyển raw sang dữ liệu chung cho từng adapter bằng raw response đã ghi sẵn (không gọi mạng); khớp tên với danh sách ví dụ đúng và phản ví dụ; kiểm tra C3, C4; tầng AI chạy với `FakeProvider` | `tests/unit` |
-| Integration | Toàn luồng: thu bằng adapter giả → xử lý một video ngắn tự quay trong fixtures → `analysis` với `FakeProvider` → nghi vấn hợp lệ trong hàng đợi. Worker bị tắt giữa chừng rồi bật lại | `tests/integration` |
+| Unit | Ghi manifest, SHA-256, verify; chuyển raw sang dữ liệu chung cho từng adapter bằng raw response đã ghi sẵn (không gọi mạng); khớp tên với danh sách ví dụ đúng và phản ví dụ; kiểm tra C3, C4; tầng Jev chạy với Jev giả | `tests/unit` |
+| Integration | Toàn luồng: thu bằng adapter giả → xử lý một video ngắn tự quay trong fixtures → `analysis` với Jev giả → nghi vấn hợp lệ trong hàng đợi. Worker bị tắt giữa chừng rồi bật lại | `tests/integration` |
 | Live (`-m live`) | Mỗi adapter gọi thật với 1 video; Jev gọi thật 1 request | chạy tay, không bắt buộc trước khi commit |
 | Demo | Checklist diễn tập 3 màn demo (T42), chạy cuối mỗi tuần từ tuần 3 | `docs/demo-checklist.md` |
 | Đánh giá (làm thêm) | Bảng so sánh tĩnh và LLM trên khoảng 50 đoạn tự gán nhãn | làm nếu còn thời gian |
