@@ -121,7 +121,11 @@ export default function KeyframeStrip({
     const box = listRef.current
     const el = box?.querySelector<HTMLElement>('[data-playing="true"]')
     if (!box || !el) return
-    box.scrollTo({ left: el.offsetLeft - box.clientWidth / 3, behavior: 'smooth' })
+    const strip = box.getBoundingClientRect()
+    const frame = el.getBoundingClientRect()
+    if (frame.left < strip.left || frame.right > strip.right) {
+      box.scrollLeft += frame.left - strip.left - (box.clientWidth - frame.width) / 2
+    }
   }, [playing?.id])
 
   if (keyframes.length === 0) {
