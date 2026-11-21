@@ -52,3 +52,13 @@ Bản sao capture `20261120T132008` của `1RUJ_6eruwA` (sau T58), `max_comments
 - [Models](https://docs.typesafe.ai/models) niêm yết Jev 1.13 và 1.14 ở mức **0,042 USD mỗi triệu token đầu vào**: “You pay per input token. Output tokens are free.” Đây là đơn giá USD, không phải công thức quy đổi credit hay số dư tài khoản.
 - [OpenAPI](https://api.typesafe.ai/openapi.json), được [Swagger](https://api.typesafe.ai/docs) trỏ tới, chỉ liệt kê `/v1/models` và `/v1/systemone`. `Usage` trả `input_tokens` (token đầu vào tính phí) và `output_tokens`; không có trường credit hay API số dư được công bố trong schema này.
 - Theo quyết định ngày 21/11/2026, chỉ cộng riêng token vào/ra hợp lệ do TypeSafe báo; h4wk không tự đếm hoặc ước tính. Trường không có số hợp lệ trả `null`, lượt gọi vẫn được tính. Settings tổng hợp theo kỳ và nguồn; Dashboard tổng hợp tháng hiện tại theo giờ Việt Nam. Không hiển thị USD, credit, hạn mức hay số dư Jev.
+
+## Checkpoint 6d: xử lý lại `1RUJ_6eruwA` trọn luồng
+
+Chạy bằng `backend/scripts/checkpoint_6d.py` ngày 22/11/2026 trên bản sao chỉ gồm `captures/` (media chạy lại từ video gốc: STT, keyframe, OCR, khớp ảnh, Jev thật); dữ liệu gốc chỉ đọc, key không in ra.
+
+- Job `done`, không lỗi; run `r_01M7ZEE054X6PM1D5R0NW646M4`, capture `20261120T132008`, 85 keyframe vào timeline.
+- Nghi vấn: 19 (title 1, speech 6, OCR 9, visual 1, thumbnail 2). Kết luận `violation: yes`, `highly_likely`, `severity: high`, `model: null`, danh mục `unsupported_accusation`.
+- Dòng "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" (OCR nhiễu dấu) sinh 8 nghi vấn OCR, đều `entity: e_01`, `high`, trong đó 5 `highly_likely` và 3 `likely`. Ví dụ đầu: `frames/000014.jpg`, 0,52 s, bbox `[9, 400, 250, 20]` (x, y, rộng, cao).
+- `jev_calls.jsonl`: 28 dòng, cả 28 `ok`; 17 request có ảnh; 0 lần 429. Token do TypeSafe báo: 63 506 vào, 4 114 ra.
+- Chưa chấm độ chính xác bằng người.

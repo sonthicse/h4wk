@@ -1136,7 +1136,7 @@ Người làm: lead. Phụ thuộc: T58–T63, T65, T66. Cỡ: S.
 
 ### Checkpoint 6d
 
-- [ ] Xử lý lại `1RUJ_6eruwA` trọn luồng (media và phân tích) với key Jev thật: job `done`, `llm_error` rỗng hoặc chỉ có request ảnh bị từ chối đã ghi rõ; có nghi vấn `ocr` cho dòng chữ "KẺ KHỦNG BỐ"; kết luận ra `yes` hoặc `uncertain` đúng quy tắc.
+- [x] Xử lý lại `1RUJ_6eruwA` trọn luồng (media và phân tích) với key Jev thật: job `done`, `llm_error` rỗng hoặc chỉ có request ảnh bị từ chối đã ghi rõ; có nghi vấn `ocr` cho dòng chữ "KẺ KHỦNG BỐ"; kết luận ra `yes` hoặc `uncertain` đúng quy tắc.
 - [ ] Đủ các tiêu chí thành công của SPEC-jev-only.md.
 - [ ] Thi xem cả app trên trình duyệt và xác nhận khớp bản phác.
 - [ ] Backend pytest, ruff check, ruff format --check; web build, lint đều qua trên `main`.

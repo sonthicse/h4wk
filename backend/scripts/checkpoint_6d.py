@@ -87,7 +87,7 @@ def summarize(data: Path, job_id: str) -> dict:
         "ocr_marker_findings": [
             {"id": f["id"], "frame": f.get("frame"), "category": f["category"]} for f in ocr
         ],
-        "verdict": {k: verdict.get(k) for k in ("verdict", "confidence", "model")},
+        "verdict": {k: verdict.get(k) for k in ("violation", "confidence", "model")},
         "jev_calls": {
             "lines": len(calls),
             "by_status": dict(Counter(c["status"] for c in calls)),
