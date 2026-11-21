@@ -71,26 +71,31 @@ class Timeline(Contract):
         if not isinstance(data, dict):
             return data
         data = dict(data)
-        segments = []
-        for seg in data.get("segments") or []:
-            if isinstance(seg, dict) and "visual" in seg:
-                seg = dict(seg)
-                old = seg.pop("visual") or []
-                if "frames" not in seg:
-                    seg["frames"] = [
-                        {"frame": v["frame"], "t": v["t"]} if isinstance(v, dict) else v
-                        for v in old
-                    ]
-            segments.append(seg)
-        if "segments" in data:
+        if isinstance(data.get("segments"), list):
+            segments = []
+            for seg in data["segments"]:
+                if isinstance(seg, dict) and "visual" in seg:
+                    seg = dict(seg)
+                    old = seg.pop("visual")
+                    if "frames" not in seg and isinstance(old, list):
+                        # Chỉ giữ frame, t; khóa thiếu hoặc sai kiểu để mô hình Frame báo lỗi.
+                        seg["frames"] = [
+                            {k: v[k] for k in ("frame", "t") if k in v}
+                            if isinstance(v, dict)
+                            else v
+                            for v in old
+                        ]
+                    elif "frames" not in seg:
+                        seg["frames"] = old  # sai kiểu: để Pydantic từ chối
+                segments.append(seg)
             data["segments"] = segments
-        thumbs = []
-        for thumb in data.get("thumbnails") or []:
-            if isinstance(thumb, dict) and "visual" in thumb:
-                thumb = {k: v for k, v in thumb.items() if k != "visual"}
-            thumbs.append(thumb)
-        if "thumbnails" in data:
-            data["thumbnails"] = thumbs
+        if isinstance(data.get("thumbnails"), list):
+            data["thumbnails"] = [
+                {k: v for k, v in thumb.items() if k != "visual"}
+                if isinstance(thumb, dict)
+                else thumb
+                for thumb in data["thumbnails"]
+            ]
         return data
 
     @model_validator(mode="after")

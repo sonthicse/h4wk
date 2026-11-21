@@ -11,7 +11,6 @@ from h4wk.media.transcripts import write_timeline
 
 def enrich(
     timeline: Timeline,
-    capture: Path,
     out: Path,
     frames: list[Keyframe],
     thumbnails: list[str],

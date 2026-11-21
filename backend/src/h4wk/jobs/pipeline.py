@@ -299,7 +299,7 @@ def media(job_id: str) -> None:
                 frames = _select_frames(job, out, frames, lines)
                 kept = {f.file for f in frames} | set(thumbnails)
                 lines = [line for line in lines if line.frame in kept]
-            enrich(timeline, cap_dir, out, frames, thumbnails, lines)
+            enrich(timeline, out, frames, thumbnails, lines)
             job = _update(job_id, step="match", progress=68)
             _match(job, cap_dir, out, frames, thumbnails, timeline)
             _faces(job, cap_dir, out, frames, thumbnails, timeline)

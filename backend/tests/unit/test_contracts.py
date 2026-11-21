@@ -478,6 +478,22 @@ def test_legacy_timeline_visual_becomes_frames() -> None:
         Timeline.model_validate(legacy)
 
 
+@pytest.mark.parametrize(
+    "patch",
+    [
+        {"segments": None},
+        {"segments": 42},
+        {"segments": [{"id": "seg_0001", "start": 0, "end": 1, "visual": [{}]}]},
+        {"segments": [{"id": "seg_0001", "start": 0, "end": 1, "visual": 5}]},
+        {"segments": [{"id": "seg_0001", "start": 0, "end": 1, "visual": ["x"]}]},
+        {"thumbnails": 7},
+    ],
+)
+def test_legacy_validator_leaves_wrong_types_to_pydantic(patch: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError):
+        Timeline.model_validate({**TIMELINE, **patch})
+
+
 def test_ollama_without_base_url_rejected_for_the_right_rule() -> None:
     data = next(d for _, d, why in REJECTED if why == "ollama thiếu base_url")
     with pytest.raises(ValidationError, match="an ollama provider needs base_url"):
