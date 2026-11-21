@@ -289,7 +289,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 - [ ] T47: `analysis`: phân loại comment và lời nói bằng Jev
 - [ ] T48: `analysis`: kết luận theo video
-- [ ] T49: `review`: rà soát theo video (backend)
+- [x] T49: `review`: rà soát theo video (backend)
 - [ ] T50: UI rà soát theo video
 
 ### Phase 7: Demo (tuần 6)

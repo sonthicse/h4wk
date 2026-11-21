@@ -16,6 +16,7 @@ from h4wk.evidence.writer import CAPTURE_TS_FORMAT, list_captures
 from h4wk.jobs.pipeline import latest_findings
 from h4wk.review.decisions import decisions_for
 from h4wk.review.queue import video_ref
+from h4wk.review.videos import queue as video_queue
 
 router = APIRouter(tags=["dashboard"])
 
@@ -61,6 +62,7 @@ class Dashboard(BaseModel):
     capture_count: int
     findings_by_severity: SeverityCounts
     findings_by_status: StatusCounts
+    videos_by_review_status: StatusCounts
     activity: list[DayActivity]  # 14 ngày, cũ trước, theo giờ Việt Nam
     youtube_quota: Usage | None  # quota YouTube API hôm nay
     supadata_credits: Usage | None  # credit Supadata trong kỳ; None khi chưa có key hoặc lỗi
@@ -127,6 +129,7 @@ def dashboard(latest_only: bool = False) -> Dashboard:
         capture_count=sum(len(c) for c in captures_by_video.values()),
         findings_by_severity=SeverityCounts(**by_sev),
         findings_by_status=StatusCounts(**by_status),
+        videos_by_review_status=StatusCounts(**Counter(i.status for i in video_queue())),
         activity=[
             DayActivity(date=d, captures=capture_days[d], findings=finding_days[d]) for d in days
         ],

@@ -107,6 +107,14 @@ class DecisionRow(SQLModel, table=True):
     data: str
 
 
+class VideoDecisionRow(SQLModel, table=True):
+    __tablename__ = "video_decisions"
+    id: int | None = Field(default=None, primary_key=True)
+    video_id: str = Field(index=True)
+    run_id: str
+    data: str
+
+
 class WatchItemRow(SQLModel, table=True):
     """Một kênh trong watchlist. initialized=False: chưa chạy bước thêm kênh (SPEC 10.9)."""
 

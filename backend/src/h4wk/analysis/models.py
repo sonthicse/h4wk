@@ -212,3 +212,20 @@ class ReviewDecision(Contract):
         if self.status == "rejected" and not self.note.strip():
             raise ValueError("Reject needs a note")
         return self
+
+
+class VideoReviewDecision(Contract):
+    """Một quyết định rà soát cho kết luận của video."""
+
+    video_id: str
+    run_id: str
+    status: Literal["confirmed", "rejected", "needs_info"]
+    by: Actor
+    at: VnDatetime
+    note: str = ""
+
+    @model_validator(mode="after")
+    def _reject_needs_reason(self) -> Self:
+        if self.status == "rejected" and not self.note.strip():
+            raise ValueError("Reject needs a note")
+        return self

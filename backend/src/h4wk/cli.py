@@ -13,7 +13,13 @@ from sqlmodel import Session
 from h4wk.ai.gateway import AIGateway
 from h4wk.analysis import verdict
 from h4wk.analysis.evaluation import collect_units, markdown_table, sample, score
-from h4wk.analysis.models import EntityHit, Finding, ReviewDecision, VideoVerdict
+from h4wk.analysis.models import (
+    EntityHit,
+    Finding,
+    ReviewDecision,
+    VideoReviewDecision,
+    VideoVerdict,
+)
 from h4wk.collectors.models import Normalized
 from h4wk.core.auth import create_user
 from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
@@ -40,6 +46,7 @@ CONTRACTS: dict[str, object] = {
     "c3-timeline": Timeline,
     "c4-hits": list[EntityHit],
     "c4-findings": list[Finding],
+    "c4-video-review-decision": VideoReviewDecision,
     "c4-verdict": VideoVerdict,
     "c4-review-decision": ReviewDecision,
     "c5-sources": SourcesConfig,

@@ -6,12 +6,20 @@ from dataclasses import dataclass
 from pydantic import TypeAdapter, ValidationError
 from sqlmodel import Session
 
-from h4wk.analysis.models import Finding, ReviewDecision
+from h4wk.analysis.models import Finding, ReviewDecision, VideoReviewDecision
 from h4wk.core import audit
 from h4wk.core.config import data_dir
-from h4wk.core.db import DecisionRow, EntityRow, drop_index, finding_row, get_engine
+from h4wk.core.db import (
+    DecisionRow,
+    EntityRow,
+    VideoDecisionRow,
+    drop_index,
+    finding_row,
+    get_engine,
+)
 from h4wk.core.entities import load_entities
 
+_DECISIONS = TypeAdapter(ReviewDecision | VideoReviewDecision)
 _FINDINGS = TypeAdapter(list[Finding])
 
 
@@ -63,11 +71,14 @@ def reindex() -> ReindexResult:
                 if not line:
                     continue
                 try:
-                    d = ReviewDecision.model_validate_json(line)
+                    d = _DECISIONS.validate_json(line)
                 except ValidationError as e:
                     skipped.append(f"reviews.jsonl:{n}: {_short(e)}")
                     continue
-                s.add(DecisionRow(finding_id=d.finding_id, data=line))
+                if isinstance(d, VideoReviewDecision):
+                    s.add(VideoDecisionRow(video_id=d.video_id, run_id=d.run_id, data=line))
+                else:
+                    s.add(DecisionRow(finding_id=d.finding_id, data=line))
                 decisions += 1
         s.commit()
 

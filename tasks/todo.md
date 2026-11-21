@@ -849,8 +849,8 @@ SPEC 10.8: hàng đợi theo video (kết luận `yes` hoặc `uncertain` của 
 
 Nghiệm thu:
 
-- [ ] Video kết luận `no` không có trong hàng đợi.
-- [ ] Thu lại video thì kết luận mới bắt đầu ở trạng thái chưa rà soát, quyết định cũ vẫn còn.
+- [x] Video kết luận `no` không có trong hàng đợi.
+- [x] Thu lại video thì kết luận mới bắt đầu ở trạng thái chưa rà soát, quyết định cũ vẫn còn.
 
 Người làm: Thi. Phụ thuộc: T48. Cỡ: M.
 

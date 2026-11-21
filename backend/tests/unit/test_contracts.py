@@ -518,6 +518,7 @@ def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
         "c4-findings.json",
         "c4-review-decision.json",
         "c4-verdict.json",
+        "c4-video-review-decision.json",
         "c5-sources.json",
         "c5-ai.json",
         "c5-analysis.json",
@@ -557,3 +558,21 @@ def test_video_verdict_requires_evidence(fields, message):
     assert VideoVerdict.model_validate(valid).violation == "yes"
     with pytest.raises(ValidationError, match=message):
         VideoVerdict.model_validate(valid | fields)
+
+
+def test_video_review_decision_contract():
+    from h4wk.analysis.models import VideoReviewDecision
+
+    fields = dict(
+        video_id="v",
+        run_id="r",
+        status="rejected",
+        by="user:thi",
+        at="2026-11-18T16:00:00+07:00",
+        note="Không đủ bằng chứng",
+    )
+    assert VideoReviewDecision.model_validate(fields).status == "rejected"
+    with pytest.raises(ValidationError, match="Reject needs a note"):
+        VideoReviewDecision.model_validate(fields | {"note": " "})
+    with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+        VideoReviewDecision.model_validate(fields | {"finding_id": "wrong"})

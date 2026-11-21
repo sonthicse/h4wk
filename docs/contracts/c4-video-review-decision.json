@@ -1,0 +1,47 @@
+{
+  "additionalProperties": false,
+  "description": "Một quyết định rà soát cho kết luận của video.",
+  "properties": {
+    "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+    },
+    "by": {
+      "pattern": "^(user|system):\\S+$",
+      "title": "By",
+      "type": "string"
+    },
+    "note": {
+      "default": "",
+      "title": "Note",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "confirmed",
+        "rejected",
+        "needs_info"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "video_id": {
+      "title": "Video Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "video_id",
+    "run_id",
+    "status",
+    "by",
+    "at"
+  ],
+  "title": "VideoReviewDecision",
+  "type": "object"
+}
