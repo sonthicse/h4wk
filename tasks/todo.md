@@ -477,7 +477,7 @@ Người làm: Bảo. Phụ thuộc: T20, T21, T12, T13. Cỡ: S.
 ### Checkpoint C
 
 - [ ] Đo màn 2 với video 5 phút trên máy demo, ghi vào `docs/spikes/latency.md`, gồm cả thời gian nạp model.
-- [ ] Mở `timeline.json` của 3 video thật và kiểm tra: đoạn có đúng mốc thời gian, chữ OCR đọc đúng, `offensive_cues` khớp với hình.
+- [ ] Mở `timeline.json` của 3 video thật và kiểm tra: đoạn có đúng mốc thời gian, chữ OCR đọc đúng, keyframe (`frames`) gắn đúng đoạn. Kiểm sau T58; phần `offensive_cues` bỏ cùng VLM (Phase 6d).
 
 ## Phase 4: Phân tích và rà soát
 
@@ -774,7 +774,7 @@ Người làm: Thi. Phụ thuộc: T31, T32, T25, T15, T13. Cỡ: M.
 
 Gồm các task: T15, T24, T27, T28, T29, T33, T34, T35, T40, T41, T45, T46.
 
-- [ ] Rà lại từng tiêu chí ở SPEC §8 và đánh dấu đạt hay chưa.
+- [ ] Rà lại từng tiêu chí ở SPEC §8 và đánh dấu đạt hay chưa. Tiêu chí đổi nhà cung cấp AI trên Settings bị bỏ ở Phase 6d; rà sau T64 theo SPEC đã sửa.
 - [ ] `uv run pytest`, `ruff` và `npm run build` đều sạch.
 
 ## Phase 7: Demo
@@ -911,10 +911,10 @@ Bỏ ngày 2026-11-21: kết luận theo video tính bằng quy tắc ở T60.
 
 Nghiệm thu:
 
-- [ ] Trên ít nhất 5 video có nghi vấn vi phạm: JSON hợp lệ (ngay lần đầu hoặc sau lượt sửa của gateway), tóm tắt tiếng Việt có dấu, `finding_ids` thuộc cùng lần chạy; Thi chấm đạt ít nhất 4/5.
-- [ ] Tắt Ollama thì kết luận chuyển sang tuyến cloud kế tiếp có key, `model` trong `verdict.json` ghi đúng tuyến đó.
-- [ ] Ghi số liệu (thời gian, số lượt sửa JSON, điểm chấm) vào `docs/eval/local-ai.md`.
-- [ ] Đổi route `analysis.video_verdict` trên Settings có hiệu lực (`ai_calls.jsonl` ghi đúng provider).
+- [-] Trên ít nhất 5 video có nghi vấn vi phạm: JSON hợp lệ (ngay lần đầu hoặc sau lượt sửa của gateway), tóm tắt tiếng Việt có dấu, `finding_ids` thuộc cùng lần chạy; Thi chấm đạt ít nhất 4/5.
+- [-] Tắt Ollama thì kết luận chuyển sang tuyến cloud kế tiếp có key, `model` trong `verdict.json` ghi đúng tuyến đó.
+- [-] Ghi số liệu (thời gian, số lượt sửa JSON, điểm chấm) vào `docs/eval/local-ai.md`.
+- [-] Đổi route `analysis.video_verdict` trên Settings có hiệu lực (`ai_calls.jsonl` ghi đúng provider).
 
 Kiểm tra: chạy script đánh giá; `uv run --no-sync pytest tests/unit/test_verdict.py`.
 
@@ -988,7 +988,7 @@ Bỏ ngày 2026-11-21 cùng Ollama; thay bằng Checkpoint 6d.
 
 ## Phase 6d: Jev thay toàn bộ LLM và VLM (thêm ngày 2026-11-21)
 
-Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend: nhánh `feat/t58-jev-only` (worktree `.claude/worktrees/feat-t58-jev-only`, chưa commit). Đọc để tham khảo cách làm và test, không cherry-pick nguyên khối: bản đó gộp T58–T61 và chưa đọc được `timeline.json` cũ.
+Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend: nhánh `feat/t58-jev-only` (commit `29d92b7`, worktree `.claude/worktrees/feat-t58-jev-only`). Đọc để tham khảo cách làm và test, không cherry-pick nguyên khối: bản đó gộp T58–T61 và chưa đọc được `timeline.json` cũ.
 
 Thứ tự: T58 → (T59, T60 song song) → T61 sau T60 → T62 sau T61; T63 sau T58 và T60 → T64 → Checkpoint 6d.
 
@@ -1076,7 +1076,7 @@ Người làm: agent ui. Phụ thuộc: T58, T60. Cỡ: S.
 
 ### T64: Gộp SPEC-jev-only.md vào SPEC.md
 
-Sửa SPEC.md: §8 (bỏ tiêu chí đổi nhà cung cấp AI, thêm tiêu chí Jev nhận ảnh), §10.4 (bỏ `ai-gateway`, ghi Jev là nhà cung cấp AI duy nhất), §10.5 (bỏ bước VLM, C3 mới), §10.6 (Jev R10 cho mọi nguồn kèm ảnh, quy tắc severity/confidence, kết luận bằng quy tắc), §10.10 (Settings mục 6–7), §11 (bỏ "validate đầu ra LLM/VLM"), §13, bản đồ module §2 nếu có `ai-gateway`. Sửa `docs/intent/socmint-youtube.md` (mục 6 và ràng buộc về nhiều nhà cung cấp). Đổi `Status` của SPEC-jev-only.md thành `implemented`. Sửa `CLAUDE.md` nếu còn nhắc C5 `ai.toml`.
+Sửa SPEC.md: §8 (bỏ tiêu chí đổi nhà cung cấp AI, thêm tiêu chí Jev nhận ảnh), §10.4 (bỏ `ai-gateway`, ghi Jev là nhà cung cấp AI duy nhất), §10.5 (bỏ bước VLM, C3 mới), §10.6 (Jev R10 cho mọi nguồn kèm ảnh, quy tắc severity/confidence, kết luận bằng quy tắc), §10.10 (Settings mục 6–7), §8 Màn 2 (bước `OCR/VLM` thành `OCR`), §11 (bỏ "validate đầu ra LLM/VLM"), §13, bản đồ module §2 nếu có `ai-gateway`. Sửa `docs/intent/socmint-youtube.md` (mục 6 và ràng buộc về nhiều nhà cung cấp). Đổi `Status` của SPEC-jev-only.md thành `implemented`. Sửa `CLAUDE.md` nếu còn nhắc C5 `ai.toml`.
 
 Nghiệm thu:
 

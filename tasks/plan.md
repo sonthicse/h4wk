@@ -310,7 +310,7 @@ Rủi ro:
 
 | Rủi ro | Mức | Cách xử lý |
 |---|---|---|
-| Video dài (342 keyframe × ~42 giây) mất vài giờ cho bước mô tả ảnh | Cao cho màn 2 | Cache theo từng ảnh để chạy tiếp được (T52); màn 2 dùng video ngắn (T36, T37) |
+| Video dài (342 keyframe × ~42 giây) mất vài giờ cho bước mô tả ảnh (hết rủi ro sau Phase 6d: không còn VLM) | Cao cho màn 2 | Cache theo từng ảnh để chạy tiếp được (T52); màn 2 dùng video ngắn (T36, T37) |
 | `qwen3-vl:4b` lặp từ tới hết context | Trung bình | Câu “trả lời ngắn gọn”, `max_tokens` 1024, gateway sửa JSON tối đa 2 lần rồi chuyển tuyến |
 | Kết quả Jev R10 dựa trên nhãn do agent gán | Trung bình | T54 đối chiếu lại số liệu; Thi xem mẫu khi chạy thật |
 | Thêm mục cho Jev (mọi đoạn có OCR/hình) làm tăng số request | Thấp | Jev rẻ và nhanh; bỏ dòng OCR trùng; ghi số request ở T55 |
@@ -320,7 +320,7 @@ Rủi ro:
 
 ### Phase 6d: Jev thay toàn bộ LLM và VLM (thêm ngày 2026-11-21)
 
-Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend ở nhánh `feat/t58-jev-only` (worktree `.claude/worktrees/feat-t58-jev-only`, chưa commit), dùng để tham khảo cách làm và test; chưa có phần đọc `timeline.json` cũ.
+Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend ở nhánh `feat/t58-jev-only` (commit `29d92b7`, worktree `.claude/worktrees/feat-t58-jev-only`), dùng để tham khảo cách làm và test; chưa có phần đọc `timeline.json` cũ.
 
 - [ ] T58: `media`: C3 bỏ mô tả ảnh, mọi keyframe vào timeline (backend)
 - [ ] T59: `analysis`: Jev nhận keyframe và thumbnail (backend)
