@@ -47,11 +47,13 @@ export default function FindingTimeline({
   player,
   activeId,
   onOpen,
+  children,
 }: {
   findings: VideoFinding[]
   player: PlayerControls
   activeId: string | null
   onOpen: (f: VideoFinding, at?: number) => void
+  children: React.ReactNode
 }) {
   const { duration, currentTime } = player
   const timed = findings.filter(isTimed).sort((a, b) => a.start! - b.start!)
@@ -128,6 +130,8 @@ export default function FindingTimeline({
           style={{ left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
         />
       </div>
+
+      {children}
 
       <div className="flex items-center gap-2">
         <h2 className="text-sm font-medium">Findings</h2>

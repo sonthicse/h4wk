@@ -144,14 +144,15 @@ function VideoView({
               findings={findings}
             />
           </div>
-          <FindingTimeline findings={findings} player={player} activeId={finding?.id ?? null} onOpen={openFinding} />
-          <KeyframeStrip
-            videoId={video.id}
-            capture={timeline.data?.capture}
-            keyframes={keyframes}
-            findings={findings}
-            player={player}
-          />
+          <FindingTimeline findings={findings} player={player} activeId={finding?.id ?? null} onOpen={openFinding}>
+            <KeyframeStrip
+              videoId={video.id}
+              capture={timeline.data?.capture}
+              keyframes={keyframes}
+              findings={findings}
+              player={player}
+            />
+          </FindingTimeline>
           <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
             <TabsList>
               <TabsTrigger value="comments">Comments ({commentList.length})</TabsTrigger>
