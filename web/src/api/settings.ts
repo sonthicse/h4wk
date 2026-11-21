@@ -51,7 +51,12 @@ export function resumeSource(name: SourceName): Promise<SourceInfo> {
 // Kiểu dạng UI: models là mảng, tên trường camelCase. Hàm bên dưới đổi qua lại với dạng API.
 
 export type AiTask = 'analysis.video_verdict' | 'media.vision'
-export type ProviderType = Schemas['ProviderInfo']['type']
+// Tương thích tạm với trang cũ trong lúc T62 thay Settings AI.
+export type ProviderType = 'anthropic' | 'openai_compat' | 'gemini' | 'ollama'
+type LegacyAiSettings = {
+  providers: { name: string; type: ProviderType; base_url: string | null; models: Record<string, Omit<AiModel, 'name'>>; key: { masked?: string | null } }[]
+  tasks: Partial<Record<AiTask, AiRoute[]>>
+}
 
 export const AI_TASKS: AiTask[] = ['analysis.video_verdict', 'media.vision']
 
@@ -83,7 +88,7 @@ export type ProviderTestResult = { ok: boolean; message: string; latencyMs?: num
 const provider = (name: string) => `/api/settings/ai/providers/${encodeURIComponent(name)}`
 
 export async function getAiSettings(): Promise<AiSettings> {
-  const data = await api<Schemas['AiSettings']>('/api/settings/ai')
+  const data = await api<LegacyAiSettings>('/api/settings/ai')
   return {
     providers: data.providers.map((p) => ({
       name: p.name,

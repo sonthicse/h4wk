@@ -1998,52 +1998,6 @@ export interface components {
             /** Event */
             event?: string | null;
         };
-        /** ProviderInfo */
-        ProviderInfo: {
-            /** Name */
-            name: string;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "anthropic" | "openai_compat" | "gemini" | "ollama";
-            /** Base Url */
-            base_url: string | null;
-            /** Models */
-            models: {
-                [key: string]: components["schemas"]["ModelCaps"];
-            };
-            key: components["schemas"]["KeyInfo"];
-        };
-        /** ModelCaps */
-        ModelCaps: {
-            /**
-             * Vision
-             * @default false
-             */
-            vision: boolean;
-            /**
-             * Structured
-             * @default false
-             */
-            structured: boolean;
-        };
-        /** AiSettings */
-        AiSettings: {
-            /** Providers */
-            providers: components["schemas"]["ProviderInfo"][];
-            /** Tasks */
-            tasks: {
-                [key: string]: components["schemas"]["Route"][];
-            };
-        };
-        /** Route */
-        Route: {
-            /** Provider */
-            provider: string;
-            /** Model */
-            model: string;
-        };
     };
     responses: never;
     parameters: never;
