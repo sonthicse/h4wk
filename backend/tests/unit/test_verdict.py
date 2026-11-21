@@ -1,13 +1,8 @@
-import json
-from unittest.mock import Mock
-
 import pytest
 from _analysis_sample import _data
 
-from h4wk.ai.gateway import GatewayError
 from h4wk.analysis.models import Finding
 from h4wk.analysis.verdict import decide
-from h4wk.core.config_models import Route
 
 
 def _finding(timeline, i, **fields):
@@ -31,46 +26,52 @@ def _finding(timeline, i, **fields):
     )
 
 
-def test_no_violations():
-    data, timeline = _data()
-    gateway = Mock()
-    result, error = decide(
-        data, [_finding(timeline, 0, category="neutral")], "r_test", timeline, gateway
+def test_no_violations_and_other_runs_ignored():
+    _, timeline = _data()
+    other = _finding(timeline, 0, run_id="r_other", confidence="highly_likely")
+    neutral = _finding(timeline, 1, category="neutral")
+    result = decide([other, neutral], "r_test", timeline)
+    assert result.violation == "no" and result.model is None
+    assert result.confidence == "highly_likely" and result.summary == "Không có nghi vấn vi phạm."
+    assert result.categories == [] and result.finding_ids == []
+
+
+@pytest.mark.parametrize(
+    ("confidences", "expected"),
+    [
+        (["highly_likely"], "yes"),
+        (["likely", "highly_likely"], "yes"),
+        (["likely", "unverified"], "uncertain"),
+        (["unverified"], "uncertain"),
+    ],
+)
+def test_violation_by_confidence(confidences, expected):
+    _, timeline = _data()
+    findings = [_finding(timeline, i, confidence=c) for i, c in enumerate(confidences)]
+    assert decide(findings, "r_test", timeline).violation == expected
+
+
+def test_summary_categories_and_top_confidence():
+    _, timeline = _data()
+    findings = [
+        _finding(timeline, 0, category="insult", severity="medium", confidence="likely"),
+        _finding(timeline, 1, category="insult", severity="low"),
+        _finding(timeline, 2, category="incitement", severity="high", confidence="highly_likely"),
+        _finding(timeline, 3, category="insult", severity="low"),
+    ]
+    result = decide(findings, "r_test", timeline)
+    assert result.categories == ["insult", "incitement"]
+    assert result.severity == "high"
+    assert result.confidence == "highly_likely"  # của nghi vấn xếp đầu
+    assert result.finding_ids[0] == findings[2].id
+    assert (
+        result.summary
+        == "4 nghi vấn vi phạm; danh mục: insult (3), incitement (1); mức cao nhất: high."
     )
-    assert result.violation == "no" and result.model is None and error is None
-    gateway.complete_structured_with_route.assert_not_called()
 
 
-@pytest.mark.parametrize("mode", ["mixed", "unknown", "gateway", "schema"])
-def test_evidence_and_fallback(mode):
-    data, timeline = _data()
-    finding = _finding(timeline, 1)
-    gateway = Mock()
-
-    def respond(task, messages, schema):
-        assert task == "analysis.video_verdict"
-        if mode == "gateway":
-            raise GatewayError("429 quota")
-        ids = [_finding(timeline, 2).id] + ([finding.id] if mode == "mixed" else [])
-        return schema(
-            violation="yes",
-            categories=["incitement"],
-            confidence="likely",
-            severity=None if mode == "schema" else "high",
-            finding_ids=ids,
-        ), Route(provider="gemini", model="fake")
-
-    gateway.complete_structured_with_route.side_effect = respond
-    result, error = decide(data, [finding], "r_test", timeline, gateway)
-    assert result.finding_ids == [finding.id]
-    if mode == "mixed":
-        assert result.violation == "yes" and result.model.provider == "gemini" and error is None
-    else:
-        assert result.violation == "uncertain" and result.model is None and error
-
-
-def test_payload_limits_and_order():
-    data, timeline = _data()
+def test_ten_ids_ranked_by_severity_then_jev_probability():
+    _, timeline = _data()
     findings = [
         _finding(
             timeline,
@@ -80,19 +81,13 @@ def test_payload_limits_and_order():
         )
         for i in range(200)
     ]
-    gateway = Mock()
-    gateway.complete_structured_with_route.side_effect = GatewayError("offline")
-    result, error = decide(data, findings, "r_test", timeline, gateway)
-    _, messages, _ = gateway.complete_structured_with_route.call_args.args
-    payload = json.loads(messages[1]["content"])
-    assert payload["total_findings"] == 200
-    assert [f["id"] for f in payload["findings"]] == [f.id for f in reversed(findings[40:100])]
-    assert all(len(f["quote"]) == 300 for f in payload["findings"])
-    assert error and result.finding_ids == [f.id for f in findings]
+    result = decide(findings, "r_test", timeline)
+    assert result.finding_ids == [f.id for f in reversed(findings[90:100])]
+    assert result.summary.startswith("200 nghi vấn vi phạm")
 
 
 @pytest.mark.parametrize("args", [["demo"], ["--all"]])
-def test_backfill_retries_fallback_and_preserves_success(data_dir, monkeypatch, args):
+def test_backfill_writes_once_and_force_rewrites(data_dir, args):
     from typer.testing import CliRunner
 
     from h4wk import cli
@@ -107,39 +102,24 @@ def test_backfill_retries_fallback_and_preserves_success(data_dir, monkeypatch, 
     run.mkdir(parents=True)
     (capture / "normalized.json").write_text(data.model_dump_json(), encoding="utf-8")
     (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
-    finding = _finding(timeline, 1)
+    finding = _finding(timeline, 1, confidence="highly_likely")
     (run / "findings.json").write_text(f"[{finding.model_dump_json()}]", encoding="utf-8")
-    gateway = Mock()
-    monkeypatch.setattr(cli, "AIGateway", lambda: gateway)
-    from h4wk.analysis.models import VerdictAnswer
-
-    gateway.complete_structured_with_route.side_effect = GatewayError("offline")
     runner = CliRunner()
     assert runner.invoke(cli.app, ["verdict"]).exit_code == 2
     result = runner.invoke(cli.app, ["verdict", *args])
     assert result.exit_code == 0, result.exception
     path = run / "verdict.json"
-    assert VideoVerdict.model_validate_json(path.read_bytes()).model is None
-    gateway.complete_structured_with_route.side_effect = None
-    gateway.complete_structured_with_route.return_value = (
-        VerdictAnswer(
-            violation="yes",
-            categories=["incitement"],
-            severity="high",
-            confidence="likely",
-            finding_ids=[finding.id],
-        ),
-        Route(provider="gemini", model="fake"),
-    )
-    result = runner.invoke(cli.app, ["verdict", *args])
-    assert result.exit_code == 0, result.exception
-    assert VideoVerdict.model_validate_json(path.read_bytes()).model.model == "fake"
-    gateway.reset_mock()
+    first = VideoVerdict.model_validate_json(path.read_bytes())
+    assert first.violation == "yes" and first.model is None
+    # Chạy lại không ghi đè: đổi nội dung rồi kiểm tra còn nguyên.
+    path.write_text(first.model_copy(update={"summary": "giữ"}).model_dump_json(), encoding="utf-8")
     assert runner.invoke(cli.app, ["verdict", *args]).exit_code == 0
-    gateway.complete_structured_with_route.assert_not_called()
+    assert VideoVerdict.model_validate_json(path.read_bytes()).summary == "giữ"
+    assert runner.invoke(cli.app, ["verdict", *args, "--force"]).exit_code == 0
+    assert VideoVerdict.model_validate_json(path.read_bytes()).summary.startswith("1 nghi vấn")
 
 
-def test_analyze_cli_creates_run(monkeypatch, data_dir):
+def test_analyze_cli_creates_run(data_dir):
     from typer.testing import CliRunner
 
     from h4wk import cli
@@ -152,8 +132,6 @@ def test_analyze_cli_creates_run(monkeypatch, data_dir):
     derived.mkdir(parents=True)
     (capture / "normalized.json").write_text(data.model_dump_json(), encoding="utf-8")
     (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
-    gateway = Mock()
-    monkeypatch.setattr(cli, "AIGateway", lambda: gateway)
     result = CliRunner().invoke(cli.app, ["analyze", timeline.video_id])
     assert result.exit_code == 0, result.exception
     (path,) = derived.glob("analysis/*/verdict.json")
@@ -182,11 +160,7 @@ def test_analyze_all_stops_on_quota_without_replacing_run(monkeypatch, data_dir)
     from h4wk.jobs import pipeline
 
     monkeypatch.setattr(pipeline.runner, "analyze", lambda *args, **kwargs: ([], [], "HTTP 429"))
-    gateway = Mock()
-    gateway.complete_structured_with_route.side_effect = GatewayError("HTTP 429")
-    monkeypatch.setattr(cli, "AIGateway", lambda: gateway)
     result = CliRunner().invoke(cli.app, ["analyze", "--all"])
     assert result.exit_code == 1, result.exception
     assert "429" in result.output
     assert _latest_runs(data_dir) == before
-    gateway.complete_structured_with_route.assert_not_called()

@@ -13,7 +13,6 @@ import cv2
 from pydantic import TypeAdapter
 from sqlmodel import Session, select
 
-from h4wk.ai.gateway import AIGateway
 from h4wk.analysis import faces, refimages, runner, verdict
 from h4wk.analysis.models import EntityHit, Finding
 from h4wk.collectors.models import CollectLevel, Normalized
@@ -314,7 +313,7 @@ class AnalysisQuotaError(RuntimeError):
     """Không công bố run CLI khi hết quota."""
 
 
-def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway, *, reject_quota: bool = False):
+def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
     """Phân tích bản thu đã có timeline, không thu lại hay chạy media."""
     derived = video_dir / "derived" / cap
     timeline = Timeline.model_validate_json((derived / "timeline.json").read_text("utf-8"))
@@ -354,9 +353,7 @@ def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway, *, reject_quo
             capture_dir=video_dir / "captures" / cap,
         )
         check_quota(llm_error)
-        decision, verdict_error = verdict.decide(n, findings, run_id, timeline, gateway)
-        verdict.write(target / "verdict.json", decision)
-        llm_error = "; ".join(e for e in (llm_error, verdict_error) if e) or None
+        verdict.write(target / "verdict.json", verdict.decide(findings, run_id, timeline))
         return findings, llm_error
 
     if reject_quota:
@@ -380,7 +377,7 @@ def analyze(job_id: str) -> None:
     job = _update(job_id, status="running", step="analyze", progress=75)
     try:
         cap = str(job.capture)
-        run_id, findings, llm_error = analyze_capture(_video_dir(job), cap, AIGateway())
+        run_id, findings, llm_error = analyze_capture(_video_dir(job), cap)
     except Exception as e:
         _fail(job_id, "analyze", e)
         return

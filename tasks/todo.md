@@ -1030,9 +1030,9 @@ Theo SPEC-jev-only §3. `verdict.decide(findings, run_id, timeline) -> VideoVerd
 
 Nghiệm thu:
 
-- [ ] Test quy tắc: `no`; `yes` với một nghi vấn `highly_likely`; `uncertain` khi chỉ có `likely` và `unverified`; nghi vấn của run khác bị bỏ qua; thứ tự `categories` và `finding_ids` (200 nghi vấn, xếp theo severity rồi xác suất Jev).
-- [ ] Test CLI: `h4wk verdict <id>` ghi một lần, chạy lại không ghi đè, `--force` ghi lại; `h4wk analyze --all` vẫn dừng khi Jev báo 429.
-- [ ] Không còn `import` từ `h4wk.ai` trong `analysis/` và `cli.py`; backend pytest, ruff qua.
+- [x] Test quy tắc: `no`; `yes` với một nghi vấn `highly_likely`; `uncertain` khi chỉ có `likely` và `unverified`; nghi vấn của run khác bị bỏ qua; thứ tự `categories` và `finding_ids` (200 nghi vấn, xếp theo severity rồi xác suất Jev).
+- [x] Test CLI: `h4wk verdict <id>` ghi một lần, chạy lại không ghi đè, `--force` ghi lại; `h4wk analyze --all` vẫn dừng khi Jev báo 429.
+- [x] Không còn `import` từ `h4wk.ai` trong `analysis/` và `cli.py`; backend pytest, ruff qua.
 
 File: `analysis/verdict.py`, `jobs/pipeline.py`, `cli.py`, `tests/unit/test_verdict.py`; xoá `analysis/prompts/video_verdict.md`.
 Người làm: agent backend. Phụ thuộc: T58. Cỡ: S.

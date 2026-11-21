@@ -155,20 +155,13 @@ def test_failed_step_marks_job_failed_and_audits(
 def test_llm_failure_keeps_job_done(
     client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from itertools import repeat
+    from h4wk.analysis import jev
 
-    from h4wk.ai.base import ProviderReply
-    from h4wk.ai.config import AI_CONFIG_PATH
-    from h4wk.ai.fake import FakeProvider
-    from h4wk.ai.gateway import AIGateway
-    from h4wk.jobs import pipeline
+    def broken(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+        raise RuntimeError("HTTP 500")
 
-    broken = AIGateway(
-        {"anthropic": FakeProvider(repeat(ProviderReply("not json")))},
-        config_path=AI_CONFIG_PATH.with_suffix(".toml.example"),
-        log_dir=data_dir,
-    )
-    monkeypatch.setattr(pipeline, "AIGateway", lambda: broken)
+    monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
+    monkeypatch.setattr(jev, "_call", broken)
     _entity(client)
     r = client.post("/api/collect", json={"url": VIDEO})
     job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()

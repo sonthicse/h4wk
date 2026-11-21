@@ -10,7 +10,6 @@ import typer
 from pydantic import TypeAdapter
 from sqlmodel import Session
 
-from h4wk.ai.gateway import AIGateway
 from h4wk.analysis import verdict
 from h4wk.analysis.evaluation import collect_units, markdown_table, sample, score
 from h4wk.analysis.models import (
@@ -133,10 +132,9 @@ def reanalyze(
                 raise typer.BadParameter(f"No prepared capture for {video.name}")
             continue
         pending.append((video, capture.parent.name))
-    gateway = AIGateway()
     for video, cap in pending:
         try:
-            run_id, findings, error = analyze_capture(video, cap, gateway, reject_quota=True)
+            run_id, findings, error = analyze_capture(video, cap, reject_quota=True)
         except AnalysisQuotaError as exc:
             typer.echo(str(exc), err=True)
             raise typer.Exit(1) from exc
@@ -168,32 +166,17 @@ def backfill_verdict(
                 raise typer.BadParameter(f"No analysis for {video.name}")
             continue
         target = latest.with_name("verdict.json")
-        if (
-            target.exists()
-            and not force
-            and VideoVerdict.model_validate_json(target.read_text(encoding="utf-8")).model
-            is not None
-        ):
+        if target.exists() and not force:
             if not all_videos:
                 typer.echo(f"Already exists: {target}")
             continue
-        pending.append((capture, derived, latest, target))
-    gateway = AIGateway()
-    for index, (capture, derived, latest, target) in enumerate(pending):
-        data = Normalized.model_validate_json(capture.read_text(encoding="utf-8"))
+        pending.append((derived, latest, target))
+    for derived, latest, target in pending:
         timeline = Timeline.model_validate_json(
             (derived / "timeline.json").read_text(encoding="utf-8")
         )
         findings = TypeAdapter(list[Finding]).validate_json(latest.read_text(encoding="utf-8"))
-        decision, error = verdict.decide(data, findings, latest.parent.name, timeline, gateway)
-        if error:
-            typer.echo(error, err=True)
-            if all_videos and any(
-                word in error.lower() for word in ("quota", "429", "resource_exhausted")
-            ):
-                typer.echo(f"Remaining: {len(pending) - index}", err=True)
-                raise typer.Exit(1)
-        verdict.write(target, decision)
+        verdict.write(target, verdict.decide(findings, latest.parent.name, timeline))
         typer.echo(f"wrote: {target}")
 
 

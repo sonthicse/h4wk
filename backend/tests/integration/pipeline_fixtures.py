@@ -5,17 +5,12 @@ Không đặt trong conftest.py vì test_auth.py import `conftest` của thư m�
 import os
 import shutil
 from collections.abc import Iterator
-from itertools import repeat
 from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
-from h4wk.ai.base import ProviderReply
-from h4wk.ai.config import AI_CONFIG_PATH
-from h4wk.ai.fake import FakeProvider
-from h4wk.ai.gateway import AIGateway
 from h4wk.collectors import registry
 from h4wk.collectors.base import Blocked, FetchResult
 from h4wk.collectors.models import Cap, Normalized
@@ -96,13 +91,6 @@ def fake_source(
         "_ref_embedder",
         SimpleNamespace(embed=lambda images: np.ones((len(images), 4)) / 2),
     )
-    # Tầng LLM của analysis: trả Answer hợp lệ, không có kết luận nào.
-    analysis_gateway = AIGateway(
-        {"anthropic": FakeProvider(repeat(ProviderReply('{"verdicts":[]}')))},
-        config_path=AI_CONFIG_PATH.with_suffix(".toml.example"),
-        log_dir=data_dir,
-    )
-    monkeypatch.setattr(pipeline, "AIGateway", lambda: analysis_gateway)
     return holder
 
 
