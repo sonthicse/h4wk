@@ -113,7 +113,7 @@ def reanalyze(
     all_videos: Annotated[bool, typer.Option("--all")] = False,
 ) -> None:
     """Phân tích lại bản thu mới nhất mà không thu lại hoặc chạy media."""
-    from h4wk.jobs.pipeline import analyze_capture
+    from h4wk.jobs.pipeline import AnalysisQuotaError, analyze_capture
 
     if (video_id is None) == (not all_videos):
         raise typer.BadParameter("Specify a video ID or --all, not both")
@@ -134,12 +134,14 @@ def reanalyze(
         pending.append((video, capture.parent.name))
     gateway = AIGateway()
     for video, cap in pending:
-        run_id, findings, error = analyze_capture(video, cap, gateway)
+        try:
+            run_id, findings, error = analyze_capture(video, cap, gateway, reject_quota=True)
+        except AnalysisQuotaError as exc:
+            typer.echo(str(exc), err=True)
+            raise typer.Exit(1) from exc
         typer.echo(f"{video.name}: {run_id} ({len(findings)} findings)")
         if error:
             typer.echo(error, err=True)
-            if any(word in error.lower() for word in ("quota", "429", "resource_exhausted")):
-                raise typer.Exit(1)
 
 
 @app.command("verdict")

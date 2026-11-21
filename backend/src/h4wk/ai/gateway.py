@@ -81,6 +81,7 @@ class AIGateway:
 
         json_schema = schema.model_json_schema()
         last_error = None
+        quota_blocked = False
         unavailable: list[str] = []
         keys = secrets.all_keys() if self.providers is None else {}
         for route in routes:
@@ -107,6 +108,11 @@ class AIGateway:
                 except ProviderError as error:
                     self._log(task, route, start, "provider_error", None)
                     last_error = error
+                    cause = error.__cause__
+                    quota_blocked |= 429 in (
+                        getattr(cause, "code", None),
+                        getattr(cause, "status_code", None),
+                    )
                     break
 
                 try:
@@ -129,6 +135,8 @@ class AIGateway:
                     return answer, route
         if last_error is None:
             raise GatewayError(f"{task}: no AI provider available ({'; '.join(unavailable)})")
+        if quota_blocked:
+            raise GatewayError(f"{task}: no valid result (HTTP 429 quota exceeded)") from last_error
         raise GatewayError(f"{task}: no valid result ({last_error})") from last_error
 
     def _log(

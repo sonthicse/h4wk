@@ -159,3 +159,36 @@ def test_analyze_cli_creates_run(monkeypatch, data_dir):
     (path,) = derived.glob("analysis/*/verdict.json")
     assert path.with_name("findings.json").is_file()
     assert cli.VideoVerdict.model_validate_json(path.read_bytes()).run_id == path.parent.name
+
+
+def test_analyze_all_stops_on_quota_without_replacing_run(monkeypatch, data_dir):
+    from typer.testing import CliRunner
+
+    from h4wk import cli
+    from h4wk.analysis import runner
+    from h4wk.jobs.pipeline import _latest_runs
+
+    data, timeline = _data()
+    for video_id in (timeline.video_id, "zz-next"):
+        video = data_dir / "videos" / video_id
+        capture = video / "captures" / timeline.capture
+        derived = video / "derived" / timeline.capture
+        old = derived / "analysis" / "r_00000000000000000000000000"
+        capture.mkdir(parents=True)
+        old.mkdir(parents=True)
+        (capture / "normalized.json").write_text(data.model_dump_json(), encoding="utf-8")
+        (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
+        (old / "findings.json").write_text("[]", encoding="utf-8")
+    before = _latest_runs(data_dir)
+    gateway = Mock()
+    gateway.complete_structured_with_route.side_effect = GatewayError("HTTP 429")
+    monkeypatch.setattr(cli, "AIGateway", lambda: gateway)
+    monkeypatch.setattr(runner.llm, "build_items", lambda *args: [object()])
+    monkeypatch.setattr(
+        runner.llm, "classify", lambda *args: gateway.complete_structured_with_route()
+    )
+    result = CliRunner().invoke(cli.app, ["analyze", "--all"])
+    assert result.exit_code == 1, result.exception
+    assert "429" in result.output
+    assert _latest_runs(data_dir) == before
+    gateway.complete_structured_with_route.assert_called_once()

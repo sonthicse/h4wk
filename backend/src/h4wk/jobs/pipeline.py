@@ -7,6 +7,7 @@ import os
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import cv2
 from pydantic import TypeAdapter
@@ -282,7 +283,11 @@ def media(job_id: str) -> None:
     analyze(job_id, len(failed))
 
 
-def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway):
+class AnalysisQuotaError(RuntimeError):
+    """Không công bố run CLI khi hết quota."""
+
+
+def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway, *, reject_quota: bool = False):
     """Phân tích bản thu đã có timeline, không thu lại hay chạy media."""
     derived = video_dir / "derived" / cap
     timeline = Timeline.model_validate_json((derived / "timeline.json").read_text("utf-8"))
@@ -299,21 +304,43 @@ def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway):
     # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
     settings = _analysis_config()
     out = derived / "analysis" / run_id
-    _hits, findings, llm_error = runner.analyze(
-        n,
-        timeline,
-        load_entities(),
-        None,
-        run_id,
-        out,
-        gateway=gateway,
-        comment_settings=settings.comments,
-        jev_settings=settings.jev,
-        extra_hits=ref_hits,
-    )
-    decision, verdict_error = verdict.decide(n, findings, run_id, timeline, gateway)
-    verdict.write(out / "verdict.json", decision)
-    llm_error = "; ".join(e for e in (llm_error, verdict_error) if e) or None
+
+    def check_quota(error: str | None) -> None:
+        if (
+            reject_quota
+            and error
+            and any(word in error.lower() for word in ("quota", "429", "resource_exhausted"))
+        ):
+            raise AnalysisQuotaError(error)
+
+    def run(target: Path):
+        _hits, findings, llm_error = runner.analyze(
+            n,
+            timeline,
+            load_entities(),
+            None,
+            run_id,
+            target,
+            gateway=gateway,
+            comment_settings=settings.comments,
+            jev_settings=settings.jev,
+            extra_hits=ref_hits,
+        )
+        check_quota(llm_error)
+        decision, verdict_error = verdict.decide(n, findings, run_id, timeline, gateway)
+        verdict.write(target / "verdict.json", decision)
+        llm_error = "; ".join(e for e in (llm_error, verdict_error) if e) or None
+        return findings, llm_error
+
+    if reject_quota:
+        with TemporaryDirectory(prefix=".reanalyze-", dir=derived) as staging:
+            target = Path(staging) / run_id
+            findings, llm_error = run(target)
+            check_quota(llm_error)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            target.rename(out)
+    else:
+        findings, llm_error = run(out)
     with Session(get_engine()) as s:
         for f in findings:
             s.add(finding_row(f))
