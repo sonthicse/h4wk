@@ -62,24 +62,13 @@ export type VideoVerdictDetail = {
   findings: Schemas['Finding'][]
 }
 
-// GIẢ: đặt true để dùng dữ liệu giả trong review.mock.ts cho tới khi T49 xong.
-export const USE_MOCK_VIDEO_REVIEW = true
-
 export async function listVideoQueue(status?: string): Promise<VideoQueueItem[]> {
-  if (USE_MOCK_VIDEO_REVIEW) {
-    const { mockQueue } = await import('@/api/review.mock')
-    return mockQueue().filter((it) => !status || it.status === status)
-  }
   const q = new URLSearchParams({ latest_only: 'true', ...(status ? { status } : {}) })
   return api(`/api/review/videos?${q}`)
 }
 
 // 404 nghĩa là video chưa có kết luận: trả null để trang giữ như cũ.
 export async function getVerdict(videoId: string): Promise<VideoVerdictDetail | null> {
-  if (USE_MOCK_VIDEO_REVIEW) {
-    const { mockDetail } = await import('@/api/review.mock')
-    return mockDetail(videoId)
-  }
   try {
     return await api(`/api/videos/${encodeURIComponent(videoId)}/verdict`)
   } catch (e) {
@@ -95,10 +84,6 @@ export async function decideVideo(
   status: VideoDecisionStatus,
   note = '',
 ): Promise<VideoReviewDecision> {
-  if (USE_MOCK_VIDEO_REVIEW) {
-    const { mockDecide } = await import('@/api/review.mock')
-    return mockDecide(videoId, runId, status, note)
-  }
   return api(`/api/videos/${encodeURIComponent(videoId)}/decision`, {
     method: 'POST',
     body: { status, note, run_id: runId },
