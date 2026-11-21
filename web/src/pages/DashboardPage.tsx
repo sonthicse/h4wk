@@ -149,7 +149,7 @@ export default function DashboardPage() {
               <ReviewQueueCard />
             </div>
             <EventFeed />
-            <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} />
+            <UsageCard youtubeQuota={d.youtube_quota} supadataCredits={d.supadata_credits} jevUsage={d.jev_usage} />
           </div>
         </div>
       </div>

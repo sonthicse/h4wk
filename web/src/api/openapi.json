@@ -5836,6 +5836,46 @@
           "type"
         ],
         "title": "Trigger"
+      },
+      "JevMonthUsage": {
+        "properties": {
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "input_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Tokens",
+            "description": "Input tokens reported by TypeSafe, if available."
+          },
+          "output_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Tokens",
+            "description": "Output tokens reported by TypeSafe, if available."
+          }
+        },
+        "type": "object",
+        "required": [
+          "requests",
+          "input_tokens",
+          "output_tokens"
+        ],
+        "title": "JevMonthUsage",
+        "description": "T\u1ed5ng th\u00e1ng hi\u1ec7n t\u1ea1i theo gi\u1edd Vi\u1ec7t Nam, ch\u1ec9 g\u1ed3m token TypeSafe b\u00e1o."
       }
     }
   }
