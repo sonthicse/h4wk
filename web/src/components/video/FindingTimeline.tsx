@@ -69,7 +69,9 @@ export default function FindingTimeline({
     const box = listRef.current
     const row = box?.querySelector<HTMLElement>('[data-now="true"]')
     if (!box || !row) return
-    box.scrollTo({ top: row.offsetTop - box.clientHeight / 3, behavior: 'smooth' })
+    // offsetTop tính theo LI.relative nên luôn 0; đo theo toạ độ so với vùng cuộn.
+    const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop
+    box.scrollTo({ top: top - box.clientHeight / 3, behavior: 'smooth' })
   }, [nowKey])
   const [showAll, setShowAll] = useState(false)
   const shown = showAll ? groups : groups.filter((g, i) => i < MAX_GROUPS || g.key === nowKey)
