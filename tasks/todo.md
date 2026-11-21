@@ -824,8 +824,8 @@ Nghiệm thu:
 
 - [ ] Gán nhãn đủ 124 dòng ở `data/eval/jev/trial.csv` (còn 42 dòng chưa gán); Jev đạt recall không thấp hơn LLM trên cùng bộ nhãn.
 - [ ] Chạy thử trên mọi đoạn và comment của 8 video có sẵn, gán nhãn khoảng 50 mục không nhắc tên ai mà Jev đánh dấu, ghi precision vào `docs/eval/`.
-- [ ] Test với Jev giả: đoạn và comment vi phạm sinh nghi vấn đúng danh mục và đối tượng; `target` là `none` thì không sinh nghi vấn; 429 được thử lại; Jev lỗi thì job vẫn xong, lỗi ghi vào `llm_error`.
-- [ ] Thiếu `TYPESAFE_API_KEY` thì Settings báo thiếu key; job vẫn chạy, comment và lời nói chỉ có tầng tĩnh.
+- [x] Test với Jev giả: đoạn và comment vi phạm sinh nghi vấn đúng danh mục và đối tượng; `target` là `none` thì không sinh nghi vấn; 429 được thử lại; Jev lỗi thì job vẫn xong, lỗi ghi vào `llm_error`.
+- [x] Thiếu `TYPESAFE_API_KEY` thì Settings báo thiếu key; job vẫn chạy, comment và lời nói chỉ có tầng tĩnh.
 
 Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py`, chạy thật trên 8 video có sẵn.
 

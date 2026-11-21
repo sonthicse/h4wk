@@ -7,7 +7,7 @@ Tên trang, nút và nhãn trong các bước là chữ tiếng Anh đang hiện
 ## 1. Chuẩn bị máy
 
 - [ ] **GPU.** `nvidia-smi` liệt kê GPU và phiên bản CUDA, không báo lỗi.
-- [ ] **Cấu hình AI.** `config/ai.toml` có ba tuyến `"media.vision"`, `"analysis.classify"` và `"analysis.classify_comment"` (mẫu ở `config/ai.toml.example`). Model của `media.vision` phải đọc được ảnh (`vision = true`).
+- [ ] **Cấu hình AI.** `config/ai.toml` có ba tuyến `"media.vision"`, `"analysis.classify"` và `"analysis.video_verdict"` (mẫu ở `config/ai.toml.example`). Model của `media.vision` phải đọc được ảnh (`vision = true`).
 - [ ] **Key.** Có key của nhà cung cấp đã chọn trong `.env` hoặc trong Settings → AI providers (key nhập ở Settings được ưu tiên). Giao diện chỉ hiện bản che của key.
 - [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync --extra stt --extra match && uv run --no-sync h4wk init`, rồi `cd ../web && npm install` (từ thư mục `backend/`).
 
