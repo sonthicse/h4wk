@@ -30,7 +30,7 @@ function Meter({ label, note, usage, unit }: { label: string; note: string; usag
 // Quota YouTube Data API và credit Supadata đã dùng (SPEC 10.3).
 export default function UsageCard({ youtubeQuota, supadataCredits, jevUsage }: { youtubeQuota: Usage | null | undefined; supadataCredits: Usage | null | undefined; jevUsage: DashboardStats['jev_usage'] }) {
   return (
-    <Card>
+    <Card className="self-start">
       <CardHeader>
         <CardTitle>Source usage</CardTitle>
       </CardHeader>

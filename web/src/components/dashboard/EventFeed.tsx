@@ -93,7 +93,7 @@ function EventItem({ event }: { event: WatchEvent }) {
 
 // Dòng sự kiện (T31): poll mỗi 5 giây.
 // Cột phải đã tự cuộn nên hiện nhiều hơn.
-const MAX_EVENTS = 15
+const MAX_EVENTS = 5
 
 export default function EventFeed() {
   const events = useQuery({
