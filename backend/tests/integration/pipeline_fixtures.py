@@ -20,7 +20,7 @@ from h4wk.collectors import registry
 from h4wk.collectors.base import Blocked, FetchResult
 from h4wk.collectors.models import Cap, Normalized
 from h4wk.jobs import pipeline, queue
-from h4wk.media import ocr, stt, vision
+from h4wk.media import ocr, stt
 
 SAMPLE = (
     Path(__file__).resolve().parents[1] / "fixtures/captures/h4wkDemo001/captures/20261118T160000"
@@ -96,13 +96,6 @@ def fake_source(
         "_ref_embedder",
         SimpleNamespace(embed=lambda images: np.ones((len(images), 4)) / 2),
     )
-    provider = FakeProvider(repeat(ProviderReply('{"description":"Ảnh mẫu","offensive_cues":[]}')))
-    gateway = AIGateway(
-        {"anthropic": provider},
-        config_path=AI_CONFIG_PATH.with_suffix(".toml.example"),
-        log_dir=data_dir,
-    )
-    monkeypatch.setattr(vision, "AIGateway", lambda: gateway)
     # Tầng LLM của analysis: trả Answer hợp lệ, không có kết luận nào.
     analysis_gateway = AIGateway(
         {"anthropic": FakeProvider(repeat(ProviderReply('{"verdicts":[]}')))},

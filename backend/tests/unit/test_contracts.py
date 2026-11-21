@@ -116,12 +116,6 @@ TIMELINE: dict[str, Any] = {
         {
             "file": "thumbnails/maxres.jpg",
             "ocr": [{"text": "TIN NÓNG", "bbox": [10, 10, 200, 40]}],
-            "visual": {
-                "description": "ảnh chân dung",
-                "offensive_cues": ["vẽ sừng"],
-                "provider": "anthropic",
-                "model": "claude-sonnet-5-5",
-            },
         }
     ],
     "segments": [
@@ -133,16 +127,7 @@ TIMELINE: dict[str, Any] = {
             "ocr": [
                 {"frame": "frames/000231.jpg", "t": 95.0, "text": "chữ", "bbox": [0, 0, 50, 10]}
             ],
-            "visual": [
-                {
-                    "frame": "frames/000231.jpg",
-                    "t": 95.0,
-                    "description": "ảnh ghép còng tay",
-                    "offensive_cues": ["còng tay"],
-                    "provider": "anthropic",
-                    "model": "claude-sonnet-5-5",
-                }
-            ],
+            "frames": [{"frame": "frames/000231.jpg", "t": 95.0}],
         }
     ],
 }
@@ -352,6 +337,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     # C3
     (Timeline, _set("segments.0.end", 90.0)(TIMELINE), "end < start"),
     (Timeline, _set("segments.0.ocr.0.t", 200.0)(TIMELINE), "khung hình ngoài đoạn"),
+    (Timeline, _set("segments.0.frames.0.t", 200.0)(TIMELINE), "keyframe ngoài đoạn"),
     (Timeline, _set("segments.0.ocr.0.bbox", [0, 0, -1, 10])(TIMELINE), "bbox rộng âm"),
     (Timeline, _set("segments.0.ocr.0.bbox", [0, 0, 1])(TIMELINE), "bbox thiếu số"),
     (Timeline, _set("transcript_kind", "manual")(TIMELINE), "loại transcript lạ"),
@@ -454,6 +440,42 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
 def test_rejected_examples(model: type[BaseModel], data: dict[str, Any], why: str) -> None:
     with pytest.raises(ValidationError):
         model.model_validate(data)
+
+
+def test_frame_outside_segment_rejected_for_the_right_rule() -> None:
+    data = next(d for m, d, why in REJECTED if m is Timeline and why == "keyframe ngoài đoạn")
+    assert data["segments"][0]["frames"][0]["t"] == 200.0
+    with pytest.raises(ValidationError, match="outside segment seg_0007"):
+        Timeline.model_validate(data)
+
+
+def test_legacy_timeline_visual_becomes_frames() -> None:
+    """Timeline cũ: visual của đoạn thành frames, visual của thumbnail bị bỏ."""
+    legacy = copy.deepcopy(TIMELINE)
+    legacy["segments"][0].pop("frames")
+    legacy["segments"][0]["visual"] = [
+        {
+            "frame": "frames/000231.jpg",
+            "t": 95.0,
+            "description": "ảnh",
+            "offensive_cues": [],
+            "provider": "p",
+            "model": "m",
+        }
+    ]
+    legacy["thumbnails"][0]["visual"] = {
+        "description": "d",
+        "offensive_cues": [],
+        "provider": "p",
+        "model": "m",
+    }
+    timeline = Timeline.model_validate(legacy)
+    assert timeline == Timeline.model_validate(TIMELINE)
+    assert "visual" not in timeline.model_dump_json()
+    # visual cũ ngoài đoạn vẫn bị chặn như frames.
+    legacy["segments"][0]["visual"][0]["t"] = 200.0
+    with pytest.raises(ValidationError, match="outside segment"):
+        Timeline.model_validate(legacy)
 
 
 def test_ollama_without_base_url_rejected_for_the_right_rule() -> None:

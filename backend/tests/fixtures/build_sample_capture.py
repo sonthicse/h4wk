@@ -321,12 +321,6 @@ def manifest(files: dict[str, Path]) -> Manifest:
 
 
 def timeline(video_sha: str) -> Timeline:
-    visual = {
-        "description": "Ảnh khuôn mặt bị đè chữ đỏ và vẽ còng tay.",
-        "offensive_cues": [f"chữ '{MEME_TEXT}' đè lên khuôn mặt", "vẽ còng tay"],
-        "provider": "fake",
-        "model": "fake-vlm",
-    }
     return Timeline.model_validate(
         {
             "schema": "h4wk.timeline/1",
@@ -338,7 +332,6 @@ def timeline(video_sha: str) -> Timeline:
                 {
                     "file": f"{SRC}/maxres.jpg",
                     "ocr": [{"text": MEME_TEXT, "bbox": BBOX_MEME}],
-                    "visual": visual,
                 }
             ],
             "segments": [
@@ -375,7 +368,7 @@ def timeline(video_sha: str) -> Timeline:
                             "bbox": BBOX_MEME,
                         }
                     ],
-                    "visual": [{"frame": "frames/000025.jpg", "t": 25.0, **visual}],
+                    "frames": [{"frame": "frames/000025.jpg", "t": 25.0}],
                 },
                 {
                     "id": "seg_0004",
@@ -390,16 +383,7 @@ def timeline(video_sha: str) -> Timeline:
                             "bbox": BBOX_CORNER,
                         }
                     ],
-                    "visual": [
-                        {
-                            "frame": "frames/000032.jpg",
-                            "t": 32.0,
-                            "description": "Một ảnh hoa văn đã đổi màu ở góc phải.",
-                            "offensive_cues": [],
-                            "provider": "fake",
-                            "model": "fake-vlm",
-                        }
-                    ],
+                    "frames": [{"frame": "frames/000032.jpg", "t": 32.0}],
                 },
             ],
         }

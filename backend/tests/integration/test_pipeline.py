@@ -26,11 +26,6 @@ def _lines(path: Path) -> list[dict]:
     return [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines()]
 
 
-def _vision_calls(data_dir: Path) -> list[dict]:
-    rows = _lines(data_dir / "ai_calls.jsonl")
-    return [r for r in rows if r["task"] == "media.vision"]
-
-
 def test_full_flow_ends_with_findings(
     client: TestClient, data_dir: Path, fake_source: dict
 ) -> None:
@@ -61,13 +56,11 @@ def test_full_flow_ends_with_findings(
     selected = json.loads((derived / "frames/selected.json").read_bytes())
     assert len(candidates) > 1 and selected == candidates[:1]
     expected = {f["file"] for f in selected}
-    assert {v.frame for seg in timeline.segments for v in seg.visual} == expected
+    assert {v.frame for seg in timeline.segments for v in seg.frames} == expected
     assert {v.frame for seg in timeline.segments for v in seg.ocr} == expected
-    vision_rows = json.loads((derived / "vision.json").read_bytes())
-    assert set(vision_rows) == expected | {"sources/fake/maxres.jpg"}
+    assert not (derived / "vision.json").exists()
     assert any(seg.speech for seg in timeline.segments)
-    assert any(seg.visual and seg.ocr for seg in timeline.segments)
-    assert timeline.thumbnails[0].visual.provider == "anthropic"
+    assert any(seg.frames and seg.ocr for seg in timeline.segments)
     assert timeline.thumbnails[0].ocr[0].text == "Chữ"
 
 
@@ -82,9 +75,9 @@ def test_text_after_metadata_processes_only_thumbnails(client, fake_source, data
         assert timeline.source_video_sha256 is None
         assert not (derived / "proxy_480p.mp4").exists()
         if level == "metadata":
-            assert not timeline.thumbnails and not (derived / "vision.json").exists()
+            assert not timeline.thumbnails
         else:
-            assert timeline.thumbnails[0].visual and timeline.thumbnails[0].ocr
+            assert timeline.thumbnails[0].ocr
             assert any(segment.speech for segment in timeline.segments)
 
 
@@ -102,13 +95,10 @@ def test_recent_capture_is_not_collected_again(
     caplog.set_level("INFO", logger=stt.__name__)
     _entity(client)
     first = client.post("/api/collect", json={"url": VIDEO}).json()[0]
-    initial_calls = _vision_calls(data_dir)
     second = client.post("/api/collect", json={"url": VIDEO}).json()[0]
     j1 = client.get(f"/api/jobs/{first['id']}").json()
     j2 = client.get(f"/api/jobs/{second['id']}").json()
     assert j2["status"] == "done" and j2["capture"] == j1["capture"]
-    # Chạy lại chỉ phân tích lại (analysis.classify); media.vision không được gọi thêm.
-    assert _vision_calls(data_dir) == initial_calls
     forced = client.post("/api/collect", json={"url": VIDEO, "force": True})
     j3 = client.get(f"/api/jobs/{forced.json()[0]['id']}").json()
     assert j3["status"] == "done", j3["error"]
@@ -154,45 +144,6 @@ def test_llm_failure_keeps_job_done(
     assert "LLM analysis skipped" in done["message"]
     run = _lines(data_dir / "log" / "audit.jsonl")[-1]
     assert run["action"] == "job.run" and "llm_error" in json.dumps(run)
-
-
-def test_vision_failure_for_one_image_keeps_job_done(
-    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    from h4wk.ai.base import ProviderError, ProviderReply
-    from h4wk.ai.config import AI_CONFIG_PATH
-    from h4wk.ai.gateway import AIGateway
-    from h4wk.media import vision
-
-    class OneBad:
-        bad = None
-
-        def complete(self, request):  # noqa: ANN001, ANN201
-            if self.bad is None:
-                self.bad = request.image
-            if request.image == self.bad:
-                raise ProviderError("boom")
-            return ProviderReply('{"description":"Ảnh mẫu","offensive_cues":[]}')
-
-    gateway = AIGateway(
-        {"anthropic": OneBad()},
-        config_path=AI_CONFIG_PATH.with_suffix(".toml.example"),
-        log_dir=data_dir,
-    )
-    monkeypatch.setattr(vision, "AIGateway", lambda: gateway)
-    _entity(client)
-    r = client.post("/api/collect", json={"url": VIDEO})
-    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
-    assert job["status"] == "done", job["error"]
-    done = next(e for e in client.get("/api/events").json() if e["kind"] == "job_done")
-    assert "could not be described" in done["message"]
-    derived = data_dir / "videos" / job["video_id"] / "derived" / job["capture"]
-    timeline = Timeline.model_validate_json((derived / "timeline.json").read_bytes())
-    described = {v.frame for seg in timeline.segments for v in seg.visual}
-    cached = set(json.loads((derived / "vision.json").read_bytes()))
-    assert cached == described | {t.file for t in timeline.thumbnails if t.visual}
-    audit = [r for r in _lines(data_dir / "log" / "audit.jsonl") if r["action"] == "media.vision"]
-    assert audit and audit[0]["status"] == "error"
 
 
 @pytest.mark.parametrize(

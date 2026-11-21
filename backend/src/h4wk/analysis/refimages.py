@@ -156,14 +156,14 @@ def to_hits(
     frame_times: dict[str, float],
 ) -> list[EntityHit]:
     """Đổi kết quả khớp thành EntityHit (via ref_image), gán segment_id theo timeline:
-    ưu tiên segment chứa khung trong visual hoặc ocr, sau đó segment có start <= t <= end.
+    ưu tiên segment chứa khung trong frames hoặc ocr, sau đó segment có start <= t <= end.
     Thumbnail (không có thời điểm) không có segment_id.
 
     Giới hạn: khung khớp ảnh mẫu mà không thuộc segment nào (ngoài lời nói, không có VLM hay OCR)
     chỉ nằm trong hits.json, không được gửi cho LLM."""
     owner: dict[str, str] = {}
     for segment in timeline.segments:
-        for item in [*segment.visual, *segment.ocr]:
+        for item in [*segment.frames, *segment.ocr]:
             owner.setdefault(item.frame, segment.id)
     hits = []
     for entity, file, bbox, score in matches:

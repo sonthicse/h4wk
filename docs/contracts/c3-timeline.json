@@ -1,5 +1,26 @@
 {
   "$defs": {
+    "Frame": {
+      "additionalProperties": false,
+      "description": "Keyframe thuộc một đoạn; ảnh gửi thẳng cho Jev, không có mô tả.",
+      "properties": {
+        "frame": {
+          "title": "Frame",
+          "type": "string"
+        },
+        "t": {
+          "minimum": 0,
+          "title": "T",
+          "type": "number"
+        }
+      },
+      "required": [
+        "frame",
+        "t"
+      ],
+      "title": "Frame",
+      "type": "object"
+    },
     "FrameOcr": {
       "additionalProperties": false,
       "properties": {
@@ -46,49 +67,6 @@
       "title": "FrameOcr",
       "type": "object"
     },
-    "FrameVisual": {
-      "additionalProperties": false,
-      "properties": {
-        "description": {
-          "title": "Description",
-          "type": "string"
-        },
-        "frame": {
-          "title": "Frame",
-          "type": "string"
-        },
-        "model": {
-          "title": "Model",
-          "type": "string"
-        },
-        "offensive_cues": {
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "title": "Offensive Cues",
-          "type": "array"
-        },
-        "provider": {
-          "title": "Provider",
-          "type": "string"
-        },
-        "t": {
-          "minimum": 0,
-          "title": "T",
-          "type": "number"
-        }
-      },
-      "required": [
-        "description",
-        "provider",
-        "model",
-        "frame",
-        "t"
-      ],
-      "title": "FrameVisual",
-      "type": "object"
-    },
     "OcrText": {
       "additionalProperties": false,
       "properties": {
@@ -132,6 +110,14 @@
           "title": "End",
           "type": "number"
         },
+        "frames": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Frame"
+          },
+          "title": "Frames",
+          "type": "array"
+        },
         "id": {
           "pattern": "^seg_\\d{4,}$",
           "title": "Id",
@@ -154,14 +140,6 @@
           "minimum": 0,
           "title": "Start",
           "type": "number"
-        },
-        "visual": {
-          "default": [],
-          "items": {
-            "$ref": "#/$defs/FrameVisual"
-          },
-          "title": "Visual",
-          "type": "array"
         }
       },
       "required": [
@@ -186,17 +164,6 @@
           },
           "title": "Ocr",
           "type": "array"
-        },
-        "visual": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/Visual"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
         }
       },
       "required": [
@@ -214,39 +181,6 @@
       ],
       "title": "TranscriptKind",
       "type": "string"
-    },
-    "Visual": {
-      "additionalProperties": false,
-      "description": "Mô tả của VLM. Không chứa danh tính người trong ảnh.",
-      "properties": {
-        "description": {
-          "title": "Description",
-          "type": "string"
-        },
-        "model": {
-          "title": "Model",
-          "type": "string"
-        },
-        "offensive_cues": {
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "title": "Offensive Cues",
-          "type": "array"
-        },
-        "provider": {
-          "title": "Provider",
-          "type": "string"
-        }
-      },
-      "required": [
-        "description",
-        "provider",
-        "model"
-      ],
-      "title": "Visual",
-      "type": "object"
     }
   },
   "additionalProperties": false,

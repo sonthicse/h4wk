@@ -78,7 +78,7 @@ def test_timeline_matches_capture(timeline: Timeline, manifest: Manifest) -> Non
     video = next(rel for rel in manifest.files if rel.endswith(".mp4"))
     assert timeline.source_video_sha256 == manifest.files[video].sha256
     for seg in timeline.segments:
-        for item in [*seg.ocr, *seg.visual]:
+        for item in [*seg.ocr, *seg.frames]:
             assert (DERIVED_DIR / item.frame).is_file(), item.frame
 
 

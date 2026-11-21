@@ -77,22 +77,13 @@ def _text(kind: str, place: str, data: Normalized, timeline: Timeline) -> str:
             return ""
         parts = [segment.speech]
         parts += [f"OCR: {o.text}" for o in segment.ocr]
-        for v in segment.visual:
-            cues = f" ({', '.join(v.offensive_cues)})" if v.offensive_cues else ""
-            parts.append(f"Visual: {v.description}{cues}")
         return "\n".join(p for p in parts if p)
     if kind == "frame":
-        for segment in timeline.segments:
-            for v in segment.visual:
-                if v.frame == place:
-                    return f"Visual: {v.description}"
         return f"(keyframe {place})"
     thumbnail = next((t for t in timeline.thumbnails if t.file == place), None)
     if thumbnail is None:
         return ""
     parts = [f"OCR: {o.text}" for o in thumbnail.ocr]
-    if thumbnail.visual:
-        parts.append(f"Visual: {thumbnail.visual.description}")
     return "\n".join(parts)
 
 

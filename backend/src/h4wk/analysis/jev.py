@@ -169,13 +169,6 @@ def _call(key, state, questions):
             time.sleep(delay)
 
 
-def _image_text(lines, visual):
-    parts = [*lines]
-    for row in visual:
-        parts.extend([row.description, *row.offensive_cues])
-    return " | ".join(part.strip() for part in parts if part.strip())
-
-
 def _location(kind, item_id, text, hits, target, *, segment=None, frame=None):
     location = dict(source_kind=kind, quote=text, triggers=[])
     if kind == "comment":
@@ -236,31 +229,22 @@ def classify(
             if line and line not in seen:
                 seen.add(line)
                 ocr.append(row)
-        visual = [
-            row
-            for row in segment.visual
-            if row.description.strip() or any(c.strip() for c in row.offensive_cues)
-        ]
-        if ocr or visual:
-            kind = "ocr" if ocr else "visual"
-            frame = ocr[0].frame if ocr else visual[0].frame
-            text = _image_text([row.text.strip() for row in ocr], visual)
+        if ocr:  # tạm chỉ gửi OCR, ảnh gửi thẳng ở T59
             add(
-                kind,
-                f"{segment.id}:{kind}",
-                "text overlaid on video frames (OCR) and image description",
-                text,
+                "ocr",
+                f"{segment.id}:ocr",
+                "text overlaid on video frames (OCR)",
+                " | ".join(row.text.strip() for row in ocr),
                 segment=segment,
-                frame=frame,
+                frame=ocr[0].frame,
             )
     for thumb in timeline.thumbnails:
         lines = list(dict.fromkeys(row.text.strip() for row in thumb.ocr))
-        text = _image_text(lines, [thumb.visual] if thumb.visual else [])
         add(
             "thumbnail",
             thumb.file,
-            "video thumbnail (OCR and image description)",
-            text,
+            "video thumbnail (OCR)",
+            " | ".join(line for line in lines if line),
             frame=thumb.file,
         )
     texts = {c.id: c.text for c in data.comments}

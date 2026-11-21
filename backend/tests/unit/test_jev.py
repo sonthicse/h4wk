@@ -8,7 +8,7 @@ from _analysis_sample import ENTITY, INSULT, _data
 from h4wk.analysis import jev, runner
 from h4wk.analysis.models import EntityHit
 from h4wk.core.config_models import JevSettings
-from h4wk.media.timeline import FrameOcr, FrameVisual, Segment
+from h4wk.media.timeline import Frame, FrameOcr, Segment
 
 
 @pytest.mark.parametrize(
@@ -67,8 +67,8 @@ def test_classify(monkeypatch, target, probability, kept):
         "speech transcript segment",
         "video title",
         "video description",
-        "video thumbnail (OCR and image description)",
-        "text overlaid on video frames (OCR) and image description",
+        "video thumbnail (OCR)",
+        "text overlaid on video frames (OCR)",
     }
     for state in states:
         assert "Mẫu hai, Tên khác, MH, Mô tả mẫu" in state["protected_targets"]
@@ -131,18 +131,11 @@ def test_failure_keeps_static(monkeypatch, tmp_path, key):
 def test_new_sources(monkeypatch):
     data, timeline = _data()
     ocr = FrameOcr(text="Dòng chữ mẫu", bbox=[0, 0, 1, 1], frame="frames/a.jpg", t=0)
-    visual = FrameVisual(
-        description="Mô tả mẫu",
-        offensive_cues=["Dấu hiệu mẫu"],
-        provider="mock",
-        model="mock",
-        frame="frames/b.jpg",
-        t=2,
-    )
+    frame = Frame(frame="frames/b.jpg", t=2)
     timeline.segments = [
         Segment(id="seg_0001", start=0, end=1, ocr=[ocr, ocr]),
         Segment(
-            id="seg_0002", start=1, end=3, ocr=[ocr.model_copy(update={"t": 2})], visual=[visual]
+            id="seg_0002", start=1, end=3, ocr=[ocr.model_copy(update={"t": 2})], frames=[frame]
         ),
     ]
     states = []
@@ -161,7 +154,7 @@ def test_new_sources(monkeypatch):
 
     monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
     monkeypatch.setattr(jev, "_call", reply)
-    hit = EntityHit(entity=ENTITY.id, via="ref_image", segment_id="seg_0002", frame=visual.frame)
+    hit = EntityHit(entity=ENTITY.id, via="ref_image", segment_id="seg_0002", frame=frame.frame)
     hits = [
         hit,
         hit.model_copy(update={"entity": "e_02"}),
@@ -172,15 +165,14 @@ def test_new_sources(monkeypatch):
     )
     assert error is None
     by_kind = {f.source_kind: f for f in findings}
-    assert len(records) == len(findings) == len(by_kind) == 5
-    assert set(by_kind) == {"title", "description", "ocr", "visual", "thumbnail"}
+    assert len(records) == len(findings) == len(by_kind) == 4
+    assert set(by_kind) == {"title", "description", "ocr", "thumbnail"}
     assert sum(s["text"].count(ocr.text) for s in states) == 1
     assert by_kind["title"].quote == data.video.title
     assert by_kind["description"].quote == data.video.description
     assert by_kind["thumbnail"].frame == timeline.thumbnails[0].file
     for kind, segment, frame, quote in [
         ("ocr", timeline.segments[0], ocr.frame, ocr.text),
-        ("visual", timeline.segments[1], visual.frame, "Mô tả mẫu | Dấu hiệu mẫu"),
     ]:
         finding = by_kind[kind]
         assert (finding.segment_id, finding.start, finding.end, finding.frame, finding.quote) == (
@@ -190,5 +182,3 @@ def test_new_sources(monkeypatch):
             frame,
             quote,
         )
-
-    assert [t.via for t in by_kind["visual"].triggers] == ["ref_image"]

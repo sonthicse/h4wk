@@ -288,7 +288,6 @@ def media(job_id: str) -> None:
             frames = extract_keyframes(out)
         timeline = transcripts.read_capture_timeline(cap_dir, out, _analysis_config())
         timeline.source_video_sha256 = source_hash
-        failed: list[str] = []
         if job.level == CollectLevel.METADATA:
             transcripts.write_timeline(out / "timeline.json", timeline)
         else:
@@ -296,14 +295,11 @@ def media(job_id: str) -> None:
             lines = ocr.process_ocr(cap_dir, out)
             thumbnails = list(dict.fromkeys(t.file for t in data.thumbnails if t.file))
             if frames:
-                # OCR chạy trên mọi khung ứng viên; timeline, VLM và khớp ảnh chỉ dùng keyframe.
+                # OCR chạy trên mọi khung ứng viên; timeline và khớp ảnh chỉ dùng keyframe.
                 frames = _select_frames(job, out, frames, lines)
                 kept = {f.file for f in frames} | set(thumbnails)
                 lines = [line for line in lines if line.frame in kept]
-            job = _update(job_id, step="vlm", progress=65)
-            failed = enrich(timeline, cap_dir, out, frames, thumbnails, lines)
-            if failed:
-                audit.log(job.trigger, "media.vision", job.id, {"failed": failed}, status="error")
+            enrich(timeline, cap_dir, out, frames, thumbnails, lines)
             job = _update(job_id, step="match", progress=68)
             _match(job, cap_dir, out, frames, thumbnails, timeline)
             _faces(job, cap_dir, out, frames, thumbnails, timeline)
@@ -311,7 +307,7 @@ def media(job_id: str) -> None:
         _fail(job_id, job.step or "media", e)
         return
     _update(job_id, status="queued", step="analyze", progress=70)
-    analyze(job_id, len(failed))
+    analyze(job_id)
 
 
 class AnalysisQuotaError(RuntimeError):
@@ -378,9 +374,7 @@ def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway, *, reject_quo
 
 
 @huey.task()
-def analyze(job_id: str, vision_failed: int = 0) -> None:
-    # vision_failed chỉ để ghi vào sự kiện. Recovery gọi lại analyze(job_id) nên mất số này
-    # (giới hạn đã chấp nhận); audit media.vision vẫn còn.
+def analyze(job_id: str) -> None:
     job = _update(job_id, status="running", step="analyze", progress=75)
     try:
         cap = str(job.capture)
@@ -392,8 +386,6 @@ def analyze(job_id: str, vision_failed: int = 0) -> None:
     message = f"Processed video {job.video_id}: {len(findings)} findings"
     detail = {"capture": cap, "run_id": run_id, "findings": len(findings)}
     notes = []
-    if vision_failed:
-        notes.append(f"{vision_failed} images could not be described")
     if llm_error:
         short = llm_error[:200] + ("…" if len(llm_error) > 200 else "")
         notes.append(f"LLM analysis skipped: {short}")

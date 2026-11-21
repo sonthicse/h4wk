@@ -62,7 +62,7 @@ def test_events_have_titles_findings_error_and_review(client: TestClient, sample
     done = pipeline._update(done.id, status="done", run_id=RUN)
     pipeline._event(done, "job_done", "x")
     failed = pipeline.create_job("u", "h4wkDemo001", "full", False, "user:thi")
-    pipeline._fail(failed.id, "vlm", RuntimeError("no AI provider available"))
+    pipeline._fail(failed.id, "match", RuntimeError("no AI provider available"))
     client.post(f"/api/findings/{sample[0].id}/decision", json={"status": "confirmed"})
     ev = client.get("/api/events").json()
     assert [e["kind"] for e in ev] == ["review", "job_failed", "job_done"]

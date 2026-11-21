@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from h4wk.analysis import refimages
-from h4wk.media.timeline import FrameOcr, FrameVisual, Segment, Timeline
+from h4wk.media.timeline import Frame, FrameOcr, Segment, Timeline
 
 
 class ColorEmbedder:
@@ -92,7 +92,6 @@ def test_missing_refs_or_unreadable_images_are_skipped(scene, tmp_path):
 
 
 def test_to_hits_assigns_segment_by_timeline():
-    visual = {"description": "d", "provider": "p", "model": "m"}
     timeline = Timeline(
         schema="h4wk.timeline/1",
         video_id="v",
@@ -102,7 +101,7 @@ def test_to_hits_assigns_segment_by_timeline():
                 id="seg_0001",
                 start=0,
                 end=10,
-                visual=[FrameVisual(frame="frames/000001.jpg", t=3, **visual)],
+                frames=[Frame(frame="frames/000001.jpg", t=3)],
             ),
             Segment(
                 id="seg_0002",

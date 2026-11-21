@@ -1002,10 +1002,10 @@ Theo SPEC-jev-only §2. C3: thay `Visual`, `FrameVisual` bằng `Frame` (`frame`
 
 Nghiệm thu:
 
-- [ ] `test_contracts.py`: ví dụ hợp lệ có `frames`; ví dụ dạng cũ có `visual` ở đoạn và thumbnail nạp được và ra đúng `frames`; ví dụ bị từ chối `frames[].t` ngoài đoạn bị chặn bởi đúng thông báo "outside segment".
-- [ ] Bản sao `timeline.json` thật của `1RUJ_6eruwA` (lấy từ `data/`, không sửa bản gốc) nạp được, số phần tử `frames` bằng số phần tử `visual` cũ.
-- [ ] Test pipeline: mọi keyframe trong `frames/selected.json` có trong `frames` của timeline; không còn `vision.json` mới được ghi.
-- [ ] `grep -rn "visual\b" backend/src/h4wk/media` chỉ còn validator đọc dạng cũ; backend pytest, ruff qua.
+- [x] `test_contracts.py`: ví dụ hợp lệ có `frames`; ví dụ dạng cũ có `visual` ở đoạn và thumbnail nạp được và ra đúng `frames`; ví dụ bị từ chối `frames[].t` ngoài đoạn bị chặn bởi đúng thông báo "outside segment".
+- [x] Bản sao `timeline.json` thật của `1RUJ_6eruwA` (lấy từ `data/`, không sửa bản gốc) nạp được, số phần tử `frames` bằng số phần tử `visual` cũ.
+- [x] Test pipeline: mọi keyframe trong `frames/selected.json` có trong `frames` của timeline; không còn `vision.json` mới được ghi.
+- [x] `grep -rn "visual\b" backend/src/h4wk/media` chỉ còn validator đọc dạng cũ; backend pytest, ruff qua.
 
 File: `media/timeline.py`, `media/enrich.py`, `jobs/pipeline.py`, `analysis/jev.py`, `analysis/refimages.py`, `analysis/evaluation.py`; xoá `media/vision.py`; fixture mẫu, tests, `docs/contracts/c3-timeline.json`.
 Người làm: agent backend. Phụ thuộc: không (T56 đã merge). Cỡ: L (đổi hợp đồng kéo theo nhiều file, phần lớn là xoá; không tách được vì C3 cũ và mới không chạy song song).

@@ -96,7 +96,7 @@ def test_stopped_after_media_resumes_at_analyze(client: TestClient) -> None:
     with Session(get_engine()) as s:
         row = s.get(JobRow, job.id)
         assert row is not None
-        row.status, row.step, row.progress = "running", "vlm", 70
+        row.status, row.step, row.progress = "running", "match", 70
         s.add(row)
         s.commit()
         assert recovery.next_task(row) == "analyze"
