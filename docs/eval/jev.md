@@ -18,3 +18,16 @@
 | **Tổng** | **2266** | **1072** | **0** |
 
 Các phản hồi có lựa chọn đối tượng, lựa chọn và xác suất danh mục, và điểm mức độ ở đúng trường. Tính lại quy tắc tổng xác suất ≥ 0,5 và đối tượng khác `none` trên các phản hồi thô cho kết quả trùng khớp với cờ `kept` ở mọi request. Tỷ lệ giữ khoảng 47% trên 8 video này không phải là precision. Kết quả chấm mù cho thấy nhiều báo động sai trên nhóm mẫu không khớp tên; không suy rộng 18% ra toàn bộ nghi vấn và chưa thể so sánh với LLM cũ.
+
+
+## So sánh theo ngưỡng
+
+Tính lại trên phản hồi đã lưu, không gửi thêm request. Hai cột dùng hai tập mẫu khác nhau: precision tính trên phần còn giữ của 50 mẫu mù không khớp tên; recall tính trên 82 bình luận vi phạm có nhắc tên trong `trial.csv`.
+
+| Ngưỡng | Precision trên mẫu mù | Recall Jev trên bình luận có nhắc tên |
+| ---: | ---: | ---: |
+| 0,5 | 9/50 (18,0%) | 81/82 (98,8%) |
+| 0,7 | 8/33 (24,2%) | 70/82 (85,4%) |
+| 0,9 | 6/14 (42,9%) | 57/82 (69,5%) |
+
+T47 giữ ngưỡng 0,5 theo SPEC 10.6. Nâng ngưỡng loại bớt báo động sai nhưng cũng bỏ sót thêm bình luận vi phạm trong tập thử nghiệm; ngay ở 0,9 vẫn còn 8/14 mẫu báo động sai. Bảng này không đo recall của LLM cũ.
