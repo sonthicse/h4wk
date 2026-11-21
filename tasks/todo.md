@@ -870,7 +870,7 @@ Người làm: Thi. Phụ thuộc: T49. Cỡ: M.
 
 ## Phase 6c: AI cục bộ và Jev cho mọi văn bản (thêm ngày 2026-11-21)
 
-Spec: [SPEC-local-ai.md](../SPEC-local-ai.md). Ollama chạy ở máy GPU riêng trong LAN; IP chỉ ghi trong `config/ai.toml` (không commit). Kết quả đo dùng làm căn cứ: `data/eval/jev/tune/REPORT.md` (Jev R10) và `data/eval/ollama/REPORT.md` (chọn `qwen3-vl:4b`).
+Spec: `SPEC-local-ai.md` (đã xoá ngày 2026-11-21, thay bằng [SPEC-jev-only.md](../SPEC-jev-only.md), Phase 6d; T53 và Checkpoint 6c bị bỏ). Ollama chạy ở máy GPU riêng trong LAN; IP chỉ ghi trong `config/ai.toml` (không commit). Kết quả đo dùng làm căn cứ: `data/eval/jev/tune/REPORT.md` (Jev R10) và `data/eval/ollama/REPORT.md` (chọn `qwen3-vl:4b`).
 
 Thứ tự: T51 → (T52, T54, T56 song song) → T53 sau T52 → T55 sau T54 → T57.
 
@@ -903,7 +903,9 @@ Kiểm tra: `cd backend && uv run --no-sync pytest tests/unit/test_vision.py tes
 File: `media/vision.py`, `media/prompts/vision.md`, `ai/providers/__init__.py` hoặc `ai/providers/openai_compat.py`, `ai/base.py`, tests.
 Người làm: Thi. Phụ thuộc: T51, T21. Cỡ: M.
 
-### T53: `analysis`: kết luận theo video bằng model cục bộ
+### T53: `analysis`: kết luận theo video bằng model cục bộ (bỏ)
+
+Bỏ ngày 2026-11-21: kết luận theo video tính bằng quy tắc ở T60.
 
 Đổi tuyến mặc định của `analysis.video_verdict` (và `media.vision`) trong `config/ai.toml.example` thành `ollama/qwen3-vl:4b` trước, sau đó Gemini, OpenRouter, Anthropic. Viết script đánh giá chạy `verdict.decide` qua gateway thật trên các bản thu đã có nghi vấn vi phạm, ghi kết quả ra `data/eval/verdict-local/`.
 
@@ -980,9 +982,113 @@ Kiểm tra: build và kiểm tra thủ công.
 File: `web/src/pages/FindingsPage.tsx`, `web/src/pages/FindingReviewPage.tsx`.
 Người làm: Thi. Phụ thuộc: không. Cỡ: S.
 
-### Checkpoint 6c
+### Checkpoint 6c (bỏ)
 
-- [ ] Test live 3 khung của T21 đạt 3/3 lượt với `ollama/qwen3-vl:4b`: ảnh ghép còng tay và ảnh có chữ chửi có `offensive_cues` đúng loại, ảnh bình thường không có. Bản thinking với 4096 token đạt 0/3: cả ba lượt nhận ra còng tay (một lượt dùng từ “gông tay”) nhưng bỏ sót dấu hiệu chữ buộc tội. Chờ chọn bản thinking hay instruct.
-- [ ] Xử lý một video thật ở mức `full` với cấu hình mẫu mới: `ai_calls.jsonl` không có lời gọi cloud cho `media.vision` và `analysis.video_verdict` khi Ollama chạy.
-- [ ] Đủ 8 tiêu chí thành công của SPEC-local-ai.md.
-- [ ] Gộp SPEC-local-ai.md vào SPEC.md (§10.4, §10.5, §10.6, §13), đổi `Status` thành `implemented`.
+Bỏ ngày 2026-11-21 cùng Ollama; thay bằng Checkpoint 6d.
+
+## Phase 6d: Jev thay toàn bộ LLM và VLM (thêm ngày 2026-11-21)
+
+Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend: nhánh `feat/t58-jev-only` (worktree `.claude/worktrees/feat-t58-jev-only`, chưa commit). Đọc để tham khảo cách làm và test, không cherry-pick nguyên khối: bản đó gộp T58–T61 và chưa đọc được `timeline.json` cũ.
+
+Thứ tự: T58 → (T59, T60 song song) → T61 sau T60 → T62 sau T61; T63 sau T58 và T60 → T64 → Checkpoint 6d.
+
+Lệnh chung của backend: `cd backend && uv run --no-sync pytest && uv run --no-sync ruff check . && uv run --no-sync ruff format --check .`. Sinh lại kiểu API: không chạy `npm run gen:api` (gọi `uv run` trơn, gỡ torch); chạy phần Python của script với `uv run --no-sync`, rồi `npx -y openapi-typescript@7.13.0 src/api/openapi.json -o src/api/schema.d.ts` trong `web/`.
+
+### T58: `media`: C3 bỏ mô tả ảnh, mọi keyframe vào timeline
+
+Theo SPEC-jev-only §2. C3: thay `Visual`, `FrameVisual` bằng `Frame` (`frame`, `t`); `Segment.visual` đổi thành `frames`, `ThumbnailAnalysis` bỏ `visual`; `frames` phải nằm trong đoạn như `ocr`. Validator `mode="before"` của `Timeline` đổi dạng cũ: `visual` của đoạn thành `frames` (giữ `frame`, `t`), bỏ `visual` của thumbnail. `enrich` không gọi VLM, gắn mọi keyframe vào đoạn (đoạn im lặng như hiện nay), không trả danh sách ảnh lỗi. Pipeline bỏ bước `vlm` và audit `media.vision`; `analyze(job_id)` bỏ tham số `vision_failed`. Xoá `media/vision.py`, `media/prompts/vision.md`, `tests/unit/test_vision.py`, `tests/live/test_vision_live.py`. `jev.py`, `refimages.py`, `evaluation.py` thôi đọc `visual` (Jev tạm chỉ gửi OCR cho đến T59). Sửa `tests/fixtures/build_sample_capture.py` và sinh lại `timeline.json` mẫu; chạy `h4wk schema export`.
+
+Nghiệm thu:
+
+- [ ] `test_contracts.py`: ví dụ hợp lệ có `frames`; ví dụ dạng cũ có `visual` ở đoạn và thumbnail nạp được và ra đúng `frames`; ví dụ bị từ chối `frames[].t` ngoài đoạn bị chặn bởi đúng thông báo "outside segment".
+- [ ] Bản sao `timeline.json` thật của `1RUJ_6eruwA` (lấy từ `data/`, không sửa bản gốc) nạp được, số phần tử `frames` bằng số phần tử `visual` cũ.
+- [ ] Test pipeline: mọi keyframe trong `frames/selected.json` có trong `frames` của timeline; không còn `vision.json` mới được ghi.
+- [ ] `grep -rn "visual\b" backend/src/h4wk/media` chỉ còn validator đọc dạng cũ; backend pytest, ruff qua.
+
+File: `media/timeline.py`, `media/enrich.py`, `jobs/pipeline.py`, `analysis/jev.py`, `analysis/refimages.py`, `analysis/evaluation.py`; xoá `media/vision.py`; fixture mẫu, tests, `docs/contracts/c3-timeline.json`.
+Người làm: agent backend. Phụ thuộc: không (T56 đã merge). Cỡ: L (đổi hợp đồng kéo theo nhiều file, phần lớn là xoá; không tách được vì C3 cũ và mới không chạy song song).
+
+### T59: `analysis`: Jev nhận keyframe và thumbnail
+
+Theo SPEC-jev-only §1. `jev._call` nhận danh sách ảnh: có ảnh thì thêm header `TypeSafe-Danger-Zone-Images: true`, `assets` `<image-N>` dạng JPEG base64 và `state` thành `[<image-1>, …, state]`. Hàm mã hoá ảnh dùng OpenCV (đã có): cạnh dài ≤ 1024, cạnh ngắn ≥ 320, JPEG chất lượng 85; ảnh không đọc được thì lỗi `ValueError` và request được ghi lỗi như hiện nay. `classify` nhận `derived_dir`, `capture_dir`: mỗi đoạn có keyframe hoặc OCR là một mục (tối đa 4 keyframe lấy cách đều, `text` là OCR chưa gửi, có thể rỗng; `source_kind` `ocr` khi có chữ, `visual` khi không); mỗi thumbnail một mục kèm ảnh. `source_type` mô tả ảnh và `text`. `runner.analyze` và `pipeline.analyze_capture` truyền hai thư mục.
+
+Nghiệm thu:
+
+- [ ] Test với `urlopen` giả: request có ảnh có header và `state` dạng danh sách; request không ảnh không có header và `state` là object; ảnh 640×200 thành 1024×320, ảnh 270×480 có cạnh ngắn 320.
+- [ ] Test `classify` với `_call` giả: đúng đường dẫn keyframe cho từng đoạn, thumbnail lấy từ `capture_dir`; đoạn chỉ có keyframe sinh mục `visual` với `quote` rỗng; dòng OCR lặp vẫn chỉ gửi một lần.
+- [ ] Test pipeline với Jev giả: mọi ảnh gửi đi tồn tại trên đĩa.
+- [ ] Chạy thật trên bản sao bản thu `1RUJ_6eruwA` (sau T58): đoạn có chữ "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" sinh nghi vấn Jev `source_kind: ocr` có `frame`, request có ảnh; ghi số request, số request lỗi và số token ảnh vào `docs/eval/jev.md`.
+
+File: `analysis/jev.py`, `analysis/runner.py`, `jobs/pipeline.py`, `tests/unit/test_jev.py`, `tests/integration/test_pipeline.py`, `docs/eval/jev.md`.
+Người làm: agent backend. Phụ thuộc: T58. Cỡ: M.
+
+### T60: `analysis`: kết luận theo video bằng quy tắc
+
+Theo SPEC-jev-only §3. `verdict.decide(findings, run_id, timeline) -> VideoVerdict` không gọi AI: `no` khi không có nghi vấn vi phạm của đúng run; `yes` khi có ít nhất một nghi vấn vi phạm `highly_likely`, còn lại `uncertain`; `categories` theo số nghi vấn giảm dần, `severity` cao nhất, `confidence` của nghi vấn xếp đầu, `finding_ids` 10 nghi vấn đầu theo `_rank`, `summary` theo mẫu, `model` null. Xoá `analysis/prompts/video_verdict.md`. `pipeline.analyze_capture` bỏ tham số `gateway`; `h4wk analyze` và `h4wk verdict` không tạo gateway; `h4wk verdict` bỏ qua run đã có `verdict.json` trừ khi `--force`.
+
+Nghiệm thu:
+
+- [ ] Test quy tắc: `no`; `yes` với một nghi vấn `highly_likely`; `uncertain` khi chỉ có `likely` và `unverified`; nghi vấn của run khác bị bỏ qua; thứ tự `categories` và `finding_ids` (200 nghi vấn, xếp theo severity rồi xác suất Jev).
+- [ ] Test CLI: `h4wk verdict <id>` ghi một lần, chạy lại không ghi đè, `--force` ghi lại; `h4wk analyze --all` vẫn dừng khi Jev báo 429.
+- [ ] Không còn `import` từ `h4wk.ai` trong `analysis/` và `cli.py`; backend pytest, ruff qua.
+
+File: `analysis/verdict.py`, `jobs/pipeline.py`, `cli.py`, `tests/unit/test_verdict.py`; xoá `analysis/prompts/video_verdict.md`.
+Người làm: agent backend. Phụ thuộc: T58. Cỡ: S.
+
+### T61: Bỏ `ai-gateway` và cấu hình C5 `ai.toml`
+
+Theo SPEC-jev-only §4. Xoá package `h4wk.ai`, `tests/unit/test_ai_gateway.py`, `tests/unit/test_ai_providers.py`, `tests/live/test_ai_provider_live.py`, `config/ai.toml.example`, `docs/contracts/c5-ai.json`. C5 bỏ `AiConfig`, `AiTask`, `ProviderConfig`, `ModelCaps`, `Route` và đoạn đọc tuyến cũ; `core/settings.py` bỏ `ai_path`, `load_ai`, `save_ai`; API bỏ `/api/settings/ai*`, giữ `/api/settings/jev*`; `cli.py` bỏ `c5-ai` khỏi `schema export`. `.env.example` bỏ key LLM, thêm `TYPESAFE_API_KEY`. Không đụng `config/ai.toml` có sẵn trên máy.
+
+Nghiệm thu:
+
+- [ ] `grep -rn "h4wk.ai\|AiConfig\|ai.toml\|describe_image\|media.vision\|video_verdict" backend/src config` không còn kết quả (trừ `test_init.py` dùng tên file mẫu bất kỳ).
+- [ ] Test Settings: không response nào chứa key đầy đủ (gồm `/api/settings/jev`); `GET /api/settings/ai` trả 404.
+- [ ] `test_contracts.py` và `test_settings_core.py` không còn ví dụ C5 `ai`; `h4wk schema export` không còn `c5-ai.json`; backend pytest, ruff qua.
+
+File: `ai/` (xoá), `core/config_models.py`, `core/settings.py`, `api/settings.py`, `cli.py`, `config/ai.toml.example` (xoá), `.env.example`, tests.
+Người làm: agent backend. Phụ thuộc: T60. Cỡ: M (phần lớn là xoá).
+
+### T62: UI Settings chỉ còn Jev
+
+Theo SPEC-jev-only §5. Mục Settings "AI providers" đổi thành "Jev", đường dẫn `/settings/jev`, chỉ hiện thẻ Jev (key, trạng thái). Xoá `AddProviderDialog`, `ProviderCard`, `TaskRoutes`, `draft.ts` và hàm gọi `/api/settings/ai*` trong `api/settings.ts`. Link trong `CollectPage.tsx` trỏ sang `/settings/jev`. Sinh lại kiểu API sau T61.
+
+Nghiệm thu:
+
+- [ ] Mở Settings: có mục Sources và Jev; nhập, che và xoá key Jev được; `/settings/ai` không còn.
+- [ ] `grep -rn "settings/ai\|TaskRoutes\|ProviderCard" web/src` không còn kết quả.
+- [ ] `npm run build` và `npm run lint` không lỗi.
+
+File: `web/src/App.tsx`, `web/src/pages/settings/SettingsLayout.tsx`, `web/src/pages/settings/AIProvidersPage.tsx` (đổi thành trang Jev), `web/src/components/settings/ai/*`, `web/src/api/settings.ts`, `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
+Người làm: agent ui. Phụ thuộc: T61. Cỡ: M.
+
+### T63: UI màn video và Collect bỏ mô tả ảnh và bước VLM
+
+Theo SPEC-jev-only §5. Dải keyframe đọc `frames` thay `visual`, bỏ mục "VLM description" và danh sách dấu hiệu; thẻ kết luận không hiện model khi `model` null; danh sách bước job ở Collect bỏ `vlm`. Sinh lại kiểu API sau T58 và T60 (rebase sau T62 nếu T62 merge trước).
+
+Nghiệm thu:
+
+- [ ] Mở `1RUJ_6eruwA` (timeline dạng cũ) và `h4wkDemo001` (timeline mới): dải keyframe hiện đủ khung, bấm khung tua đúng chỗ, không có chữ "VLM".
+- [ ] Thẻ kết luận của run mới hiện `violation`, danh mục, mức độ, tóm tắt, không hiện model.
+- [ ] `npm run build` và `npm run lint` không lỗi.
+
+File: `web/src/components/video/keyframes.ts`, `web/src/components/video/KeyframeStrip.tsx`, `web/src/components/video/VerdictCard.tsx`, `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
+Người làm: agent ui. Phụ thuộc: T58, T60. Cỡ: S.
+
+### T64: Gộp SPEC-jev-only.md vào SPEC.md
+
+Sửa SPEC.md: §8 (bỏ tiêu chí đổi nhà cung cấp AI, thêm tiêu chí Jev nhận ảnh), §10.4 (bỏ `ai-gateway`, ghi Jev là nhà cung cấp AI duy nhất), §10.5 (bỏ bước VLM, C3 mới), §10.6 (Jev R10 cho mọi nguồn kèm ảnh, quy tắc severity/confidence, kết luận bằng quy tắc), §10.10 (Settings mục 6–7), §11 (bỏ "validate đầu ra LLM/VLM"), §13, bản đồ module §2 nếu có `ai-gateway`. Sửa `docs/intent/socmint-youtube.md` (mục 6 và ràng buộc về nhiều nhà cung cấp). Đổi `Status` của SPEC-jev-only.md thành `implemented`. Sửa `CLAUDE.md` nếu còn nhắc C5 `ai.toml`.
+
+Nghiệm thu:
+
+- [ ] `grep -n "ai-gateway\|media.vision\|video_verdict\|ai.toml\|Ollama\|VLM" SPEC.md docs/intent/socmint-youtube.md CLAUDE.md` chỉ còn câu ghi lý do đã bỏ.
+- [ ] Reviewer đối chiếu SPEC.md với code trên `main`: C3, C5, quy tắc kết luận khớp.
+
+File: `SPEC.md`, `SPEC-jev-only.md`, `docs/intent/socmint-youtube.md`, `CLAUDE.md`, `tasks/plan.md`.
+Người làm: lead. Phụ thuộc: T58–T63. Cỡ: S.
+
+### Checkpoint 6d
+
+- [ ] Xử lý lại `1RUJ_6eruwA` trọn luồng (media và phân tích) với key Jev thật: job `done`, `llm_error` rỗng hoặc chỉ có request ảnh bị từ chối đã ghi rõ; có nghi vấn `ocr` cho dòng chữ "KẺ KHỦNG BỐ"; kết luận ra `yes` hoặc `uncertain` đúng quy tắc.
+- [ ] Đủ 7 tiêu chí thành công của SPEC-jev-only.md.
+- [ ] Backend pytest, ruff check, ruff format --check; web build, lint đều qua trên `main`.
+- [ ] Thi xem màn video của `1RUJ_6eruwA` và duyệt.

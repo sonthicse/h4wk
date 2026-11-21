@@ -248,7 +248,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [ ] T18: Proxy 480p, audio, STT (còn transcript từ video mẫu thật, chờ T44)
 - [x] T19: Keyframe theo mức thay đổi
 - [x] T20: OCR trên keyframe và thumbnail
-- [x] T21: VLM mô tả keyframe và thumbnail (test live chuyển sang Checkpoint 6c)
+- [x] T21: VLM mô tả keyframe và thumbnail (test live chuyển sang Checkpoint 6c; VLM bị bỏ ở Phase 6d)
 - [ ] T22: Timeline đầy đủ (màn Collect đã nghiệm thu 20/11; còn đo thời gian xử lý trên máy demo)
 
 ### Checkpoint C: đo thời gian màn 2, kiểm tra timeline của video thật
@@ -294,11 +294,11 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 6c: AI cục bộ và Jev cho mọi văn bản (thêm ngày 2026-11-21)
 
-Spec: [SPEC-local-ai.md](../SPEC-local-ai.md). VLM và LLM kết luận chạy cục bộ qua Ollama (`qwen3-vl:4b` trên máy GPU riêng), nhà cloud giữ làm tuyến dự phòng; mọi phân loại văn bản qua Jev cấu hình R10; bỏ `analysis.classify`.
+Spec cũ `SPEC-local-ai.md` đã xoá ngày 2026-11-21, thay bằng [SPEC-jev-only.md](../SPEC-jev-only.md) (Phase 6d). Phần đã làm (T51, T52, T54, T55, T57) và T56 vẫn giữ; T53 và Checkpoint 6c bị bỏ.
 
 - [x] T51: `ai-gateway`: nhà cung cấp `ollama`
 - [x] T52: `media`: mô tả ảnh qua Ollama, cache theo từng ảnh
-- [ ] T53: `analysis`: kết luận theo video bằng model cục bộ
+- [-] T53: `analysis`: kết luận theo video bằng model cục bộ (bỏ, thay bằng T60)
 - [x] T54: `analysis`: Jev cấu hình R10 cho lời nói và comment
 - [x] T55: `analysis`: Jev cho tiêu đề, mô tả, OCR, hình ảnh và thumbnail
 - [x] T56: Bỏ tác vụ AI `analysis.classify`
@@ -316,7 +316,39 @@ Rủi ro:
 | Thêm mục cho Jev (mọi đoạn có OCR/hình) làm tăng số request | Thấp | Jev rẻ và nhanh; bỏ dòng OCR trùng; ghi số request ở T55 |
 | Máy Ollama tắt khi demo | Trung bình | Giữ tuyến cloud dự phòng có key |
 
-### Checkpoint 6c: một video thật chạy trọn với VLM và kết luận cục bộ, đủ 8 tiêu chí của SPEC-local-ai.md
+### Checkpoint 6c: bỏ (Ollama không còn dùng)
+
+### Phase 6d: Jev thay toàn bộ LLM và VLM (thêm ngày 2026-11-21)
+
+Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend ở nhánh `feat/t58-jev-only` (worktree `.claude/worktrees/feat-t58-jev-only`, chưa commit), dùng để tham khảo cách làm và test; chưa có phần đọc `timeline.json` cũ.
+
+- [ ] T58: `media`: C3 bỏ mô tả ảnh, mọi keyframe vào timeline (backend)
+- [ ] T59: `analysis`: Jev nhận keyframe và thumbnail (backend)
+- [ ] T60: `analysis`: kết luận theo video bằng quy tắc (backend)
+- [ ] T61: Bỏ `ai-gateway` và cấu hình C5 `ai.toml` (backend)
+- [ ] T62: UI Settings chỉ còn Jev (ui)
+- [ ] T63: UI màn video và Collect bỏ mô tả ảnh và bước VLM (ui)
+- [ ] T64: Gộp SPEC-jev-only.md vào SPEC.md và sửa tài liệu ý định
+
+Thứ tự: T58 → (T59, T60 song song) → T61 sau T60 → T62 sau T61; T63 sau T58 và T60 → T64 sau tất cả → Checkpoint 6d.
+
+- T58 trước hết vì đổi hợp đồng C3, mọi task sau đọc timeline mới.
+- T59 và T60 làm song song được; cả hai sửa `jobs/pipeline.py` ở chỗ khác nhau, merge lần lượt và rebase.
+- T61 sau T60 vì `verdict.py` là chỗ cuối cùng dùng gateway (cùng với `media/vision.py`, đã xoá ở T58).
+- T62 sau T61 (API `/api/settings/ai*` mất); T63 sau T58 và T60. T62 và T63 đều sinh lại `web/src/api/schema.d.ts`: merge lần lượt, task sau sinh lại kiểu sau khi rebase, không sửa tay file sinh ra.
+
+Rủi ro:
+
+| Rủi ro | Mức | Cách xử lý |
+|---|---|---|
+| `timeline.json` cũ trong `data/` có `visual` không đọc được sau khi đổi C3 | Cao | T58 đọc được dạng cũ (đổi `visual` thành `frames`); test bằng bản sao timeline thật của `1RUJ_6eruwA` |
+| Jev từ chối ảnh vì kích thước | Trung bình | T59 đổi cỡ ảnh (cạnh dài ≤ 1024, cạnh ngắn ≥ 320); ảnh vẫn lỗi thì ghi lỗi như request Jev khác, job vẫn xong |
+| Ảnh trên API Jev còn thử nghiệm, có thể đổi hoặc bị tắt | Trung bình | Header chỉ gửi khi có ảnh; tắt ảnh thì vẫn còn chữ OCR. Ghi ngày thử trong spec |
+| Jev không tất định, chỉ ảnh thì kết quả dao động (0,37–0,59 trên cùng khung) | Thấp | Luôn gửi chữ OCR cùng ảnh; tiêu chí nghiệm thu dùng khung có chữ |
+| Nhiều video ra kết luận `yes` vì precision Jev thấp | Thấp | Thi đã chấp nhận; người duyệt xác nhận từng video |
+| Lệnh `npm run gen:api` gọi `uv run` trơn, gỡ torch và CUDA | Trung bình | Chạy phần Python của lệnh với `uv run --no-sync`, rồi chạy `openapi-typescript` như trong script |
+
+### Checkpoint 6d: video thật chạy trọn chỉ với Jev, đủ 7 tiêu chí của SPEC-jev-only.md
 
 ### Phase 7: Demo (tuần 6)
 
