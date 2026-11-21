@@ -302,7 +302,7 @@ Spec: [SPEC-local-ai.md](../SPEC-local-ai.md). VLM và LLM kết luận chạy c
 - [ ] T54: `analysis`: Jev cấu hình R10 cho lời nói và comment
 - [ ] T55: `analysis`: Jev cho tiêu đề, mô tả, OCR, hình ảnh và thumbnail
 - [ ] T56: Bỏ tác vụ AI `analysis.classify`
-- [ ] T57: UI ẩn lý do của nghi vấn Jev
+- [x] T57: UI ẩn lý do của nghi vấn Jev
 
 Thứ tự: T51 → T52, T54, T57 song song → T53 sau T52; T55 sau T54; T56 sau T55.
 
