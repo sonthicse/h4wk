@@ -1998,24 +1998,6 @@ export interface components {
             /** Event */
             event?: string | null;
         };
-        /**
-         * JevMonthUsage
-         * @description Tổng tháng hiện tại theo giờ Việt Nam, chỉ gồm token TypeSafe báo.
-         */
-        JevMonthUsage: {
-            /** Requests */
-            requests: number;
-            /**
-             * Input Tokens
-             * @description Input tokens reported by TypeSafe, if available.
-             */
-            input_tokens: number | null;
-            /**
-             * Output Tokens
-             * @description Output tokens reported by TypeSafe, if available.
-             */
-            output_tokens: number | null;
-        };
     };
     responses: never;
     parameters: never;

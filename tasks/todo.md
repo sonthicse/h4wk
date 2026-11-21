@@ -1078,9 +1078,9 @@ Theo SPEC-jev-only §5 và bản phác `docs/design/phase-6d/Video.dc.html`, `Co
 
 Nghiệm thu:
 
-- [ ] Ảnh chụp màn video của `1RUJ_6eruwA` (timeline cũ) và một video vừa xử lý lại (timeline mới) khớp bản phác; gửi Thi duyệt trước khi merge.
-- [ ] Bấm keyframe, nghi vấn hay dòng transcript đều tua đúng chỗ và ba phần cùng tô đúng mục; khung bao hiện trên trình phát ở keyframe có OCR hoặc khuôn mặt; không còn chữ "VLM".
-- [ ] `npm run build`, `npm run lint` không lỗi.
+- [x] Ảnh chụp màn video của `1RUJ_6eruwA` (timeline cũ) và một video vừa xử lý lại (timeline mới) khớp bản phác; gửi Thi duyệt trước khi merge.
+- [x] Bấm keyframe, nghi vấn hay dòng transcript đều tua đúng chỗ và ba phần cùng tô đúng mục; khung bao hiện trên trình phát ở keyframe có OCR hoặc khuôn mặt; không còn chữ "VLM".
+- [x] `npm run build`, `npm run lint` không lỗi.
 
 File: `web/src/pages/VideoDetailPage.tsx`, `web/src/components/video/` (`Player.tsx`, `KeyframeStrip.tsx`, `keyframes.ts`, `FindingTimeline.tsx`, `TranscriptPane.tsx`, `EvidencePanel.tsx`, `VerdictCard.tsx`), `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
 Người làm: agent ui. Phụ thuộc: T58, T60. Cỡ: L (bố cục lại cả màn; nếu quá một phiên thì tách phần Collect và thẻ kết luận ra trước).
@@ -1115,9 +1115,9 @@ Theo bản phác `docs/design/phase-6d/Dashboard.dc.html`, `Videos.dc.html`, `En
 
 Nghiệm thu:
 
-- [ ] Ảnh chụp 4 màn khớp bản phác; gửi Thi duyệt trước khi merge.
-- [ ] Mọi chỗ hiện ngày giờ trên 4 màn dùng chung một hàm định dạng `HH:MM dd/mm/yyyy` ở `web/src/lib/format.ts`.
-- [ ] `npm run build`, `npm run lint` không lỗi.
+- [x] Ảnh chụp 4 màn khớp bản phác; gửi Thi duyệt trước khi merge.
+- [x] Mọi chỗ hiện ngày giờ trên 4 màn dùng chung một hàm định dạng `HH:MM dd/mm/yyyy` ở `web/src/lib/format.ts`.
+- [x] `npm run build`, `npm run lint` không lỗi.
 
 File: `web/src/pages/DashboardPage.tsx`, `web/src/components/dashboard/UsageCard.tsx`, `web/src/pages/VideosPage.tsx`, `web/src/pages/EntitiesPage.tsx`, `web/src/pages/LoginPage.tsx`, `web/src/lib/format.ts`.
 Người làm: agent ui. Phụ thuộc: T65 (dòng Jev ở Dashboard); phần còn lại làm ngay được. Cỡ: M.
