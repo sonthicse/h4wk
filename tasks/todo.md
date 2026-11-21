@@ -860,7 +860,7 @@ Review queue liệt kê video; mở một video thấy thẻ kết luận (danh 
 
 Nghiệm thu:
 
-- [ ] Video `1RUJ_6eruwA` duyệt xong bằng một lần bấm.
-- [ ] `npm run build` và `npm run lint` không lỗi.
+- [x] Video `1RUJ_6eruwA` duyệt xong bằng một lần bấm.
+- [x] `npm run build` và `npm run lint` không lỗi.
 
 Người làm: Thi. Phụ thuộc: T49. Cỡ: M.
