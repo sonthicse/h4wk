@@ -89,3 +89,51 @@ def test_payload_limits_and_order():
     assert [f["id"] for f in payload["findings"]] == [f.id for f in reversed(findings[40:100])]
     assert all(len(f["quote"]) == 300 for f in payload["findings"])
     assert error and result.finding_ids == [f.id for f in findings]
+
+
+@pytest.mark.parametrize("args", [["demo"], ["--all"]])
+def test_backfill_retries_fallback_and_preserves_success(data_dir, monkeypatch, args):
+    from typer.testing import CliRunner
+
+    from h4wk import cli
+    from h4wk.analysis.models import VideoVerdict
+
+    data, timeline = _data()
+    video = data_dir / "videos" / "demo"
+    capture = video / "captures" / timeline.capture
+    derived = video / "derived" / timeline.capture
+    run = derived / "analysis" / "r_test"
+    capture.mkdir(parents=True)
+    run.mkdir(parents=True)
+    (capture / "normalized.json").write_text(data.model_dump_json(), encoding="utf-8")
+    (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
+    finding = _finding(timeline, 1)
+    (run / "findings.json").write_text(f"[{finding.model_dump_json()}]", encoding="utf-8")
+    gateway = Mock()
+    monkeypatch.setattr(cli, "AIGateway", lambda: gateway)
+    from h4wk.analysis.models import VerdictAnswer
+
+    gateway.complete_structured_with_route.side_effect = GatewayError("offline")
+    runner = CliRunner()
+    assert runner.invoke(cli.app, ["verdict"]).exit_code == 2
+    result = runner.invoke(cli.app, ["verdict", *args])
+    assert result.exit_code == 0, result.exception
+    path = run / "verdict.json"
+    assert VideoVerdict.model_validate_json(path.read_bytes()).model is None
+    gateway.complete_structured_with_route.side_effect = None
+    gateway.complete_structured_with_route.return_value = (
+        VerdictAnswer(
+            violation="yes",
+            categories=["incitement"],
+            severity="high",
+            confidence="likely",
+            finding_ids=[finding.id],
+        ),
+        Route(provider="gemini", model="fake"),
+    )
+    result = runner.invoke(cli.app, ["verdict", *args])
+    assert result.exit_code == 0, result.exception
+    assert VideoVerdict.model_validate_json(path.read_bytes()).model.model == "fake"
+    gateway.reset_mock()
+    assert runner.invoke(cli.app, ["verdict", *args]).exit_code == 0
+    gateway.complete_structured_with_route.assert_not_called()

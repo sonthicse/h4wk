@@ -102,7 +102,7 @@ def init() -> None:
 
 @app.command("verdict")
 def backfill_verdict(
-    video_id: str | None = None,
+    video_id: Annotated[str | None, typer.Argument()] = None,
     all_videos: Annotated[bool, typer.Option("--all")] = False,
     force: Annotated[bool, typer.Option("--force")] = False,
 ) -> None:
@@ -123,7 +123,12 @@ def backfill_verdict(
                 raise typer.BadParameter(f"No analysis for {video.name}")
             continue
         target = latest.with_name("verdict.json")
-        if target.exists() and not force:
+        if (
+            target.exists()
+            and not force
+            and VideoVerdict.model_validate_json(target.read_text(encoding="utf-8")).model
+            is not None
+        ):
             if not all_videos:
                 typer.echo(f"Already exists: {target}")
             continue
