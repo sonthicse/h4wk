@@ -40,7 +40,7 @@ export default function EntitiesPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-baseline justify-between">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="text-2xl font-semibold">Entities</h1>
         <div className="flex items-center gap-2 text-sm">
           <Badge variant="outline">{plural(all.length, 'entity')}</Badge>
@@ -70,7 +70,7 @@ export default function EntitiesPage() {
       )}
 
       {selected && (
-        <div className="grid grid-cols-[18rem_minmax(0,1fr)] items-start gap-6">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
           <ul className="space-y-1">
             {all.map((e) => {
               const total = findingCount(findings, e)

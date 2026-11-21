@@ -3,7 +3,7 @@ import { api, type Schemas } from '@/api/client'
 export type Entity = Schemas['EntityOut']
 export type RefImage = Schemas['RefImage']
 export type RefKind = RefImage['kind']
-export type EntityPatch = { name?: string; aliases?: string[]; abbreviations?: string[]; description?: string }
+export type EntityPatch = Schemas['EntityUpdate']
 
 // Danh sách đối tượng, kèm số ảnh mẫu mỗi loại (ref_counts).
 export function listEntities(): Promise<Entity[]> {

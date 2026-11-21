@@ -41,7 +41,7 @@ export default function EntityForm({ entity }: { entity: Entity }) {
         <Input id="entity-name" className="max-w-md" value={form.name} onChange={(e) => set('name')(e.target.value)} />
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="entity-alias">Aliases</Label>
           <TermListInput id="entity-alias" values={form.aliases} placeholder="e.g. ông A" onChange={set('aliases')} />
