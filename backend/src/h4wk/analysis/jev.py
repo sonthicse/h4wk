@@ -169,6 +169,32 @@ def _call(key, state, questions):
             time.sleep(delay)
 
 
+def _image_text(lines, visual):
+    parts = [*lines]
+    for row in visual:
+        parts.extend([row.description, *row.offensive_cues])
+    return " | ".join(part.strip() for part in parts if part.strip())
+
+
+def _location(kind, item_id, text, hits, *, segment=None, frame=None):
+    location = dict(source_kind=kind, quote=text, triggers=[])
+    if kind == "comment":
+        location.update(comment_id=item_id, triggers=[Trigger(via="comment", comment_id=item_id)])
+    if segment is not None:
+        location.update(segment_id=segment.id, start=segment.start, end=segment.end)
+    if frame is not None:
+        location["frame"] = frame
+    if kind != "comment":
+        location["triggers"] = [
+            Trigger(**hit.model_dump(exclude={"entity"}))
+            for hit in hits
+            if hit.segment_id == location.get("segment_id")
+            and (hit.via == kind or kind == "visual" and hit.via in {"face", "image"})
+            and (frame is None or hit.frame == frame)
+        ]
+    return location
+
+
 def classify(
     data, timeline, entities, hits, run_id, settings, *, max_comments=None
 ) -> tuple[list[Finding], list[dict], str | None]:
@@ -177,37 +203,82 @@ def classify(
         return [], [], "jev: TYPESAFE_API_KEY is not set"
     shared, questions = _configuration(entities, data.video.title if data.video else "")
     items = []
-    segments = timeline.segments
-    for i, segment in enumerate(segments):
-        if segment.speech.strip():
+
+    def add(kind, item_id, source_type, text, *, segment=None, frame=None, **context):
+        if text.strip():
             items.append(
                 (
-                    segment.id,
-                    segment,
-                    {
-                        "speech_before": segments[i - 1].speech if i else "",
-                        "source_type": "speech transcript segment",
-                        "text": segment.speech,
-                        "speech_after": segments[i + 1].speech if i + 1 < len(segments) else "",
-                    },
+                    item_id,
+                    {"source_type": source_type, "text": text, **context},
+                    _location(kind, item_id, text, hits, segment=segment, frame=frame),
                 )
             )
+
+    if data.video:
+        add("title", "title", "video title", data.video.title)
+        add("description", "description", "video description", data.video.description)
+    segments = timeline.segments
+    seen = set()
+    for i, segment in enumerate(segments):
+        add(
+            "speech",
+            segment.id,
+            "speech transcript segment",
+            segment.speech,
+            segment=segment,
+            speech_before=segments[i - 1].speech if i else "",
+            speech_after=segments[i + 1].speech if i + 1 < len(segments) else "",
+        )
+        ocr = []
+        for row in segment.ocr:
+            line = row.text.strip()
+            if line and line not in seen:
+                seen.add(line)
+                ocr.append(row)
+        visual = [
+            row
+            for row in segment.visual
+            if row.description.strip() or any(c.strip() for c in row.offensive_cues)
+        ]
+        if ocr or visual:
+            kind = "ocr" if ocr else "visual"
+            frame = ocr[0].frame if ocr else visual[0].frame
+            text = _image_text([row.text.strip() for row in ocr], visual)
+            add(
+                kind,
+                f"{segment.id}:{kind}",
+                "text overlaid on video frames (OCR) and image description",
+                text,
+                segment=segment,
+                frame=frame,
+            )
+    for thumb in timeline.thumbnails:
+        lines = list(dict.fromkeys(row.text.strip() for row in thumb.ocr))
+        text = _image_text(lines, [thumb.visual] if thumb.visual else [])
+        add(
+            "thumbnail",
+            thumb.file,
+            "video thumbnail (OCR and image description)",
+            text,
+            frame=thumb.file,
+        )
     texts = {c.id: c.text for c in data.comments}
     for comment in data.comments[:max_comments]:
-        content = {"source_type": "YouTube comment", "text": comment.text}
-        if parent := texts.get(comment.parent_id):
-            content["parent_comment"] = parent
-        items.append((comment.id, None, content))
-    segment_hits = {}
-    for hit in hits:
-        if hit.segment_id:
-            segment_hits.setdefault(hit.segment_id, []).append(hit)
+        parent = texts.get(comment.parent_id)
+        add(
+            "comment",
+            comment.id,
+            "YouTube comment",
+            comment.text,
+            **({"parent_comment": parent} if parent else {}),
+        )
 
     def request(item):
-        item_id, segment, content = item
+        item_id, content, location = item
         record = {
             "task": "jev",
             "item_id": item_id,
+            "source_kind": location["source_kind"],
             "answers": {},
             "provider": "typesafe",
             "model": MODEL,
@@ -226,26 +297,6 @@ def classify(
             category = max(VIOLATIONS, key=lambda c: probs.get(c, 0.0))
             p = probs[category]
             score = answers["severity"]["score"]
-            location = (
-                dict(
-                    source_kind="speech",
-                    segment_id=item_id,
-                    start=segment.start,
-                    end=segment.end,
-                    triggers=[
-                        Trigger(**h.model_dump(exclude={"entity"}))
-                        for h in segment_hits.get(item_id, [])
-                    ],
-                    quote=segment.speech,
-                )
-                if segment is not None
-                else dict(
-                    source_kind="comment",
-                    comment_id=item_id,
-                    quote=content["text"],
-                    triggers=[Trigger(via="comment", comment_id=item_id)],
-                )
-            )
             finding = Finding(
                 id=f"f_{new_ulid()}",
                 run_id=run_id,

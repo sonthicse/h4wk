@@ -187,7 +187,12 @@ def group_repeats(findings: list[Finding], references: list[str] = ()) -> list[F
     `references` là văn bản đáng tin hơn OCR (tiêu đề, mô tả, lời nói) để sửa trích dẫn."""
     groups: list[tuple[list[str], list[Finding]]] = []
     for finding in findings:
-        if finding.source_kind not in REPEAT_KINDS or finding.start is None:
+        # Jev đã bỏ OCR trùng trước khi gửi; giữ nguyên văn bản đã gửi làm quote.
+        if (
+            finding.source_kind not in REPEAT_KINDS
+            or finding.start is None
+            or (finding.model is not None and finding.model.provider == "typesafe")
+        ):
             continue
         text = _fold(finding.quote)
         for texts, members in groups:

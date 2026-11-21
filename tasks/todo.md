@@ -943,9 +943,9 @@ Thêm vào Jev các mục: tiêu đề video (`source_kind: title`), mô tả vi
 
 Nghiệm thu:
 
-- [ ] Test với Jev giả: mỗi loại nguồn sinh nghi vấn đúng `source_kind`, `segment_id`, `start`, `frame`; dòng OCR lặp giữa các keyframe chỉ gửi một lần.
-- [ ] Chạy thật trên `1RUJ_6eruwA`: dòng chữ “CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ” sinh nghi vấn `ocr` hoặc `visual` từ Jev.
-- [ ] Ghi số request Jev thêm cho mỗi video vào `docs/eval/local-ai.md`.
+- [x] Test với Jev giả: mỗi loại nguồn sinh nghi vấn đúng `source_kind`, `segment_id`, `start`, `frame`; dòng OCR lặp giữa các keyframe chỉ gửi một lần.
+- [x] Chạy thật trên `1RUJ_6eruwA`: dòng chữ “CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ” sinh nghi vấn `ocr` hoặc `visual` từ Jev.
+- [x] Ghi số request Jev thêm cho mỗi video vào `docs/eval/local-ai.md`.
 
 Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py tests/integration/test_pipeline.py`.
 

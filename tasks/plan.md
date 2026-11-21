@@ -287,7 +287,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 6b: Rà soát theo video và Jev (thêm ngày 2026-11-20)
 
-- [ ] T47: `analysis`: phân loại comment và lời nói bằng Jev
+- [x] T47: `analysis`: phân loại comment và lời nói bằng Jev
 - [x] T48: `analysis`: kết luận theo video
 - [x] T49: `review`: rà soát theo video (backend)
 - [x] T50: UI rà soát theo video
@@ -300,7 +300,7 @@ Spec: [SPEC-local-ai.md](../SPEC-local-ai.md). VLM và LLM kết luận chạy c
 - [ ] T52: `media`: mô tả ảnh qua Ollama, cache theo từng ảnh
 - [ ] T53: `analysis`: kết luận theo video bằng model cục bộ
 - [x] T54: `analysis`: Jev cấu hình R10 cho lời nói và comment
-- [ ] T55: `analysis`: Jev cho tiêu đề, mô tả, OCR, hình ảnh và thumbnail
+- [x] T55: `analysis`: Jev cho tiêu đề, mô tả, OCR, hình ảnh và thumbnail
 - [ ] T56: Bỏ tác vụ AI `analysis.classify`
 - [x] T57: UI ẩn lý do của nghi vấn Jev
 

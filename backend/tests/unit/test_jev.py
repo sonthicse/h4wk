@@ -7,6 +7,7 @@ from test_analysis_llm import ENTITY, INSULT, _data
 
 from h4wk.analysis import jev, runner
 from h4wk.core.config_models import JevSettings
+from h4wk.media.timeline import FrameOcr, FrameVisual, Segment
 
 
 @pytest.mark.parametrize(
@@ -60,7 +61,14 @@ def test_classify(monkeypatch, target, probability, kept):
     assert error is None
     assert records and all(r["kept"] == kept for r in records)
     assert any(s.get("parent_comment") for s in states)
-    assert {s["source_type"] for s in states} == {"YouTube comment", "speech transcript segment"}
+    assert {s["source_type"] for s in states} == {
+        "YouTube comment",
+        "speech transcript segment",
+        "video title",
+        "video description",
+        "video thumbnail (OCR and image description)",
+        "text overlaid on video frames (OCR) and image description",
+    }
     for state in states:
         assert "Mẫu hai, Tên khác, MH, Mô tả mẫu" in state["protected_targets"]
         assert state["text"]
@@ -70,7 +78,14 @@ def test_classify(monkeypatch, target, probability, kept):
         else:
             assert "speech_before" not in state and "speech_after" not in state
     if kept:
-        assert {f.source_kind for f in findings} == {"speech", "comment"}
+        assert {f.source_kind for f in findings} == {
+            "speech",
+            "comment",
+            "title",
+            "description",
+            "thumbnail",
+            "ocr",
+        }
         assert all(
             f.entity == target and f.category == "insult" and f.severity == "high" for f in findings
         )
@@ -110,3 +125,61 @@ def test_failure_keeps_static(monkeypatch, tmp_path, key):
     assert findings and {f.analyzer for f in findings} == {"static"}
     assert error.startswith("jev:")
     assert ("HTTP 500" if key else "TYPESAFE_API_KEY is not set") in error
+
+
+def test_new_sources(monkeypatch):
+    data, timeline = _data()
+    ocr = FrameOcr(text="Dòng chữ mẫu", bbox=[0, 0, 1, 1], frame="frames/a.jpg", t=0)
+    visual = FrameVisual(
+        description="Mô tả mẫu",
+        offensive_cues=["Dấu hiệu mẫu"],
+        provider="mock",
+        model="mock",
+        frame="frames/b.jpg",
+        t=2,
+    )
+    timeline.segments = [
+        Segment(id="seg_0001", start=0, end=1, ocr=[ocr, ocr]),
+        Segment(
+            id="seg_0002", start=1, end=3, ocr=[ocr.model_copy(update={"t": 2})], visual=[visual]
+        ),
+    ]
+    states = []
+
+    def reply(key, state, questions):
+        states.append(state)
+        return {
+            "model": "jev-test",
+            "answers": {
+                "category": {"probabilities": {"insult": 0.8}},
+                "is_attack": {"noul": 0.5},
+                "target": {"choice": ENTITY.id},
+                "severity": {"score": 1.0},
+            },
+        }
+
+    monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
+    monkeypatch.setattr(jev, "_call", reply)
+    findings, records, error = jev.classify(
+        data, timeline, [ENTITY], [], "r_x", JevSettings(), max_comments=0
+    )
+    assert error is None
+    by_kind = {f.source_kind: f for f in findings}
+    assert len(records) == len(findings) == len(by_kind) == 5
+    assert set(by_kind) == {"title", "description", "ocr", "visual", "thumbnail"}
+    assert sum(s["text"].count(ocr.text) for s in states) == 1
+    assert by_kind["title"].quote == data.video.title
+    assert by_kind["description"].quote == data.video.description
+    assert by_kind["thumbnail"].frame == timeline.thumbnails[0].file
+    for kind, segment, frame, quote in [
+        ("ocr", timeline.segments[0], ocr.frame, ocr.text),
+        ("visual", timeline.segments[1], visual.frame, "Mô tả mẫu | Dấu hiệu mẫu"),
+    ]:
+        finding = by_kind[kind]
+        assert (finding.segment_id, finding.start, finding.end, finding.frame, finding.quote) == (
+            segment.id,
+            segment.start,
+            segment.end,
+            frame,
+            quote,
+        )
