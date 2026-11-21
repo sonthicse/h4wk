@@ -37,3 +37,15 @@ export function formatTime(s: number) {
   const sec = Math.floor(s % 60)
   return `${m}:${sec.toString().padStart(2, '0')}`
 }
+
+// Khoá gộp: bỏ dấu (NFD, bỏ dấu kết hợp, đ -> d), bỏ ký tự điều khiển/ẩn, gộp khoảng trắng, không phân biệt hoa thường.
+export function mergeKey(q: string): string {
+  return q
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/đ/gi, 'd')
+    .replace(/[\p{Cc}\p{Cf}]/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+}

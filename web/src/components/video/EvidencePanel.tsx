@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { getVerdict, type QueueItem } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatTime } from '@/lib/findings'
+import { formatTime, mergeKey } from '@/lib/findings'
 
 type Kind = QueueItem['finding']['source_kind']
 
@@ -19,18 +19,6 @@ const MAX_ROWS = 5
 const sevRank: Record<string, number> = { high: 0, medium: 1, low: 2 }
 
 type Row = { key: string; text: string; first: QueueItem; count: number; from: number | null; to: number | null; basis: boolean }
-
-// Khoá gộp: bỏ dấu (NFD, bỏ dấu kết hợp, đ -> d), bỏ ký tự điều khiển/ẩn, gộp khoảng trắng, không phân biệt hoa thường.
-function mergeKey(q: string): string {
-  return q
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .replace(/đ/gi, 'd')
-    .replace(/[\p{Cc}\p{Cf}]/gu, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase()
-}
 
 // Gộp các nghi vấn có cùng khoá bỏ dấu thành một dòng.
 function mergeRows(list: QueueItem[], basis: Set<string>): Row[] {

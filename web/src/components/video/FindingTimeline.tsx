@@ -2,9 +2,32 @@ import { Badge } from '@/components/ui/badge'
 import { HoverHighlight, HoverItem } from '@/components/ui/hover-highlight'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Severity, VideoFinding } from '@/api/videos'
-import { formatTime, severityVariant, timedSources } from '@/lib/findings'
+import { formatTime, mergeKey, severityRank, severityVariant, timedSources } from '@/lib/findings'
 import { cn } from '@/lib/utils'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import type { PlayerControls } from './usePlayer'
+
+const MAX_GROUPS = 10
+
+type Group = { key: string; first: VideoFinding; count: number; severity: Severity }
+
+// Gộp nghi vấn cùng nguồn và cùng quote (khoá bỏ dấu); dòng đại diện là nghi vấn sớm nhất của nhóm.
+function groupFindings(list: VideoFinding[]): Group[] {
+  const map = new Map<string, Group>()
+  for (const f of list) {
+    const key = `${f.sourceKind}:${mergeKey(f.quote)}`
+    const g = map.get(key)
+    if (!g) {
+      map.set(key, { key, first: f, count: 1, severity: f.severity })
+      continue
+    }
+    g.count++
+    if (severityRank[f.severity] < severityRank[g.severity]) g.severity = f.severity
+    if (f.start !== null && (g.first.start === null || f.start < g.first.start)) g.first = f
+  }
+  return [...map.values()]
+}
 
 // Mốc thời gian của nghi vấn; nguồn không có mốc (tiêu đề, mô tả, thumbnail, comment) thì '—'.
 const isTimed = (f: VideoFinding) => timedSources.has(f.sourceKind) && f.start !== null
@@ -32,6 +55,9 @@ export default function FindingTimeline({
   const { duration, currentTime } = player
   const timed = findings.filter(isTimed)
   const untimed = findings.filter((f) => !isTimed(f))
+  const groups = groupFindings([...timed, ...untimed])
+  const [showAll, setShowAll] = useState(false)
+  const shown = showAll ? groups : groups.slice(0, MAX_GROUPS)
 
   return (
     <div className="space-y-3">
@@ -95,8 +121,8 @@ export default function FindingTimeline({
       ) : (
         <HoverHighlight>
           <ul className="space-y-1">
-            {[...timed, ...untimed].map((f) => (
-              <HoverItem key={f.id}>
+            {shown.map(({ key, first: f, count, severity }) => (
+              <HoverItem key={key}>
                 <button
                   type="button"
                   onClick={() => onOpen(f)}
@@ -105,18 +131,23 @@ export default function FindingTimeline({
                     f.id === activeId && 'bg-muted',
                   )}
                 >
-                  <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>
+                  <Badge variant={severityVariant[severity]}>{severity}</Badge>
                   <span className="w-44 shrink-0 font-mono text-xs text-muted-foreground">
                     {timeRange(f)} · {f.sourceKind}
                   </span>
                   <span className="truncate">{f.quote}</span>
-                  {f.spans.length > 1 && (
-                    <Badge variant="outline" className="ml-auto shrink-0">{f.spans.length} places</Badge>
+                  {count > 1 && (
+                    <Badge variant="outline" className="ml-auto shrink-0">×{count}</Badge>
                   )}
                 </button>
               </HoverItem>
             ))}
           </ul>
+          {groups.length > MAX_GROUPS && (
+            <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
+              {showAll ? 'Show less' : `Show all (${groups.length})`}
+            </Button>
+          )}
         </HoverHighlight>
       )}
     </div>
