@@ -154,7 +154,7 @@ export default function FindingTimeline({
                   )}
                 >
                   <Badge variant={severityVariant[severity]}>{severity}</Badge>
-                  <span className="w-44 shrink-0 font-mono text-xs text-muted-foreground">
+                  <span className="w-25 shrink-0 font-mono sm:w-44 text-xs text-muted-foreground">
                     {timeRange(f)} · {f.sourceKind}
                   </span>
                   <span className="shrink-0 text-xs text-muted-foreground">{f.category}</span>

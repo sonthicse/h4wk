@@ -73,7 +73,7 @@ function Group({ label, rows, onOpen, total }: { label: string; rows: Row[]; tot
                 onClick={() => onOpen(r.first)}
                 className="flex w-full items-start gap-2 rounded px-2 py-1 text-left text-sm hover:bg-muted"
               >
-                <span className="w-32 shrink-0 whitespace-nowrap font-mono text-xs text-muted-foreground">
+                <span className="w-20 shrink-0 whitespace-nowrap sm:w-32 font-mono text-xs text-muted-foreground">
                   {r.count > 1 && `×${r.count} · `}
                   {r.from != null ? formatTime(r.from) : '—'}
                   {r.count > 1 && r.to != null && r.to !== r.from && `–${formatTime(r.to)}`}
