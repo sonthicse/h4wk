@@ -201,8 +201,8 @@ export default function CollectPage() {
                   {/* Bước phân tích cần nhà cung cấp AI có key; backend báo "no AI provider available" khi thiếu. */}
                   {job.error?.includes('no AI provider available') && (
                     <p className="mt-1 text-xs">
-                      <Link to="/settings/ai" className="underline">
-                        Add an AI provider key in Settings
+                      <Link to="/settings/jev" className="underline">
+                        Add a Jev key in Settings
                       </Link>
                       , or collect at the <span className="font-mono">metadata</span> level.
                     </p>

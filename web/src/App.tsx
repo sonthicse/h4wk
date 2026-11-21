@@ -11,7 +11,7 @@ import FindingsPage from '@/pages/FindingsPage'
 import LoginPage from '@/pages/LoginPage'
 import FindingReviewPage from '@/pages/FindingReviewPage'
 import ReviewQueuePage from '@/pages/ReviewQueuePage'
-import AIProvidersPage from '@/pages/settings/AIProvidersPage'
+import JevPage from '@/pages/settings/JevPage'
 import SettingsLayout from '@/pages/settings/SettingsLayout'
 import SourcesPage from '@/pages/settings/SourcesPage'
 import VideoDetailPage from '@/pages/VideoDetailPage'
@@ -53,7 +53,8 @@ export default function App() {
               <Route path="/settings" element={<SettingsLayout />}>
                 <Route index element={<Navigate to="sources" replace />} />
                 <Route path="sources" element={<SourcesPage />} />
-                <Route path="ai" element={<AIProvidersPage />} />
+                <Route path="jev" element={<JevPage />} />
+                <Route path="ai" element={<Navigate to="/settings/jev" replace />} />
               </Route>
             </Route>
           </Route>

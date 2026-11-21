@@ -1,10 +1,10 @@
 import { NavLink, Outlet } from 'react-router'
 import { cn } from '@/lib/utils'
 
-// Khung trang Settings (SPEC 10.10): mục 1–5 ở Sources, mục 6–7 ở AI providers.
+// Khung trang Settings (SPEC 10.10): mục 1–5 ở Sources, phần Jev ở tab Jev.
 const tabs = [
   { to: '/settings/sources', label: 'Sources' },
-  { to: '/settings/ai', label: 'AI providers' },
+  { to: '/settings/jev', label: 'Jev' },
 ]
 
 export default function SettingsLayout() {
