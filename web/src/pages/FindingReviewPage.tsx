@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { HoverHighlight, HoverItem } from '@/components/ui/hover-highlight'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { formatTime, inSpans, severityVariant } from '@/lib/findings'
+import { formatTime, inSpans, severityVariant, showReason } from '@/lib/findings'
 import { formatVnDateTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -250,7 +250,7 @@ export default function FindingReviewPage() {
                   <Badge variant="outline">{f.confidence}</Badge>
                 </div>
                 <Detail label="Entity">{entityName(f.entity)}</Detail>
-                <Detail label="Reason">{f.reason}</Detail>
+                {showReason(f) && <Detail label="Reason">{f.reason}</Detail>}
                 <Detail label="Triggers">
                   <ul className="space-y-1">
                     {(f.triggers ?? []).map((t, i) => (

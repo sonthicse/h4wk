@@ -970,7 +970,7 @@ Danh sách nghi vấn và màn rà soát không hiện `reason` của nghi vấn
 Nghiệm thu:
 
 - [ ] Mở `1RUJ_6eruwA`: không còn chuỗi `Jev:` trên giao diện; nghi vấn tĩnh vẫn có dòng Reason.
-- [ ] `npm run build` và `npm run lint` không lỗi.
+- [x] `npm run build` và `npm run lint` không lỗi.
 
 Kiểm tra: build và kiểm tra thủ công.
 

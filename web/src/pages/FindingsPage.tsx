@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { formatTime, severityRank, severityVariant } from '@/lib/findings'
+import { formatTime, severityRank, severityVariant, showReason } from '@/lib/findings'
 
 type Severity = Finding['severity']
 type Filters = { q: string; severity: string; category: string; source: string; status: string }
@@ -97,7 +97,7 @@ function FindingSheet({
                 <Badge variant="outline">{finding.confidence}</Badge>
               </div>
               <Detail label="Entity">{entityName(finding.entity)}</Detail>
-              <Detail label="Reason">{finding.reason}</Detail>
+              {showReason(finding) && <Detail label="Reason">{finding.reason}</Detail>}
               <Detail label="Triggers">
                 <ul className="space-y-1">
                   {(finding.triggers ?? []).map((t, i) => (
