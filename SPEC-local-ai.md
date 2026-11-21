@@ -39,7 +39,7 @@ Hợp đồng C5 có loại nhà cung cấp `ollama`: bắt buộc `base_url`, k
 
 - Tuyến mặc định: `ollama/qwen3-vl:4b` (`vision = true`, `structured = false`), sau đó Gemini, OpenRouter, Anthropic.
 - Prompt thêm câu “Trả lời ngắn gọn, không cần suy luận dài.” (đo ngày 21/11: không có câu này, 1/6 ảnh lặp từ tới hết context và trả rỗng sau 281 giây).
-- Request tới nhà cung cấp `ollama` có thời gian chờ 300 giây và giới hạn độ dài đầu ra (`max_tokens` 1024).
+- Request tới nhà cung cấp `ollama` có thời gian chờ 300 giây và giới hạn độ dài đầu ra (`max_tokens` 4096). Bản thinking của `qwen3-vl:4b` có thể dùng hết 1024 token cho suy luận và trả nội dung rỗng.
 - `vision.json` được ghi sau mỗi ảnh mô tả xong, nên job bị dừng giữa chừng chạy lại chỉ mô tả các ảnh còn thiếu.
 - Khoá cache của một ảnh gồm hash ảnh, prompt, `provider` và `model` đã mô tả nó. Sửa tuyến của tác vụ khác (vd `analysis.video_verdict`) không làm mô tả lại ảnh.
 

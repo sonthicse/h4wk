@@ -1,6 +1,7 @@
 """describe_images: ảnh lỗi bị bỏ, ảnh còn lại vẫn được ghi vào vision.json."""
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -73,6 +74,55 @@ def test_changed_prompt_invalidates_cache(monkeypatch, tmp_path, images):
     prompt.write_text("Mô tả chi tiết hình ảnh.", encoding="utf-8")
     vision.describe_images(images[:1], output)
     assert len(provider.requests) == 2
+
+
+def test_cache_tracks_only_vision_route(monkeypatch, tmp_path, images):
+    original = AI_CONFIG_PATH.with_suffix(".toml.example").read_text(encoding="utf-8")
+    config = tmp_path / "ai.toml"
+    output = tmp_path / "vision.json"
+    provider = ByImage(set())
+    _use(monkeypatch, tmp_path, provider, config)
+
+    def change_model(text, task, model):
+        lines = text.splitlines()
+        index = next(i for i, line in enumerate(lines) if line.startswith(f'"{task}" ='))
+        lines[index] = f'"{task}" = [{{ provider = "anthropic", model = "{model}" }}]'
+        config.write_text("\n".join(lines), encoding="utf-8")
+
+    config.write_text(original, encoding="utf-8")
+    vision.describe_images(images[:1], output)
+    change_model(original, "analysis.video_verdict", "claude-sonnet-5-5")
+    vision.describe_images(images[:1], output)
+    assert len(provider.requests) == 1
+    change_model(original, "media.vision", "claude-haiku-5-5")
+    result = vision.describe_images(images[:1], output)
+    assert len(provider.requests) == 2
+    assert result[images[0][0]].model == "claude-haiku-5-5"
+
+
+def test_cache_persisted_before_interruption(monkeypatch, tmp_path, images):
+    output = tmp_path / "vision.json"
+    fourth = tmp_path / "d.jpg"
+    fourth.write_bytes(b"d")
+    images.append(("frames/d.jpg", fourth))
+    expected = {file for file, _ in images[:2]}
+
+    class Interrupt(ByImage):
+        def complete(self, request):
+            if request.image in {b"c", b"d"}:
+                assert set(json.loads(output.read_text(encoding="utf-8"))) == expected
+                raise KeyboardInterrupt
+            return super().complete(request)
+
+    # Một luồng để ngắt đúng sau hai ảnh, không phụ thuộc lịch chạy.
+    monkeypatch.setattr(vision, "ThreadPoolExecutor", lambda **_: ThreadPoolExecutor(1))
+    _use(monkeypatch, tmp_path, Interrupt(set()))
+    with pytest.raises(KeyboardInterrupt):
+        vision.describe_images(images, output)
+    retry = ByImage(set())
+    _use(monkeypatch, tmp_path, retry)
+    assert set(vision.describe_images(images, output)) == {file for file, _ in images}
+    assert [request.image for request in retry.requests] == [b"c", b"d"]
 
 
 def test_missing_config_returns_nothing_without_error(monkeypatch, tmp_path, images):

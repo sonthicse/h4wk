@@ -25,7 +25,8 @@ def request(structured):
 
 
 @pytest.mark.parametrize("structured", [False, True])
-def test_openai_compat(structured):
+@pytest.mark.parametrize("ollama", [False, True])
+def test_openai_compat(structured, ollama):
     with patch("h4wk.ai.providers.openai_compat.OpenAI") as sdk:
         create = sdk.return_value.__enter__.return_value.chat.completions.create
         message = MagicMock(content='{"label":"ok"}', refusal=None)
@@ -35,9 +36,16 @@ def test_openai_compat(structured):
         message.tool_calls[0].function.name = "result"
         create.return_value.choices = [MagicMock(message=message, finish_reason="stop")]
         create.return_value.usage = MagicMock(prompt_tokens=5, completion_tokens=2)
-        reply = OpenAICompatProvider("test", "https://service.example/v1").complete(
-            request(structured)
+        config = ProviderConfig(
+            type="ollama" if ollama else "openai_compat",
+            base_url="https://service.example/v1",
+            models={},
         )
+        provider = make_provider("internal", config, {"INTERNAL_API_KEY": "test"})
+        assert provider is not None
+        reply = provider.complete(request(structured))
+        assert sdk.call_args.kwargs["timeout"] == (300 if ollama else 120)
+        assert create.call_args.kwargs.get("max_tokens") == (4096 if ollama else None)
         assert json.loads(reply.text)["label"] == "ok"
         assert (reply.input_tokens, reply.output_tokens) == (5, 2)
         assert sdk.call_args.kwargs["base_url"] == "https://service.example/v1"

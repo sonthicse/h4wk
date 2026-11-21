@@ -5,9 +5,10 @@ from h4wk.ai.providers.content import split_messages
 
 
 class OpenAICompatProvider:
-    def __init__(self, key: str, base_url: str):
+    def __init__(self, key: str, base_url: str, *, ollama: bool = False):
         self.key = key
         self.base_url = base_url
+        self.ollama = ollama
 
     def complete(self, request: ProviderRequest) -> ProviderReply:
         system, turns = split_messages(request)
@@ -34,9 +35,14 @@ class OpenAICompatProvider:
             }
         else:
             options = {"response_format": {"type": "json_object"}}
+        if self.ollama:
+            options["max_tokens"] = 4096
         try:
             with OpenAI(
-                api_key=self.key, base_url=self.base_url, max_retries=0, timeout=REQUEST_TIMEOUT_S
+                api_key=self.key,
+                base_url=self.base_url,
+                max_retries=0,
+                timeout=300 if self.ollama else REQUEST_TIMEOUT_S,
             ) as client:
                 reply = client.chat.completions.create(
                     model=request.model, messages=messages, **options

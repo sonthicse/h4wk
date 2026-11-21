@@ -889,15 +889,15 @@ Người làm: Thi. Phụ thuộc: T17, T34. Cỡ: M.
 
 ### T52: `media`: mô tả ảnh qua Ollama, cache theo từng ảnh
 
-Merge nhánh `feat/t21-vision-live` trước (đã có làm mới cache theo prompt). Prompt `media.vision` thêm câu “Trả lời ngắn gọn, không cần suy luận dài.”. Request tới nhà cung cấp loại `ollama` có thời gian chờ 300 giây và `max_tokens` 1024; nhà cung cấp khác giữ nguyên 120 giây. `vision.json` được ghi lại sau mỗi ảnh mô tả xong (ghi nguyên tử, hai luồng không ghi đè lẫn nhau). Khoá cache một ảnh gồm hash ảnh, prompt, `provider` và `model`; bỏ hash của toàn bộ `ai.toml`.
+Merge nhánh `feat/t21-vision-live` trước (đã có làm mới cache theo prompt). Prompt `media.vision` thêm câu “Trả lời ngắn gọn, không cần suy luận dài.”. Request tới nhà cung cấp loại `ollama` có thời gian chờ 300 giây và `max_tokens` 4096; nhà cung cấp khác giữ nguyên 120 giây. Bản thinking của `qwen3-vl:4b` có thể dùng hết 1024 token cho suy luận và trả nội dung rỗng. `vision.json` được ghi lại sau mỗi ảnh mô tả xong (ghi nguyên tử, hai luồng không ghi đè lẫn nhau). Khoá cache một ảnh gồm hash ảnh, prompt, `provider` và `model`; bỏ hash của toàn bộ `ai.toml`.
 
 Nghiệm thu:
 
-- [ ] Test: ảnh đã có trong cache với cùng prompt và route thì không gọi gateway; sửa tuyến `analysis.video_verdict` không làm mô tả lại ảnh; đổi prompt thì mô tả lại.
-- [ ] Test: dừng (ném lỗi) sau ảnh thứ 2 của 4 ảnh, chạy lại thì chỉ gọi gateway cho 2 ảnh còn lại.
-- [ ] Test: provider Ollama gửi `timeout=300` và `max_tokens=1024`; provider `openai_compat` khác không đổi.
+- [x] Test: ảnh đã có trong cache với cùng prompt và route thì không gọi gateway; sửa tuyến `analysis.video_verdict` không làm mô tả lại ảnh; đổi prompt thì mô tả lại.
+- [x] Test: dừng (ném lỗi) sau ảnh thứ 2 của 4 ảnh, chạy lại thì chỉ gọi gateway cho 2 ảnh còn lại.
+- [x] Test: provider Ollama gửi `timeout=300` và `max_tokens=4096`; provider `openai_compat` khác không đổi.
 - [ ] Test live 3 khung của T21 đạt 3/3 lượt với `ollama/qwen3-vl:4b`: ảnh ghép còng tay và ảnh có chữ chửi có `offensive_cues` đúng loại, ảnh bình thường không có.
-- [ ] Chạy thật trên một video ngắn có sẵn với `config/ai.toml` trỏ Ollama: `vision.json` ghi `provider: ollama`, `model: qwen3-vl:4b`; ghi thời gian mỗi ảnh vào `docs/eval/local-ai.md`.
+- [x] Chạy thật trên một video ngắn có sẵn với `config/ai.toml` trỏ Ollama: `vision.json` ghi `provider: ollama`, `model: qwen3-vl:4b`; ghi thời gian mỗi ảnh vào `docs/eval/local-ai.md`.
 
 Kiểm tra: `cd backend && uv run --no-sync pytest tests/unit/test_vision.py tests/unit/test_ai_providers.py`.
 
