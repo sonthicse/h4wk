@@ -12,5 +12,8 @@ export default defineConfig({
   server: {
     // Dùng 127.0.0.1 thay cho localhost để tránh lệch IPv6 (::1) trên WSL
     proxy: { '/api': 'http://127.0.0.1:8000' },
+    allowedHosts: [
+      'ubuntu-36.bitterling-butterfly.ts.net'
+    ]
   },
 })
