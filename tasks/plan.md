@@ -323,8 +323,8 @@ Rủi ro:
 Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend ở nhánh `feat/t58-jev-only` (commit `29d92b7`, worktree `.claude/worktrees/feat-t58-jev-only`), dùng để tham khảo cách làm và test; chưa có phần đọc `timeline.json` cũ.
 
 - [x] T58: `media`: C3 bỏ mô tả ảnh, mọi keyframe vào timeline (backend)
-- [ ] T59: `analysis`: Jev nhận keyframe và thumbnail (backend)
-- [ ] T60: `analysis`: kết luận theo video bằng quy tắc (backend)
+- [x] T59: `analysis`: Jev nhận keyframe và thumbnail (backend)
+- [x] T60: `analysis`: kết luận theo video bằng quy tắc (backend)
 - [ ] T61: Bỏ `ai-gateway` và cấu hình C5 `ai.toml` (backend)
 - [ ] T62: UI Settings → Jev: key, thử kết nối, usage (ui)
 - [ ] T63: UI màn video và Collect bỏ mô tả ảnh và bước VLM (ui)
