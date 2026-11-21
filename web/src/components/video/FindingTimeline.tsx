@@ -2,9 +2,9 @@ import { Badge } from '@/components/ui/badge'
 import { HoverHighlight, HoverItem } from '@/components/ui/hover-highlight'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Severity, VideoFinding } from '@/api/videos'
-import { formatTime, mergeKey, severityRank, severityVariant, timedSources } from '@/lib/findings'
+import { formatTime, inSpans, mergeKey, severityRank, severityVariant, timedSources } from '@/lib/findings'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import type { PlayerControls } from './usePlayer'
 
@@ -54,16 +54,28 @@ export default function FindingTimeline({
   onOpen: (f: VideoFinding, at?: number) => void
 }) {
   const { duration, currentTime } = player
-  const timed = findings.filter(isTimed)
+  const timed = findings.filter(isTimed).sort((a, b) => a.start! - b.start!)
   const untimed = findings.filter((f) => !isTimed(f))
   const groups = groupFindings([...timed, ...untimed])
+  const listRef = useRef<HTMLUListElement>(null)
+  // Nhóm nào có đoạn đang nằm dưới đầu phát thì được tô và tự cuộn vào tầm nhìn.
+  const nowKey = groups.find((g) => [...g.ids].some((id) => {
+    const f = findings.find((x) => x.id === id)
+    return f !== undefined && isTimed(f) && inSpans(f, currentTime)
+  }))?.key
+  useEffect(() => {
+    const box = listRef.current
+    const row = box?.querySelector<HTMLElement>('[data-now="true"]')
+    if (!box || !row) return
+    box.scrollTo({ top: row.offsetTop - box.clientHeight / 3, behavior: 'smooth' })
+  }, [nowKey])
   const [showAll, setShowAll] = useState(false)
   const shown = showAll ? groups : groups.slice(0, MAX_GROUPS)
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium">Findings timeline</h2>
+        <h2 className="text-sm font-medium">Timeline</h2>
         <div className="flex gap-3 text-xs text-muted-foreground">
           {(['high', 'medium', 'low'] as const).map((s) => (
             <span key={s} className="flex items-center gap-1">
@@ -117,25 +129,31 @@ export default function FindingTimeline({
         />
       </div>
 
+      <div className="flex items-center gap-2">
+        <h2 className="text-sm font-medium">Findings</h2>
+        <span className="text-xs text-muted-foreground">sorted by time · the one under the playhead is highlighted</span>
+      </div>
       {findings.length === 0 ? (
         <p className="text-sm text-muted-foreground">No findings in this video.</p>
       ) : (
         <HoverHighlight>
-          <ul className="space-y-1">
+          <ul ref={listRef} className="max-h-72 space-y-1 overflow-y-auto">
             {shown.map(({ key, first: f, count, severity, ids }) => (
               <HoverItem key={key}>
                 <button
                   type="button"
+                  data-now={key === nowKey}
                   onClick={() => onOpen(f)}
                   className={cn(
                     'flex w-full items-center gap-2 rounded px-2 py-1 text-left text-sm focus-visible:bg-muted focus-visible:outline-none',
-                    activeId !== null && ids.has(activeId) && 'bg-muted',
+                    (key === nowKey || (activeId !== null && ids.has(activeId))) && 'bg-muted',
                   )}
                 >
                   <Badge variant={severityVariant[severity]}>{severity}</Badge>
                   <span className="w-44 shrink-0 font-mono text-xs text-muted-foreground">
                     {timeRange(f)} · {f.sourceKind}
                   </span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{f.category}</span>
                   <span className="truncate">{f.quote}</span>
                   {count > 1 && (
                     <Badge variant="outline" className="ml-auto shrink-0">×{count}</Badge>

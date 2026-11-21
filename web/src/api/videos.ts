@@ -81,6 +81,7 @@ export type VideoFinding = {
   spans: { start: number; end: number }[]
   quote: string
   severity: Severity
+  category: Schemas['Finding']['category']
   entity: string
   frame: string | null
   commentId: string | null
@@ -101,6 +102,7 @@ export function toVideoFinding({ finding: f }: QueueItem): VideoFinding {
         : [],
     quote: f.quote ?? '',
     severity: f.severity,
+    category: f.category,
     entity: f.entity,
     frame: f.frame ?? null,
     commentId: f.comment_id ?? null,

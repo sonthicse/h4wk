@@ -138,9 +138,12 @@ function VideoView({
               src={hasMedia ? mediaUrl(video.id) : null}
               failed={failed}
               activeFinding={finding}
+              videoId={video.id}
+              capture={timeline.data?.capture}
+              keyframes={keyframes}
+              findings={findings}
             />
           </div>
-          <EvidencePanel videoId={video.id} items={items} onOpen={openEvidence} />
           <FindingTimeline findings={findings} player={player} activeId={finding?.id ?? null} onOpen={openFinding} />
           <KeyframeStrip
             videoId={video.id}
@@ -148,7 +151,6 @@ function VideoView({
             keyframes={keyframes}
             findings={findings}
             player={player}
-            activeFinding={finding}
           />
           <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
             <TabsList>
@@ -174,13 +176,17 @@ function VideoView({
             </TabsContent>
           </Tabs>
         </div>
-        <div className="h-96 lg:sticky lg:top-4 lg:h-[calc(100vh-7rem)]">
-          <TranscriptPane
-            transcripts={transcripts.data ?? []}
-            findings={findings}
-            player={player}
-            activeId={finding?.id ?? null}
-          />
+        <div className="space-y-4 lg:sticky lg:top-4">
+          <div className="h-96 lg:h-[calc(100vh-14rem)] lg:min-h-80">
+            <TranscriptPane
+              transcripts={transcripts.data ?? []}
+              findings={findings}
+              player={player}
+              activeId={finding?.id ?? null}
+              primaryKind={timeline.data?.transcript_kind ?? null}
+            />
+          </div>
+          <EvidencePanel videoId={video.id} items={items} onOpen={openEvidence} />
         </div>
       </div>
     </div>

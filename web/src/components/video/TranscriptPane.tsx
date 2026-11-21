@@ -12,13 +12,15 @@ export default function TranscriptPane({
   findings,
   player,
   activeId,
+  primaryKind,
 }: {
   transcripts: Transcript[]
   findings: VideoFinding[]
   player: PlayerControls
   activeId: string | null
+  primaryKind: string | null
 }) {
-  const [kind, setKind] = useState<string>(transcripts[0]?.kind ?? '')
+  const [kind, setKind] = useState<string>(primaryKind ?? transcripts[0]?.kind ?? '')
   const listRef = useRef<HTMLDivElement>(null)
   const transcript = transcripts.find((t) => t.kind === kind) ?? transcripts[0]
 
@@ -43,7 +45,10 @@ export default function TranscriptPane({
             </SelectTrigger>
             <SelectContent>
               {transcripts.map((t) => (
-                <SelectItem key={t.kind} value={t.kind}>{t.kind}</SelectItem>
+                <SelectItem key={t.kind} value={t.kind}>
+                  {t.kind}
+                  {t.kind === primaryKind && ' (used for analysis)'}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { Timeline, VideoFinding } from '@/api/videos'
 
 // bbox là [x, y, w, h] tính bằng pixel trên khung gốc của ảnh.
@@ -36,3 +37,30 @@ export function buildKeyframes(timeline: Timeline | null | undefined, findings: 
   }
   return [...frames.values()].sort((a, b) => a.t - b.t)
 }
+
+// Khung hình bao nằm trong ±1 giây quanh một keyframe thì vẽ đè lên trình phát (xem Player).
+export const BOX_WINDOW_S = 1
+
+// Keyframe gần thời điểm t nhất trong ±BOX_WINDOW_S, không có thì null.
+export function nearestKeyframe(keyframes: Keyframe[], t: number): Keyframe | null {
+  let best: Keyframe | null = null
+  for (const k of keyframes) {
+    if (Math.abs(k.t - t) <= BOX_WINDOW_S && (!best || Math.abs(k.t - t) < Math.abs(best.t - t))) best = k
+  }
+  return best
+}
+
+// Kích thước ảnh gốc của keyframe: đọc bằng một thẻ <img> ẩn.
+export const DEFAULT_FRAME_SIZE = { w: 854, h: 480 }
+
+export function useFrameSize(src: string | null) {
+  const [size, setSize] = useState(DEFAULT_FRAME_SIZE)
+  useEffect(() => {
+    if (!src) return
+    const img = new Image()
+    img.onload = () => setSize({ w: img.naturalWidth || DEFAULT_FRAME_SIZE.w, h: img.naturalHeight || DEFAULT_FRAME_SIZE.h })
+    img.src = src
+  }, [src])
+  return size
+}
+

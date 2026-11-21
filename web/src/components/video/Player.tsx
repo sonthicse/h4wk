@@ -1,8 +1,15 @@
+import { useState } from 'react'
 import { Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { VideoFinding } from '@/api/videos'
 import { formatTime, inSpans } from '@/lib/findings'
+import { frameUrl } from '@/api/videos'
+import { BoxLayer, BoxLegend } from './KeyframeStrip'
+import { nearestKeyframe, useFrameSize, type Keyframe } from './keyframes'
 import type { PlayerControls, VideoProps } from './usePlayer'
+import { cn } from '@/lib/utils'
+
+const severityBar = { high: 'bg-red-500/60', medium: 'bg-amber-500/60', low: 'bg-sky-500/60' }
 
 // Trình phát thật trên <video>; không có media (hoặc nạp lỗi) thì hiện khung trống, thanh seek vẫn dùng được cho transcript/timeline.
 export default function Player({
@@ -11,7 +18,15 @@ export default function Player({
   src,
   failed,
   activeFinding,
+  videoId,
+  capture,
+  keyframes,
+  findings,
 }: {
+  videoId: string
+  capture?: string
+  keyframes: Keyframe[]
+  findings: VideoFinding[]
   player: PlayerControls
   videoProps: VideoProps
   src: string | null
@@ -21,6 +36,10 @@ export default function Player({
   const { currentTime, duration, playing } = player
   const hasMedia = src !== null && !failed
   const inFinding = activeFinding && inSpans(activeFinding, currentTime)
+  const [boxesOn, setBoxesOn] = useState(true)
+  const near = nearestKeyframe(keyframes, currentTime)
+  const hasBoxes = near !== null && near.ocr.length + near.faces.length + near.refImages.length > 0
+  const size = useFrameSize(near ? frameUrl(videoId, near.id, capture) : null)
 
   return (
     <div className="space-y-2">
@@ -33,6 +52,14 @@ export default function Player({
             <p className="mt-1 text-xs">
               {failed ? 'The media file could not be loaded.' : 'Media is only stored at capture level full.'}
             </p>
+          </div>
+        )}
+        {boxesOn && near && hasBoxes && (
+          <div className="pointer-events-none absolute inset-0">
+            <BoxLayer frame={near} size={size} />
+            <span className="absolute top-2 right-2 rounded bg-black/55 px-1.5 font-mono text-[11px] text-zinc-50">
+              keyframe {formatTime(near.t)}
+            </span>
           </div>
         )}
         {inFinding && (
@@ -51,10 +78,22 @@ export default function Player({
         >
           {playing ? <Pause /> : <Play />}
         </Button>
+        <div className="relative flex h-2 flex-1 items-center">
+        {duration > 0 &&
+          findings.flatMap((f) =>
+            f.spans.filter((sp) => sp.end > sp.start).map((sp, i) => (
+              <span
+                key={`${f.id}:${i}`}
+                aria-hidden="true"
+                className={cn('pointer-events-none absolute inset-y-[-2px] rounded-sm', severityBar[f.severity])}
+                style={{ left: `${(sp.start / duration) * 100}%`, width: `${((sp.end - sp.start) / duration) * 100}%` }}
+              />
+            )),
+          )}
         <input
           type="range"
           aria-label="Seek"
-          className="h-2 flex-1 cursor-pointer accent-primary"
+          className="relative h-2 w-full cursor-pointer accent-primary"
           min={0}
           max={duration}
           step={0.5}
@@ -62,9 +101,17 @@ export default function Player({
           value={Math.min(currentTime, duration)}
           onChange={(e) => player.seek(Number(e.target.value))}
         />
+        </div>
+        <Button size="sm" variant="outline" aria-pressed={boxesOn} onClick={() => setBoxesOn((v) => !v)}>
+          Boxes {boxesOn ? 'on' : 'off'}
+        </Button>
         <span className="w-24 text-right font-mono text-sm text-muted-foreground">
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <BoxLegend />
+        <span className="ml-auto">Boxes show while the video is within 1 s of a keyframe</span>
       </div>
     </div>
   )
