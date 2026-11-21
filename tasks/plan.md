@@ -280,7 +280,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 - [x] T32: Backend settings và lưu secret
 - [x] T33: UI Settings → Sources
-- [x] T34: UI Settings → AI providers (giao diện đã nối API T32; ô `analysis.classify` chờ T23, ô `media.vision` nghiệm thu được ngay)
+- [x] T34: UI Settings → AI providers (giao diện đã nối API T32; ô `analysis.classify` chờ T23, ô `media.vision` nghiệm thu được ngay) — classify bị bỏ ở T56; chỉ OpenRouter quan sát ở classify, hai chiều định tuyến kiểm qua `media.vision`
 - [x] T35: UI Dashboard
 
 ### Checkpoint F: đạt toàn bộ tiêu chí thành công ở SPEC §8
