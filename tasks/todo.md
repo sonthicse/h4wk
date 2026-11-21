@@ -746,7 +746,7 @@ Nghiệm thu:
 - [x] Đổi nhà cung cấp của `analysis.classify` trên giao diện rồi chạy phân tích lại thì nghi vấn ghi đúng nhà cung cấp mới. (classify bị bỏ ở T56; chỉ quan sát OpenRouter ở tác vụ này, định tuyến hai chiều kiểm qua `media.vision`, Gemini trả lỗi nhà cung cấp chứ không phải kết quả thành công)
 - [x] Đổi nhà cung cấp của `media.vision` thì `vision.json` lần sau ghi đúng nhà cung cấp mới.
 
-Giao diện đã nối API T32 (team làm theo đồng ý của người dùng). Từ 21/11, ô `analysis.classify` bị bỏ (T56); mục nghiệm thu đầu thay bằng đổi nhà cung cấp của `analysis.video_verdict`. Trước đó ô `analysis.classify` chờ T23; ô `media.vision` dựa vào T21 (`vision.json` đã ghi provider/model), có thể nghiệm thu thủ công bằng key gemini hoặc openrouter.
+Giao diện đã nối API T32 (team làm theo đồng ý của người dùng). Từ 21/11, ô `analysis.classify` bị bỏ (T56); T34 chỉ ghi nhận `classify` qua OpenRouter, còn định tuyến hai chiều đã kiểm qua `media.vision`. Việc kiểm đổi nhà cung cấp của `analysis.video_verdict` chuyển sang T53 / Checkpoint 6c. Trước đó ô `analysis.classify` chờ T23; ô `media.vision` dựa vào T21 (`vision.json` đã ghi provider/model), có thể nghiệm thu thủ công bằng key gemini hoặc openrouter.
 
 Kiểm tra: `npm run build` và kiểm tra thủ công.
 
@@ -911,6 +911,7 @@ Nghiệm thu:
 - [ ] Trên ít nhất 5 video có nghi vấn vi phạm: JSON hợp lệ (ngay lần đầu hoặc sau lượt sửa của gateway), tóm tắt tiếng Việt có dấu, `finding_ids` thuộc cùng lần chạy; Thi chấm đạt ít nhất 4/5.
 - [ ] Tắt Ollama thì kết luận chuyển sang tuyến cloud kế tiếp có key, `model` trong `verdict.json` ghi đúng tuyến đó.
 - [ ] Ghi số liệu (thời gian, số lượt sửa JSON, điểm chấm) vào `docs/eval/local-ai.md`.
+- [ ] Đổi route `analysis.video_verdict` trên Settings có hiệu lực (`ai_calls.jsonl` ghi đúng provider).
 
 Kiểm tra: chạy script đánh giá; `uv run --no-sync pytest tests/unit/test_verdict.py`.
 
