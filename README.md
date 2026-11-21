@@ -4,9 +4,9 @@ Bản demo SOCMINT cho YouTube. Đặc tả nằm trong [SPEC.md](SPEC.md).
 
 ## Yêu cầu
 
-- WSL2 (Ubuntu hoặc Kali). Các bước xử lý media và AI về sau cần GPU NVIDIA và CUDA.
+- WSL2 (Ubuntu hoặc Kali) trên Linux x86_64, **bắt buộc có GPU NVIDIA** với driver hỗ trợ CUDA 12.6. Không chạy trên CPU.
 - [uv](https://docs.astral.sh/uv/). uv tự tải Python 3.12 nếu máy chưa có.
-- Node 20 trở lên và npm.
+- Node 20.19+ hoặc 22.12+ (khuyên dùng bản trong `web/.nvmrc`) và npm. `npm install` báo lỗi nếu sai phiên bản Node.
 - `ffmpeg` và `ffprobe` trong PATH để tạo và kiểm tra proxy, audio.
 - [Deno](https://deno.land) trong PATH: yt-dlp cần JS runtime để tải từ YouTube (spike T2). Cài bằng `curl -fsSL https://deno.land/install.sh | sh` rồi thêm `~/.deno/bin` vào PATH.
 
@@ -20,8 +20,8 @@ cd h4wk
 
 # Backend
 cd backend
-uv sync --extra stt --extra match   # tạo .venv và cài dependency, kể cả STT và khớp ảnh (cần GPU)
-uv run --no-sync h4wk init     # tạo data/ và config/*.toml từ config/*.toml.example
+uv sync                 # tạo .venv và cài toàn bộ dependency (kể cả torch, thư viện CUDA)
+uv run h4wk init        # tạo data/ và config/*.toml từ config/*.toml.example
 cd ..
 
 # Frontend
@@ -36,30 +36,36 @@ Thư mục dữ liệu mặc định là `data/` ở gốc repo. Muốn đặt c
 
 ## Chạy
 
-Mở hai terminal:
+Mở bốn terminal:
 
 ```bash
 # Terminal 1: API ở :8000
-cd backend && uv run --no-sync uvicorn h4wk.api.app:app --reload
+cd backend && uv run uvicorn h4wk.api.app:app --reload
 
-# Terminal 2: giao diện ở :3000, /api được proxy sang :8000
+# Terminal 2: worker mặc định (thu thập, phân tích, watchlist)
+cd backend && uv run huey_consumer h4wk.jobs.queue.huey -w 2
+
+# Terminal 3: worker GPU (STT, keyframe, OCR, khớp ảnh)
+cd backend && uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1
+
+# Terminal 4: giao diện ở :3000, /api được proxy sang :8000
 cd web && npm run dev
 ```
 
-**Trong `backend/` không chạy `uv sync` hay `uv run` trơn:** lệnh đó gỡ torch và thư viện CUDA của extra. Dùng `uv run --no-sync ...`. Các bước chạy thử 3 màn demo nằm ở [docs/demo-checklist.md](docs/demo-checklist.md).
+Các bước chạy thử 3 màn demo nằm ở [docs/demo-checklist.md](docs/demo-checklist.md).
 
-Mở http://localhost:3000. Trang chủ hiện `API status: ok` nghĩa là đã cài đặt đúng.
+Mở http://localhost:3000 và đăng nhập (tạo tài khoản bằng `cd backend && uv run h4wk user create <tên>`).
 
-Job mức `full` cần worker GPU có CUDA. Trong `backend/`, chạy `uv run --extra stt --extra match huey_consumer h4wk.jobs.queue.huey_gpu -w 1`. Worker dùng model STT từ `H4WK_STT_MODEL` (mặc định `large-v3`). Extra `match` kéo theo torch, transformers và các thư viện CUDA 12.6; thiếu extra này thì bước khớp ảnh mẫu bị bỏ qua. Chỉ cài extra `stt` mà không cài `match` hoặc máy không có CUDA toolkit thì đặt `LD_LIBRARY_PATH` tới các thư mục `nvidia/*/lib` trong `.venv`. Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
+Worker GPU dùng model STT từ `H4WK_STT_MODEL` (mặc định `large-v3`). Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
 
 ## Kiểm tra trước khi commit
 
 ```bash
-cd backend && uv run --no-sync pytest && uv run --no-sync ruff check . && uv run --no-sync ruff format --check .
+cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check .
 cd web && npm run build && npm run lint
 ```
 
-Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run --no-sync pytest -m live`.
+Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run pytest -m live`.
 
 Các lệnh khác (tạo tài khoản, worker, verify bản thu…) có ở [SPEC.md §4](SPEC.md#4-lệnh); lệnh nào chưa có thì sẽ được thêm dần theo task.
 

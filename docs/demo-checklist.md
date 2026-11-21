@@ -9,21 +9,20 @@ Tên trang, nút và nhãn trong các bước là chữ tiếng Anh đang hiện
 - [ ] **GPU.** `nvidia-smi` liệt kê GPU và phiên bản CUDA, không báo lỗi.
 - [ ] **Khóa Jev.** `TYPESAFE_API_KEY` có trong `.env` hoặc nhập ở Settings → Jev.
 - [ ] **Key nguồn thu.** `YOUTUBE_API_KEY`, `SUPADATA_API_KEY` có trong `.env` hoặc nhập ở Settings → Sources (key nhập ở Settings được ưu tiên). Giao diện chỉ hiện bản che của key.
-- [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync --extra stt --extra match && uv run --no-sync h4wk init`, rồi `cd ../web && npm install` (từ thư mục `backend/`).
+- [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync && uv run h4wk init`, rồi `cd ../web && npm install` (từ thư mục `backend/`).
 
-> **Cảnh báo:** trong `backend/` **không chạy `uv sync` hay `uv run` trơn**. Hai lệnh này đồng bộ lại môi trường theo extra mặc định và gỡ torch cùng các thư viện CUDA của extra `stt`, `match`. Mọi lệnh dùng `uv run --no-sync ...`. Riêng worker GPU dùng `uv run --extra stt --extra match ...` như bên dưới.
 
 Mở 4 terminal:
 
-- [ ] **API** (port 8000): `cd backend && uv run --no-sync uvicorn h4wk.api.app:app --port 8000`
-- [ ] **Worker mặc định:** `cd backend && uv run --no-sync huey_consumer h4wk.jobs.queue.huey -w 2`
-- [ ] **Worker GPU:** `cd backend && uv run --extra stt --extra match huey_consumer h4wk.jobs.queue.huey_gpu -w 1`
+- [ ] **API** (port 8000): `cd backend && uv run uvicorn h4wk.api.app:app --port 8000`
+- [ ] **Worker mặc định:** `cd backend && uv run huey_consumer h4wk.jobs.queue.huey -w 2`
+- [ ] **Worker GPU:** `cd backend && uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1`
 - [ ] **Frontend:** `cd web && npm run dev`
 
 Kiểm tra:
 
 - [ ] `curl -s localhost:8000/api/health` trả HTTP 200. (Kiểm mã: `curl -s -o /dev/null -w "%{http_code}\n" localhost:8000/api/health`.)
-- [ ] Mở http://localhost:3000, đăng nhập. Chưa có tài khoản thì tạo: `cd backend && uv run --no-sync h4wk user create <tên>` (lệnh hỏi mật khẩu). Đăng nhập xong vào thẳng **Dashboard**.
+- [ ] Mở http://localhost:3000, đăng nhập. Chưa có tài khoản thì tạo: `cd backend && uv run h4wk user create <tên>` (lệnh hỏi mật khẩu). Đăng nhập xong vào thẳng **Dashboard**.
 
 Kết quả mong đợi: cả bốn tiến trình chạy không lỗi, Dashboard mở được.
 
@@ -79,7 +78,7 @@ Kết quả mong đợi: sự kiện `New video detected on <kênh>` ở Dashboa
 Bản thu nằm ở `data/videos/<video_id>/captures/<YYYYMMDDTHHMMSS>/`.
 
 - [ ] **Trên giao diện:** mở một video ở **Videos**, tab **Captures**, mở một bản thu, bấm **Verify integrity**. Mọi file báo OK.
-- [ ] **CLI trên bản thu thật:** `cd backend && uv run --no-sync h4wk verify ../data/videos/<video_id>/captures/<ts>` in `OK <đường dẫn>` cho từng file, thoát mã 0.
+- [ ] **CLI trên bản thu thật:** `cd backend && uv run h4wk verify ../data/videos/<video_id>/captures/<ts>` in `OK <đường dẫn>` cho từng file, thoát mã 0.
 
 **Chỉ thử phá trên bản sao**, không sửa `data/` thật:
 
@@ -89,7 +88,7 @@ cp -r data/videos/<video_id> "$T/"
 chmod -R u+w "$T"                                 # bản thu gốc chỉ đọc, bản sao cần ghi được
 C="$T/<video_id>/captures/<ts>"
 cd backend
-uv run --no-sync h4wk verify "$C"                 # tất cả OK
+uv run h4wk verify "$C"                 # tất cả OK
 ```
 
 - [ ] Thêm 1 byte vào một file: `printf 'x' >> "$C/normalized.json"`, chạy lại `verify` → file đó báo `FAIL`, các file khác OK, mã thoát 1.
@@ -104,9 +103,8 @@ Kết quả mong đợi: OK với bản thu nguyên vẹn; FAIL, `missing`, `une
 | Triệu chứng | Nguyên nhân và cách xử lý |
 | --- | --- |
 | Jev báo 429 hoặc lỗi | Jev được thử lại khi 429; vẫn lỗi thì job xong với tầng tĩnh, event ghi "Jev analysis skipped". Chờ rồi chạy lại phân tích. |
-| `No module named 'faster_whisper'` | Worker GPU chạy thiếu `--extra stt`. Chạy lại đúng lệnh ở mục 1. |
-| Thiếu `libcublas` hoặc cuDNN | Chưa cài extra `match`, hoặc chưa đặt `LD_LIBRARY_PATH` tới các thư mục `nvidia/*/lib` trong `backend/.venv`. |
-| torch hoặc thư viện CUDA biến mất | Lỡ chạy `uv sync` hoặc `uv run` trơn. Cài lại: `uv sync --extra stt --extra match`, rồi dùng `--no-sync`. |
+| `NVIDIA GPU with CUDA is required` | Máy không có GPU NVIDIA hoặc driver không thấy GPU. Kiểm tra `nvidia-smi`; app không chạy trên CPU. |
+| Thiếu thư viện Python | Chạy lại `cd backend && uv sync`. |
 
 ## 7. Lịch sử chạy
 

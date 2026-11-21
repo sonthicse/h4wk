@@ -79,12 +79,12 @@ Công cụ SOCMINT cho YouTube, bài tập lớn của nhóm 2 người (Thi ch�
 ## Lệnh
 
 ```bash
-cd backend && uv run --no-sync pytest && uv run --no-sync ruff check . && uv run --no-sync ruff format --check .
-cd backend && uv run --no-sync h4wk schema export      # chạy lại khi đổi hợp đồng C1–C5
+cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check .
+cd backend && uv run h4wk schema export      # chạy lại khi đổi hợp đồng C1–C5
 cd web && npm run build && npm run lint
 ```
 
-Trong `backend/` không chạy `uv sync` hay `uv run` trơn: lệnh đó gỡ torch và thư viện CUDA của extra `stt`, `match`.
+Máy chạy bắt buộc có GPU NVIDIA (CUDA); STT và khớp ảnh mẫu không chạy trên CPU. `uv sync` cài đủ mọi dependency, kể cả torch và thư viện CUDA.
 
 ## Quy ước dễ sai
 

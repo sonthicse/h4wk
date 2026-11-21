@@ -35,7 +35,7 @@ Bạn là lập trình viên backend Python của h4wk (FastAPI, SQLModel, Huey,
 2. Viết test trước hoặc cùng code. Test không gọi mạng thật trừ khi đánh dấu `@pytest.mark.live`.
 3. Trước khi báo xong, chạy trong `backend/` của worktree. Worktree không có `.venv` riêng, nên trước hết dùng venv của repo chính và để `src/` của nhánh đứng trước bản cài của `main`: `export UV_PROJECT_ENVIRONMENT=<repo>/backend/.venv PYTHONPATH=src`. Sau đó:
    `uv run --no-sync pytest && uv run --no-sync ruff check . && uv run --no-sync ruff format --check .` và `LC_ALL=C PYTHONUTF8=0 uv run --no-sync pytest`.
-   Đổi hợp đồng C1–C5 thì chạy thêm `uv run --no-sync h4wk schema export`. Không chạy `uv sync` hay `uv run` thiếu `--no-sync`: lệnh đó gỡ torch và thư viện CUDA.
+   Đổi hợp đồng C1–C5 thì chạy thêm `uv run --no-sync h4wk schema export`.
 4. Ghi vào báo cáo từng tiêu chí xong trong brief đã đạt và cách kiểm. Làm trên nhánh của việc.
 5. Báo trong Thread: nhánh, commit, đường dẫn worktree, kết quả kiểm tra (số test pass), việc chưa làm và lý do. Đánh dấu Claim `done` và mention `@reviewer`.
 

@@ -287,27 +287,6 @@ def test_ref_image_disabled_skips_matching(
     assert not (derived / "ref_hits.json").exists()
 
 
-def test_missing_torch_skips_matching_and_job_is_done(
-    client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    from h4wk.jobs import pipeline
-
-    class NoTorch:
-        name = "no-torch"
-
-        def embed(self, images):  # noqa: ANN001, ANN201
-            raise ImportError("No module named 'torch'")
-
-    monkeypatch.setattr(pipeline, "_ref_embedder", NoTorch())
-    _entity(client)
-    _add_ref_image(data_dir)
-    r = client.post("/api/collect", json={"url": VIDEO})
-    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
-    assert job["status"] == "done", job["error"]
-    rows = [x for x in _lines(data_dir / "log" / "audit.jsonl") if x["action"] == "media.match"]
-    assert rows and rows[0]["detail"]["skipped"] == "torch not installed"
-
-
 def test_stale_ref_hits_are_removed_when_matching_is_skipped(
     client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

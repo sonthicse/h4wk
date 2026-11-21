@@ -123,3 +123,12 @@ def test_to_hits_assigns_segment_by_timeline():
     hits = refimages.to_hits(matches, timeline, times)
     assert [h.segment_id for h in hits] == ["seg_0001", "seg_0002", "seg_0002", None, None]
     assert all(h.via == "ref_image" and h.frame and h.score for h in hits)
+
+
+def test_embedder_requires_cuda(monkeypatch):
+    """Máy không có GPU NVIDIA: khớp ảnh mẫu báo lỗi rõ, không lặng lẽ chạy CPU."""
+    import torch
+
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    with pytest.raises(RuntimeError, match="NVIDIA GPU with CUDA is required"):
+        refimages.DinoEmbedder().embed([np.zeros((8, 8, 3), np.uint8)])

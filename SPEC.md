@@ -60,7 +60,7 @@ Một số từ dùng thống nhất trong các tài liệu:
 | Frontend | React, Vite, TypeScript, React Router, TanStack Query, Tailwind và shadcn/ui | Giao diện tiếng Anh. Trình phát dùng thẻ `<video>` với lớp phủ tự viết |
 | Chất lượng code | `ruff` (lint và format), `pytest`; `oxlint` và `tsc` cho frontend | |
 
-Máy chạy cần WSL2 với GPU NVIDIA và CUDA, `ffmpeg` trong PATH, Node 20 trở lên. Không dùng Docker. Spike T3 đã đo trên RTX 3050 Laptop 4 GB. Model nhận dạng chữ tiếng Việt có giấy phép phi thương mại; báo cáo môn học ghi rõ điều này.
+Máy chạy cần WSL2 trên Linux x86_64, bắt buộc có GPU NVIDIA với driver hỗ trợ CUDA 12.6 (không chạy trên CPU), `ffmpeg` trong PATH, Node 20.19+ hoặc 22.12+. Không dùng Docker. Spike T3 đã đo trên RTX 3050 Laptop 4 GB. Model nhận dạng chữ tiếng Việt có giấy phép phi thương mại; báo cáo môn học ghi rõ điều này.
 
 Rủi ro lớn nhất về cài đặt là bốn thư viện GPU (ctranslate2 cho faster-whisper, paddlepaddle-gpu, onnxruntime-gpu, torch) phải cùng chạy trong một môi trường, mỗi thư viện đòi một bộ phiên bản CUDA/cuDNN riêng. Spike T3 kiểm tra việc này trước tiên. Phương án dự phòng là chạy PaddleOCR bằng CPU, hoặc tách worker `gpu` thành nhiều môi trường riêng.
 

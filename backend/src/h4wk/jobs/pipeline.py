@@ -220,10 +220,6 @@ def _match(
             _analysis_config().ref_image.threshold,
             out / "embeddings.npz",
         )
-    except ImportError:
-        logger.warning("Skipping reference image matching: torch is not installed")
-        audit.log(job.trigger, "media.match", job.id, {"skipped": "torch not installed"})
-        return
     except Exception as e:
         # Tải model lỗi (mất mạng), hết VRAM...: bỏ qua bước này, job vẫn chạy tiếp tới analyze.
         logger.warning("Reference image matching failed: %s", e)

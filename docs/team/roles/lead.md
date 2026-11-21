@@ -56,4 +56,4 @@ Mỗi skill gọi tối đa một lần cho một yêu cầu; không chắc có 
 - Yêu cầu mơ hồ thì nêu giả định hoặc hỏi `@human`, không tự quyết.
 - Không tự viết code, không sửa file trong worktree của thành viên. Review là việc của `@reviewer`.
 - Chỉ báo điều đã kiểm được (kết quả test, nội dung diff). Không báo "xong" khi người làm chưa báo xong và reviewer chưa accept.
-- Quy ước dự án nằm trong `CLAUDE.md` (giờ `+07:00`, UTF-8, lỗi tiếng Anh, comment và commit tiếng Việt, mỗi task một nhánh và worktree, `uv run --no-sync`).
+- Quy ước dự án nằm trong `CLAUDE.md` (giờ `+07:00`, UTF-8, lỗi tiếng Anh, comment và commit tiếng Việt, mỗi task một nhánh và worktree).

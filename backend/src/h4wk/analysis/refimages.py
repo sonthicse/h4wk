@@ -40,7 +40,7 @@ class Embedder(Protocol):
 
 
 class DinoEmbedder:
-    """Nạp lười model một lần cho mỗi worker (như SttWorker); thiếu torch thì ImportError."""
+    """Nạp lười model một lần cho mỗi worker (như SttWorker). Bắt buộc có GPU NVIDIA (CUDA)."""
 
     name = f"{MODEL_ID}@{MODEL_REVISION}"
 
@@ -53,7 +53,9 @@ class DinoEmbedder:
         import torch
         from transformers import AutoImageProcessor, AutoModel
 
-        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        if not torch.cuda.is_available():
+            raise RuntimeError("an NVIDIA GPU with CUDA is required for reference image matching")
+        self._device = "cuda"
         self._processor = AutoImageProcessor.from_pretrained(MODEL_ID, revision=MODEL_REVISION)
         self._model = AutoModel.from_pretrained(MODEL_ID, revision=MODEL_REVISION)
         self._model.to(self._device).eval()

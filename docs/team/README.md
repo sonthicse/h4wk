@@ -33,7 +33,7 @@ Team chạy bằng plugin [`@contexera/dsh-agent-team`](https://github.com/Conte
 
    Máy không có Google Chrome, nên Agent luôn mở bằng `--browser=chromium`. Thiếu thư viện hệ thống thì chạy `sudo playwright-cli install-browser chromium --with-deps`.
 
-   Agent đăng nhập giao diện bằng tài khoản `agent` (đã tạo bằng `uv run --no-sync h4wk user create agent --password ...`). Tài khoản nằm trong `~/.config/h4wk-review.env` (quyền 0600, ngoài repo):
+   Agent đăng nhập giao diện bằng tài khoản `agent` (đã tạo bằng `uv run h4wk user create agent --password ...`). Tài khoản nằm trong `~/.config/h4wk-review.env` (quyền 0600, ngoài repo):
 
    ```bash
    H4WK_REVIEW_USER=agent

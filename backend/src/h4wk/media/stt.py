@@ -17,13 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 def _load_model(model_name: str):
-    # torch nạp sẵn thư viện CUDA (cuBLAS, cuDNN) của các gói nvidia-*-cu12 trong venv; không có
-    # torch (chỉ cài extra stt) thì ctranslate2 cần LD_LIBRARY_PATH tới nvidia/*/lib.
-    try:
-        import torch  # noqa: F401
-    except ImportError:
-        pass
+    # Nạp torch trước để thư viện CUDA (cuBLAS, cuDNN) của các gói nvidia-*-cu12 trong venv có sẵn
+    # cho ctranslate2, khỏi phải đặt LD_LIBRARY_PATH. Bắt buộc có GPU NVIDIA.
+    import torch
     from faster_whisper import WhisperModel
+
+    if not torch.cuda.is_available():
+        raise RuntimeError("an NVIDIA GPU with CUDA is required for speech-to-text")
 
     return WhisperModel(model_name, device="cuda")
 
