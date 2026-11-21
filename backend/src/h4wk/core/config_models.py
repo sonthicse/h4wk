@@ -76,14 +76,14 @@ class ModelCaps(Contract):
 
 
 class ProviderConfig(Contract):
-    type: Literal["anthropic", "openai_compat", "gemini"]
-    base_url: HttpUrl | None = None  # bắt buộc với openai_compat
+    type: Literal["anthropic", "openai_compat", "gemini", "ollama"]
+    base_url: HttpUrl | None = None  # bắt buộc với openai_compat và ollama
     models: dict[str, ModelCaps]
 
     @model_validator(mode="after")
     def _base_url(self) -> Self:
-        if self.type == "openai_compat" and self.base_url is None:
-            raise ValueError("an openai_compat provider needs base_url")
+        if self.type in ("openai_compat", "ollama") and self.base_url is None:
+            raise ValueError(f"an {self.type} provider needs base_url")
         return self
 
 

@@ -101,7 +101,7 @@ export default function AIProvidersPage() {
           <AnimateIcon animateOnHover asChild>
             <Button variant="outline" onClick={() => setAdding(true)}>
               <PlusIcon />
-              Add OpenAI-compatible
+              Add provider
             </Button>
           </AnimateIcon>
         </div>

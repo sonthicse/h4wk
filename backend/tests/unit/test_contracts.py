@@ -279,6 +279,21 @@ VALID: list[tuple[Any, dict[str, Any]]] = [
     (ReviewDecision, REVIEW),
     (SourcesConfig, SOURCES),
     (AiConfig, AI),
+    (
+        AiConfig,
+        {
+            **AI,
+            "providers": {
+                **AI["providers"],
+                "ollama": {
+                    "type": "ollama",
+                    "base_url": "http://192.168.1.10:11434/v1",
+                    "models": {"qwen2.5vl:7b": {"vision": True, "structured": False}},
+                },
+            },
+            "tasks": {"media.vision": [{"provider": "ollama", "model": "qwen2.5vl:7b"}]},
+        },
+    ),
     (AnalysisConfig, ANALYSIS),
 ]
 
@@ -396,6 +411,21 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     ),
     (
         AiConfig,
+        {
+            **AI,
+            "providers": {
+                **AI["providers"],
+                "ollama": {
+                    "type": "ollama",
+                    "models": {"qwen2.5vl:7b": {"vision": True, "structured": False}},
+                },
+            },
+            "tasks": {},
+        },
+        "ollama thiếu base_url",
+    ),
+    (
+        AiConfig,
         {**AI, "tasks": {"analysis.classify": [{"provider": "openai", "model": "gpt"}]}},
         "route tới provider chưa khai báo",
     ),
@@ -423,6 +453,12 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
 def test_rejected_examples(model: type[BaseModel], data: dict[str, Any], why: str) -> None:
     with pytest.raises(ValidationError):
         model.model_validate(data)
+
+
+def test_ollama_without_base_url_rejected_for_the_right_rule() -> None:
+    data = next(d for _, d, why in REJECTED if why == "ollama thiếu base_url")
+    with pytest.raises(ValidationError, match="an ollama provider needs base_url"):
+        AiConfig.model_validate(data)
 
 
 # ------------------------------------------------------------ quy ước chung

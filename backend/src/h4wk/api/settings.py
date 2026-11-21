@@ -79,7 +79,7 @@ class TestResult(BaseModel):
 
 class ProviderInfo(BaseModel):
     name: str
-    type: Literal["anthropic", "openai_compat", "gemini"]
+    type: Literal["anthropic", "openai_compat", "gemini", "ollama"]
     base_url: str | None
     models: dict[str, ModelCaps]
     key: KeyInfo

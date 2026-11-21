@@ -322,7 +322,7 @@ Module cho phép dùng nhiều nhà cung cấp LLM/VLM và đổi nhà cung cấ
 
 Mỗi cặp `(provider, model)` khai báo hai khả năng: `vision` (đọc được ảnh) và `structured` (hỗ trợ JSON schema hoặc tool calling). Cấu hình gán `media.vision` cho model không có `vision` bị từ chối ngay khi nạp.
 
-Có ba loại adapter. `anthropic` và `gemini` dùng SDK riêng của nhà cung cấp. `openai_compat` nhận `base_url`, nên một adapter dùng chung được cho OpenAI, DeepSeek, Qwen/DashScope, GLM, Kimi và OpenRouter.
+Có ba loại adapter. `anthropic` và `gemini` dùng SDK riêng của nhà cung cấp. `openai_compat` nhận `base_url`, nên một adapter dùng chung được cho OpenAI, DeepSeek, Qwen/DashScope, GLM, Kimi và OpenRouter. Loại nhà cung cấp `ollama` dùng lại adapter `openai_compat` với `base_url` của máy chủ Ollama và không cần key.
 
 Với đầu ra có cấu trúc, adapter dùng JSON schema hoặc tool calling khi model có `structured`; nếu không thì dùng JSON mode và đặt schema trong prompt. Mọi đầu ra đều qua Pydantic validate. Đầu ra sai được gửi lại kèm thông báo lỗi, tối đa 2 lần, sau đó gateway chuyển sang nhà cung cấp tiếp theo.
 

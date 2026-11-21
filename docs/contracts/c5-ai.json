@@ -55,7 +55,8 @@
           "enum": [
             "anthropic",
             "openai_compat",
-            "gemini"
+            "gemini",
+            "ollama"
           ],
           "title": "Type",
           "type": "string"

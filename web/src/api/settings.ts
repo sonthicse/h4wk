@@ -60,7 +60,7 @@ export type AiModel = { name: string; vision: boolean; structured: boolean }
 export type AiProvider = {
   name: string
   type: ProviderType
-  baseUrl: string | null // chỉ có với openai_compat
+  baseUrl: string | null // chỉ có với openai_compat và ollama
   models: AiModel[]
   apiKeyMasked: string | null // dạng sk-…abcd; null nghĩa là chưa có key
 }

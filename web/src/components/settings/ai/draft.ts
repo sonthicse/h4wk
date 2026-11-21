@@ -23,6 +23,10 @@ export function toInput(d: Draft): AiSettingsInput {
 
 export const hasKey = (p: DraftProvider) => Boolean(p.apiKeyMasked || p.newApiKey.trim())
 
+// Nhà cung cấp cần base URL; Ollama chạy cục bộ nên không cần key.
+export const needsBaseUrl = (p: Pick<DraftProvider, 'type'>) => p.type === 'openai_compat' || p.type === 'ollama'
+export const needsKey = (p: Pick<DraftProvider, 'type'>) => p.type !== 'ollama'
+
 // So một nhà cung cấp trong bản nháp với bản đã lưu (không tính key vì key đã lưu không về tới đây).
 export function providerChanged(p: DraftProvider, saved: AiProvider | undefined) {
   if (!saved) return true
@@ -53,7 +57,7 @@ export function routeProblem(task: AiTask, route: AiRoute, providers: DraftProvi
   const m = p.models.find((x) => x.name === route.model)
   if (!m) return { reason: 'Model removed', blocking: true }
   if (!modelAllowed(task, m)) return { reason: 'Model has no vision', blocking: true }
-  if (!hasKey(p)) return { reason: 'No API key', blocking: false }
+  if (needsKey(p) && !hasKey(p)) return { reason: 'No API key', blocking: false }
   return null
 }
 
@@ -61,7 +65,7 @@ export function routeProblem(task: AiTask, route: AiRoute, providers: DraftProvi
 export function draftErrors(d: Draft): string[] {
   const errors: string[] = []
   for (const p of d.providers) {
-    if (p.type === 'openai_compat' && !validBaseUrl(p.baseUrl)) errors.push(`${p.name}: base URL must be an http(s) URL.`)
+    if (needsBaseUrl(p) && !validBaseUrl(p.baseUrl)) errors.push(`${p.name}: base URL must be an http(s) URL.`)
   }
   for (const [task, routes] of Object.entries(d.tasks) as [AiTask, AiRoute[]][]) {
     routes.forEach((r, i) => {

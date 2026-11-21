@@ -68,6 +68,15 @@ base_url = "https://openrouter.ai/api/v1"
 vision = true
 structured = true
 
+# Ollama chạy trên máy trong mạng nội bộ, không cần key. Máy chủ Ollama phải nghe trên mạng
+# (OLLAMA_HOST=0.0.0.0:11434). https://docs.ollama.com/api/openai-compatibility
+[providers.ollama]
+type = "ollama"
+base_url = "http://localhost:11434/v1"
+[providers.ollama.models."qwen2.5vl:7b"]
+vision = true
+structured = false
+
 # Mỗi tác vụ AI: danh sách (provider, model) theo thứ tự ưu tiên.
 # media.vision chỉ được gán cho model có vision = true.
 [tasks]

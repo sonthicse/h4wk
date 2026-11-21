@@ -10,12 +10,13 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { testProvider, type AiModel } from '@/api/settings'
-import { hasKey, validBaseUrl, type DraftProvider } from './draft'
+import { hasKey, needsBaseUrl, needsKey, validBaseUrl, type DraftProvider } from './draft'
 
 const typeLabel: Record<DraftProvider['type'], string> = {
   anthropic: 'Anthropic',
   gemini: 'Gemini',
   openai_compat: 'OpenAI-compatible',
+  ollama: 'Ollama',
 }
 
 type Props = {
@@ -36,7 +37,7 @@ export default function ProviderCard({ provider: p, isNew, changed, onChange, on
   const id = `provider-${p.name}`
   const newModel = modelName.trim()
   const modelExists = p.models.some((m) => m.name === newModel)
-  const baseUrlInvalid = p.type === 'openai_compat' && !validBaseUrl(p.baseUrl)
+  const baseUrlInvalid = needsBaseUrl(p) && !validBaseUrl(p.baseUrl)
 
   const setModels = (models: AiModel[]) => onChange({ ...p, models })
   const addModel = () => {
@@ -62,7 +63,7 @@ export default function ProviderCard({ provider: p, isNew, changed, onChange, on
             {test.isPending && <LoaderCircleIcon animate />}
             {test.isPending ? 'Testing…' : 'Test'}
           </Button>
-          {p.type === 'openai_compat' && (
+          {needsBaseUrl(p) && (
             <AnimateIcon animateOnHover asChild>
               <Button size="icon-sm" variant="ghost" aria-label={`Remove provider ${p.name}`} onClick={onRemove}>
                 <Trash2Icon />
@@ -81,56 +82,58 @@ export default function ProviderCard({ provider: p, isNew, changed, onChange, on
           </p>
         )}
 
-        <div className="space-y-1.5">
-          <Label htmlFor={`${id}-key`}>API key</Label>
-          {p.apiKeyMasked && !editingKey ? (
-            <div className="flex items-center gap-2">
-              <code id={`${id}-key`} className="flex-1 rounded-md border bg-muted px-3 py-1.5 font-mono text-sm">
-                {p.apiKeyMasked}
-              </code>
-              <Button variant="outline" onClick={() => setEditingKey(true)}>
-                Change key
-              </Button>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <Input
-                id={`${id}-key`}
-                type="password"
-                autoComplete="off"
-                placeholder={p.apiKeyMasked ? 'Paste the new key' : 'Not set'}
-                value={p.newApiKey}
-                onChange={(e) => onChange({ ...p, newApiKey: e.target.value })}
-              />
-              {p.apiKeyMasked && (
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    onChange({ ...p, newApiKey: '' })
-                    setEditingKey(false)
-                  }}
-                >
-                  Cancel
+        {needsKey(p) && (
+          <div className="space-y-1.5">
+            <Label htmlFor={`${id}-key`}>API key</Label>
+            {p.apiKeyMasked && !editingKey ? (
+              <div className="flex items-center gap-2">
+                <code id={`${id}-key`} className="flex-1 rounded-md border bg-muted px-3 py-1.5 font-mono text-sm">
+                  {p.apiKeyMasked}
+                </code>
+                <Button variant="outline" onClick={() => setEditingKey(true)}>
+                  Change key
                 </Button>
-              )}
-            </div>
-          )}
-          <p className="text-xs text-muted-foreground">
-            {p.newApiKey.trim()
-              ? 'New key will be stored on the server when you save.'
-              : hasKey(p)
-                ? 'The saved key is never shown again. To change it, enter a new one and save.'
-                : 'No key yet. Routes to this provider are skipped.'}
-          </p>
-        </div>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Input
+                  id={`${id}-key`}
+                  type="password"
+                  autoComplete="off"
+                  placeholder={p.apiKeyMasked ? 'Paste the new key' : 'Not set'}
+                  value={p.newApiKey}
+                  onChange={(e) => onChange({ ...p, newApiKey: e.target.value })}
+                />
+                {p.apiKeyMasked && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      onChange({ ...p, newApiKey: '' })
+                      setEditingKey(false)
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                )}
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {p.newApiKey.trim()
+                ? 'New key will be stored on the server when you save.'
+                : hasKey(p)
+                  ? 'The saved key is never shown again. To change it, enter a new one and save.'
+                  : 'No key yet. Routes to this provider are skipped.'}
+            </p>
+          </div>
+        )}
 
-        {p.type === 'openai_compat' && (
+        {needsBaseUrl(p) && (
           <div className="space-y-1.5">
             <Label htmlFor={`${id}-url`}>Base URL</Label>
             <Input
               id={`${id}-url`}
               className="font-mono"
-              placeholder="https://api.example.com/v1"
+              placeholder={p.type === 'ollama' ? 'http://192.168.1.10:11434/v1' : 'https://api.example.com/v1'}
               value={p.baseUrl ?? ''}
               aria-invalid={baseUrlInvalid}
               onChange={(e) => onChange({ ...p, baseUrl: e.target.value.trim() || null })}

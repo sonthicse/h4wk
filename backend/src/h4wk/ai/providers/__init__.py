@@ -19,6 +19,9 @@ def make_provider(
     name: str, config: ProviderConfig, keys: Mapping[str, str | None]
 ) -> Provider | None:
     key = keys.get(key_name(name))
+    if config.type == "ollama":
+        # Ollama cục bộ không cần key; API tương thích OpenAI vẫn đòi một chuỗi khác rỗng.
+        return OpenAICompatProvider(key or "ollama", str(config.base_url))
     if name == "gemini" and not key:
         key = keys.get("GOOGLE_API_KEY")
     if not key:

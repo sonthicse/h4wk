@@ -1295,7 +1295,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "anthropic" | "openai_compat" | "gemini";
+            type: "anthropic" | "openai_compat" | "gemini" | "ollama";
             /** Base Url */
             base_url: string | null;
             /** Models */

@@ -96,6 +96,13 @@ def test_private_endpoint_uses_its_own_key():
     )
 
 
+def test_ollama_needs_no_key():
+    config = ProviderConfig(type="ollama", base_url="http://gpu.local:11434/v1", models={})
+    provider = make_provider("ollama", config, {})
+    assert isinstance(provider, OpenAICompatProvider)
+    assert provider.base_url == "http://gpu.local:11434/v1"
+
+
 def test_unsupported_image_rejected_before_network():
     req = request(True)
     with pytest.raises(ProviderError):

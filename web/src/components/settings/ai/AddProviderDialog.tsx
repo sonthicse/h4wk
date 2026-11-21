@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { validBaseUrl, type DraftProvider } from './draft'
 
 type Props = {
@@ -19,8 +20,9 @@ type Props = {
   onAdd: (p: DraftProvider) => void
 }
 
-// Thêm nhà cung cấp OpenAI-compatible (DeepSeek, OpenRouter…). Model được thêm trong thẻ sau khi tạo.
+// Thêm nhà cung cấp OpenAI-compatible (DeepSeek, OpenRouter…) hoặc Ollama cục bộ. Model được thêm trong thẻ sau khi tạo.
 export default function AddProviderDialog({ open, onOpenChange, existingNames, onAdd }: Props) {
+  const [type, setType] = useState<'openai_compat' | 'ollama'>('openai_compat')
   const [name, setName] = useState('')
   const [baseUrl, setBaseUrl] = useState('')
   const [apiKey, setApiKey] = useState('')
@@ -38,6 +40,7 @@ export default function AddProviderDialog({ open, onOpenChange, existingNames, o
 
   const close = (next: boolean) => {
     if (!next) {
+      setType('openai_compat')
       setName('')
       setBaseUrl('')
       setApiKey('')
@@ -55,27 +58,42 @@ export default function AddProviderDialog({ open, onOpenChange, existingNames, o
             if (!canAdd) return
             onAdd({
               name: slug,
-              type: 'openai_compat',
+              type,
               baseUrl: baseUrl.trim(),
               models: [],
               apiKeyMasked: null,
-              newApiKey: apiKey,
+              newApiKey: type === 'ollama' ? '' : apiKey,
             })
             close(false)
           }}
         >
           <DialogHeader>
-            <DialogTitle>Add OpenAI-compatible provider</DialogTitle>
+            <DialogTitle>Add provider</DialogTitle>
             <DialogDescription>
-              Any API that follows the OpenAI chat format. Add its models after creating it, then save.
+              Any API that follows the OpenAI chat format, or an Ollama server. Add its models after creating it, then save.
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-1.5">
+            <Label>Type</Label>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              spacing={0}
+              aria-label="Provider type"
+              value={type}
+              onValueChange={(v) => v && setType(v as typeof type)}
+            >
+              <ToggleGroupItem value="openai_compat">OpenAI-compatible</ToggleGroupItem>
+              <ToggleGroupItem value="ollama">Ollama</ToggleGroupItem>
+            </ToggleGroup>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="new-provider-name">Name</Label>
             <Input
               id="new-provider-name"
               className="font-mono"
-              placeholder="openrouter"
+              placeholder={type === 'ollama' ? 'ollama' : 'openrouter'}
               value={name}
               aria-invalid={Boolean(nameError)}
               onChange={(e) => setName(e.target.value)}
@@ -87,23 +105,25 @@ export default function AddProviderDialog({ open, onOpenChange, existingNames, o
             <Input
               id="new-provider-url"
               className="font-mono"
-              placeholder="https://openrouter.ai/api/v1"
+              placeholder={type === 'ollama' ? 'http://192.168.1.10:11434/v1' : 'https://openrouter.ai/api/v1'}
               value={baseUrl}
               aria-invalid={Boolean(urlError)}
               onChange={(e) => setBaseUrl(e.target.value)}
             />
             {urlError && <p className="text-xs text-destructive">{urlError}</p>}
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="new-provider-key">API key (optional)</Label>
-            <Input
-              id="new-provider-key"
-              type="password"
-              autoComplete="off"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-            />
-          </div>
+          {type === 'openai_compat' && (
+            <div className="space-y-1.5">
+              <Label htmlFor="new-provider-key">API key (optional)</Label>
+              <Input
+                id="new-provider-key"
+                type="password"
+                autoComplete="off"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+            </div>
+          )}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => close(false)}>
               Cancel
