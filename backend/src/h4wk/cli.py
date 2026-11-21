@@ -10,8 +10,10 @@ import typer
 from pydantic import TypeAdapter
 from sqlmodel import Session
 
+from h4wk.ai.gateway import AIGateway
+from h4wk.analysis import verdict
 from h4wk.analysis.evaluation import collect_units, markdown_table, sample, score
-from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
+from h4wk.analysis.models import EntityHit, Finding, ReviewDecision, VideoVerdict
 from h4wk.collectors.models import Normalized
 from h4wk.core.auth import create_user
 from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
@@ -38,6 +40,7 @@ CONTRACTS: dict[str, object] = {
     "c3-timeline": Timeline,
     "c4-hits": list[EntityHit],
     "c4-findings": list[Finding],
+    "c4-verdict": VideoVerdict,
     "c4-review-decision": ReviewDecision,
     "c5-sources": SourcesConfig,
     "c5-ai": AiConfig,
@@ -95,6 +98,53 @@ def init() -> None:
 
     for item in seed_defaults():
         typer.echo(f"watchlist: {item.id} {item.handle} ({item.level})")
+
+
+@app.command("verdict")
+def backfill_verdict(
+    video_id: str | None = None,
+    all_videos: Annotated[bool, typer.Option("--all")] = False,
+    force: Annotated[bool, typer.Option("--force")] = False,
+) -> None:
+    """Tạo kết luận cho lần phân tích mới nhất."""
+    root = data_dir() / "videos"
+    if (video_id is None) == (not all_videos):
+        raise typer.BadParameter("Specify a video ID or --all, not both")
+    if video_id is not None and (Path(video_id).name != video_id or video_id in {".", ".."}):
+        raise typer.BadParameter("Invalid video ID")
+    videos = sorted(p for p in root.glob("*") if p.is_dir()) if all_videos else [root / video_id]
+    pending = []
+    for video in videos:
+        capture = max((video / "captures").glob("*/normalized.json"), default=None)
+        derived = video / "derived" / capture.parent.name if capture else None
+        latest = max(derived.glob("analysis/*/findings.json"), default=None) if derived else None
+        if latest is None:
+            if not all_videos:
+                raise typer.BadParameter(f"No analysis for {video.name}")
+            continue
+        target = latest.with_name("verdict.json")
+        if target.exists() and not force:
+            if not all_videos:
+                typer.echo(f"Already exists: {target}")
+            continue
+        pending.append((capture, derived, latest, target))
+    gateway = AIGateway()
+    for index, (capture, derived, latest, target) in enumerate(pending):
+        data = Normalized.model_validate_json(capture.read_text(encoding="utf-8"))
+        timeline = Timeline.model_validate_json(
+            (derived / "timeline.json").read_text(encoding="utf-8")
+        )
+        findings = TypeAdapter(list[Finding]).validate_json(latest.read_text(encoding="utf-8"))
+        decision, error = verdict.decide(data, findings, latest.parent.name, timeline, gateway)
+        if error:
+            typer.echo(error, err=True)
+            if all_videos and any(
+                word in error.lower() for word in ("quota", "429", "resource_exhausted")
+            ):
+                typer.echo(f"Remaining: {len(pending) - index}", err=True)
+                raise typer.Exit(1)
+        verdict.write(target, decision)
+        typer.echo(f"wrote: {target}")
 
 
 def export_schemas(out_dir: Path) -> list[Path]:

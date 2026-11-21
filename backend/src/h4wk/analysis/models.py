@@ -159,6 +159,43 @@ class Finding(Contract):
         return self
 
 
+NON_VIOLATIONS = {Category.LEGITIMATE_CRITICISM, Category.NEUTRAL}
+
+
+class VerdictAnswer(Contract):
+    violation: Literal["yes", "no", "uncertain"]
+    categories: list[Category] = []
+    severity: Severity | None = None
+    confidence: Confidence
+    summary: str = ""
+    finding_ids: list[FindingId] = []
+
+    @model_validator(mode="after")
+    def _evidence(self) -> Self:
+        if NON_VIOLATIONS.intersection(self.categories):
+            raise ValueError("Verdict categories must be violations")
+        if self.violation == "no" and self.categories:
+            raise ValueError("A no verdict must have no categories")
+        if self.violation != "no":
+            if not self.categories:
+                raise ValueError("Verdict needs categories")
+            if self.severity is None:
+                raise ValueError("Verdict needs severity")
+            if not self.finding_ids:
+                raise ValueError("Verdict needs finding_ids")
+        return self
+
+
+class VideoVerdict(VerdictAnswer):
+    """Kết luận theo video (verdict.json), một lần chạy một kết luận."""
+
+    run_id: str
+    video_id: str
+    capture: CaptureTs
+    model: ModelRef | None = None
+    at: VnDatetime
+
+
 class ReviewDecision(Contract):
     """Một quyết định rà soát (một dòng của reviews.jsonl)."""
 

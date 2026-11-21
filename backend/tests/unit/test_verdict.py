@@ -1,0 +1,91 @@
+import json
+from unittest.mock import Mock
+
+import pytest
+from test_analysis_llm import _data
+
+from h4wk.ai.gateway import GatewayError
+from h4wk.analysis.models import Finding
+from h4wk.analysis.verdict import decide
+from h4wk.core.config_models import Route
+
+
+def _finding(timeline, i, **fields):
+    return Finding.model_validate(
+        dict(
+            id=f"f_{i:026d}",
+            run_id="r_test",
+            video_id=timeline.video_id,
+            capture=timeline.capture,
+            analyzer="static",
+            analyzer_version="0.1.0",
+            source_kind="description",
+            entity="e_01",
+            category="incitement",
+            severity="high",
+            confidence="likely",
+            reason="",
+            quote="q" * 400,
+        )
+        | fields
+    )
+
+
+def test_no_violations():
+    data, timeline = _data()
+    gateway = Mock()
+    result, error = decide(
+        data, [_finding(timeline, 0, category="neutral")], "r_test", timeline, gateway
+    )
+    assert result.violation == "no" and result.model is None and error is None
+    gateway.complete_structured_with_route.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", ["mixed", "unknown", "gateway", "schema"])
+def test_evidence_and_fallback(mode):
+    data, timeline = _data()
+    finding = _finding(timeline, 1)
+    gateway = Mock()
+
+    def respond(task, messages, schema):
+        assert task == "analysis.video_verdict"
+        if mode == "gateway":
+            raise GatewayError("429 quota")
+        ids = [_finding(timeline, 2).id] + ([finding.id] if mode == "mixed" else [])
+        return schema(
+            violation="yes",
+            categories=["incitement"],
+            confidence="likely",
+            severity=None if mode == "schema" else "high",
+            finding_ids=ids,
+        ), Route(provider="gemini", model="fake")
+
+    gateway.complete_structured_with_route.side_effect = respond
+    result, error = decide(data, [finding], "r_test", timeline, gateway)
+    assert result.finding_ids == [finding.id]
+    if mode == "mixed":
+        assert result.violation == "yes" and result.model.provider == "gemini" and error is None
+    else:
+        assert result.violation == "uncertain" and result.model is None and error
+
+
+def test_payload_limits_and_order():
+    data, timeline = _data()
+    findings = [
+        _finding(
+            timeline,
+            i,
+            severity="high" if i < 100 else "medium",
+            reason=f"Jev: incitement p={i % 100 / 100:.2f}",
+        )
+        for i in range(200)
+    ]
+    gateway = Mock()
+    gateway.complete_structured_with_route.side_effect = GatewayError("offline")
+    result, error = decide(data, findings, "r_test", timeline, gateway)
+    _, messages, _ = gateway.complete_structured_with_route.call_args.args
+    payload = json.loads(messages[1]["content"])
+    assert payload["total_findings"] == 200
+    assert [f["id"] for f in payload["findings"]] == [f.id for f in reversed(findings[40:100])]
+    assert all(len(f["quote"]) == 300 for f in payload["findings"])
+    assert error and result.finding_ids == [f.id for f in findings]

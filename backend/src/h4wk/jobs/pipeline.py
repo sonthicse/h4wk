@@ -13,7 +13,7 @@ from pydantic import TypeAdapter
 from sqlmodel import Session, select
 
 from h4wk.ai.gateway import AIGateway
-from h4wk.analysis import refimages, runner
+from h4wk.analysis import refimages, runner, verdict
 from h4wk.analysis.models import EntityHit, Finding
 from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
@@ -303,18 +303,23 @@ def analyze(job_id: str, vision_failed: int = 0) -> None:
         )
         # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
         settings = _analysis_config()
+        gateway = AIGateway()
+        out = derived / "analysis" / run_id
         _hits, findings, llm_error = runner.analyze(
             n,
             timeline,
             load_entities(),
             None,
             run_id,
-            derived / "analysis" / run_id,
-            gateway=AIGateway(),
+            out,
+            gateway=gateway,
             comment_settings=settings.comments,
             jev_settings=settings.jev,
             extra_hits=ref_hits,
         )
+        decision, verdict_error = verdict.decide(n, findings, run_id, timeline, gateway)
+        verdict.write(out / "verdict.json", decision)
+        llm_error = "; ".join(e for e in (llm_error, verdict_error) if e) or None
         with Session(get_engine()) as s:
             for f in findings:
                 s.add(finding_row(f))

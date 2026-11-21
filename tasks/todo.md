@@ -837,8 +837,8 @@ Bước 4 ở SPEC 10.6: tác vụ AI `analysis.video_verdict`, cấu trúc `Vid
 
 Nghiệm thu:
 
-- [ ] Video không có nghi vấn vi phạm có kết luận `no` mà không gọi LLM.
-- [ ] `finding_id` trong kết luận đều là nghi vấn của cùng lần chạy; đầu ra LLM sai schema không được ghi.
+- [x] Video không có nghi vấn vi phạm có kết luận `no` mà không gọi LLM.
+- [x] `finding_id` trong kết luận đều là nghi vấn của cùng lần chạy; đầu ra LLM sai schema không được ghi.
 - [ ] Trên video `1RUJ_6eruwA`, kết luận `yes` với danh mục `incitement` và tóm tắt nhắc tới băng rôn.
 
 Người làm: Thi. Phụ thuộc: T23. Cỡ: M.

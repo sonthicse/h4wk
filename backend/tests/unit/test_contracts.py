@@ -517,6 +517,7 @@ def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
         "c4-hits.json",
         "c4-findings.json",
         "c4-review-decision.json",
+        "c4-verdict.json",
         "c5-sources.json",
         "c5-ai.json",
         "c5-analysis.json",
@@ -527,3 +528,32 @@ def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
     before = {p.name: p.read_text(encoding="utf-8") for p in written}
     export_schemas(tmp_path)
     assert before == {p.name: p.read_text(encoding="utf-8") for p in written}
+
+
+@pytest.mark.parametrize(
+    ("fields", "message"),
+    [
+        ({"finding_ids": []}, "needs finding_ids"),
+        ({"categories": []}, "needs categories"),
+        ({"severity": None}, "needs severity"),
+        ({"violation": "no"}, "must have no categories"),
+        ({"categories": ["neutral"]}, "must be violations"),
+    ],
+)
+def test_video_verdict_requires_evidence(fields, message):
+    from h4wk.analysis.models import VideoVerdict
+
+    valid = dict(
+        run_id="r_x",
+        video_id="v",
+        capture="20261118T160000",
+        at="2026-11-18T16:00:00+07:00",
+        violation="yes",
+        categories=["incitement"],
+        severity="high",
+        confidence="likely",
+        finding_ids=[f"f_{0:026d}"],
+    )
+    assert VideoVerdict.model_validate(valid).violation == "yes"
+    with pytest.raises(ValidationError, match=message):
+        VideoVerdict.model_validate(valid | fields)

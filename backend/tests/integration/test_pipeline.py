@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 from pipeline_fixtures import VIDEO, SampleCollector, _immediate, fake_source  # noqa: F401
 
+from h4wk.analysis.models import VideoVerdict
 from h4wk.collectors import registry
 from h4wk.media import stt
 from h4wk.media.timeline import Timeline
@@ -46,6 +47,11 @@ def test_full_flow_ends_with_findings(
     assert {f["video_id"] for f in findings} == {"h4wkDemo001"}
     assert any("lừa đảo" in f["quote"] for f in findings)
     derived = data_dir / "videos" / job["video_id"] / "derived" / job["capture"]
+    decision = VideoVerdict.model_validate_json(
+        (derived / "analysis" / job["run_id"] / "verdict.json").read_text(encoding="utf-8")
+    )
+    assert decision.run_id == job["run_id"]
+    assert set(decision.finding_ids) <= {f["id"] for f in findings}
     timeline = Timeline.model_validate_json((derived / "timeline.json").read_bytes())
     manifest = json.loads(
         (derived.parents[1] / "captures" / job["capture"] / "manifest.json").read_bytes()
