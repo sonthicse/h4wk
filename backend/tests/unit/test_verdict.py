@@ -137,3 +137,25 @@ def test_backfill_retries_fallback_and_preserves_success(data_dir, monkeypatch, 
     gateway.reset_mock()
     assert runner.invoke(cli.app, ["verdict", *args]).exit_code == 0
     gateway.complete_structured_with_route.assert_not_called()
+
+
+def test_analyze_cli_creates_run(monkeypatch, data_dir):
+    from typer.testing import CliRunner
+
+    from h4wk import cli
+
+    data, timeline = _data()
+    video = data_dir / "videos" / timeline.video_id
+    capture = video / "captures" / timeline.capture
+    derived = video / "derived" / timeline.capture
+    capture.mkdir(parents=True)
+    derived.mkdir(parents=True)
+    (capture / "normalized.json").write_text(data.model_dump_json(), encoding="utf-8")
+    (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
+    gateway = Mock()
+    monkeypatch.setattr(cli, "AIGateway", lambda: gateway)
+    result = CliRunner().invoke(cli.app, ["analyze", timeline.video_id])
+    assert result.exit_code == 0, result.exception
+    (path,) = derived.glob("analysis/*/verdict.json")
+    assert path.with_name("findings.json").is_file()
+    assert cli.VideoVerdict.model_validate_json(path.read_bytes()).run_id == path.parent.name

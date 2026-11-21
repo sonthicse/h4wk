@@ -839,7 +839,7 @@ Nghiệm thu:
 
 - [x] Video không có nghi vấn vi phạm có kết luận `no` mà không gọi LLM.
 - [x] `finding_id` trong kết luận đều là nghi vấn của cùng lần chạy; đầu ra LLM sai schema không được ghi.
-- [ ] Trên video `1RUJ_6eruwA`, kết luận `yes` với danh mục `incitement` và tóm tắt nhắc tới băng rôn.
+- [x] Trên video `1RUJ_6eruwA`, kết luận `yes`, danh mục thuộc nhóm vi phạm và khớp với danh mục nghi vấn, tóm tắt nhắc tới dòng chữ “chính quyền Tô Lâm mới là kẻ khủng bố” hoặc cáo buộc bắt cóc. Run `r_01M7XX549VDRXKCYH11Y3K4VYM` trên bản sao trả `yes` và `unsupported_accusation`.
 
 Người làm: Thi. Phụ thuộc: T23. Cỡ: M.
 

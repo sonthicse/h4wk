@@ -107,6 +107,41 @@ def init() -> None:
         typer.echo(f"watchlist: {item.id} {item.handle} ({item.level})")
 
 
+@app.command("analyze")
+def reanalyze(
+    video_id: Annotated[str | None, typer.Argument()] = None,
+    all_videos: Annotated[bool, typer.Option("--all")] = False,
+) -> None:
+    """Phân tích lại bản thu mới nhất mà không thu lại hoặc chạy media."""
+    from h4wk.jobs.pipeline import analyze_capture
+
+    if (video_id is None) == (not all_videos):
+        raise typer.BadParameter("Specify a video ID or --all, not both")
+    if video_id is not None and (Path(video_id).name != video_id or video_id in {".", ".."}):
+        raise typer.BadParameter("Invalid video ID")
+    root = data_dir() / "videos"
+    videos = sorted(p for p in root.glob("*") if p.is_dir()) if all_videos else [root / video_id]
+    pending = []
+    for video in videos:
+        capture = max((video / "captures").glob("*/normalized.json"), default=None)
+        if (
+            capture is None
+            or not (video / "derived" / capture.parent.name / "timeline.json").is_file()
+        ):
+            if not all_videos:
+                raise typer.BadParameter(f"No prepared capture for {video.name}")
+            continue
+        pending.append((video, capture.parent.name))
+    gateway = AIGateway()
+    for video, cap in pending:
+        run_id, findings, error = analyze_capture(video, cap, gateway)
+        typer.echo(f"{video.name}: {run_id} ({len(findings)} findings)")
+        if error:
+            typer.echo(error, err=True)
+            if any(word in error.lower() for word in ("quota", "429", "resource_exhausted")):
+                raise typer.Exit(1)
+
+
 @app.command("verdict")
 def backfill_verdict(
     video_id: Annotated[str | None, typer.Argument()] = None,

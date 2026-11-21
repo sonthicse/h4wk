@@ -282,6 +282,45 @@ def media(job_id: str) -> None:
     analyze(job_id, len(failed))
 
 
+def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway):
+    """Phân tích bản thu đã có timeline, không thu lại hay chạy media."""
+    derived = video_dir / "derived" / cap
+    timeline = Timeline.model_validate_json((derived / "timeline.json").read_text("utf-8"))
+    n = Normalized.model_validate_json(
+        (video_dir / "captures" / cap / "normalized.json").read_text("utf-8")
+    )
+    run_id = f"r_{new_ulid()}"
+    ref_path = derived / "ref_hits.json"
+    ref_hits = (
+        TypeAdapter(list[EntityHit]).validate_json(ref_path.read_bytes())
+        if ref_path.is_file()
+        else []
+    )
+    # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
+    settings = _analysis_config()
+    out = derived / "analysis" / run_id
+    _hits, findings, llm_error = runner.analyze(
+        n,
+        timeline,
+        load_entities(),
+        None,
+        run_id,
+        out,
+        gateway=gateway,
+        comment_settings=settings.comments,
+        jev_settings=settings.jev,
+        extra_hits=ref_hits,
+    )
+    decision, verdict_error = verdict.decide(n, findings, run_id, timeline, gateway)
+    verdict.write(out / "verdict.json", decision)
+    llm_error = "; ".join(e for e in (llm_error, verdict_error) if e) or None
+    with Session(get_engine()) as s:
+        for f in findings:
+            s.add(finding_row(f))
+        s.commit()
+    return run_id, findings, llm_error
+
+
 @huey.task()
 def analyze(job_id: str, vision_failed: int = 0) -> None:
     # vision_failed chỉ để ghi vào sự kiện. Recovery gọi lại analyze(job_id) nên mất số này
@@ -289,41 +328,7 @@ def analyze(job_id: str, vision_failed: int = 0) -> None:
     job = _update(job_id, status="running", step="analyze", progress=75)
     try:
         cap = str(job.capture)
-        derived = _video_dir(job) / "derived" / cap
-        timeline = Timeline.model_validate_json((derived / "timeline.json").read_text("utf-8"))
-        n = Normalized.model_validate_json(
-            (_video_dir(job) / "captures" / cap / "normalized.json").read_text("utf-8")
-        )
-        run_id = f"r_{new_ulid()}"
-        ref_path = derived / "ref_hits.json"
-        ref_hits = (
-            TypeAdapter(list[EntityHit]).validate_json(ref_path.read_bytes())
-            if ref_path.is_file()
-            else []
-        )
-        # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
-        settings = _analysis_config()
-        gateway = AIGateway()
-        out = derived / "analysis" / run_id
-        _hits, findings, llm_error = runner.analyze(
-            n,
-            timeline,
-            load_entities(),
-            None,
-            run_id,
-            out,
-            gateway=gateway,
-            comment_settings=settings.comments,
-            jev_settings=settings.jev,
-            extra_hits=ref_hits,
-        )
-        decision, verdict_error = verdict.decide(n, findings, run_id, timeline, gateway)
-        verdict.write(out / "verdict.json", decision)
-        llm_error = "; ".join(e for e in (llm_error, verdict_error) if e) or None
-        with Session(get_engine()) as s:
-            for f in findings:
-                s.add(finding_row(f))
-            s.commit()
+        run_id, findings, llm_error = analyze_capture(_video_dir(job), cap, AIGateway())
     except Exception as e:
         _fail(job_id, "analyze", e)
         return
