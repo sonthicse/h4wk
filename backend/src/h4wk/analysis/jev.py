@@ -198,17 +198,47 @@ def _call(key, state, questions, images=()):
             time.sleep(delay)
 
 
+def _validate_reply(reply) -> None:
+    if (
+        not isinstance(reply, dict)
+        or not isinstance(reply.get("model"), str)
+        or not reply["model"].strip()
+        or not isinstance(reply.get("answers"), dict)
+    ):
+        raise ValueError("Invalid Jev response")
+
+
 def test_connection() -> dict:
-    """Một câu hỏi `noul` ngắn để thử key; không ghi nhật ký usage, không trả nội dung."""
+    """Một câu hỏi `noul` ngắn để thử key; ghi thống kê nhưng không trả nội dung."""
     key = secrets.get("TYPESAFE_API_KEY")
     if not key:
         return {"ok": False, "error": "TYPESAFE_API_KEY is not set"}
     questions = {"is_attack": {"type": "noul", "instructions": "Is this text an attack?"}}
     started = time.perf_counter()
+    jev_log.take_retries()
+    reply = None
+    status = "ok"
     try:
         reply = _call(key, {"text": "Xin chào"}, questions)
-    except (OSError, RuntimeError, ValueError) as error:
-        return {"ok": False, "error": jev_log.error_status(str(error))}
+        _validate_reply(reply)
+        score = reply["answers"]["is_attack"]["noul"]
+        if type(score) not in (int, float) or not 0 <= score <= 1:
+            raise ValueError("Invalid Jev answer")
+    except (OSError, RuntimeError, ValueError, KeyError, TypeError) as error:
+        status = jev_log.error_status(str(error))
+    jev_log.record(
+        video_id=None,
+        capture=None,
+        run_id=None,
+        source_kind="connection_test",
+        images=0,
+        reply=reply if isinstance(reply, dict) else None,
+        kept=False,
+        status=status,
+        retries_429=jev_log.take_retries(),
+    )
+    if status != "ok":
+        return {"ok": False, "error": status}
     return {
         "ok": True,
         "model": reply.get("model"),
@@ -333,6 +363,7 @@ def classify(
         }
         try:
             reply = _call(key, {**shared, **content}, questions, images)
+            _validate_reply(reply)
             record["usage"] = reply.get("usage")
             answers = record["answers"] = reply["answers"]
             record["model"] = reply["model"]
@@ -364,7 +395,7 @@ def classify(
             )
             record["kept"] = True
             return finding, record
-        except (OSError, RuntimeError, ValueError, TypeError, KeyError) as error:
+        except (OSError, RuntimeError, ValueError, TypeError, KeyError, AttributeError) as error:
             record["error"] = str(error)
             return None, record
 

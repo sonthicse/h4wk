@@ -47,9 +47,9 @@ def error_status(text: str) -> str:
 
 def record(
     *,
-    video_id: str,
-    capture: str,
-    run_id: str,
+    video_id: str | None,
+    capture: str | None,
+    run_id: str | None,
     source_kind: str,
     images: int,
     reply: dict[str, Any] | None,
@@ -57,7 +57,14 @@ def record(
     status: str,
     retries_429: int,
 ) -> None:
-    usage = (reply or {}).get("usage") or {}
+    usage = (reply or {}).get("usage")
+    if not isinstance(usage, dict):
+        usage = {}
+
+    def tokens(name):
+        value = usage.get(name)
+        return value if type(value) is int and value >= 0 else None
+
     line = {
         "at": datetime.now(VN_TZ).isoformat(),
         "video_id": video_id,
@@ -65,8 +72,8 @@ def record(
         "run_id": run_id,
         "source_kind": source_kind,
         "images": images,
-        "input_tokens": usage.get("input_tokens"),
-        "output_tokens": usage.get("output_tokens"),
+        "input_tokens": tokens("input_tokens"),
+        "output_tokens": tokens("output_tokens"),
         "kept": kept,
         "status": status,
         "retries_429": retries_429,

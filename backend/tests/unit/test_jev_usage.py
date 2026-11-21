@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta
 from urllib.error import HTTPError
 
+import pytest
 from _analysis_sample import ENTITY, _data
 from fastapi.testclient import TestClient
 
@@ -158,7 +159,7 @@ def test_usage_api_periods_sources_and_errors(client: TestClient, data_dir):
 def test_recent_errors_capped_at_five_newest_first(client: TestClient, data_dir):
     now = datetime.now(VN_TZ)
     _write(data_dir, [_row(now - timedelta(minutes=i), status=f"HTTP {500 + i}") for i in range(8)])
-    errors = client.get("/api/settings/jev/usage?period=today").json()["recent_errors"]
+    errors = client.get("/api/settings/jev/usage?period=7d").json()["recent_errors"]
     assert [e["status"] for e in errors] == [f"HTTP {500 + i}" for i in range(5)]
 
 
@@ -189,7 +190,10 @@ def test_connection_test_ok_error_and_no_key(client: TestClient, data_dir, monke
     assert bad.json()["ok"] is False and SECRET not in bad.text
     audit = (data_dir / "log" / "audit.jsonl").read_text(encoding="utf-8")
     assert "settings.jev.test" in audit and SECRET not in audit
-    assert not (data_dir / "jev_calls.jsonl").exists()  # thử kết nối không tính vào usage
+    usage = client.get("/api/settings/jev/usage").json()
+    assert usage["requests"] == 2  # thiếu key thì chưa gửi
+    assert usage["by_source"][-1]["source"] == "connection_test"
+    assert usage["recent_errors"][0]["video_id"] is None
 
 
 def test_dashboard_has_jev_usage_field(client: TestClient, data_dir):
@@ -199,3 +203,38 @@ def test_dashboard_has_jev_usage_field(client: TestClient, data_dir):
 def test_month_start_uses_vietnam_time():
     utc_evening = datetime.fromisoformat("2026-10-31T18:00:00+00:00")  # 01/11 01:00 giờ VN
     assert jev_log.month_start(utc_evening).isoformat() == "2026-11-01T00:00:00+07:00"
+
+
+@pytest.mark.parametrize("usage", [TEXT_MARK, {"input_tokens": True, "output_tokens": -1}])
+def test_malformed_usage_records_null_tokens(data_dir, monkeypatch, usage):
+    _run(monkeypatch, [{**_answer(), "usage": usage}, _answer()])
+    first, second = _lines(data_dir)
+    assert first["input_tokens"] is None and first["output_tokens"] is None
+    assert second["input_tokens"] == 100
+    assert TEXT_MARK not in json.dumps(first)
+
+
+@pytest.mark.parametrize("reply", [None, {}, {"model": "test", "answers": {}}])
+def test_connection_rejects_invalid_reply(client, data_dir, monkeypatch, reply):
+    monkeypatch.setattr(jev.secrets, "get", lambda name: SECRET)
+    monkeypatch.setattr(jev, "_call", lambda *args: reply)
+    assert client.post("/api/settings/jev/test").json()["ok"] is False
+    (row,) = _lines(data_dir)
+    assert row["status"] == "error" and row["source_kind"] == "connection_test"
+    assert all(row[k] is None for k in ("video_id", "capture", "run_id"))
+
+
+def test_connection_retry_is_one_request(client, data_dir, monkeypatch):
+    replies = iter([HTTPError(jev.URL, 429, "", {"retry-after": "0"}, None), _answer()])
+
+    def urlopen(request, timeout):
+        reply = next(replies)
+        if isinstance(reply, Exception):
+            raise reply
+        return io.BytesIO(json.dumps(reply).encode("utf-8"))
+
+    monkeypatch.setattr(jev.secrets, "get", lambda name: SECRET)
+    monkeypatch.setattr(jev.urllib.request, "urlopen", urlopen)
+    assert client.post("/api/settings/jev/test").json()["ok"] is True
+    (row,) = _lines(data_dir)
+    assert row["retries_429"] == 1 and row["input_tokens"] == 100

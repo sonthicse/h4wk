@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 USERNAME, PASSWORD = "thi", "mật-khẩu-thử"
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     d = tmp_path / "data"
     monkeypatch.setenv("H4WK_DATA_DIR", str(d))

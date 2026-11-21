@@ -253,7 +253,7 @@ class JevError(BaseModel):
     at: VnDatetime
     status: str
     source: str
-    video_id: str
+    video_id: str | None
 
 
 class JevLimit(BaseModel):
@@ -274,7 +274,7 @@ class JevUsage(BaseModel):
     kept: int
     errors: int
     retries_429: int
-    by_source: list[JevSourceUsage]  # luôn đủ 6 nguồn
+    by_source: list[JevSourceUsage]  # luôn đủ 6 nguồn nội dung
     recent_errors: list[JevError]  # tối đa 5, mới trước
     limit: JevLimit | None  # credit; None cho tới khi có cách tính credit
 
@@ -309,14 +309,17 @@ def jev_usage(period: Literal["today", "7d", "30d"] = "7d") -> JevUsage:
             JevSourceUsage(
                 source=name, **{k: by_source.get(name, {}).get(k, 0) for k in _SOURCE_KEYS}
             )
-            for name in JEV_SOURCES
+            for name in (
+                *JEV_SOURCES,
+                *(["connection_test"] if "connection_test" in by_source else []),
+            )
         ],
         recent_errors=[
             JevError(
                 at=r["at"],
                 status=r["status"],
                 source=jev_log.source_of(r.get("source_kind", "")),
-                video_id=r.get("video_id", ""),
+                video_id=r.get("video_id"),
             )
             for r in reversed(errors[-jev_log.RECENT_ERRORS :])
         ],
