@@ -248,7 +248,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [ ] T18: Proxy 480p, audio, STT (còn transcript từ video mẫu thật, chờ T44)
 - [x] T19: Keyframe theo mức thay đổi
 - [x] T20: OCR trên keyframe và thumbnail
-- [x] T21: VLM mô tả keyframe và thumbnail (test live chuyển sang T52)
+- [x] T21: VLM mô tả keyframe và thumbnail (test live chuyển sang Checkpoint 6c)
 - [ ] T22: Timeline đầy đủ (màn Collect đã nghiệm thu 20/11; còn đo thời gian xử lý trên máy demo)
 
 ### Checkpoint C: đo thời gian màn 2, kiểm tra timeline của video thật

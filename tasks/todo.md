@@ -455,7 +455,7 @@ Nghiệm thu:
 - [x] Đổi prompt làm mới cache ảnh (test trong `tests/unit/test_vision.py`).
 - Test live 3 khung chuyển sang Checkpoint 6c. Nemotron đạt 2/3 lượt; Ollama `qwen3-vl:4b` đạt 0/2 lượt trước khi áp dụng timeout 300 giây và `max_tokens` 1024.
 
-Kiểm tra tích hợp với nhà cung cấp giả bằng `uv run pytest tests/integration/test_pipeline.py -k full_flow`. Từ 21/11, test live dùng Ollama `qwen3-vl:4b` (T52), không cần API key.
+Kiểm tra tích hợp với nhà cung cấp giả bằng `uv run pytest tests/integration/test_pipeline.py -k full_flow`. Từ 21/11, test live dùng Ollama `qwen3-vl:4b` (Checkpoint 6c), không cần API key.
 
 File: `src/h4wk/media/vision.py`, `media/prompts/vision.md`, tests.
 Người làm: Bảo. Phụ thuộc: T17, T19. Cỡ: S.
