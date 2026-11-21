@@ -326,16 +326,20 @@ Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend ở 
 - [ ] T59: `analysis`: Jev nhận keyframe và thumbnail (backend)
 - [ ] T60: `analysis`: kết luận theo video bằng quy tắc (backend)
 - [ ] T61: Bỏ `ai-gateway` và cấu hình C5 `ai.toml` (backend)
-- [ ] T62: UI Settings chỉ còn Jev (ui)
+- [ ] T62: UI Settings → Jev: key, thử kết nối, usage (ui)
 - [ ] T63: UI màn video và Collect bỏ mô tả ảnh và bước VLM (ui)
+- [ ] T65: `analysis`: nhật ký request Jev, API usage và thử kết nối (backend)
+- [ ] T66: UI Dashboard, Videos, Entities, Login theo bản phác (ui)
 - [ ] T64: Gộp SPEC-jev-only.md vào SPEC.md và sửa tài liệu ý định
 
-Thứ tự: T58 → (T59, T60 song song) → T61 sau T60 → T62 sau T61; T63 sau T58 và T60 → T64 sau tất cả → Checkpoint 6d.
+Thứ tự: T58 → (T59, T60 song song) → T61 sau T60; T65 sau T59 → T62 sau T61 và T65; T63 sau T58 và T60; T66 làm ngay được (dòng Jev ở Dashboard chờ T65) → T64 sau tất cả → Checkpoint 6d.
+
+Bản phác giao diện (Thi duyệt 21/11): `docs/design/phase-6d/` và canvas https://claude.ai/artifact/Bk9dxR1XysygA9CSnvRnEr.
 
 - T58 trước hết vì đổi hợp đồng C3, mọi task sau đọc timeline mới.
 - T59 và T60 làm song song được; cả hai sửa `jobs/pipeline.py` ở chỗ khác nhau, merge lần lượt và rebase.
 - T61 sau T60 vì `verdict.py` là chỗ cuối cùng dùng gateway (cùng với `media/vision.py`, đã xoá ở T58).
-- T62 sau T61 (API `/api/settings/ai*` mất); T63 sau T58 và T60. T62 và T63 đều sinh lại `web/src/api/schema.d.ts`: merge lần lượt, task sau sinh lại kiểu sau khi rebase, không sửa tay file sinh ra.
+- T62 sau T61 (API `/api/settings/ai*` mất) và T65 (API usage, thử kết nối); T63 sau T58 và T60; T66 không chặn ai. T62, T63, T66 đều sinh lại `web/src/api/schema.d.ts`: merge lần lượt, task sau sinh lại kiểu sau khi rebase, không sửa tay file sinh ra.
 
 Rủi ro:
 
@@ -348,7 +352,7 @@ Rủi ro:
 | Nhiều video ra kết luận `yes` vì precision Jev thấp | Thấp | Thi đã chấp nhận; người duyệt xác nhận từng video |
 | Lệnh `npm run gen:api` gọi `uv run` trơn, gỡ torch và CUDA | Trung bình | Chạy phần Python của lệnh với `uv run --no-sync`, rồi chạy `openapi-typescript` như trong script |
 
-### Checkpoint 6d: video thật chạy trọn chỉ với Jev, đủ 7 tiêu chí của SPEC-jev-only.md
+### Checkpoint 6d: video thật chạy trọn chỉ với Jev, đủ tiêu chí của SPEC-jev-only.md, giao diện khớp bản phác
 
 ### Phase 7: Demo (tuần 6)
 

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings – Sources</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#171717} a:hover{color:#525252}</style>
+</helmet>
+<div style="width: 1280px; height: 860px; display: flex; font-family: Geist, system-ui, sans-serif; font-size: 14px; color: #0a0a0a; background: #ffffff;">
+  <dc-import name="Sidebar" active="Settings" h="{{h}}" hint-size="240px,860px"></dc-import>
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="height: 48px; flex-shrink: 0; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+      <button type="button" aria-label="Toggle sidebar" style="width: 32px; height: 32px; border: none; background: transparent;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#404040" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path></svg></button>
+      <span aria-hidden="true" style="width: 1px; height: 16px; background: #e5e5e5;"></span>
+      <span style="color: #404040;">thi</span>
+    </header>
+    <main style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Settings</h1>
+      <div style="display: flex; gap: 4px; border-bottom: 1px solid #e5e5e5;">
+        <a href="#" style="text-decoration: none; padding: 8px 12px; color: #0a0a0a; font-weight: 500; border-bottom: 2px solid #0a0a0a; margin-bottom: -1px;">Sources</a>
+        <a href="SettingsJev.dc.html" style="text-decoration: none; padding: 8px 12px; color: #737373;">Jev</a>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 600;">Collection sources</h2>
+        <span style="display: flex; gap: 8px;"><button type="button" style="height: 36px; padding: 0 14px; border: 1px solid #d4d4d4; border-radius: 8px; background: #fff; font: inherit;">Discard</button><button type="button" style="height: 36px; padding: 0 14px; border: none; border-radius: 8px; background: #171717; color: #fafafa; font: inherit;">Save</button></span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+        <sc-for list="{{sources}}" as="s" hint-placeholder-count="3">
+          <section style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h3 style="margin: 0; font-size: 15px; font-weight: 600;">{{s.name}}</h3>
+              <span style="{{s.badge}}">{{s.state}}</span>
+              <span aria-hidden="true" style="margin-left: auto; display: inline-flex; width: 34px; height: 20px; border-radius: 10px; padding: 2px; box-sizing: border-box; background: #171717; justify-content: flex-end;"><span style="width: 16px; height: 16px; border-radius: 50%; background: #fff;"></span></span>
+            </div>
+            <p style="margin: 0; font-size: 13px; color: #737373;">{{s.key}}</p>
+            <div style="display: flex; flex-direction: column; gap: 4px;"><span style="display: flex; justify-content: space-between; font-size: 12px; color: #525252;"><span>{{s.usage}}</span></span><span style="height: 6px; border-radius: 3px; background: #f0f0f0;"><span style="{{s.bar}}"></span></span></div>
+            <button type="button" style="height: 36px; border: 1px solid #d4d4d4; border-radius: 8px; background: #fff; font: inherit;">Test connection</button>
+          </section>
+        </sc-for>
+      </div>
+      <h2 style="margin: 0; font-size: 18px; font-weight: 600;">Source priority</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+        <sc-for list="{{priority}}" as="p" hint-placeholder-count="6">
+          <div style="border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+            <span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #525252;">{{p.cap}}</span>
+            <span style="font-size: 13px;">{{p.order}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":860}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const ok = 'font-size: 11px; background: #171717; color: #fafafa; border-radius: 6px; padding: 1px 6px;';
+    const bar = (p) => `display: block; width: ${p}%; height: 6px; border-radius: 3px; background: #171717;`;
+    return {
+      h: 860,
+      sources: [
+        { name: 'yt-dlp', state: 'active', badge: ok, key: 'No API key needed.', usage: 'No quota', bar: bar(0) },
+        { name: 'YouTube Data API', state: 'active', badge: ok, key: 'Key set · AIza…0001', usage: '[used] / 10,000 units today', bar: bar(18) },
+        { name: 'Supadata', state: 'active', badge: ok, key: 'Key set · sd_…9a1c', usage: '[used] credits this month', bar: bar(9) },
+      ],
+      priority: [
+        { cap: 'video.metadata', order: '1. youtube_api · 2. ytdlp' },
+        { cap: 'video.media', order: '1. ytdlp' },
+        { cap: 'transcripts', order: '1. ytdlp · 2. supadata' },
+        { cap: 'comments', order: '1. youtube_api · 2. ytdlp' },
+        { cap: 'thumbnails', order: '1. ytdlp · 2. youtube_api' },
+        { cap: 'channel', order: '1. youtube_api · 2. ytdlp' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

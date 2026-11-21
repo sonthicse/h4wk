@@ -990,7 +990,9 @@ Bỏ ngày 2026-11-21 cùng Ollama; thay bằng Checkpoint 6d.
 
 Spec: [SPEC-jev-only.md](../SPEC-jev-only.md). Bản thử nghiệm backend: nhánh `feat/t58-jev-only` (commit `29d92b7`, worktree `.claude/worktrees/feat-t58-jev-only`). Đọc để tham khảo cách làm và test, không cherry-pick nguyên khối: bản đó gộp T58–T61 và chưa đọc được `timeline.json` cũ.
 
-Thứ tự: T58 → (T59, T60 song song) → T61 sau T60 → T62 sau T61; T63 sau T58 và T60 → T64 → Checkpoint 6d.
+Thứ tự: T58 → (T59, T60 song song) → T61 sau T60; T65 sau T59 → T62 sau T61 và T65; T63 sau T58 và T60; T66 làm ngay được (dòng Jev ở Dashboard chờ T65) → T64 → Checkpoint 6d.
+
+Bản phác giao diện: `docs/design/phase-6d/` (đọc `README.md` ở đó) và canvas https://claude.ai/artifact/Bk9dxR1XysygA9CSnvRnEr. Mọi task UI gửi ảnh chụp cho Thi duyệt trước khi merge.
 
 Lệnh chung của backend: `cd backend && uv run --no-sync pytest && uv run --no-sync ruff check . && uv run --no-sync ruff format --check .`. Sinh lại kiểu API: không chạy `npm run gen:api` (gọi `uv run` trơn, gỡ torch); chạy phần Python của script với `uv run --no-sync`, rồi `npx -y openapi-typescript@7.13.0 src/api/openapi.json -o src/api/schema.d.ts` trong `web/`.
 
@@ -1048,31 +1050,68 @@ Nghiệm thu:
 File: `ai/` (xoá), `core/config_models.py`, `core/settings.py`, `api/settings.py`, `cli.py`, `config/ai.toml.example` (xoá), `.env.example`, tests.
 Người làm: agent backend. Phụ thuộc: T60. Cỡ: M (phần lớn là xoá).
 
-### T62: UI Settings chỉ còn Jev
+### T62: UI Settings → Jev (key, thử kết nối, usage)
 
-Theo SPEC-jev-only §5. Mục Settings "AI providers" đổi thành "Jev", đường dẫn `/settings/jev`, chỉ hiện thẻ Jev (key, trạng thái). Xoá `AddProviderDialog`, `ProviderCard`, `TaskRoutes`, `draft.ts` và hàm gọi `/api/settings/ai*` trong `api/settings.ts`. Link trong `CollectPage.tsx` trỏ sang `/settings/jev`. Sinh lại kiểu API sau T61.
+Theo SPEC-jev-only §5–§6 và bản phác `docs/design/phase-6d/SettingsJev.dc.html`. Mục Settings "AI providers" đổi thành "Jev", đường dẫn `/settings/jev`. Trang gồm thẻ API key rộng hết trang (trạng thái, key đã che, ô nhập, Save key, Remove, Test connection kèm kết quả model và độ trễ) và thẻ Usage (chọn Today / 7 days / 30 days; 5 ô: Requests, With images, Input tokens kèm output, Findings kept kèm tỉ lệ, Failed kèm số lần 429; bảng theo nguồn; lỗi gần nhất). Xoá `AddProviderDialog`, `ProviderCard`, `TaskRoutes`, `draft.ts` và hàm gọi `/api/settings/ai*`. Link trong `CollectPage.tsx` trỏ sang `/settings/jev`. Sinh lại kiểu API sau T61 và T65.
 
 Nghiệm thu:
 
-- [ ] Mở Settings: có mục Sources và Jev; nhập, che và xoá key Jev được; `/settings/ai` không còn.
-- [ ] `grep -rn "settings/ai\|TaskRoutes\|ProviderCard" web/src` không còn kết quả.
-- [ ] `npm run build` và `npm run lint` không lỗi.
+- [ ] Ảnh chụp trang khớp bản phác (bố cục, nhãn, thứ tự khối); gửi Thi duyệt trước khi merge.
+- [ ] Nhập, che, xoá key được; Test connection hiện kết quả thật và lỗi khi key sai; số Usage khớp `GET /api/settings/jev/usage`.
+- [ ] `grep -rn "settings/ai\|TaskRoutes\|ProviderCard" web/src` không còn kết quả; `npm run build`, `npm run lint` không lỗi.
 
-File: `web/src/App.tsx`, `web/src/pages/settings/SettingsLayout.tsx`, `web/src/pages/settings/AIProvidersPage.tsx` (đổi thành trang Jev), `web/src/components/settings/ai/*`, `web/src/api/settings.ts`, `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
-Người làm: agent ui. Phụ thuộc: T61. Cỡ: M.
+File: `web/src/App.tsx`, `web/src/pages/settings/SettingsLayout.tsx`, `web/src/pages/settings/AIProvidersPage.tsx` (thành trang Jev), `web/src/components/settings/ai/*`, `web/src/api/settings.ts`, `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
+Người làm: agent ui. Phụ thuộc: T61, T65. Cỡ: M.
 
 ### T63: UI màn video và Collect bỏ mô tả ảnh và bước VLM
 
-Theo SPEC-jev-only §5. Dải keyframe đọc `frames` thay `visual`, bỏ mục "VLM description" và danh sách dấu hiệu; thẻ kết luận không hiện model khi `model` null; danh sách bước job ở Collect bỏ `vlm`. Sinh lại kiểu API sau T58 và T60 (rebase sau T62 nếu T62 merge trước).
+Theo SPEC-jev-only §5 và bản phác `docs/design/phase-6d/Video.dc.html`, `Collect.dc.html`. Dải keyframe đọc `frames` thay `visual`. Khung keyframe đang chọn: ảnh lớn có khung bao (OCR vàng, khuôn mặt đỏ, ảnh mẫu xanh) và chú giải; bên phải là "Jev findings on this frame" (các nghi vấn Jev có `frame` là khung này hoặc đoạn chứa khung, mỗi thẻ có mức độ, danh mục, nguồn, thời điểm, trích dẫn, bấm thì mở nghi vấn), rồi "OCR text" và "Matched references". Bỏ "VLM description" và "Offensive cues". Thẻ kết luận không hiện model khi `model` null. Collect: danh sách bước bỏ `vlm`; cột Started theo dạng `HH:MM dd/mm/yyyy`. Sinh lại kiểu API sau T58, T60 (rebase sau T62 nếu T62 merge trước).
 
 Nghiệm thu:
 
-- [ ] Mở `1RUJ_6eruwA` (timeline dạng cũ) và `h4wkDemo001` (timeline mới): dải keyframe hiện đủ khung, bấm khung tua đúng chỗ, không có chữ "VLM".
-- [ ] Thẻ kết luận của run mới hiện `violation`, danh mục, mức độ, tóm tắt, không hiện model.
-- [ ] `npm run build` và `npm run lint` không lỗi.
+- [ ] Ảnh chụp màn video của `1RUJ_6eruwA` (timeline cũ) và một video vừa xử lý lại (timeline mới) khớp bản phác; gửi Thi duyệt trước khi merge.
+- [ ] Bấm khung tua đúng chỗ; bấm thẻ nghi vấn trong khung mở đúng nghi vấn; không còn chữ "VLM".
+- [ ] `npm run build`, `npm run lint` không lỗi.
 
 File: `web/src/components/video/keyframes.ts`, `web/src/components/video/KeyframeStrip.tsx`, `web/src/components/video/VerdictCard.tsx`, `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
-Người làm: agent ui. Phụ thuộc: T58, T60. Cỡ: S.
+Người làm: agent ui. Phụ thuộc: T58, T60. Cỡ: M.
+
+### T65: `analysis`: nhật ký request Jev, API usage và thử kết nối
+
+Theo SPEC-jev-only §6. Mỗi request Jev ghi một dòng vào `data/jev_calls.jsonl` (ghi nối, không xoá): `at` (giờ Việt Nam), `video_id`, `capture`, `run_id`, `source_kind`, `images` (số ảnh), `input_tokens`, `output_tokens` (từ `usage` của phản hồi), `kept`, `status` (`ok` hoặc mã lỗi), `retries_429`. Không ghi nội dung văn bản hay ảnh. API:
+
+- `GET /api/settings/jev/usage?period=today|7d|30d`: tổng request, số request có ảnh, token vào/ra, số nghi vấn giữ lại, số lỗi, số lần 429, bảng theo nguồn (tiêu đề và mô tả gộp một dòng), 5 lỗi gần nhất (mã, nguồn, video, thời điểm); phần hạn mức: `used`, `limit`, `left` của tháng hiện tại.
+- `POST /api/settings/jev/test`: gọi Jev một câu hỏi `noul` ngắn, trả `ok`, `model`, `latency_ms` hoặc lỗi; có audit, không ghi key.
+- Dashboard (`GET /api/dashboard`): thêm usage Jev theo tháng (`used`, `limit`, `left`) để hiện cạnh YouTube API và Supadata.
+
+Hạn mức: trước khi làm, thử xem API TypeSafe có trả hạn mức còn lại (header hoặc endpoint) không. Có thì dùng số đó. Không có thì C5 `analysis.toml` thêm `jev.monthly_request_limit` (mặc định trống: không hiện `limit`, `left`), kèm ví dụ hợp lệ và bị từ chối trong `test_contracts.py`; ghi kết quả thử vào `docs/eval/jev.md`.
+
+Nghiệm thu:
+
+- [ ] Test với Jev giả: mỗi request (ok, lỗi, 429 rồi ok) ghi đúng một dòng; tổng theo kỳ và theo nguồn đúng; nội dung văn bản không có trong file.
+- [ ] Test API usage, test và dashboard; không response nào chứa key; giờ trong response có `+07:00`.
+- [ ] Backend pytest, ruff qua; chạy `h4wk schema export` nếu đổi C5.
+
+File: `analysis/jev.py`, `api/settings.py`, `api/dashboard.py`, `core/config_models.py` (nếu cần hạn mức), tests.
+Người làm: agent backend. Phụ thuộc: T59. Cỡ: M.
+
+### T66: UI Dashboard, Videos, Entities, Login theo bản phác
+
+Theo bản phác `docs/design/phase-6d/Dashboard.dc.html`, `Videos.dc.html`, `Entities.dc.html`, `Login.dc.html`.
+
+- Dashboard: cột phải đổi chỗ, thẻ Review (hàng đợi) rộng hai cột ở chỗ Events cũ, Events xuống chỗ Review cũ; thẻ Usage có thêm dòng Jev với thanh tiến độ, mỗi dòng (YouTube API, Supadata, Jev) ghi đã dùng / hạn mức và còn lại.
+- Videos: cột Latest capture hiện ngày giờ theo dạng `HH:MM dd/mm/yyyy`, giờ Việt Nam (vd `13:20 20/11/2026`).
+- Entities: dòng cảnh báo dữ liệu khuôn mặt ghi rằng khi demo dùng ảnh chân dung công khai của nhân vật công chúng (SPEC §13).
+- Login: thẻ cao hơn (khoảng 560 px), logo lớn ở giữa phía trên, chữ "Sign in" ngay dưới logo, rồi Username, Password, nút Sign in.
+
+Nghiệm thu:
+
+- [ ] Ảnh chụp 4 màn khớp bản phác; gửi Thi duyệt trước khi merge.
+- [ ] Mọi chỗ hiện ngày giờ trên 4 màn dùng chung một hàm định dạng `HH:MM dd/mm/yyyy` ở `web/src/lib/format.ts`.
+- [ ] `npm run build`, `npm run lint` không lỗi.
+
+File: `web/src/pages/DashboardPage.tsx`, `web/src/components/dashboard/UsageCard.tsx`, `web/src/pages/VideosPage.tsx`, `web/src/pages/EntitiesPage.tsx`, `web/src/pages/LoginPage.tsx`, `web/src/lib/format.ts`.
+Người làm: agent ui. Phụ thuộc: T65 (dòng Jev ở Dashboard); phần còn lại làm ngay được. Cỡ: M.
 
 ### T64: Gộp SPEC-jev-only.md vào SPEC.md
 
@@ -1084,11 +1123,12 @@ Nghiệm thu:
 - [ ] Reviewer đối chiếu SPEC.md với code trên `main`: C3, C5, quy tắc kết luận khớp.
 
 File: `SPEC.md`, `SPEC-jev-only.md`, `docs/intent/socmint-youtube.md`, `CLAUDE.md`, `tasks/plan.md`.
-Người làm: lead. Phụ thuộc: T58–T63. Cỡ: S.
+Người làm: lead. Phụ thuộc: T58–T63, T65, T66. Cỡ: S.
 
 ### Checkpoint 6d
 
 - [ ] Xử lý lại `1RUJ_6eruwA` trọn luồng (media và phân tích) với key Jev thật: job `done`, `llm_error` rỗng hoặc chỉ có request ảnh bị từ chối đã ghi rõ; có nghi vấn `ocr` cho dòng chữ "KẺ KHỦNG BỐ"; kết luận ra `yes` hoặc `uncertain` đúng quy tắc.
-- [ ] Đủ 7 tiêu chí thành công của SPEC-jev-only.md.
+- [ ] Đủ các tiêu chí thành công của SPEC-jev-only.md.
+- [ ] Thi xem cả app trên trình duyệt và xác nhận khớp bản phác.
 - [ ] Backend pytest, ruff check, ruff format --check; web build, lint đều qua trên `main`.
 - [ ] Thi xem màn video của `1RUJ_6eruwA` và duyệt.

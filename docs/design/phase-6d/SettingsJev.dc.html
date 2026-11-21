@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings – Jev</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#171717} a:hover{color:#525252}</style>
+</helmet>
+<div style="width: 1280px; height: 1080px; display: flex; font-family: Geist, system-ui, sans-serif; font-size: 14px; color: #0a0a0a; background: #ffffff;">
+  <dc-import name="Sidebar" active="Settings" h="{{h}}" hint-size="240px,1080px"></dc-import>
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="height: 48px; flex-shrink: 0; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+      <button type="button" aria-label="Toggle sidebar" style="width: 32px; height: 32px; border: none; background: transparent;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#404040" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path></svg></button>
+      <span aria-hidden="true" style="width: 1px; height: 16px; background: #e5e5e5;"></span>
+      <span style="color: #404040;">thi</span>
+    </header>
+    <main style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Settings</h1>
+      <div style="display: flex; gap: 4px; border-bottom: 1px solid #e5e5e5;">
+        <a href="Sources.dc.html" style="text-decoration: none; padding: 8px 12px; color: #737373;">Sources</a>
+        <a href="#" style="text-decoration: none; padding: 8px 12px; color: #0a0a0a; font-weight: 500; border-bottom: 2px solid #0a0a0a; margin-bottom: -1px;">Jev</a>
+      </div>
+
+      <section style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">API key</h2>
+          <span style="font-size: 12px; font-weight: 500; background: #171717; color: #fafafa; border-radius: 6px; padding: 2px 8px;">Key set · settings</span>
+          <span style="margin-left: auto; font-family: 'Geist Mono', monospace; color: #737373;">tsk-…9f2a</span>
+        </div>
+        <form style="display: flex; gap: 8px;">
+          <label for="jev-key" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Jev API key</label>
+          <input id="jev-key" type="password" placeholder="Replace the key" style="flex-grow: 1; min-width: 0; height: 44px; border: 1px solid #d4d4d4; border-radius: 8px; padding: 0 12px; font: inherit;">
+          <button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: none; background: #171717; color: #fafafa; font: inherit; font-weight: 500;">Save key</button>
+          <button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; color: #0a0a0a; font: inherit;">Remove</button>
+        </form>
+        <div style="display: flex; align-items: center; gap: 12px; border-top: 1px solid #f0f0f0; padding-top: 16px;">
+          <button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #d4d4d4; background: #ffffff; color: #0a0a0a; font: inherit;">Test connection</button>
+          <span role="status" style="display: flex; align-items: center; gap: 6px; color: #15803d;">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+            Connected · jev-1.14.0 · [latency] ms
+          </span>
+        </div>
+      </section>
+
+      <section aria-labelledby="usage-title" style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+          <h2 id="usage-title" style="margin: 0; font-size: 16px; font-weight: 600;">Usage</h2>
+          <div role="group" aria-label="Period" style="margin-left: auto; display: flex; border: 1px solid #d4d4d4; border-radius: 8px; overflow: hidden;">
+            <button type="button" aria-pressed="false" style="height: 36px; padding: 0 12px; border: none; background: #ffffff; font: inherit; color: #404040;">Today</button>
+            <button type="button" aria-pressed="true" style="height: 36px; padding: 0 12px; border: none; border-left: 1px solid #d4d4d4; background: #171717; font: inherit; color: #fafafa;">7 days</button>
+            <button type="button" aria-pressed="false" style="height: 36px; padding: 0 12px; border: none; border-left: 1px solid #d4d4d4; background: #ffffff; font: inherit; color: #404040;">30 days</button>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px;">
+          <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Requests</span><span style="font-size: 22px; font-weight: 600;">2,266</span><span style="font-size: 12px; color: #737373;">8 videos</span></div>
+          <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">With images</span><span style="font-size: 22px; font-weight: 600;">[n]</span><span style="font-size: 12px; color: #737373;">keyframes + thumbnails</span></div>
+          <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Input tokens</span><span style="font-size: 22px; font-weight: 600;">[tokens]</span><span style="font-size: 12px; color: #737373;">output [tokens]</span></div>
+          <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Findings kept</span><span style="font-size: 22px; font-weight: 600;">1,072</span><span style="font-size: 12px; color: #737373;">47% of requests</span></div>
+          <div style="background: #fafafa; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;"><span style="font-size: 12px; color: #737373;">Failed</span><span style="font-size: 22px; font-weight: 600;">0</span><span style="font-size: 12px; color: #737373;">429 retried: 0</span></div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <caption style="text-align: left; font-size: 12px; color: #737373; padding-bottom: 6px;">By source</caption>
+          <thead>
+            <tr style="text-align: left; color: #737373; border-bottom: 1px solid #e5e5e5;">
+              <th scope="col" style="padding: 6px 8px; font-weight: 500;">Source</th>
+              <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Requests</th>
+              <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Input tokens</th>
+              <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Kept</th>
+              <th scope="col" style="padding: 6px 8px; font-weight: 500; text-align: right;">Failed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
+              <tr style="border-bottom: 1px solid #f0f0f0;">
+                <th scope="row" style="padding: 6px 8px; font-weight: 400; text-align: left;">{{r.name}}</th>
+                <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.req}}</td>
+                <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.tok}}</td>
+                <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.kept}}</td>
+                <td style="padding: 6px 8px; text-align: right; font-family: 'Geist Mono', monospace;">{{r.failed}}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 12px; color: #737373;">Last errors</span>
+          <p style="margin: 0; font-family: 'Geist Mono', monospace; font-size: 12px; color: #b91c1c;">HTTP 400 Invalid image dimensions · thumbnail · [video id] · [time]</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      h: 1080,
+      rows: [
+        { name: 'Title and description', req: '16', tok: '[tokens]', kept: '[n]', failed: '0' },
+        { name: 'Speech segments', req: '[n]', tok: '[tokens]', kept: '[n]', failed: '0' },
+        { name: 'Comments', req: '[n]', tok: '[tokens]', kept: '[n]', failed: '0' },
+        { name: 'Keyframes (images + OCR)', req: '[n]', tok: '[tokens]', kept: '[n]', failed: '0' },
+        { name: 'Thumbnails (image + OCR)', req: '[n]', tok: '[tokens]', kept: '[n]', failed: '0' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

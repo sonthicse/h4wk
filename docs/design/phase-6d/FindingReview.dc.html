@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Review queue – per finding</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#171717} a:hover{color:#525252}</style>
+</helmet>
+<div style="width: 1280px; height: 900px; display: flex; font-family: Geist, system-ui, sans-serif; font-size: 14px; color: #0a0a0a; background: #ffffff;">
+  <dc-import name="Sidebar" active="Review queue" h="{{h}}" hint-size="240px,900px"></dc-import>
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="height: 48px; flex-shrink: 0; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+      <button type="button" aria-label="Toggle sidebar" style="width: 32px; height: 32px; border: none; background: transparent;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#404040" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path></svg></button>
+      <span aria-hidden="true" style="width: 1px; height: 16px; background: #e5e5e5;"></span>
+      <span style="color: #404040;">thi</span>
+    </header>
+    <main style="flex-grow: 1; min-height: 0; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Review queue · per finding</h1>
+        <span style="font-size: 12px; color: #737373;">j/k move · c confirm · r reject · n needs info</span>
+      </div>
+      <div style="flex-grow: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px;">
+        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; overflow: hidden;">
+          <sc-for list="{{list}}" as="it" hint-placeholder-count="6">
+            <li style="{{it.style}}">
+              <span style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #737373;">
+                <span style="{{it.sev}}">{{it.sevText}}</span>
+                <span style="font-family: 'Geist Mono', monospace;">{{it.src}} · {{it.t}}</span>
+                <span style="margin-left: auto;">unreviewed</span>
+              </span>
+              <span style="display: block; margin-top: 6px; font-size: 13px;">{{it.quote}}</span>
+              <span style="display: block; margin-top: 4px; font-size: 12px; color: #737373; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{it.video}}</span>
+            </li>
+          </sc-for>
+        </ul>
+        <section style="border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow: hidden;">
+          <div>
+            <h2 style="margin: 0; font-size: 15px; font-weight: 600;">BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN, CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ</h2>
+            <p style="margin: 2px 0 0; font-size: 13px; color: #737373;">Chân Trời Mới Media · Tô Lâm</p>
+          </div>
+          <div style="position: relative; aspect-ratio: 16 / 9; max-height: 260px; border-radius: 6px; background: #27272a;">
+            <span style="position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); color: #a1a1aa; font-size: 12px;">[keyframe 0:12]</span>
+            <div style="position: absolute; left: 6%; top: 74%; width: 88%; height: 14%; border: 2px solid #facc15;"></div>
+          </div>
+          <dl style="margin: 0; display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 10px 12px;">
+            <dt style="color: #737373; font-size: 13px;">Quote</dt>
+            <dd style="margin: 0; border-left: 2px solid #d4d4d4; padding-left: 10px; font-style: italic;">CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ</dd>
+            <dt style="color: #737373; font-size: 13px;">Labels</dt>
+            <dd style="margin: 0; display: flex; gap: 6px; flex-wrap: wrap;"><span style="font-size: 12px; background: #dc2626; color: #fff; border-radius: 6px; padding: 1px 7px;">high</span><span style="font-size: 12px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 1px 7px;">unsupported_accusation</span><span style="font-size: 12px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 1px 7px;">highly_likely</span></dd>
+            <dt style="color: #737373; font-size: 13px;">Entity</dt>
+            <dd style="margin: 0;">Tô Lâm</dd>
+            <dt style="color: #737373; font-size: 13px;">Triggers</dt>
+            <dd style="margin: 0; font-family: 'Geist Mono', monospace; font-size: 12px;">ocr · frames/000014.jpg · face 0.87</dd>
+            <dt style="color: #737373; font-size: 13px;">Analyzer</dt>
+            <dd style="margin: 0; font-size: 13px;">Jev (ocr + images)</dd>
+          </dl>
+          <a href="#" style="font-size: 13px;">Open in video</a>
+          <div style="display: flex; gap: 8px; margin-top: auto;">
+            <button type="button" style="height: 40px; padding: 0 14px; border-radius: 8px; border: none; background: #171717; color: #fafafa; font: inherit; font-weight: 500;">Confirm</button>
+            <button type="button" style="height: 40px; padding: 0 14px; border-radius: 8px; border: none; background: #dc2626; color: #fff; font: inherit; font-weight: 500;">Reject</button>
+            <button type="button" style="height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #d4d4d4; background: #fff; font: inherit;">Needs info</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const card = 'border: 1px solid #e5e5e5; border-radius: 8px; padding: 10px 12px;';
+    const picked = card + ' background: #f5f5f5; outline: 2px solid #171717;';
+    const sev = (s) => 'font-size: 11px; border-radius: 6px; padding: 1px 6px; ' + (s === 'high' ? 'background: #dc2626; color: #fff;' : 'background: #f59e0b; color: #0a0a0a;');
+    const it = (s, src, t, quote, video, on) => ({ sev: sev(s), sevText: s, src, t, quote, video, style: on ? picked : card });
+    return {
+      h: 900,
+      list: [
+        it('high', 'ocr', '0:12', 'CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ', 'BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN…', true),
+        it('high', 'title', '—', 'BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN, CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ', 'BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN…'),
+        it('medium', 'visual', '0:14', '(image)', 'BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN…'),
+        it('medium', 'speech', '0:00', 'Từ ngày Tô Lâm lên nắm quyền, có tổng cộng 850 nghị định…', 'TỪ NGÀY TÔ LÂM LÊN NẮM QUYỀN…'),
+        it('medium', 'comment', '—', '[comment text]', 'T.ô L.âm ưu tiên quan hệ với Bắc Kinh…'),
+        it('medium', 'thumbnail', '—', 'TỪ NGÀY TÔ LÂM LÊN NẮM QUYỀN', 'TỪ NGÀY TÔ LÂM LÊN NẮM QUYỀN…'),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

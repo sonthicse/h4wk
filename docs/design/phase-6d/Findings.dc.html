@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Findings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#171717} a:hover{color:#525252}</style>
+</helmet>
+<div style="width: 1280px; height: 760px; display: flex; font-family: Geist, system-ui, sans-serif; font-size: 14px; color: #0a0a0a; background: #ffffff;">
+  <dc-import name="Sidebar" active="Findings" h="{{h}}" hint-size="240px,760px"></dc-import>
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="height: 48px; flex-shrink: 0; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+      <button type="button" aria-label="Toggle sidebar" style="width: 32px; height: 32px; border: none; background: transparent;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#404040" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path></svg></button>
+      <span aria-hidden="true" style="width: 1px; height: 16px; background: #e5e5e5;"></span>
+      <span style="color: #404040;">thi</span>
+    </header>
+    <main style="padding: 24px; display: flex; flex-direction: column; gap: 14px;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Findings</h1>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+        <label for="f-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Search findings</label>
+        <input id="f-search" placeholder="Search quote, video or entity…" style="width: 300px; height: 40px; border: 1px solid #d4d4d4; border-radius: 8px; padding: 0 12px; font: inherit;">
+        <button type="button" style="height: 40px; padding: 0 12px; border: 1px dashed #d4d4d4; border-radius: 8px; background: #fff; font: inherit;">Severities</button>
+        <button type="button" style="height: 40px; padding: 0 12px; border: 1px dashed #d4d4d4; border-radius: 8px; background: #fff; font: inherit;">Categories</button>
+        <button type="button" style="height: 40px; padding: 0 12px; border: 1px dashed #d4d4d4; border-radius: 8px; background: #fff; font: inherit;">Sources</button>
+        <button type="button" style="height: 40px; padding: 0 12px; border: 1px dashed #d4d4d4; border-radius: 8px; background: #fff; font: inherit;">Statuses</button>
+        <span style="margin-left: auto; color: #737373;">249 findings</span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <thead>
+          <tr style="text-align: left; color: #737373; border-bottom: 1px solid #e5e5e5;">
+            <th scope="col" style="padding: 8px; font-weight: 500;">Video</th>
+            <th scope="col" style="padding: 8px; font-weight: 500;">Time</th>
+            <th scope="col" style="padding: 8px; font-weight: 500;">Source</th>
+            <th scope="col" style="padding: 8px; font-weight: 500;">Entity</th>
+            <th scope="col" style="padding: 8px; font-weight: 500;">Quote</th>
+            <th scope="col" style="padding: 8px; font-weight: 500;">Category</th>
+            <th scope="col" style="padding: 8px; font-weight: 500;">Severity</th>
+            <th scope="col" style="padding: 8px; font-weight: 500;">Confidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+              <td style="padding: 9px 8px; font-family: 'Geist Mono', monospace; font-size: 12px;">{{r.video}}</td>
+              <td style="padding: 9px 8px; font-family: 'Geist Mono', monospace; font-size: 12px;">{{r.t}}</td>
+              <td style="padding: 9px 8px;"><span style="font-size: 11px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 1px 6px;">{{r.src}}</span></td>
+              <td style="padding: 9px 8px;">Tô Lâm</td>
+              <td style="padding: 9px 8px; max-width: 330px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{r.quote}}</td>
+              <td style="padding: 9px 8px;">{{r.cat}}</td>
+              <td style="padding: 9px 8px;"><span style="{{r.sev}}">{{r.sevText}}</span></td>
+              <td style="padding: 9px 8px; color: #404040;">{{r.conf}}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const sev = (s) => 'font-size: 11px; border-radius: 6px; padding: 1px 6px; ' + (s === 'high' ? 'background: #dc2626; color: #fff;' : 'background: #f59e0b;');
+    const row = (video, t, src, quote, cat, s, conf) => ({ video, t, src, quote, cat, sev: sev(s), sevText: s, conf });
+    return {
+      h: 760,
+      rows: [
+        row('1RUJ_6eruwA', '—', 'title', 'BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN, CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ', 'unsupported_accusation', 'high', 'highly_likely'),
+        row('1RUJ_6eruwA', '0:00', 'speech', 'Bắt cóc người, phá nhà dân, chính quyền Tô Lâm mới là kẻ khủng bố…', 'incitement', 'medium', 'unverified'),
+        row('1RUJ_6eruwA', '0:12', 'ocr', 'CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ', 'unsupported_accusation', 'high', 'highly_likely'),
+        row('1RUJ_6eruwA', '0:14', 'visual', '(image)', 'insult', 'medium', 'unverified'),
+        row('d003oY3tOPs', '0:00', 'speech', 'Từ ngày Tô Lâm lên nắm quyền, có tổng cộng 850 nghị định…', 'fabrication', 'medium', 'likely'),
+        row('d003oY3tOPs', '—', 'thumbnail', 'TỪ NGÀY TÔ LÂM LÊN NẮM QUYỀN', 'fabrication', 'medium', 'likely'),
+        row('Tb_Kf0nDuK0', '—', 'comment', '[comment text]', 'insult', 'medium', 'likely'),
+        row('AJP6Y0LWcXQ', '0:41', 'ocr', '[on-screen text]', 'incitement', 'medium', 'unverified'),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

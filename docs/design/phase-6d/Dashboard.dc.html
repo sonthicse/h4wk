@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#171717} a:hover{color:#525252}</style>
+</helmet>
+<div style="width: 1280px; height: 900px; display: flex; font-family: Geist, system-ui, sans-serif; font-size: 14px; color: #0a0a0a; background: #ffffff;">
+  <dc-import name="Sidebar" active="Dashboard" h="{{h}}" hint-size="240px,900px"></dc-import>
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="height: 48px; flex-shrink: 0; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+      <button type="button" aria-label="Toggle sidebar" style="width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#404040" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path></svg></button>
+      <span aria-hidden="true" style="width: 1px; height: 16px; background: #e5e5e5;"></span>
+      <span style="color: #404040;">thi</span>
+    </header>
+    <main style="flex-grow: 1; min-height: 0; padding: 24px; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 9fr) minmax(0, 11fr); gap: 16px;">
+      <div style="display: flex; flex-direction: column; gap: 16px; min-height: 0;">
+        <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: start;">
+          <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-size: 18px; font-weight: 600;">Most serious</span>
+            <span style="aspect-ratio: 16 / 9; border-radius: 8px; background: #27272a; display: flex; align-items: center; justify-content: center; color: #a1a1aa; font-size: 12px;">[thumbnail]</span>
+            <span style="font-weight: 500; line-height: 1.35;">BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN, CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ</span>
+            <span style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <span style="font-size: 12px; background: #dc2626; color: #fff; border-radius: 6px; padding: 1px 7px;">yes</span>
+              <span style="font-size: 12px; background: #dc2626; color: #fff; border-radius: 6px; padding: 1px 7px;">high</span>
+              <span style="font-size: 12px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 1px 7px;">Chân Trời Mới Media</span>
+            </span>
+          </a>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px;"><span style="display: block; color: #737373;">Watched channels</span><span style="display: block; font-size: 30px; font-weight: 600;">5</span></a>
+            <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px;"><span style="display: block; color: #737373;">Videos collected</span><span style="display: block; font-size: 30px; font-weight: 600;">115</span></a>
+            <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px;"><span style="display: block; color: #737373;">Captures</span><span style="display: block; font-size: 30px; font-weight: 600;">142</span></a>
+          </div>
+        </div>
+        <section style="flex-grow: 1; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Activity</h2>
+          <p style="margin: 0; color: #737373;">Captures and new findings per day, last 14 days</p>
+          <div style="flex-grow: 1; display: flex; align-items: flex-end; gap: 10px; padding-top: 8px; border-bottom: 1px solid #e5e5e5;">
+            <sc-for list="{{bars}}" as="b" hint-placeholder-count="14">
+              <span style="flex: 1; display: flex; align-items: flex-end; gap: 2px; height: 100%;">
+                <span style="{{b.c}}"></span><span style="{{b.f}}"></span>
+              </span>
+            </sc-for>
+          </div>
+          <span style="display: flex; gap: 14px; font-size: 12px; color: #525252;"><span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #3b82f6;"></span> Captures</span><span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #dc2626;"></span> Findings</span></span>
+        </section>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-content: start; overflow: hidden;">
+        <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-weight: 600; font-size: 16px;">Findings</span>
+          <span style="display: flex; align-items: center; gap: 16px;">
+            <span aria-hidden="true" style="width: 88px; height: 88px; border-radius: 50%; background: conic-gradient(#dc2626 0 6%, #f59e0b 6% 100%); display: flex; align-items: center; justify-content: center;"><span style="width: 60px; height: 60px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600;">249<span style="font-size: 10px; font-weight: 400; color: #737373;">findings</span></span></span>
+            <span style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1;">
+              <span style="display: flex; justify-content: space-between;"><span style="font-size: 12px; background: #dc2626; color: #fff; border-radius: 6px; padding: 0 6px;">high</span><span>16</span></span>
+              <span style="display: flex; justify-content: space-between;"><span style="font-size: 12px; background: #f59e0b; border-radius: 6px; padding: 0 6px;">medium</span><span>233</span></span>
+              <span style="display: flex; justify-content: space-between;"><span style="font-size: 12px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 0 6px;">low</span><span>0</span></span>
+            </span>
+          </span>
+        </a>
+        <a href="#" style="text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+          <span style="font-weight: 600; font-size: 16px;">Review</span>
+          <span style="display: flex; align-items: center; gap: 16px;">
+            <span aria-hidden="true" style="width: 88px; height: 88px; border-radius: 50%; background: conic-gradient(#f59e0b 0 80%, #dc2626 80% 92%, #737373 92% 100%); display: flex; align-items: center; justify-content: center;"><span style="width: 60px; height: 60px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 600;">[n]<span style="font-size: 10px; font-weight: 400; color: #737373;">videos</span></span></span>
+            <span style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1; font-size: 13px;">
+              <span style="display: flex; justify-content: space-between;"><span>unreviewed</span><span>[n]</span></span>
+              <span style="display: flex; justify-content: space-between;"><span>confirmed</span><span>[n]</span></span>
+              <span style="display: flex; justify-content: space-between;"><span>rejected</span><span>[n]</span></span>
+              <span style="display: flex; justify-content: space-between;"><span>needs_info</span><span>[n]</span></span>
+            </span>
+          </span>
+        </a>
+        <section style="grid-column: span 2; border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 600;">Review</h2>
+          <span style="display: flex; gap: 6px; align-items: center;"><span style="font-size: 12px; background: #dc2626; color: #fff; border-radius: 6px; padding: 0 6px;">high</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN…</span></span>
+          <span style="display: flex; gap: 6px; align-items: center;"><span style="font-size: 12px; background: #f59e0b; border-radius: 6px; padding: 0 6px;">medium</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">TỪ NGÀY TÔ LÂM LÊN NẮM QUYỀN…</span></span>
+          <span style="display: flex; gap: 6px; align-items: center;"><span style="font-size: 12px; background: #f59e0b; border-radius: 6px; padding: 0 6px;">medium</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">T.ô L.âm ưu tiên quan hệ với Bắc Kinh…</span></span>
+        </section>
+        <section style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 600;">Events</h2>
+          <sc-for list="{{events}}" as="e" hint-placeholder-count="5">
+            <div style="display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; padding: 6px 0;">
+              <span style="{{e.badge}}">{{e.kind}}</span>
+              <span style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{e.text}}</span>
+              <span style="font-size: 12px; color: #737373; font-family: 'Geist Mono', monospace;">{{e.at}}</span>
+            </div>
+          </sc-for>
+        </section>
+        <section style="border: 1px solid #e5e5e5; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Usage</h2>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="display: flex; justify-content: space-between; font-size: 13px;"><span style="font-weight: 500;">YouTube Data API</span><span style="color: #737373;">[used] / 10,000 units today · [left] left</span></span><span style="height: 6px; border-radius: 3px; background: #f0f0f0;"><span style="display: block; width: 18%; height: 6px; border-radius: 3px; background: #171717;"></span></span></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="display: flex; justify-content: space-between; font-size: 13px;"><span style="font-weight: 500;">Supadata</span><span style="color: #737373;">[used] / [limit] credits this month · [left] left</span></span><span style="height: 6px; border-radius: 3px; background: #f0f0f0;"><span style="display: block; width: 9%; height: 6px; border-radius: 3px; background: #171717;"></span></span></div>
+          <div style="display: flex; flex-direction: column; gap: 4px;"><span style="display: flex; justify-content: space-between; font-size: 13px;"><span style="font-weight: 500;">Jev</span><span style="color: #737373;">[used] / [limit] requests this month · [left] left</span></span><span style="height: 6px; border-radius: 3px; background: #f0f0f0;"><span style="display: block; width: 23%; height: 6px; border-radius: 3px; background: #171717;"></span></span></div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const caps = [3, 5, 2, 8, 6, 4, 9, 12, 7, 5, 10, 14, 9, 11];
+    const fnd = [1, 4, 0, 6, 3, 2, 8, 15, 5, 3, 9, 18, 6, 10];
+    const bar = (v, color) => `width: 50%; height: ${Math.max(2, v * 5)}%; background: ${color}; border-radius: 2px 2px 0 0;`;
+    const tag = (bg, fg) => `font-size: 11px; border-radius: 6px; padding: 1px 6px; flex-shrink: 0; background: ${bg}; color: ${fg};`;
+    return {
+      h: 900,
+      bars: caps.map((c, i) => ({ c: bar(c, '#3b82f6'), f: bar(fnd[i], '#dc2626') })),
+      events: [
+        { kind: 'new video', badge: tag('#dc2626', '#fff'), text: 'New video detected on VTV24', at: '19:42' },
+        { kind: 'done', badge: tag('#171717', '#fafafa'), text: 'Processed video d003oY3tOPs: [n] findings', at: '19:30' },
+        { kind: 'done', badge: tag('#171717', '#fafafa'), text: 'Processed video 1RUJ_6eruwA: [n] findings', at: '18:05' },
+        { kind: 'failed', badge: tag('#fee2e2', '#991b1b'), text: 'Collect failed: video unavailable', at: '17:51' },
+        { kind: 'done', badge: tag('#171717', '#fafafa'), text: 'Processed video AiOTmCSFs4s: [n] findings', at: '17:20' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

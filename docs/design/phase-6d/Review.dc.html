@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Review queue</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} a{color:#171717} a:hover{color:#525252}</style>
+</helmet>
+<div style="width: 1280px; height: 760px; display: flex; font-family: Geist, system-ui, sans-serif; font-size: 14px; color: #0a0a0a; background: #ffffff;">
+  <dc-import name="Sidebar" active="Review queue" h="{{h}}" hint-size="240px,760px"></dc-import>
+  <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
+    <header style="height: 48px; flex-shrink: 0; border-bottom: 1px solid #e5e5e5; display: flex; align-items: center; gap: 10px; padding: 0 16px;">
+      <button type="button" aria-label="Toggle sidebar" style="width: 32px; height: 32px; border: none; background: transparent;"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#404040" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18"></path></svg></button>
+      <span aria-hidden="true" style="width: 1px; height: 16px; background: #e5e5e5;"></span>
+      <span style="color: #404040;">thi</span>
+    </header>
+    <main style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Review queue</h1>
+        <a href="#" style="font-size: 13px;">Per-finding view</a>
+      </div>
+      <div role="group" aria-label="Filter" style="display: flex; gap: 4px;">
+        <button type="button" aria-pressed="true" style="height: 32px; padding: 0 12px; border: none; border-radius: 6px; background: #171717; color: #fafafa; font: inherit;">Unreviewed <span style="opacity: 0.7;">[n]</span></button>
+        <button type="button" aria-pressed="false" style="height: 32px; padding: 0 12px; border: none; border-radius: 6px; background: transparent; font: inherit;">Needs info <span style="opacity: 0.7;">[n]</span></button>
+        <button type="button" aria-pressed="false" style="height: 32px; padding: 0 12px; border: none; border-radius: 6px; background: transparent; font: inherit;">Confirmed <span style="opacity: 0.7;">[n]</span></button>
+        <button type="button" aria-pressed="false" style="height: 32px; padding: 0 12px; border: none; border-radius: 6px; background: transparent; font: inherit;">Rejected <span style="opacity: 0.7;">[n]</span></button>
+        <button type="button" aria-pressed="false" style="height: 32px; padding: 0 12px; border: none; border-radius: 6px; background: transparent; font: inherit;">All <span style="opacity: 0.7;">[n]</span></button>
+      </div>
+      <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px;">
+        <sc-for list="{{items}}" as="it" hint-placeholder-count="5">
+          <li>
+            <a href="#" style="display: block; text-decoration: none; color: inherit; border: 1px solid #e5e5e5; border-radius: 8px; padding: 12px;">
+              <span style="display: flex; align-items: center; gap: 8px;">
+                <span style="flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500;">{{it.title}}</span>
+                <span style="{{it.vStyle}}">{{it.violation}}</span>
+                <span style="{{it.sStyle}}">{{it.severity}}</span>
+                <span style="font-size: 12px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 1px 7px;">unreviewed</span>
+              </span>
+              <span style="display: block; margin-top: 4px; font-size: 12px; color: #737373;">{{it.meta}}</span>
+            </a>
+          </li>
+        </sc-for>
+      </ul>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const yes = 'font-size: 12px; background: #dc2626; color: #fff; border-radius: 6px; padding: 1px 7px;';
+    const unc = 'font-size: 12px; border: 1px solid #d4d4d4; border-radius: 6px; padding: 1px 7px;';
+    const high = 'font-size: 12px; background: #dc2626; color: #fff; border-radius: 6px; padding: 1px 7px;';
+    const med = 'font-size: 12px; background: #f59e0b; border-radius: 6px; padding: 1px 7px;';
+    const it = (title, v, s, meta) => ({ title, violation: v, vStyle: v === 'yes' ? yes : unc, severity: s, sStyle: s === 'high' ? high : med, meta });
+    return {
+      h: 760,
+      items: [
+        it('BẮT CÓC NGƯỜI, PHÁ NHÀ DÂN, CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ', 'yes', 'high', 'Chân Trời Mới Media · unsupported_accusation, incitement · [n] findings'),
+        it('TỪ NGÀY TÔ LÂM LÊN NẮM QUYỀN, CÓ TỔNG CỘNG 850 NGHỊ ĐỊNH ĐƯỢC BAN HÀNH', 'uncertain', 'medium', 'Chân Trời Mới Media · fabrication · [n] findings'),
+        it('T.ô L.âm ưu tiên quan hệ với Bắc Kinh hơn chủ quyền biển đảo', 'uncertain', 'medium', 'Việt Tân · insult · [n] findings'),
+        it('T.ô L.âm dự Hội nghị Pháp Ngữ tại Campuchia giữa làn sóng chỉ trích', 'uncertain', 'medium', 'Việt Tân · insult · [n] findings'),
+        it('Gian.g hồ mạng chử.i bới câu view... chính quyền cứ để đó', 'uncertain', 'medium', 'Việt Tân · incitement · [n] findings'),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

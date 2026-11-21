@@ -2,7 +2,7 @@
 
 Status: approved (2026-11-21)
 
-Kế hoạch: [tasks/plan.md](tasks/plan.md) Phase 6d (T58–T64).
+Kế hoạch: [tasks/plan.md](tasks/plan.md) Phase 6d (T58–T66). Bản phác giao diện: [docs/design/phase-6d/](docs/design/phase-6d/README.md).
 
 Spec gốc: [SPEC.md](SPEC.md) §8 (Nguồn thu và AI), §10.4 `ai-gateway`, §10.5 bước 5 và hợp đồng C3, §10.6 bước 3–4, §10.10 mục 6–7, §13. Delta này thay delta cũ `SPEC-local-ai.md` (Ollama cho `media.vision` và `analysis.video_verdict`); file đó đã xoá, phần của nó đã làm và vẫn giữ được ghi ở mục "Hành vi hiện tại". Sau khi làm xong, gộp nội dung vào SPEC.md và đổi `Status` thành `implemented`.
 
@@ -99,10 +99,21 @@ Còn lại:
 
 ### 5. Giao diện
 
-- Settings: trang "AI providers" chỉ còn thẻ Jev (key và trạng thái), đổi tên mục thành "Jev". Bỏ danh sách nhà cung cấp, hộp thêm nhà cung cấp, bảng tuyến tác vụ.
-- Dải keyframe ở màn video bỏ mục "VLM description" và danh sách dấu hiệu.
-- Thẻ kết luận không hiện `model` khi `null`.
-- Các bước job hiển thị bỏ `vlm`.
+Giao diện theo bản phác Thi duyệt ngày 2026-11-21 (`docs/design/phase-6d/`).
+
+- Settings: mục "AI providers" đổi thành "Jev" (`/settings/jev`). Thẻ API key rộng hết trang (key đã che, nhập, xoá, Test connection) và thẻ Usage (§6). Bỏ danh sách nhà cung cấp, hộp thêm nhà cung cấp, bảng tuyến tác vụ.
+- Màn video: khung keyframe đang chọn bỏ "VLM description" và dấu hiệu; chỗ đó hiện "Jev findings on this frame" (nghi vấn Jev của khung hoặc đoạn chứa khung), rồi chữ OCR và ảnh mẫu đã khớp. Thẻ kết luận không hiện `model` khi `null`.
+- Các bước job ở Collect bỏ `vlm`.
+- Dashboard: thẻ Review (hàng đợi) và Events đổi chỗ; thẻ Usage thêm dòng Jev, mỗi nguồn ghi đã dùng, hạn mức và còn lại.
+- Ngày giờ ở Videos (Latest capture) và Collect (Started) theo dạng `HH:MM dd/mm/yyyy`, giờ Việt Nam.
+- Login: thẻ cao hơn, logo lớn ở trên, chữ "Sign in" dưới logo.
+- Entities: dòng cảnh báo dữ liệu khuôn mặt ghi việc dùng ảnh công khai của nhân vật công chúng.
+
+### 6. Theo dõi usage của Jev
+
+- Mỗi request Jev ghi một dòng vào `data/jev_calls.jsonl`: thời điểm, video, bản thu, run, nguồn, số ảnh, token vào và ra, có giữ nghi vấn không, trạng thái hoặc mã lỗi, số lần thử lại vì 429. Không ghi nội dung văn bản hay ảnh.
+- API tổng hợp theo kỳ (hôm nay, 7 ngày, 30 ngày) và theo nguồn, 5 lỗi gần nhất, hạn mức tháng (đã dùng, hạn mức, còn lại); API thử kết nối gọi Jev một câu ngắn.
+- Hạn mức lấy từ API TypeSafe nếu có; không có thì cấu hình `jev.monthly_request_limit` trong `analysis.toml` (để trống thì không hiện hạn mức).
 
 ## Tiêu chí thành công
 
@@ -112,7 +123,9 @@ Còn lại:
 4. `timeline.json` cũ có `visual` (vd của `1RUJ_6eruwA`) đọc được, `frames` giữ đủ `frame` và `t`; màn video của video đó mở được.
 5. Kết luận: test quy tắc cho `no`, `yes`, `uncertain`, thứ tự `finding_ids`, nghi vấn của run khác bị bỏ qua.
 6. `grep -rn "h4wk.ai\|AiConfig\|media.vision\|video_verdict\|describe_image"` trong `backend/src`, `web/src`, `config/` không còn kết quả (trừ chỗ đọc `timeline.json` cũ).
-7. Backend `pytest`, `ruff check`, `ruff format --check`; web `npm run build`, `npm run lint` đều qua. Test không gọi mạng.
+7. Sau khi xử lý một video, `data/jev_calls.jsonl` có đúng một dòng mỗi request và không chứa nội dung văn bản; trang Jev và Dashboard hiện số khớp file đó.
+8. Ảnh chụp các màn đổi khớp bản phác, Thi duyệt.
+9. Backend `pytest`, `ruff check`, `ruff format --check`; web `npm run build`, `npm run lint` đều qua. Test không gọi mạng.
 
 Không được thay đổi:
 

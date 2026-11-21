@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sidebar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<nav aria-label="Main" style="width: 240px; height: {{h}}px; box-sizing: border-box; border-right: 1px solid #e5e5e5; background: #fafafa; padding: 12px 10px; display: flex; flex-direction: column; gap: 4px; font-family: Geist, system-ui, sans-serif; font-size: 14px; color: #0a0a0a;">
+  <div style="display: flex; align-items: center; gap: 8px; padding: 4px 6px 14px;">
+    <span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 8px; background: #171717; color: #fafafa; display: flex; align-items: center; justify-content: center; font-weight: 600;">h</span>
+    <span style="font-size: 18px; font-weight: 600;">h4wk</span>
+  </div>
+  <sc-for list="{{items}}" as="it" hint-placeholder-count="7">
+    <a href="#" style="{{it.style}}">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{it.icon}}"></path></svg>
+      {{it.label}}
+    </a>
+  </sc-for>
+  <div style="flex-grow: 1;"></div>
+  <a href="#" style="{{settings.style}}">
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path></svg>
+    Settings
+  </a>
+  <div style="display: flex; align-items: center; gap: 6px; padding: 8px; font-size: 12px; color: #525252;">
+    <span aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
+    API connected
+  </div>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"active":{"editor":"enum","options":["Dashboard","Collect","Videos","Findings","Review queue","Watchlist","Entities","Settings"],"default":"Dashboard"},"h":{"editor":"int","default":900},"$preview":{"width":240,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const active = this.props.active ?? 'Dashboard';
+    const base = 'display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #404040;';
+    const on = base + ' background: #ececec; color: #0a0a0a; font-weight: 500;';
+    const nav = [
+      ['Dashboard', 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z'],
+      ['Collect', 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'],
+      ['Videos', 'M16 13l5.2 3.5a.5.5 0 0 0 .8-.4V7.9a.5.5 0 0 0-.8-.4L16 11M2 6h14v12H2z'],
+      ['Findings', 'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7'],
+      ['Review queue', 'M3 17l2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8'],
+      ['Watchlist', 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'],
+      ['Entities', 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0 .01M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'],
+    ];
+    return {
+      h: this.props.h ?? 900,
+      items: nav.map(([label, icon]) => ({ label, icon, style: label === active ? on : base })),
+      settings: { style: active === 'Settings' ? on : base },
+    };
+  }
+}
+</script>
+</body>
+</html>
