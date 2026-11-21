@@ -45,7 +45,7 @@ Buổi demo cũng trình diễn giao diện chỉnh nguồn để cho thấy ki�
 - Tiền API (LLM, VLM, speech-to-text, Supadata) không giới hạn.
 - Backend Python (FastAPI), frontend React, giao diện tiếng Anh. Cả hai thành viên thạo Python nhưng yếu frontend, nên cần đọc lại code do agent sinh ra để trả lời được câu hỏi của người chấm.
 - Chạy trực tiếp trên máy, không dùng Docker.
-- Khớp khuôn mặt chỉ so với các đối tượng đã khai báo, chạy trên máy, không lưu đặc trưng của khuôn mặt không khớp, và khi demo dùng khuôn mặt của thành viên nhóm.
+- Khớp khuôn mặt chỉ so với các đối tượng đã khai báo, chạy trên máy, không lưu đặc trưng của khuôn mặt không khớp, và khi demo dùng ảnh chân dung công khai của nhân vật công chúng là đối tượng (đổi ngày 2026-11-21, xem SPEC §13).
 - Comment được gửi nguyên văn cho nhà cung cấp AI. Settings chỉ cho chọn nhà cung cấp, không chọn theo quốc gia.
 
 ## Ngoài phạm vi

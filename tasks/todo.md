@@ -112,7 +112,7 @@ Nghiệm thu:
 
 - [x] Mọi file JSON mẫu validate được theo C1–C4.
 - [x] `verify` (T5) chạy trên bản thu mẫu báo OK; trước khi có T5, SHA-256 trong manifest được kiểm bằng `sha256sum`.
-- [ ] Quay video thật: lời nói tiếng Việt có tên đối tượng giả, khuôn mặt thật của thành viên đóng vai đối tượng. Thay video và ảnh khuôn mặt mẫu trong `tests/fixtures/build_sample_capture.py` rồi chạy lại script. Mục này phải xong trước T18 và T41.
+- [x] Video thật cho T18 và T41 (đổi ngày 21/11, SPEC §13): không quay video; dùng bản thu thật trong `data/` (`d003oY3tOPs`, `AiOTmCSFs4s`, `Tb_Kf0nDuK0`), đối tượng `e_01` Tô Lâm với 3 ảnh mẫu khuôn mặt từ Wikimedia Commons ("Tô Lâm 20260519 (cropped).jpg" GODL-India; "To Lam on April 27, 2025 (cropped).jpg" và "CPV General Secretary To Lam (2025).jpg" CC BY 4.0). Bản thu mẫu tổng hợp trong `tests/fixtures/` giữ nguyên cho test; không commit video YouTube.
 
 Kiểm tra: `uv run pytest tests/unit/test_fixtures.py`.
 
@@ -403,7 +403,7 @@ ffmpeg tạo `proxy_480p.mp4` (H.264) và `audio_16k.wav` (mono). faster-whisper
 
 Nghiệm thu:
 
-- [ ] Video mẫu (T44) cho ra transcript có mốc thời gian hợp lệ.
+- [x] Video thật `d003oY3tOPs` có transcript `stt` 19 đoạn, mốc thời gian tăng dần, `end ≥ start`; đoạn 0,0–9,16 s nhắc "Tô Lâm" (kiểm 21/11).
 - [x] Với video không có phụ đề, timeline dùng transcript `stt`.
 - [x] Chạy hai job cho hai bản thu riêng trong cùng worker chỉ nạp Whisper large-v3 một lần (kiểm qua log).
 
@@ -633,7 +633,7 @@ OpenCV YuNet và SFace chạy cục bộ trên CPU trong bước xử lý media,
 
 Nghiệm thu:
 
-- [ ] Trên bản thu mẫu, đoạn ảnh chế khuôn mặt thành viên nhóm sinh dấu hiệu `face`.
+- [ ] Xử lý lại media của `d003oY3tOPs` với ảnh mẫu thật: `face_hits.json` có dấu hiệu `face` của `e_01`. Thử riêng trên keyframe có sẵn ngày 21/11: 69/196 khuôn mặt vượt ngưỡng 0,363 (cao nhất 0,867); `AiOTmCSFs4s` 45/202, `Tb_Kf0nDuK0` 42/409; hai video đối chứng không có Tô Lâm (`7aqvUHMVABQ`, `pFMt35QTTyQ`) 0. Trước đó ảnh mẫu là hình mặt cười vẽ tay, không dò được khuôn mặt nên khớp mặt chưa từng sinh dấu hiệu.
 - [x] Khuôn mặt của người khác trong clip thử không sinh dấu hiệu, và không có file nào chứa đặc trưng của họ.
 - [x] Tắt tính năng trong `analysis.toml` thì bước này bị bỏ qua.
 

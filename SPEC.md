@@ -585,6 +585,6 @@ Các quyết định đã chốt:
 - Phân tích lại một video thì mọi nghi vấn của lần chạy mới phải được rà soát lại; quyết định cũ không tự áp dụng.
 - Comment được gửi nguyên văn cho nhà cung cấp AI, kể cả tên và ID người bình luận.
 - `config/ai.toml.example` cấu hình sẵn nhiều nhà cung cấp: Anthropic, OpenAI, Gemini và các nhà OpenAI-compatible như DeepSeek, Qwen, GLM, Kimi. Settings chỉ cho chọn nhà cung cấp và model, không có lựa chọn theo quốc gia.
-- Có khớp khuôn mặt, với các giới hạn ở 10.6 và phần 11. Điều này đảo ngược quy định "không nhận diện khuôn mặt" trong mô tả gốc (mục 13, 14); dữ liệu khuôn mặt là dữ liệu cá nhân nhạy cảm theo Nghị định 13/2023, nên khi demo dùng khuôn mặt của chính thành viên nhóm làm đối tượng, và báo cáo môn học giải thích lý do thay đổi.
+- Có khớp khuôn mặt, với các giới hạn ở 10.6 và phần 11. Điều này đảo ngược quy định "không nhận diện khuôn mặt" trong mô tả gốc (mục 13, 14); dữ liệu khuôn mặt là dữ liệu cá nhân nhạy cảm theo Nghị định 13/2023, và báo cáo môn học giải thích lý do thay đổi. Ngày 2026-11-21 Thi đổi quyết định: đối tượng demo là nhân vật công chúng Tô Lâm, ảnh khuôn mặt mẫu là ảnh chân dung công khai trên Wikimedia Commons (ghi nguồn và giấy phép trong báo cáo), nghiệm thu trên video thật đã thu; không còn quay video có khuôn mặt thành viên nhóm.
 - Nhóm không có kênh YouTube riêng. Màn 3 theo dõi kênh tin tức đăng thường xuyên, nên chỉ trình diễn việc phát hiện và tự xử lý video mới, không trình diễn nghi vấn mới.
 - Thi là người chịu trách nhiệm chính và duyệt mọi thay đổi hợp đồng sau checkpoint A.

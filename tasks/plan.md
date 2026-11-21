@@ -216,7 +216,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T2: Spike yt-dlp trên WSL và độ trễ RSS
 - [x] T3: Spike môi trường GPU và các model
 - [x] T4: Hợp đồng C1–C5
-- [ ] T44: Bản thu mẫu (xong phần tổng hợp; còn quay video thật, cần trước T18 và T41)
+- [x] T44: Bản thu mẫu (tổng hợp cho test; video thật thay bằng bản thu trong `data/`, đổi ngày 21/11)
 
 ### Phase 1: Luồng tối giản (tuần 1)
 
@@ -245,7 +245,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 3: Media đa phương thức (tuần 2–3)
 
-- [ ] T18: Proxy 480p, audio, STT (còn transcript từ video mẫu thật, chờ T44)
+- [x] T18: Proxy 480p, audio, STT (transcript video thật kiểm trên `d003oY3tOPs` ngày 21/11)
 - [x] T19: Keyframe theo mức thay đổi
 - [x] T20: OCR trên keyframe và thumbnail
 - [x] T21: VLM mô tả keyframe và thumbnail (test live chuyển sang Checkpoint 6c; VLM bị bỏ ở Phase 6d)
