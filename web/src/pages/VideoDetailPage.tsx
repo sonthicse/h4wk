@@ -19,6 +19,7 @@ import CommentsTab from '@/components/video/CommentsTab'
 import FindingTimeline from '@/components/video/FindingTimeline'
 import KeyframeStrip from '@/components/video/KeyframeStrip'
 import { buildKeyframes } from '@/components/video/keyframes'
+import EvidencePanel from '@/components/video/EvidencePanel'
 import VerdictCard from '@/components/video/VerdictCard'
 import Player from '@/components/video/Player'
 import TranscriptPane from '@/components/video/TranscriptPane'
@@ -126,7 +127,7 @@ function VideoView({
         </div>
       </div>
 
-      <VerdictCard videoId={video.id} items={items} onOpen={openEvidence} />
+      <VerdictCard videoId={video.id} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_24rem] items-start gap-6">
         <div className="min-w-0 space-y-6">
@@ -139,6 +140,7 @@ function VideoView({
               activeFinding={finding}
             />
           </div>
+          <EvidencePanel videoId={video.id} items={items} onOpen={openEvidence} />
           <FindingTimeline findings={findings} player={player} activeId={finding?.id ?? null} onOpen={openFinding} />
           <KeyframeStrip
             videoId={video.id}

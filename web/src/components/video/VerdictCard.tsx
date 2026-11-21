@@ -1,30 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { ApiError } from '@/api/client'
-import { decideVideo, getVerdict, type QueueItem, type VideoDecisionStatus } from '@/api/review'
+import { decideVideo, getVerdict, type VideoDecisionStatus } from '@/api/review'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { formatTime, severityVariant, statusVariant } from '@/lib/findings'
+import { severityVariant, statusVariant } from '@/lib/findings'
 import { formatVnDateTime } from '@/lib/format'
-
-type Kind = QueueItem['finding']['source_kind']
-
-// Bằng chứng nhóm theo loại, theo thứ tự hiển thị.
-const groups: { label: string; kinds: Kind[] }[] = [
-  { label: 'On-screen text', kinds: ['ocr', 'thumbnail'] },
-  { label: 'Speech', kinds: ['speech'] },
-  { label: 'Comments', kinds: ['comment'] },
-  { label: 'Visual', kinds: ['visual'] },
-]
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return <kbd className="rounded border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">{children}</kbd>
 }
 
 // Thẻ kết luận của video, nút duyệt cả video và bằng chứng. Không có kết luận thì không hiện gì.
-export default function VerdictCard({ videoId, items, onOpen }: { videoId: string; items: QueueItem[]; onOpen: (it: QueueItem) => void }) {
+export default function VerdictCard({ videoId }: { videoId: string }) {
   const queryClient = useQueryClient()
   const detail = useQuery({ queryKey: ['verdict', videoId], queryFn: () => getVerdict(videoId) })
   const [rejecting, setRejecting] = useState(false)
@@ -83,7 +73,6 @@ export default function VerdictCard({ videoId, items, onOpen }: { videoId: strin
   })
 
   if (!data || !verdict) return null
-  const basis = new Set(verdict.finding_ids)
   const last = data.decisions[0]
   const conflict = save.error instanceof ApiError && save.error.status === 409
 
@@ -145,39 +134,6 @@ export default function VerdictCard({ videoId, items, onOpen }: { videoId: strin
         </div>
       </div>
 
-      {items.length > 0 && (
-        <div className="space-y-3 border-t pt-3">
-          <h3 className="text-xs text-muted-foreground">Evidence</h3>
-          {groups.map((g) => {
-            const list = items.filter((it) => g.kinds.includes(it.finding.source_kind))
-            if (list.length === 0) return null
-            return (
-              <div key={g.label} className="space-y-1">
-                <h4 className="text-sm font-medium">{g.label}</h4>
-                <ul className="space-y-1">
-                  {list.map((it) => {
-                    const f = it.finding
-                    return (
-                      <li key={f.id}>
-                        <button
-                          type="button"
-                          onClick={() => onOpen(it)}
-                          className="flex w-full items-start gap-2 rounded px-2 py-1 text-left text-sm hover:bg-muted"
-                        >
-                          <span className="w-12 shrink-0 font-mono text-xs text-muted-foreground">{f.start != null ? formatTime(f.start) : '—'}</span>
-                          <span className="line-clamp-2 min-w-0 flex-1">{f.quote}</span>
-                          <Badge variant="outline" className="shrink-0">{f.category}</Badge>
-                          {basis.has(f.id) && <Badge className="shrink-0">basis</Badge>}
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </div>
-            )
-          })}
-        </div>
-      )}
     </section>
   )
 }
