@@ -297,7 +297,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 Spec: [SPEC-local-ai.md](../SPEC-local-ai.md). VLM và LLM kết luận chạy cục bộ qua Ollama (`qwen3-vl:4b` trên máy GPU riêng), nhà cloud giữ làm tuyến dự phòng; mọi phân loại văn bản qua Jev cấu hình R10; bỏ `analysis.classify`.
 
 - [x] T51: `ai-gateway`: nhà cung cấp `ollama`
-- [ ] T52: `media`: mô tả ảnh qua Ollama, cache theo từng ảnh
+- [x] T52: `media`: mô tả ảnh qua Ollama, cache theo từng ảnh
 - [ ] T53: `analysis`: kết luận theo video bằng model cục bộ
 - [x] T54: `analysis`: Jev cấu hình R10 cho lời nói và comment
 - [x] T55: `analysis`: Jev cho tiêu đề, mô tả, OCR, hình ảnh và thumbnail

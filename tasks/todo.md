@@ -453,7 +453,7 @@ Nghiệm thu:
 
 - [x] Test với `FakeProvider` cho ra `vision.json` hợp lệ (trong `tests/integration/test_pipeline.py`).
 - [x] Đổi prompt làm mới cache ảnh (test trong `tests/unit/test_vision.py`).
-- Test live 3 khung chuyển sang T52. Nemotron đạt 2/3 lượt; Ollama `qwen3-vl:4b` đạt 0/2 lượt trước khi áp dụng timeout 300 giây và `max_tokens` 1024.
+- Test live 3 khung chuyển sang Checkpoint 6c. Nemotron đạt 2/3 lượt; Ollama `qwen3-vl:4b` đạt 0/2 lượt trước khi áp dụng timeout 300 giây và `max_tokens` 1024.
 
 Kiểm tra tích hợp với nhà cung cấp giả bằng `uv run pytest tests/integration/test_pipeline.py -k full_flow`. Từ 21/11, test live dùng Ollama `qwen3-vl:4b` (T52), không cần API key.
 
@@ -896,7 +896,6 @@ Nghiệm thu:
 - [x] Test: ảnh đã có trong cache với cùng prompt và route thì không gọi gateway; sửa tuyến `analysis.video_verdict` không làm mô tả lại ảnh; đổi prompt thì mô tả lại.
 - [x] Test: dừng (ném lỗi) sau ảnh thứ 2 của 4 ảnh, chạy lại thì chỉ gọi gateway cho 2 ảnh còn lại.
 - [x] Test: provider Ollama gửi `timeout=300` và `max_tokens=4096`; provider `openai_compat` khác không đổi.
-- [ ] Test live 3 khung của T21 đạt 3/3 lượt với `ollama/qwen3-vl:4b`: ảnh ghép còng tay và ảnh có chữ chửi có `offensive_cues` đúng loại, ảnh bình thường không có.
 - [x] Chạy thật trên một video ngắn có sẵn với `config/ai.toml` trỏ Ollama: `vision.json` ghi `provider: ollama`, `model: qwen3-vl:4b`; ghi thời gian mỗi ảnh vào `docs/eval/local-ai.md`.
 
 Kiểm tra: `cd backend && uv run --no-sync pytest tests/unit/test_vision.py tests/unit/test_ai_providers.py`.
@@ -983,6 +982,7 @@ Người làm: Thi. Phụ thuộc: không. Cỡ: S.
 
 ### Checkpoint 6c
 
+- [ ] Test live 3 khung của T21 đạt 3/3 lượt với `ollama/qwen3-vl:4b`: ảnh ghép còng tay và ảnh có chữ chửi có `offensive_cues` đúng loại, ảnh bình thường không có. Bản thinking với 4096 token đạt 0/3: cả ba lượt nhận ra còng tay (một lượt dùng từ “gông tay”) nhưng bỏ sót dấu hiệu chữ buộc tội. Chờ chọn bản thinking hay instruct.
 - [ ] Xử lý một video thật ở mức `full` với cấu hình mẫu mới: `ai_calls.jsonl` không có lời gọi cloud cho `media.vision` và `analysis.video_verdict` khi Ollama chạy.
 - [ ] Đủ 8 tiêu chí thành công của SPEC-local-ai.md.
 - [ ] Gộp SPEC-local-ai.md vào SPEC.md (§10.4, §10.5, §10.6, §13), đổi `Status` thành `implemented`.
