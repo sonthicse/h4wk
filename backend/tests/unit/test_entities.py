@@ -128,3 +128,34 @@ def test_too_large_image_is_413(client: TestClient, monkeypatch) -> None:
     monkeypatch.setattr(entities, "MAX_REF_BYTES", 16)
     _add(client)
     assert client.post("/api/entities/e_01/refs/face", content=PNG).status_code == 413
+
+
+def test_create_entity_with_description(client: TestClient) -> None:
+    r = client.post(
+        "/api/entities", json={"name": "Tô Lâm", "description": "  General Secretary  "}
+    )
+    assert r.status_code == 201, r.text
+    assert r.json()["description"] == "General Secretary"
+    assert load_entities()[0].description == "General Secretary"
+
+
+def test_patch_description_set_keep_and_clear(client: TestClient) -> None:
+    _add(client)
+    r = client.patch("/api/entities/e_01", json={"description": "Singer"})
+    assert r.json()["description"] == "Singer"
+    # Không gửi description thì giữ nguyên.
+    r = client.patch("/api/entities/e_01", json={"aliases": ["Mẫu Ca"]})
+    assert r.json()["description"] == "Singer" and load_entities()[0].description == "Singer"
+    # Chuỗi rỗng thì xoá, các trường khác không đổi.
+    r = client.patch("/api/entities/e_01", json={"description": ""})
+    assert r.status_code == 200 and r.json()["description"] is None
+    saved = load_entities()[0]
+    assert (
+        saved.description is None and saved.name == "Trần Văn Mẫu" and saved.aliases == ["Mẫu Ca"]
+    )
+
+
+def test_patch_null_name_is_ignored(client: TestClient) -> None:
+    _add(client)
+    r = client.patch("/api/entities/e_01", json={"name": None, "description": "X"})
+    assert r.status_code == 200 and r.json()["name"] == "Trần Văn Mẫu"

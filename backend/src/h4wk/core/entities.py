@@ -47,7 +47,12 @@ def _save(entities: list[Entity]) -> None:
 
 
 def add_entity(
-    session: Session, *, name: str, aliases: list[str], abbreviations: list[str]
+    session: Session,
+    *,
+    name: str,
+    aliases: list[str],
+    abbreviations: list[str],
+    description: str | None = None,
 ) -> Entity:
     entities = load_entities()
     entity = Entity(
@@ -55,6 +60,7 @@ def add_entity(
         name=name,
         aliases=aliases,
         abbreviations=abbreviations,
+        description=description,
     )
     entities.append(entity)
     _save(entities)
@@ -79,7 +85,7 @@ def get_entity(entity_id: str) -> Entity:
 
 
 def update_entity(session: Session, entity_id: str, **fields: object) -> Entity:
-    """Sửa tên, biệt danh, viết tắt; trường không truyền thì giữ nguyên."""
+    """Sửa tên, biệt danh, viết tắt, mô tả; trường không truyền thì giữ nguyên."""
     entities = load_entities()
     for i, entity in enumerate(entities):
         if entity.id == entity_id:

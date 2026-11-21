@@ -273,6 +273,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/review/videos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Video Queue */
+        get: operations["video_queue_api_review_videos_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/verdict": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Video Verdict */
+        get: operations["video_verdict_api_videos__video_id__verdict_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/videos/{video_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Video */
+        post: operations["decide_video_api_videos__video_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/videos": {
         parameters: {
             query?: never;
@@ -624,6 +675,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/settings/jev": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Jev */
+        get: operations["get_jev_api_settings_jev_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/jev/key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Jev Key */
+        put: operations["put_jev_key_api_settings_jev_key_put"];
+        post?: never;
+        /** Delete Jev Key */
+        delete: operations["delete_jev_key_api_settings_jev_key_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings/ai": {
         parameters: {
             query?: never;
@@ -888,6 +974,7 @@ export interface components {
             capture_count: number;
             findings_by_severity: components["schemas"]["SeverityCounts"];
             findings_by_status: components["schemas"]["StatusCounts"];
+            videos_by_review_status: components["schemas"]["StatusCounts"];
             /** Activity */
             activity: components["schemas"]["DayActivity"][];
             youtube_quota: components["schemas"]["Usage"] | null;
@@ -938,6 +1025,8 @@ export interface components {
              * @default []
              */
             abbreviations: string[];
+            /** Description */
+            description?: string | null;
         };
         /** EntityCreate */
         EntityCreate: {
@@ -953,6 +1042,8 @@ export interface components {
              * @default []
              */
             abbreviations: string[];
+            /** Description */
+            description?: string | null;
         };
         /** EntityOut */
         EntityOut: {
@@ -970,6 +1061,8 @@ export interface components {
              * @default []
              */
             abbreviations: string[];
+            /** Description */
+            description?: string | null;
             ref_counts: components["schemas"]["RefCounts"];
         };
         /** EntityUpdate */
@@ -980,6 +1073,8 @@ export interface components {
             aliases?: string[] | null;
             /** Abbreviations */
             abbreviations?: string[] | null;
+            /** Description */
+            description?: string | null;
         };
         /** Event */
         Event: {
@@ -1144,6 +1239,10 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** JevSettingsView */
+        JevSettingsView: {
+            key: components["schemas"]["KeyInfo"];
         };
         /** Job */
         Job: {
@@ -1704,12 +1803,45 @@ export interface components {
              */
             is_live: boolean;
         };
+        /** VideoDecisionBody */
+        VideoDecisionBody: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "confirmed" | "rejected" | "needs_info";
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /** Run Id */
+            run_id: string;
+        };
         /** VideoDetail */
         VideoDetail: {
             video: components["schemas"]["Video"];
             channel: components["schemas"]["Channel"] | null;
             /** Captures */
             captures: components["schemas"]["CaptureSummary"][];
+        };
+        /** VideoQueueItem */
+        VideoQueueItem: {
+            video: components["schemas"]["VideoRef"];
+            /** Capture */
+            capture: string;
+            /** Run Id */
+            run_id: string;
+            verdict: components["schemas"]["VideoVerdict"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "unreviewed" | "confirmed" | "rejected" | "needs_info";
+            /** Finding Count */
+            finding_count: number;
+            /** Decisions */
+            decisions: components["schemas"]["VideoReviewDecision"][];
         };
         /** VideoRef */
         VideoRef: {
@@ -1721,6 +1853,30 @@ export interface components {
             channel?: string | null;
             /** View Count */
             view_count?: number | null;
+        };
+        /**
+         * VideoReviewDecision
+         * @description Một quyết định rà soát cho kết luận của video.
+         */
+        VideoReviewDecision: {
+            /** Video Id */
+            video_id: string;
+            /** Run Id */
+            run_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "confirmed" | "rejected" | "needs_info";
+            /** By */
+            by: string;
+            /** At */
+            at: string;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
         };
         /** VideoSummary */
         VideoSummary: {
@@ -1737,6 +1893,56 @@ export interface components {
             findings: components["schemas"]["SeverityCounts"];
             /** Latest Capture */
             latest_capture: string;
+        };
+        /**
+         * VideoVerdict
+         * @description Kết luận theo video (verdict.json), một lần chạy một kết luận.
+         */
+        VideoVerdict: {
+            /**
+             * Violation
+             * @enum {string}
+             */
+            violation: "yes" | "no" | "uncertain";
+            /**
+             * Categories
+             * @default []
+             */
+            categories: components["schemas"]["Category"][];
+            severity?: components["schemas"]["Severity"] | null;
+            confidence: components["schemas"]["Confidence"];
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * Finding Ids
+             * @default []
+             */
+            finding_ids: string[];
+            /** Run Id */
+            run_id: string;
+            /** Video Id */
+            video_id: string;
+            /** Capture */
+            capture: string;
+            model?: components["schemas"]["ModelRef"] | null;
+            /** At */
+            at: string;
+        };
+        /** VideoVerdictDetail */
+        VideoVerdictDetail: {
+            verdict: components["schemas"]["VideoVerdict"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "unreviewed" | "confirmed" | "rejected" | "needs_info";
+            /** Decisions */
+            decisions: components["schemas"]["VideoReviewDecision"][];
+            /** Findings */
+            findings: components["schemas"]["Finding"][];
         };
         /**
          * Visual
@@ -2327,6 +2533,125 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ReviewDecision"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    video_queue_api_review_videos_get: {
+        parameters: {
+            query?: {
+                status?: ("unreviewed" | "confirmed" | "rejected" | "needs_info") | null;
+                latest_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoQueueItem"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    video_verdict_api_videos__video_id__verdict_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoVerdictDetail"];
+                };
+            };
+            /** @description Verdict not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_video_api_videos__video_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                video_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VideoDecisionBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoReviewDecision"];
+                };
+            };
+            /** @description Verdict not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Verdict changed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -3045,6 +3370,79 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_jev_api_settings_jev_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JevSettingsView"];
+                };
+            };
+        };
+    };
+    put_jev_key_api_settings_jev_key_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KeyBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_jev_key_api_settings_jev_key_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyInfo"];
                 };
             };
         };

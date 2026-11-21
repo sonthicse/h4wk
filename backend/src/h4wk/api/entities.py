@@ -21,12 +21,21 @@ class EntityCreate(BaseModel):
     name: str = Field(min_length=1)
     aliases: list[str] = []
     abbreviations: list[str] = []
+    description: str | None = None
 
 
 class EntityUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1)
     aliases: list[str] | None = None
     abbreviations: list[str] | None = None
+    description: str | None = None
+
+
+def _blank_to_none(fields: dict) -> dict:
+    """Mô tả rỗng hoặc chỉ có khoảng trắng nghĩa là xoá mô tả."""
+    if "description" in fields:
+        fields["description"] = (fields["description"] or "").strip() or None
+    return fields
 
 
 def _not_found(actor: str, action: str, target: str) -> HTTPException:
@@ -54,7 +63,7 @@ def list_entities() -> list[EntityOut]:
 @router.post("", status_code=status.HTTP_201_CREATED)
 def add_entity(body: EntityCreate, session: SessionDep, actor: ActorDep) -> entities.Entity:
     try:
-        entity = entities.add_entity(session, **body.model_dump())
+        entity = entities.add_entity(session, **_blank_to_none(body.model_dump()))
     except Exception as e:
         audit.log(actor, "entity.create", None, {"error": str(e)}, status="error")
         raise
@@ -66,7 +75,13 @@ def add_entity(body: EntityCreate, session: SessionDep, actor: ActorDep) -> enti
 def update_entity(
     entity_id: str, body: EntityUpdate, session: SessionDep, actor: ActorDep
 ) -> entities.Entity:
-    fields = body.model_dump(exclude_none=True)
+    # exclude_unset: trường không gửi thì giữ nguyên; null chỉ có nghĩa với description.
+    fields = {
+        k: v
+        for k, v in body.model_dump(exclude_unset=True).items()
+        if v is not None or k == "description"
+    }
+    fields = _blank_to_none(fields)
     try:
         entity = entities.update_entity(session, entity_id, **fields)
     except entities.NotFound:

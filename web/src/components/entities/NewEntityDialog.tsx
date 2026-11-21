@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 // Tạo đối tượng qua POST /api/entities, có thể nhập luôn biệt danh và viết tắt.
 export default function NewEntityDialog({
@@ -21,14 +22,16 @@ export default function NewEntityDialog({
   const [name, setName] = useState('')
   const [aliases, setAliases] = useState<string[]>([])
   const [abbreviations, setAbbreviations] = useState<string[]>([])
+  const [description, setDescription] = useState('')
 
   const create = useMutation({
-    mutationFn: () => createEntity(name.trim(), aliases, abbreviations),
+    mutationFn: () => createEntity(name.trim(), aliases, abbreviations, description.trim()),
     onSuccess: async (entity) => {
       await queryClient.invalidateQueries({ queryKey: ['entities'] })
       setName('')
       setAliases([])
       setAbbreviations([])
+      setDescription('')
       onOpenChange(false)
       onCreated(entity)
     },
@@ -63,6 +66,13 @@ export default function NewEntityDialog({
             <Label htmlFor="new-entity-abbr">Abbreviations</Label>
             <TermListInput id="new-entity-abbr" values={abbreviations} placeholder="e.g. NVA" onChange={setAbbreviations} />
             <p className="text-xs text-muted-foreground">Matched exactly, as a whole word.</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="new-entity-description">Description</Label>
+            <Textarea id="new-entity-description" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <p className="text-xs text-muted-foreground">
+              Who or what this entity covers, in English. Used by the Jev classifier to decide whether an attack targets this entity.
+            </p>
           </div>
           {create.error && (
             <p role="alert" className="text-sm text-destructive">

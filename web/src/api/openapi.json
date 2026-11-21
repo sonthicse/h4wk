@@ -797,6 +797,178 @@
         }
       }
     },
+    "/api/review/videos": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Video Queue",
+        "operationId": "video_queue_api_review_videos_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "unreviewed",
+                    "confirmed",
+                    "rejected",
+                    "needs_info"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "latest_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Latest Only"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VideoQueueItem"
+                  },
+                  "title": "Response Video Queue Api Review Videos Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/verdict": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Video Verdict",
+        "operationId": "video_verdict_api_videos__video_id__verdict_get",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoVerdictDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Verdict not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/videos/{video_id}/decision": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Decide Video",
+        "operationId": "decide_video_api_videos__video_id__decision_post",
+        "parameters": [
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Video Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoDecisionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoReviewDecision"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Verdict not found"
+          },
+          "409": {
+            "description": "Verdict changed"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/videos": {
       "get": {
         "tags": [
@@ -1879,6 +2051,87 @@
         }
       }
     },
+    "/api/settings/jev": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Get Jev",
+        "operationId": "get_jev_api_settings_jev_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JevSettingsView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/jev/key": {
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Put Jev Key",
+        "operationId": "put_jev_key_api_settings_jev_key_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Delete Jev Key",
+        "operationId": "delete_jev_key_api_settings_jev_key_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/ai": {
       "get": {
         "tags": [
@@ -2661,6 +2914,9 @@
           "findings_by_status": {
             "$ref": "#/components/schemas/StatusCounts"
           },
+          "videos_by_review_status": {
+            "$ref": "#/components/schemas/StatusCounts"
+          },
           "activity": {
             "items": {
               "$ref": "#/components/schemas/DayActivity"
@@ -2706,6 +2962,7 @@
           "capture_count",
           "findings_by_severity",
           "findings_by_status",
+          "videos_by_review_status",
           "activity",
           "youtube_quota",
           "supadata_credits",
@@ -2787,6 +3044,17 @@
             "type": "array",
             "title": "Abbreviations",
             "default": []
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
           }
         },
         "additionalProperties": false,
@@ -2820,6 +3088,17 @@
             "type": "array",
             "title": "Abbreviations",
             "default": []
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
           }
         },
         "type": "object",
@@ -2855,6 +3134,17 @@
             "type": "array",
             "title": "Abbreviations",
             "default": []
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
           },
           "ref_counts": {
             "$ref": "#/components/schemas/RefCounts"
@@ -2910,6 +3200,17 @@
               }
             ],
             "title": "Abbreviations"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
           }
         },
         "type": "object",
@@ -3415,6 +3716,18 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "JevSettingsView": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/KeyInfo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key"
+        ],
+        "title": "JevSettingsView"
       },
       "Job": {
         "properties": {
@@ -4980,6 +5293,34 @@
         ],
         "title": "Video"
       },
+      "VideoDecisionBody": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "rejected",
+              "needs_info"
+            ],
+            "title": "Status"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": ""
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "run_id"
+        ],
+        "title": "VideoDecisionBody"
+      },
       "VideoDetail": {
         "properties": {
           "video": {
@@ -5010,6 +5351,57 @@
           "captures"
         ],
         "title": "VideoDetail"
+      },
+      "VideoQueueItem": {
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/VideoRef"
+          },
+          "capture": {
+            "type": "string",
+            "pattern": "^\\d{8}T\\d{6}$",
+            "title": "Capture"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "verdict": {
+            "$ref": "#/components/schemas/VideoVerdict"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "unreviewed",
+              "confirmed",
+              "rejected",
+              "needs_info"
+            ],
+            "title": "Status"
+          },
+          "finding_count": {
+            "type": "integer",
+            "title": "Finding Count"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/VideoReviewDecision"
+            },
+            "type": "array",
+            "title": "Decisions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "video",
+          "capture",
+          "run_id",
+          "verdict",
+          "status",
+          "finding_count",
+          "decisions"
+        ],
+        "title": "VideoQueueItem"
       },
       "VideoRef": {
         "properties": {
@@ -5056,6 +5448,52 @@
           "id"
         ],
         "title": "VideoRef"
+      },
+      "VideoReviewDecision": {
+        "properties": {
+          "video_id": {
+            "type": "string",
+            "title": "Video Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "rejected",
+              "needs_info"
+            ],
+            "title": "Status"
+          },
+          "by": {
+            "type": "string",
+            "pattern": "^(user|system):\\S+$",
+            "title": "By"
+          },
+          "at": {
+            "type": "string",
+            "title": "At"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "video_id",
+          "run_id",
+          "status",
+          "by",
+          "at"
+        ],
+        "title": "VideoReviewDecision",
+        "description": "M\u1ed9t quy\u1ebft \u0111\u1ecbnh r\u00e0 so\u00e1t cho k\u1ebft lu\u1eadn c\u1ee7a video."
       },
       "VideoSummary": {
         "properties": {
@@ -5119,6 +5557,132 @@
           "latest_capture"
         ],
         "title": "VideoSummary"
+      },
+      "VideoVerdict": {
+        "properties": {
+          "violation": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no",
+              "uncertain"
+            ],
+            "title": "Violation"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            },
+            "type": "array",
+            "title": "Categories",
+            "default": []
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Severity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/Confidence"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "default": ""
+          },
+          "finding_ids": {
+            "items": {
+              "type": "string",
+              "pattern": "^f_[0-9A-HJKMNP-TV-Z]{26}$"
+            },
+            "type": "array",
+            "title": "Finding Ids",
+            "default": []
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "video_id": {
+            "type": "string",
+            "title": "Video Id"
+          },
+          "capture": {
+            "type": "string",
+            "pattern": "^\\d{8}T\\d{6}$",
+            "title": "Capture"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModelRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "at": {
+            "type": "string",
+            "title": "At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "violation",
+          "confidence",
+          "run_id",
+          "video_id",
+          "capture",
+          "at"
+        ],
+        "title": "VideoVerdict",
+        "description": "K\u1ebft lu\u1eadn theo video (verdict.json), m\u1ed9t l\u1ea7n ch\u1ea1y m\u1ed9t k\u1ebft lu\u1eadn."
+      },
+      "VideoVerdictDetail": {
+        "properties": {
+          "verdict": {
+            "$ref": "#/components/schemas/VideoVerdict"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "unreviewed",
+              "confirmed",
+              "rejected",
+              "needs_info"
+            ],
+            "title": "Status"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/VideoReviewDecision"
+            },
+            "type": "array",
+            "title": "Decisions"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/Finding"
+            },
+            "type": "array",
+            "title": "Findings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "verdict",
+          "status",
+          "decisions",
+          "findings"
+        ],
+        "title": "VideoVerdictDetail"
       },
       "Visual": {
         "properties": {

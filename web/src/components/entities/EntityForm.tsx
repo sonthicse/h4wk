@@ -3,19 +3,25 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { updateEntity, type Entity } from '@/api/entities'
 import TermListInput from '@/components/entities/TermListInput'
 
-type Form = { name: string; aliases: string[]; abbreviations: string[] }
+type Form = { name: string; aliases: string[]; abbreviations: string[]; description: string }
 
 // Form sửa tên, biệt danh, viết tắt. Trang cha đặt `key` theo id đối tượng để form khởi tạo lại khi đổi đối tượng.
 export default function EntityForm({ entity }: { entity: Entity }) {
   const queryClient = useQueryClient()
-  const initial: Form = { name: entity.name, aliases: entity.aliases, abbreviations: entity.abbreviations }
+  const initial: Form = {
+    name: entity.name,
+    aliases: entity.aliases,
+    abbreviations: entity.abbreviations,
+    description: entity.description ?? '',
+  }
   const [form, setForm] = useState<Form>(initial)
 
   const save = useMutation({
-    mutationFn: () => updateEntity(entity.id, { ...form, name: form.name.trim() }),
+    mutationFn: () => updateEntity(entity.id, { ...form, name: form.name.trim(), description: form.description.trim() }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['entities'] }),
   })
 
@@ -48,6 +54,20 @@ export default function EntityForm({ entity }: { entity: Entity }) {
           <TermListInput id="entity-abbr" values={form.abbreviations} placeholder="e.g. NVA" onChange={set('abbreviations')} />
           <p className="text-xs text-muted-foreground">Matched exactly, as a whole word.</p>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="entity-description">Description</Label>
+        <Textarea
+          id="entity-description"
+          className="max-w-2xl"
+          rows={3}
+          value={form.description}
+          onChange={(e) => set('description')(e.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Who or what this entity covers, in English. Used by the Jev classifier to decide whether an attack targets this entity.
+        </p>
       </div>
 
       <div className="flex items-center gap-2">
