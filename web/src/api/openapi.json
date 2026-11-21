@@ -2132,49 +2132,37 @@
         }
       }
     },
-    "/api/settings/ai": {
+    "/api/settings/jev/usage": {
       "get": {
         "tags": [
           "settings"
         ],
-        "summary": "Get Ai",
-        "operationId": "get_ai_api_settings_ai_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiSettings"
-                }
-              }
+        "summary": "Jev Usage",
+        "operationId": "jev_usage_api_settings_jev_usage_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "today",
+                "7d",
+                "30d"
+              ],
+              "type": "string",
+              "default": "7d",
+              "title": "Period"
             }
           }
-        }
-      },
-      "put": {
-        "tags": [
-          "settings"
         ],
-        "summary": "Put Ai",
-        "operationId": "put_ai_api_settings_ai_put",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AiUpdate"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiSettings"
+                  "$ref": "#/components/schemas/JevUsage"
                 }
               }
             }
@@ -2192,193 +2180,20 @@
         }
       }
     },
-    "/api/settings/ai/providers/{name}": {
-      "delete": {
-        "tags": [
-          "settings"
-        ],
-        "summary": "Delete Provider",
-        "operationId": "delete_provider_api_settings_ai_providers__name__delete",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiSettings"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/ai/providers/{name}/key": {
-      "put": {
-        "tags": [
-          "settings"
-        ],
-        "summary": "Put Ai Key",
-        "operationId": "put_ai_key_api_settings_ai_providers__name__key_put",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Name"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/KeyBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KeyInfo"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "settings"
-        ],
-        "summary": "Delete Ai Key",
-        "operationId": "delete_ai_key_api_settings_ai_providers__name__key_delete",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Name"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/KeyInfo"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/settings/ai/providers/{name}/test": {
+    "/api/settings/jev/test": {
       "post": {
         "tags": [
           "settings"
         ],
-        "summary": "Test Provider",
-        "description": "G\u1ecdi th\u1eadt m\u1ed9t c\u00e2u ng\u1eafn t\u1edbi nh\u00e0 cung c\u1ea5p \u0111\u1ec3 ki\u1ec3m tra key v\u00e0 model.",
-        "operationId": "test_provider_api_settings_ai_providers__name__test_post",
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Name"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/TestBody"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Body"
-              }
-            }
-          }
-        },
+        "summary": "Test Jev",
+        "operationId": "test_jev_api_settings_jev_test_post",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TestResult"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/JevTestResult"
                 }
               }
             }
@@ -2412,74 +2227,6 @@
   },
   "components": {
     "schemas": {
-      "AiSettings": {
-        "properties": {
-          "providers": {
-            "items": {
-              "$ref": "#/components/schemas/ProviderInfo"
-            },
-            "type": "array",
-            "title": "Providers"
-          },
-          "tasks": {
-            "additionalProperties": {
-              "items": {
-                "$ref": "#/components/schemas/Route"
-              },
-              "type": "array"
-            },
-            "type": "object",
-            "title": "Tasks"
-          }
-        },
-        "type": "object",
-        "required": [
-          "providers",
-          "tasks"
-        ],
-        "title": "AiSettings"
-      },
-      "AiUpdate": {
-        "properties": {
-          "providers": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Providers"
-          },
-          "tasks": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "items": {
-                    "additionalProperties": {
-                      "type": "string"
-                    },
-                    "type": "object"
-                  },
-                  "type": "array"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tasks"
-          }
-        },
-        "type": "object",
-        "title": "AiUpdate"
-      },
       "Cap": {
         "type": "string",
         "enum": [
@@ -2944,6 +2691,16 @@
               }
             ]
           },
+          "jev_usage": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JevMonthUsage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "top_video": {
             "anyOf": [
               {
@@ -2966,6 +2723,7 @@
           "activity",
           "youtube_quota",
           "supadata_credits",
+          "jev_usage",
           "top_video"
         ],
         "title": "Dashboard"
@@ -3695,6 +3453,81 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "JevError": {
+        "properties": {
+          "at": {
+            "type": "string",
+            "title": "At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "video_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "at",
+          "status",
+          "source",
+          "video_id"
+        ],
+        "title": "JevError"
+      },
+      "JevMonthUsage": {
+        "properties": {
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "input_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Tokens",
+            "description": "Input tokens reported by TypeSafe, if available."
+          },
+          "output_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Tokens",
+            "description": "Output tokens reported by TypeSafe, if available."
+          }
+        },
+        "type": "object",
+        "required": [
+          "requests",
+          "input_tokens",
+          "output_tokens"
+        ],
+        "title": "JevMonthUsage",
+        "description": "T\u1ed5ng th\u00e1ng hi\u1ec7n t\u1ea1i theo gi\u1edd Vi\u1ec7t Nam, ch\u1ec9 g\u1ed3m token TypeSafe b\u00e1o."
+      },
       "JevSettingsView": {
         "properties": {
           "key": {
@@ -3706,6 +3539,201 @@
           "key"
         ],
         "title": "JevSettingsView"
+      },
+      "JevSourceUsage": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "input_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Tokens",
+            "description": "Input tokens reported by TypeSafe, if available."
+          },
+          "output_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Tokens",
+            "description": "Output tokens reported by TypeSafe, if available."
+          },
+          "kept": {
+            "type": "integer",
+            "title": "Kept"
+          },
+          "errors": {
+            "type": "integer",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "requests",
+          "input_tokens",
+          "output_tokens",
+          "kept",
+          "errors"
+        ],
+        "title": "JevSourceUsage"
+      },
+      "JevTestResult": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok"
+        ],
+        "title": "JevTestResult"
+      },
+      "JevUsage": {
+        "properties": {
+          "period": {
+            "type": "string",
+            "enum": [
+              "today",
+              "7d",
+              "30d"
+            ],
+            "title": "Period"
+          },
+          "since": {
+            "type": "string",
+            "title": "Since"
+          },
+          "until": {
+            "type": "string",
+            "title": "Until"
+          },
+          "requests": {
+            "type": "integer",
+            "title": "Requests"
+          },
+          "image_requests": {
+            "type": "integer",
+            "title": "Image Requests"
+          },
+          "input_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Tokens",
+            "description": "Input tokens reported by TypeSafe, if available."
+          },
+          "output_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Tokens",
+            "description": "Output tokens reported by TypeSafe, if available."
+          },
+          "kept": {
+            "type": "integer",
+            "title": "Kept"
+          },
+          "errors": {
+            "type": "integer",
+            "title": "Errors"
+          },
+          "retries_429": {
+            "type": "integer",
+            "title": "Retries 429"
+          },
+          "by_source": {
+            "items": {
+              "$ref": "#/components/schemas/JevSourceUsage"
+            },
+            "type": "array",
+            "title": "By Source"
+          },
+          "recent_errors": {
+            "items": {
+              "$ref": "#/components/schemas/JevError"
+            },
+            "type": "array",
+            "title": "Recent Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "since",
+          "until",
+          "requests",
+          "image_requests",
+          "input_tokens",
+          "output_tokens",
+          "kept",
+          "errors",
+          "retries_429",
+          "by_source",
+          "recent_errors"
+        ],
+        "title": "JevUsage"
       },
       "Job": {
         "properties": {
@@ -3998,23 +4026,6 @@
         ],
         "title": "Me"
       },
-      "ModelCaps": {
-        "properties": {
-          "vision": {
-            "type": "boolean",
-            "title": "Vision",
-            "default": false
-          },
-          "structured": {
-            "type": "boolean",
-            "title": "Structured",
-            "default": false
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "title": "ModelCaps"
-      },
       "ModelRef": {
         "properties": {
           "provider": {
@@ -4106,54 +4117,6 @@
           "bbox"
         ],
         "title": "OcrText"
-      },
-      "ProviderInfo": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "anthropic",
-              "openai_compat",
-              "gemini",
-              "ollama"
-            ],
-            "title": "Type"
-          },
-          "base_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Base Url"
-          },
-          "models": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/ModelCaps"
-            },
-            "type": "object",
-            "title": "Models"
-          },
-          "key": {
-            "$ref": "#/components/schemas/KeyInfo"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "type",
-          "base_url",
-          "models",
-          "key"
-        ],
-        "title": "ProviderInfo"
       },
       "QueueItem": {
         "properties": {
@@ -4297,25 +4260,6 @@
         ],
         "title": "ReviewDecision",
         "description": "M\u1ed9t quy\u1ebft \u0111\u1ecbnh r\u00e0 so\u00e1t (m\u1ed9t d\u00f2ng c\u1ee7a reviews.jsonl)."
-      },
-      "Route": {
-        "properties": {
-          "provider": {
-            "type": "string",
-            "title": "Provider"
-          },
-          "model": {
-            "type": "string",
-            "title": "Model"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "provider",
-          "model"
-        ],
-        "title": "Route"
       },
       "Segment": {
         "properties": {
@@ -4799,23 +4743,6 @@
         },
         "type": "object",
         "title": "StatusCounts"
-      },
-      "TestBody": {
-        "properties": {
-          "model": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Model"
-          }
-        },
-        "type": "object",
-        "title": "TestBody"
       },
       "TestResult": {
         "properties": {
@@ -5909,6 +5836,117 @@
           "type"
         ],
         "title": "Trigger"
+      },
+      "ProviderInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "anthropic",
+              "openai_compat",
+              "gemini",
+              "ollama"
+            ],
+            "title": "Type"
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "models": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ModelCaps"
+            },
+            "type": "object",
+            "title": "Models"
+          },
+          "key": {
+            "$ref": "#/components/schemas/KeyInfo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "base_url",
+          "models",
+          "key"
+        ],
+        "title": "ProviderInfo"
+      },
+      "ModelCaps": {
+        "properties": {
+          "vision": {
+            "type": "boolean",
+            "title": "Vision",
+            "default": false
+          },
+          "structured": {
+            "type": "boolean",
+            "title": "Structured",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ModelCaps"
+      },
+      "AiSettings": {
+        "properties": {
+          "providers": {
+            "items": {
+              "$ref": "#/components/schemas/ProviderInfo"
+            },
+            "type": "array",
+            "title": "Providers"
+          },
+          "tasks": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/Route"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Tasks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "providers",
+          "tasks"
+        ],
+        "title": "AiSettings"
+      },
+      "Route": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "provider",
+          "model"
+        ],
+        "title": "Route"
       }
     }
   }

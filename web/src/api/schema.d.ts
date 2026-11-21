@@ -710,17 +710,16 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/settings/ai": {
+    "/api/settings/jev/usage": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get Ai */
-        get: operations["get_ai_api_settings_ai_get"];
-        /** Put Ai */
-        put: operations["put_ai_api_settings_ai_put"];
+        /** Jev Usage */
+        get: operations["jev_usage_api_settings_jev_usage_get"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -728,7 +727,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/settings/ai/providers/{name}": {
+    "/api/settings/jev/test": {
         parameters: {
             query?: never;
             header?: never;
@@ -737,46 +736,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
-        /** Delete Provider */
-        delete: operations["delete_provider_api_settings_ai_providers__name__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/ai/providers/{name}/key": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Put Ai Key */
-        put: operations["put_ai_key_api_settings_ai_providers__name__key_put"];
-        post?: never;
-        /** Delete Ai Key */
-        delete: operations["delete_ai_key_api_settings_ai_providers__name__key_delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/ai/providers/{name}/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Test Provider
-         * @description Gọi thật một câu ngắn tới nhà cung cấp để kiểm tra key và model.
-         */
-        post: operations["test_provider_api_settings_ai_providers__name__test_post"];
+        /** Test Jev */
+        post: operations["test_jev_api_settings_jev_test_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -807,30 +768,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** AiSettings */
-        AiSettings: {
-            /** Providers */
-            providers: components["schemas"]["ProviderInfo"][];
-            /** Tasks */
-            tasks: {
-                [key: string]: components["schemas"]["Route"][];
-            };
-        };
-        /** AiUpdate */
-        AiUpdate: {
-            /** Providers */
-            providers?: {
-                [key: string]: {
-                    [key: string]: unknown;
-                };
-            } | null;
-            /** Tasks */
-            tasks?: {
-                [key: string]: {
-                    [key: string]: string;
-                }[];
-            } | null;
-        };
         /**
          * Cap
          * @description Loại dữ liệu một nguồn thu lấy được. Giá trị dùng trong trường `what` của manifest.
@@ -979,6 +916,7 @@ export interface components {
             activity: components["schemas"]["DayActivity"][];
             youtube_quota: components["schemas"]["Usage"] | null;
             supadata_credits: components["schemas"]["Usage"] | null;
+            jev_usage: components["schemas"]["JevMonthUsage"] | null;
             top_video: components["schemas"]["TopVideo"] | null;
         };
         /** DayActivity */
@@ -1232,9 +1170,106 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** JevError */
+        JevError: {
+            /** At */
+            at: string;
+            /** Status */
+            status: string;
+            /** Source */
+            source: string;
+            /** Video Id */
+            video_id: string | null;
+        };
+        /**
+         * JevMonthUsage
+         * @description Tổng tháng hiện tại theo giờ Việt Nam, chỉ gồm token TypeSafe báo.
+         */
+        JevMonthUsage: {
+            /** Requests */
+            requests: number;
+            /**
+             * Input Tokens
+             * @description Input tokens reported by TypeSafe, if available.
+             */
+            input_tokens: number | null;
+            /**
+             * Output Tokens
+             * @description Output tokens reported by TypeSafe, if available.
+             */
+            output_tokens: number | null;
+        };
         /** JevSettingsView */
         JevSettingsView: {
             key: components["schemas"]["KeyInfo"];
+        };
+        /** JevSourceUsage */
+        JevSourceUsage: {
+            /** Source */
+            source: string;
+            /** Requests */
+            requests: number;
+            /**
+             * Input Tokens
+             * @description Input tokens reported by TypeSafe, if available.
+             */
+            input_tokens: number | null;
+            /**
+             * Output Tokens
+             * @description Output tokens reported by TypeSafe, if available.
+             */
+            output_tokens: number | null;
+            /** Kept */
+            kept: number;
+            /** Errors */
+            errors: number;
+        };
+        /** JevTestResult */
+        JevTestResult: {
+            /** Ok */
+            ok: boolean;
+            /** Model */
+            model?: string | null;
+            /** Latency Ms */
+            latency_ms?: number | null;
+            /** Error */
+            error?: string | null;
+        };
+        /** JevUsage */
+        JevUsage: {
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "today" | "7d" | "30d";
+            /** Since */
+            since: string;
+            /** Until */
+            until: string;
+            /** Requests */
+            requests: number;
+            /** Image Requests */
+            image_requests: number;
+            /**
+             * Input Tokens
+             * @description Input tokens reported by TypeSafe, if available.
+             */
+            input_tokens: number | null;
+            /**
+             * Output Tokens
+             * @description Output tokens reported by TypeSafe, if available.
+             */
+            output_tokens: number | null;
+            /** Kept */
+            kept: number;
+            /** Errors */
+            errors: number;
+            /** Retries 429 */
+            retries_429: number;
+            /** By Source */
+            by_source: components["schemas"]["JevSourceUsage"][];
+            /** Recent Errors */
+            recent_errors: components["schemas"]["JevError"][];
         };
         /** Job */
         Job: {
@@ -1332,19 +1367,6 @@ export interface components {
             /** Username */
             username: string;
         };
-        /** ModelCaps */
-        ModelCaps: {
-            /**
-             * Vision
-             * @default false
-             */
-            vision: boolean;
-            /**
-             * Structured
-             * @default false
-             */
-            structured: boolean;
-        };
         /** ModelRef */
         ModelRef: {
             /** Provider */
@@ -1377,23 +1399,6 @@ export interface components {
                 number,
                 number
             ];
-        };
-        /** ProviderInfo */
-        ProviderInfo: {
-            /** Name */
-            name: string;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "anthropic" | "openai_compat" | "gemini" | "ollama";
-            /** Base Url */
-            base_url: string | null;
-            /** Models */
-            models: {
-                [key: string]: components["schemas"]["ModelCaps"];
-            };
-            key: components["schemas"]["KeyInfo"];
         };
         /** QueueItem */
         QueueItem: {
@@ -1455,13 +1460,6 @@ export interface components {
              * @default
              */
             note: string;
-        };
-        /** Route */
-        Route: {
-            /** Provider */
-            provider: string;
-            /** Model */
-            model: string;
         };
         /** Segment */
         Segment: {
@@ -1638,11 +1636,6 @@ export interface components {
              * @default 0
              */
             needs_info: number;
-        };
-        /** TestBody */
-        TestBody: {
-            /** Model */
-            model?: string | null;
         };
         /** TestResult */
         TestResult: {
@@ -2004,6 +1997,52 @@ export interface components {
             watch_item?: string | null;
             /** Event */
             event?: string | null;
+        };
+        /** ProviderInfo */
+        ProviderInfo: {
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "anthropic" | "openai_compat" | "gemini" | "ollama";
+            /** Base Url */
+            base_url: string | null;
+            /** Models */
+            models: {
+                [key: string]: components["schemas"]["ModelCaps"];
+            };
+            key: components["schemas"]["KeyInfo"];
+        };
+        /** ModelCaps */
+        ModelCaps: {
+            /**
+             * Vision
+             * @default false
+             */
+            vision: boolean;
+            /**
+             * Structured
+             * @default false
+             */
+            structured: boolean;
+        };
+        /** AiSettings */
+        AiSettings: {
+            /** Providers */
+            providers: components["schemas"]["ProviderInfo"][];
+            /** Tasks */
+            tasks: {
+                [key: string]: components["schemas"]["Route"][];
+            };
+        };
+        /** Route */
+        Route: {
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
         };
     };
     responses: never;
@@ -3421,7 +3460,38 @@ export interface operations {
             };
         };
     };
-    get_ai_api_settings_ai_get: {
+    jev_usage_api_settings_jev_usage_get: {
+        parameters: {
+            query?: {
+                period?: "today" | "7d" | "30d";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JevUsage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_jev_api_settings_jev_test_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -3436,172 +3506,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AiSettings"];
-                };
-            };
-        };
-    };
-    put_ai_api_settings_ai_put: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AiUpdate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiSettings"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_provider_api_settings_ai_providers__name__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AiSettings"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    put_ai_key_api_settings_ai_providers__name__key_put: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["KeyBody"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KeyInfo"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_ai_key_api_settings_ai_providers__name__key_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["KeyInfo"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    test_provider_api_settings_ai_providers__name__test_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["TestBody"] | null;
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TestResult"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["JevTestResult"];
                 };
             };
         };
