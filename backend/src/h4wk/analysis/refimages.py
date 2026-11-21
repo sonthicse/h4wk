@@ -159,8 +159,8 @@ def to_hits(
     ưu tiên segment chứa khung trong frames hoặc ocr, sau đó segment có start <= t <= end.
     Thumbnail (không có thời điểm) không có segment_id.
 
-    Giới hạn: khung khớp ảnh mẫu mà không thuộc segment nào (ngoài lời nói, không có VLM hay OCR)
-    chỉ nằm trong hits.json, không được gửi cho LLM."""
+    Giới hạn: khung khớp ảnh mẫu mà không thuộc segment nào (ngoài lời nói, không có keyframe
+    hay OCR) chỉ nằm trong hits.json, không được gửi cho Jev."""
     owner: dict[str, str] = {}
     for segment in timeline.segments:
         for item in [*segment.frames, *segment.ocr]:

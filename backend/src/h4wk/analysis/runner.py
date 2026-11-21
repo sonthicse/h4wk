@@ -130,7 +130,7 @@ def analyze(
         merge(part_findings, part_records)
         if error:
             errors.append(error)
-    llm_error = "; ".join(errors) or None
+    jev_error = "; ".join(errors) or None
     references = [data.video.title, data.video.description] if data.video else []
     references += [segment.speech for segment in timeline.segments]
     findings = group_repeats(findings, references)
@@ -140,8 +140,8 @@ def analyze(
         content = [item.model_dump(mode="json", by_alias=True) for item in items]
         _write(output_dir / filename, content)
     if records is not None:
-        _write(output_dir / "llm.json", records)
-    return hits, findings, llm_error
+        _write(output_dir / "jev.json", records)
+    return hits, findings, jev_error
 
 
 def _slot(finding: Finding) -> tuple[str, str]:
@@ -194,7 +194,7 @@ def group_repeats(findings: list[Finding], references: list[str] = ()) -> list[F
         if (
             finding.source_kind not in REPEAT_KINDS
             or finding.start is None
-            or (finding.model is not None and finding.model.provider == "typesafe")
+            or finding.analyzer == "jev"
         ):
             continue
         text = _fold(finding.quote)

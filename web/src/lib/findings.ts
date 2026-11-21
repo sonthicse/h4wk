@@ -50,5 +50,5 @@ export function mergeKey(q: string): string {
     .toLowerCase()
 }
 
-// Lý do của nghi vấn Jev (provider typesafe) là chi tiết kỹ thuật nên không hiện ra giao diện.
-export const showReason = (f: Pick<Finding, 'model'>): boolean => f.model?.provider !== 'typesafe'
+// Lý do của nghi vấn Jev là chi tiết kỹ thuật nên không hiện ra giao diện.
+export const showReason = (f: Pick<Finding, 'analyzer'>): boolean => f.analyzer !== 'jev'

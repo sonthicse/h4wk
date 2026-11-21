@@ -31,7 +31,7 @@ def test_no_violations_and_other_runs_ignored():
     other = _finding(timeline, 0, run_id="r_other", confidence="highly_likely")
     neutral = _finding(timeline, 1, category="neutral")
     result = decide([other, neutral], "r_test", timeline)
-    assert result.violation == "no" and result.model is None
+    assert result.violation == "no"
     assert result.confidence == "highly_likely" and result.summary == "Không có nghi vấn vi phạm."
     assert result.categories == [] and result.finding_ids == []
 
@@ -110,7 +110,7 @@ def test_backfill_writes_once_and_force_rewrites(data_dir, args):
     assert result.exit_code == 0, result.exception
     path = run / "verdict.json"
     first = VideoVerdict.model_validate_json(path.read_bytes())
-    assert first.violation == "yes" and first.model is None
+    assert first.violation == "yes"
     # Chạy lại không ghi đè: đổi nội dung rồi kiểm tra còn nguyên.
     path.write_text(first.model_copy(update={"summary": "giữ"}).model_dump_json(), encoding="utf-8")
     assert runner.invoke(cli.app, ["verdict", *args]).exit_code == 0

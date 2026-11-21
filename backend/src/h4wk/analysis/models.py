@@ -119,7 +119,7 @@ class Finding(Contract):
     run_id: str
     video_id: str
     capture: CaptureTs
-    analyzer: Literal["static", "llm"]
+    analyzer: Literal["static", "jev"]
     analyzer_version: str
     model: ModelRef | None = None
     source_kind: SourceKind
@@ -138,10 +138,22 @@ class Finding(Contract):
     reason: str
     occurrences: list[Occurrence] = []
 
+    @model_validator(mode="before")
+    @classmethod
+    def _legacy_llm(cls, data):
+        """Đọc nghi vấn cũ: `analyzer: "llm"` của Jev (provider `typesafe`) thành `"jev"`.
+        Nghi vấn của các LLM khác đã bỏ khỏi dự án nên bị từ chối."""
+        if not isinstance(data, dict) or data.get("analyzer") != "llm":
+            return data
+        model = data.get("model")
+        if not (isinstance(model, dict) and model.get("provider") == "typesafe"):
+            raise ValueError("findings from removed LLM providers are not supported")
+        return {**data, "analyzer": "jev"}
+
     @model_validator(mode="after")
     def _rules(self) -> Self:
-        if self.analyzer == "llm" and self.model is None:
-            raise ValueError("an llm finding needs model")
+        if self.analyzer == "jev" and self.model is None:
+            raise ValueError("a jev finding needs model")
         if self.source_kind == SourceKind.VISUAL and not self.frame:
             raise ValueError("a visual finding needs frame")
         if self.source_kind in _TIMED_KINDS and (not self.segment_id or self.start is None):
@@ -192,8 +204,15 @@ class VideoVerdict(VerdictAnswer):
     run_id: str
     video_id: str
     capture: CaptureTs
-    model: ModelRef | None = None
     at: VnDatetime
+
+    @model_validator(mode="before")
+    @classmethod
+    def _legacy_model(cls, data):
+        """Đọc kết luận cũ do LLM viết: bỏ trường `model`; kết luận nay sinh theo quy tắc."""
+        if isinstance(data, dict) and "model" in data:
+            data = {k: v for k, v in data.items() if k != "model"}
+        return data
 
 
 class ReviewDecision(Contract):

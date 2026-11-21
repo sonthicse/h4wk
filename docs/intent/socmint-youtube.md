@@ -58,7 +58,7 @@ Buổi demo cũng trình diễn giao diện chỉnh nguồn để cho thấy ki�
 - Thu lại theo lịch thưa dần, ghi livestream, phát hiện đổi tên/avatar kênh, tự nâng mức thu.
 - Khôi phục từ Internet Archive.
 - Ghi nguồn gốc tới từng trường dữ liệu.
-- Đánh giá precision/recall chính thức. Nếu còn thời gian, chỉ làm một bảng so sánh nhỏ giữa tĩnh và LLM (khoảng 50 đoạn) cho báo cáo môn học.
+- Đánh giá precision/recall chính thức.
 
 ## Lịch sử thay đổi
 

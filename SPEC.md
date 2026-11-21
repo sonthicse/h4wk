@@ -37,7 +37,6 @@ Một số từ dùng thống nhất trong các tài liệu:
 | nguồn thu | Một adapter thu thập: yt-dlp, YouTube API, Supadata |
 | Jev | Dịch vụ phân loại TypeSafe (`systemone`), nhà cung cấp AI duy nhất; nhận văn bản và ảnh |
 | bước | Một bước trong luồng xử lý của một job, ví dụ transcribe, OCR |
-| task | Một hạng mục công việc T1–T46 trong `tasks/todo.md` |
 | bản thu | Kết quả một lần thu, nằm trong `captures/<ts>/` |
 | dấu hiệu | Chỗ đối tượng xuất hiện: tên được nhắc, khuôn mặt khớp, ảnh mẫu khớp. Dấu hiệu chưa phải nghi vấn |
 | nghi vấn | Một kết quả phân tích cần rà soát; trong code và schema gọi là `finding` |
@@ -61,7 +60,7 @@ Một số từ dùng thống nhất trong các tài liệu:
 | Frontend | React, Vite, TypeScript, React Router, TanStack Query, Tailwind và shadcn/ui | Giao diện tiếng Anh. Trình phát dùng thẻ `<video>` với lớp phủ tự viết |
 | Chất lượng code | `ruff` (lint và format), `pytest`; `oxlint` và `tsc` cho frontend | |
 
-Máy chạy cần WSL2 với GPU NVIDIA và CUDA, `ffmpeg` trong PATH, Node 20 trở lên. Không dùng Docker. Spike T3 đã đo trên RTX 3050 Laptop 4 GB; môi trường GPU thử nghiệm ở `docs/spikes/gpu-env/`, kết quả ở `docs/spikes/gpu-models.md`. Model nhận dạng chữ tiếng Việt có giấy phép phi thương mại; báo cáo môn học ghi rõ điều này.
+Máy chạy cần WSL2 với GPU NVIDIA và CUDA, `ffmpeg` trong PATH, Node 20 trở lên. Không dùng Docker. Spike T3 đã đo trên RTX 3050 Laptop 4 GB. Model nhận dạng chữ tiếng Việt có giấy phép phi thương mại; báo cáo môn học ghi rõ điều này.
 
 Rủi ro lớn nhất về cài đặt là bốn thư viện GPU (ctranslate2 cho faster-whisper, paddlepaddle-gpu, onnxruntime-gpu, torch) phải cùng chạy trong một môi trường, mỗi thư viện đòi một bộ phiên bản CUDA/cuDNN riêng. Spike T3 kiểm tra việc này trước tiên. Phương án dự phòng là chạy PaddleOCR bằng CPU, hoặc tách worker `gpu` thành nhiều môi trường riêng.
 
@@ -98,16 +97,14 @@ h4wk/
 ├── SPEC.md
 ├── docs/intent/                ← statement of intent
 ├── docs/contracts/             ← JSON Schema sinh từ C1–C5
-├── docs/adr/                   ← ghi lại quyết định kiến trúc (ngắn)
 ├── backend/
 │   ├── pyproject.toml
 │   ├── src/h4wk/
 │   │   ├── core/               ← config, db, entities, auth, audit, secrets
 │   │   ├── evidence/           ← capture writer, manifest, verify
 │   │   ├── collectors/         ← base.py, models.py (C2), orchestrator.py, providers/{ytdlp,youtube_api,supadata}.py
-│   │   ├── ai/                 ← gateway.py, providers/{anthropic,openai_compat,gemini}.py
-│   │   ├── media/              ← proxy, stt, keyframes, ocr, vision, timeline.py (C3)
-│   │   ├── analysis/           ← hits, static.py, faces.py, refimages.py, lexicon/, llm.py, prompts/, models.py (C4)
+│   │   ├── media/              ← proxy, stt, keyframes, ocr, enrich, timeline.py (C3)
+│   │   ├── analysis/           ← static.py, faces.py, refimages.py, lexicon/, jev.py, jev_log.py, verdict.py, runner.py, models.py (C4)
 │   │   ├── review/             ← queue, decisions
 │   │   ├── watchlist/
 │   │   ├── jobs/               ← queue.py (Huey), pipeline.py
@@ -156,7 +153,6 @@ class YtDlpCollector(Collector):
 | Integration | Toàn luồng: thu bằng adapter giả → xử lý một video ngắn tự quay trong fixtures → `analysis` với Jev giả → nghi vấn hợp lệ trong hàng đợi. Worker bị tắt giữa chừng rồi bật lại | `tests/integration` |
 | Live (`-m live`) | Mỗi adapter gọi thật với 1 video; Jev gọi thật 1 request | chạy tay, không bắt buộc trước khi commit |
 | Demo | Checklist diễn tập 3 màn demo (T42), chạy cuối mỗi tuần từ tuần 3 | `docs/demo-checklist.md` |
-| Đánh giá (làm thêm) | Bảng so sánh tĩnh và LLM trên khoảng 50 đoạn tự gán nhãn | làm nếu còn thời gian |
 
 Không đặt ngưỡng coverage. Các phần bắt buộc có test: `evidence-store`, phần chuyển sang dữ liệu chung của từng adapter, bộ khớp tên của `analysis`, và phần kiểm tra C3/C4.
 
@@ -243,10 +239,10 @@ data/
 │   │   ├── normalized.json              ← C2
 │   │   └── manifest.json
 │   └── derived/<capture_ts>/            ← tạo lại được
-│       ├── proxy_480p.mp4, audio_16k.wav, frames/, ocr.json, vision.json
+│       ├── proxy_480p.mp4, audio_16k.wav, frames/, ocr.json
 │       ├── transcripts/<kind>.<lang>.json
 │       ├── timeline.json                ← C3
-│       └── analysis/<run_id>/{hits.json,findings.json}   ← C4
+│       └── analysis/<run_id>/{hits.json,findings.json,verdict.json,jev.json}   ← C4; jev.json là phản hồi thô của Jev
 └── reviews.jsonl                        ← quyết định rà soát, chỉ ghi thêm
 ```
 
@@ -378,7 +374,8 @@ Bước 3 phân loại nội dung bằng Jev cho mọi nguồn (quyết định 
 - Giữ nghi vấn khi `is_attack.noul ≥ 0,5` và `target.choice ≠ "none"`; nghi vấn gắn với đối tượng được chọn. `severity` lấy từ điểm Jev: dưới 0,5 là `low`, dưới 1,5 là `medium`, còn lại `high`. `category` là danh mục có xác suất cao nhất; `confidence` theo xác suất đó: từ 0,85 là `highly_likely`, từ 0,6 là `likely`, còn lại `unverified`. Jev không viết lý do nên `reason` ghi danh mục và xác suất; giao diện không hiện `reason` của nghi vấn Jev. Nghi vấn tầng tĩnh luôn `medium` và `unverified`.
 - Ảnh gửi thẳng cho Jev. Mỗi đoạn timeline có keyframe hoặc OCR là một request: `text` là các dòng OCR chưa gửi ở đoạn trước, ghép bằng ` | ` (có thể rỗng); ảnh là tối đa 4 keyframe của đoạn, lấy cách đều. `source_kind` là `ocr` khi có chữ, `visual` khi chỉ có ảnh; `frame` là khung có chữ đầu tiên, hoặc keyframe đầu tiên. Mỗi thumbnail là một request gồm ảnh thumbnail và chữ OCR của nó (`source_kind: thumbnail`). Chỉ gửi keyframe và thumbnail của video; ảnh khuôn mặt mẫu và ảnh mẫu của đối tượng không bao giờ gửi cho Jev.
 - Ảnh gửi dạng JPEG chất lượng 85, thu nhỏ để cạnh dài không quá 1024 px rồi phóng to nếu cạnh ngắn dưới 320 px (API từ chối kích thước như 270×480 hoặc 640×200). Chỉ request có ảnh mới gửi header `TypeSafe-Danger-Zone-Images: true`. Ảnh quá dài vẫn có thể bị từ chối; khi đó request lỗi được ghi như lỗi Jev khác.
-- Các request chạy song song với số luồng giới hạn (`jev.concurrency` trong `analysis.toml`), thử lại khi 429. Jev không tất định; không cache theo hash ảnh. Không có nhà cung cấp dự phòng: Jev lỗi hoặc thiếu key thì job vẫn xong, lỗi ghi vào `llm_error` của job, và tầng tĩnh, khớp tên, ảnh mẫu, khuôn mặt vẫn chạy.
+- Các request chạy song song với số luồng giới hạn (`jev.concurrency` trong `analysis.toml`), thử lại khi 429. Jev không tất định; không cache theo hash ảnh. Không có nhà cung cấp dự phòng: Jev lỗi hoặc thiếu key thì job vẫn xong, lỗi ghi vào `jev_error` của job, và tầng tĩnh, khớp tên, ảnh mẫu, khuôn mặt vẫn chạy.
+- Nghi vấn của Jev ghi `analyzer: "jev"` và `model` là `{"provider": "typesafe", "model": <phiên bản Jev>}`. Nghi vấn cũ ghi `analyzer: "llm"` với provider `typesafe` được đọc thành `"jev"`; nghi vấn của các LLM đã bỏ bị từ chối. Trường `model` trong `verdict.json` cũ bị bỏ khi đọc.
 - Theo dõi usage: mỗi request đã gửi ghi đúng một dòng vào `data/jev_calls.jsonl` (kể cả thử kết nối, retry 429 gộp trong một dòng): thời điểm, video/bản thu/run (null khi thử kết nối), nguồn, số ảnh, token vào/ra, có giữ nghi vấn không, trạng thái, số retry. Không ghi nội dung, ảnh hay key. Chỉ cộng token hợp lệ do TypeSafe báo trong `usage`; thiếu thì null, vẫn đếm lượt gọi. Không ước tính token, USD hay credit; không hiển thị hạn mức hoặc số dư.
 
 Đối tượng có thể là tổ chức. `h4wk init` thêm sẵn đối tượng "Đảng và Nhà nước Việt Nam" (biệt danh như Đảng, Đảng Cộng sản, nhà nước, chế độ, chính quyền, chính phủ; viết tắt ĐCSVN, ĐCS) khi danh sách đối tượng còn trống.
@@ -387,7 +384,7 @@ Bước 4 là kết luận theo video bằng quy tắc, không gọi AI (`verdic
 
 - Không có nghi vấn vi phạm (danh mục khác `legitimate_criticism`, `neutral`) của đúng run: `violation: no`, `confidence: highly_likely`, tóm tắt "Không có nghi vấn vi phạm."
 - Có ít nhất một nghi vấn vi phạm `highly_likely`: `violation: yes`; còn lại `uncertain`. Nghi vấn tầng tĩnh (`unverified`) không tự đẩy kết luận lên `yes`. Thi chốt quy tắc này ngày 2026-11-21, chấp nhận nhiều video ra `yes` do precision của Jev thấp (T47: 18% trên mẫu không khớp tên); người duyệt vẫn xác nhận từng video (10.8).
-- `categories` xếp theo số nghi vấn giảm dần; `severity` là mức cao nhất; `confidence` là của nghi vấn xếp đầu; `finding_ids` là 10 nghi vấn đầu khi xếp theo `severity` rồi xác suất Jev. `summary` sinh theo mẫu, ví dụ "12 nghi vấn vi phạm; danh mục: insult (8), incitement (4); mức cao nhất: high." `model` luôn `null`.
+- `categories` xếp theo số nghi vấn giảm dần; `severity` là mức cao nhất; `confidence` là của nghi vấn xếp đầu; `finding_ids` là 10 nghi vấn đầu khi xếp theo `severity` rồi xác suất Jev. `summary` sinh theo mẫu, ví dụ "12 nghi vấn vi phạm; danh mục: insult (8), incitement (4); mức cao nhất: high."
 - `h4wk verdict` bỏ qua run đã có `verdict.json`, trừ khi có `--force`.
 
 Hợp đồng C4 gồm ba cấu trúc. Dấu hiệu (`hits.json`):
@@ -402,7 +399,7 @@ Nghi vấn (`findings.json`):
 ```json
 {
   "id": "f_…", "run_id": "…", "video_id": "…", "capture": "…",
-  "analyzer": "static|llm", "analyzer_version": "0.1.0",
+  "analyzer": "static|jev", "analyzer_version": "0.1.0",
   "model": {"provider": "typesafe", "model": "jev-1.14.0"},
   "source_kind": "speech|ocr|visual|title|description|thumbnail|comment",
   "triggers": [{"via": "face", "frame": "frames/000231.jpg", "bbox": [x, y, w, h], "score": 0.82}],

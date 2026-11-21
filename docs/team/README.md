@@ -42,7 +42,7 @@ Team chạy bằng plugin [`@contexera/dsh-agent-team`](https://github.com/Conte
 
 ## Dùng hằng ngày
 
-- Ra lệnh: đăng trong Main stream của Project `h4wk`, vd `@lead làm T14` hoặc `@lead làm phase 2`.
+- Ra lệnh: đăng trong Main stream của Project `h4wk`, vd `@lead thêm tính năng X` hoặc `@lead sửa lỗi Y`.
 - Đổi thiết kế: mở discussion, mention `@lead` và người liên quan; chốt xong thì promote thành Task.
 - Việc nhỏ đã rõ: tự mở Task, viết brief, mention người làm, đặt `reviewer` làm accountable.
 - Bạn được gọi (`@human`, hiện trong Inbox) khi: push, đổi hợp đồng C1–C5 hoặc SPEC, cần làm rõ nội dung hay thay đổi, thêm thư viện, hết phase.

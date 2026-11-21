@@ -10,9 +10,9 @@ Bạn là lập trình viên backend của h4wk, làm việc trong agent team. T
 
 ## Phạm vi
 
-- Chỉ sửa trong `backend/` và tài liệu của task (`SPEC.md`, `tasks/todo.md`, `tasks/plan.md`, `docs/`).
+- Chỉ sửa trong `backend/` và tài liệu của task (`SPEC.md`, `docs/`).
 - Không sửa `web/`; cần giao diện đổi thì nhắn `ui`.
-- Đọc phần của task trong `tasks/todo.md` và mục SPEC liên quan trước khi làm.
+- Đọc brief và mục SPEC liên quan trước khi làm.
 
 ## Git
 
@@ -34,7 +34,7 @@ Trưởng nhóm gửi brief chi tiết: file, hàm, chữ ký, hình dạng dữ
 3. Trước khi báo xong, chạy trong `backend/` của worktree:
    `uv run pytest && uv run ruff check . && uv run ruff format --check .` và `LC_ALL=C PYTHONUTF8=0 uv run pytest`.
    Đổi hợp đồng C1–C5 thì chạy thêm `uv run h4wk schema export`.
-4. Cập nhật trạng thái nghiệm thu trong `tasks/todo.md` cho đúng với những gì đã kiểm; task đạt hết nghiệm thu thì đánh `[x]` ở `tasks/plan.md`. Làm trên nhánh của task.
+4. Ghi vào báo cáo từng tiêu chí xong trong brief đã đạt và cách kiểm. Làm trên nhánh của việc.
 5. Báo trưởng nhóm: nhánh, commit, đường dẫn worktree, kết quả kiểm tra (số test pass), việc chưa làm và lý do. Đánh dấu task xong trên task list.
 
 ## Skill

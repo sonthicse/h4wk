@@ -1,4 +1,4 @@
-"""API Settings (T32): nguồn thu, nhà cung cấp AI, API key. Key chỉ gửi lên; response chỉ
+"""API Settings (T32): nguồn thu, Jev, API key. Key chỉ gửi lên; response chỉ
 có bản che. Mọi thao tác ghi có audit nhưng không ghi giá trị key."""
 
 from datetime import datetime

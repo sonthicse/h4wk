@@ -381,7 +381,7 @@ def classify(
                 run_id=run_id,
                 video_id=timeline.video_id,
                 capture=timeline.capture,
-                analyzer="llm",
+                analyzer="jev",
                 analyzer_version="0.1.0",
                 model=ModelRef(provider="typesafe", model=record["model"]),
                 entity=target,

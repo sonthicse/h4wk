@@ -439,7 +439,7 @@ def findings() -> list[Finding]:
         "entity": ENTITY,
     }
     static = {**base, "analyzer": "static", "confidence": "unverified"}
-    llm = {**base, "analyzer": "llm", "model": {"provider": "fake", "model": "fake-llm"}}
+    jev = {**base, "analyzer": "jev", "model": {"provider": "typesafe", "model": "jev-test"}}
     return TypeAdapter(list[Finding]).validate_python(
         [
             {
@@ -478,7 +478,7 @@ def findings() -> list[Finding]:
                 "reason": "Chữ trên hình gắn tên đối tượng với từ 'lừa đảo'.",
             },
             {
-                **llm,
+                **jev,
                 "id": FIDS[2],
                 "source_kind": "visual",
                 "segment_id": "seg_0003",
@@ -525,7 +525,7 @@ def findings() -> list[Finding]:
                 "reason": "Chữ nhỏ ở góc, viết tắt tên đối tượng kèm 'đồ hèn', chỉ hiện 1 giây.",
             },
             {
-                **llm,
+                **jev,
                 "id": FIDS[4],
                 "source_kind": "comment",
                 "comment_id": "c1",

@@ -29,7 +29,8 @@
     "category": "insult",
     "severity": "medium",
     "confidence": "unverified",
-    "reason": "Từ 'lừa đảo' trong đoạn nhắc tên đối tượng."
+    "reason": "Từ 'lừa đảo' trong đoạn nhắc tên đối tượng.",
+    "occurrences": []
   },
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3B",
@@ -71,18 +72,19 @@
     "category": "insult",
     "severity": "medium",
     "confidence": "unverified",
-    "reason": "Chữ trên hình gắn tên đối tượng với từ 'lừa đảo'."
+    "reason": "Chữ trên hình gắn tên đối tượng với từ 'lừa đảo'.",
+    "occurrences": []
   },
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3C",
     "run_id": "r_20261118T160500",
     "video_id": "h4wkDemo001",
     "capture": "20261118T160000",
-    "analyzer": "llm",
+    "analyzer": "jev",
     "analyzer_version": "0.1.0",
     "model": {
-      "provider": "fake",
-      "model": "fake-llm"
+      "provider": "typesafe",
+      "model": "jev-test"
     },
     "source_kind": "visual",
     "triggers": [
@@ -116,7 +118,8 @@
     "category": "insult",
     "severity": "high",
     "confidence": "likely",
-    "reason": "Khuôn mặt đối tượng bị đè chữ 'TỘI PHẠM' và vẽ còng tay; đoạn này không ai nhắc tên."
+    "reason": "Khuôn mặt đối tượng bị đè chữ 'TỘI PHẠM' và vẽ còng tay; đoạn này không ai nhắc tên.",
+    "occurrences": []
   },
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3D",
@@ -158,18 +161,19 @@
     "category": "insult",
     "severity": "low",
     "confidence": "unverified",
-    "reason": "Chữ nhỏ ở góc, viết tắt tên đối tượng kèm 'đồ hèn', chỉ hiện 1 giây."
+    "reason": "Chữ nhỏ ở góc, viết tắt tên đối tượng kèm 'đồ hèn', chỉ hiện 1 giây.",
+    "occurrences": []
   },
   {
     "id": "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3E",
     "run_id": "r_20261118T160500",
     "video_id": "h4wkDemo001",
     "capture": "20261118T160000",
-    "analyzer": "llm",
+    "analyzer": "jev",
     "analyzer_version": "0.1.0",
     "model": {
-      "provider": "fake",
-      "model": "fake-llm"
+      "provider": "typesafe",
+      "model": "jev-test"
     },
     "source_kind": "comment",
     "triggers": [
@@ -193,6 +197,7 @@
     "category": "unsupported_accusation",
     "severity": "low",
     "confidence": "likely",
-    "reason": "Comment cáo buộc đối tượng lừa đảo mà không đưa bằng chứng."
+    "reason": "Comment cáo buộc đối tượng lừa đảo mà không đưa bằng chứng.",
+    "occurrences": []
   }
 ]

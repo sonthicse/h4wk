@@ -109,7 +109,7 @@ def process_capture(capture_dir: Path, output_dir: Path, config: AnalysisConfig)
         except ValidationError:
             pass
         else:
-            # OCR, VLM và hash do bước sau bổ sung; chỉ so phần do bước phụ đề tạo.
+            # OCR, keyframe và hash do bước sau bổ sung; chỉ so phần do bước phụ đề tạo.
             speech_fields = {
                 "video_id": True,
                 "capture": True,

@@ -23,25 +23,6 @@
       "title": "Confidence",
       "type": "string"
     },
-    "ModelRef": {
-      "additionalProperties": false,
-      "properties": {
-        "model": {
-          "title": "Model",
-          "type": "string"
-        },
-        "provider": {
-          "title": "Provider",
-          "type": "string"
-        }
-      },
-      "required": [
-        "provider",
-        "model"
-      ],
-      "title": "ModelRef",
-      "type": "object"
-    },
     "Severity": {
       "enum": [
         "low",
@@ -84,17 +65,6 @@
       },
       "title": "Finding Ids",
       "type": "array"
-    },
-    "model": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/ModelRef"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null
     },
     "run_id": {
       "title": "Run Id",

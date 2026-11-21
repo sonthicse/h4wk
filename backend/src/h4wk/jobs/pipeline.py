@@ -339,7 +339,7 @@ def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
             raise AnalysisQuotaError(error)
 
     def run(target: Path):
-        _hits, findings, llm_error = runner.analyze(
+        _hits, findings, jev_error = runner.analyze(
             n,
             timeline,
             load_entities(),
@@ -352,24 +352,24 @@ def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
             derived_dir=derived,
             capture_dir=video_dir / "captures" / cap,
         )
-        check_quota(llm_error)
+        check_quota(jev_error)
         verdict.write(target / "verdict.json", verdict.decide(findings, run_id, timeline))
-        return findings, llm_error
+        return findings, jev_error
 
     if reject_quota:
         with TemporaryDirectory(prefix=".reanalyze-", dir=derived) as staging:
             target = Path(staging) / run_id
-            findings, llm_error = run(target)
-            check_quota(llm_error)
+            findings, jev_error = run(target)
+            check_quota(jev_error)
             out.parent.mkdir(parents=True, exist_ok=True)
             target.rename(out)
     else:
-        findings, llm_error = run(out)
+        findings, jev_error = run(out)
     with Session(get_engine()) as s:
         for f in findings:
             s.add(finding_row(f))
         s.commit()
-    return run_id, findings, llm_error
+    return run_id, findings, jev_error
 
 
 @huey.task()
@@ -377,7 +377,7 @@ def analyze(job_id: str) -> None:
     job = _update(job_id, status="running", step="analyze", progress=75)
     try:
         cap = str(job.capture)
-        run_id, findings, llm_error = analyze_capture(_video_dir(job), cap)
+        run_id, findings, jev_error = analyze_capture(_video_dir(job), cap)
     except Exception as e:
         _fail(job_id, "analyze", e)
         return
@@ -385,10 +385,10 @@ def analyze(job_id: str) -> None:
     message = f"Processed video {job.video_id}: {len(findings)} findings"
     detail = {"capture": cap, "run_id": run_id, "findings": len(findings)}
     notes = []
-    if llm_error:
-        short = llm_error[:200] + ("…" if len(llm_error) > 200 else "")
-        notes.append(f"LLM analysis skipped: {short}")
-        detail["llm_error"] = llm_error
+    if jev_error:
+        short = jev_error[:200] + ("…" if len(jev_error) > 200 else "")
+        notes.append(f"Jev analysis skipped: {short}")
+        detail["jev_error"] = jev_error
     if notes:
         message += f" ({'; '.join(notes)})"
     _event(job, "job_done", message)

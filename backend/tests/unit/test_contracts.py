@@ -149,9 +149,9 @@ def _finding(**over: Any) -> dict[str, Any]:
         "run_id": "r_20261118T160000",
         "video_id": "abc123",
         "capture": "20261118T154530",
-        "analyzer": "llm",
+        "analyzer": "jev",
         "analyzer_version": "0.1.0",
-        "model": {"provider": "anthropic", "model": "claude-sonnet-5-5"},
+        "model": {"provider": "typesafe", "model": "jev-1.14.0"},
         "source_kind": "visual",
         "triggers": [
             {"via": "face", "frame": "frames/000231.jpg", "bbox": [10, 20, 30, 40], "score": 0.82}
@@ -314,7 +314,13 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
         _finding(source_kind="comment", segment_id=None, comment_id=None),
         "comment thiếu id",
     ),
-    (Finding, _finding(analyzer="llm", model=None), "llm thiếu model"),
+    (Finding, _finding(model=None), "jev thiếu model"),
+    (
+        Finding,
+        _finding(analyzer="llm", model={"provider": "openrouter", "model": "x"}),
+        "nghi vấn của LLM đã bỏ",
+    ),
+    (Finding, _finding(analyzer="llm", model=None), "nghi vấn llm cũ thiếu model"),
     (Finding, _finding(confidence="87%"), "mức tin cậy dạng phần trăm"),
     (Finding, _finding(category="spam"), "category lạ"),
     (Finding, _finding(case_id="2026-11_case-0007"), "case_id đã bỏ"),
@@ -351,6 +357,27 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
 def test_rejected_examples(model: type[BaseModel], data: dict[str, Any], why: str) -> None:
     with pytest.raises(ValidationError):
         model.model_validate(data)
+
+
+@pytest.mark.parametrize(
+    ("why", "message"),
+    [
+        ("jev thiếu model", "a jev finding needs model"),
+        ("nghi vấn của LLM đã bỏ", "removed LLM providers"),
+        ("nghi vấn llm cũ thiếu model", "removed LLM providers"),
+    ],
+)
+def test_finding_analyzer_rejected_for_the_right_rule(why: str, message: str) -> None:
+    data = next(d for m, d, w in REJECTED if m is Finding and w == why)
+    with pytest.raises(ValidationError, match=message):
+        Finding.model_validate(data)
+
+
+def test_legacy_jev_finding_becomes_jev() -> None:
+    """Nghi vấn cũ của Jev ghi `analyzer: "llm"` với provider `typesafe` được đọc thành `jev`."""
+    finding = Finding.model_validate(_finding(analyzer="llm"))
+    assert finding.analyzer == "jev"
+    assert finding == Finding.model_validate(_finding())
 
 
 def test_frame_outside_segment_rejected_for_the_right_rule() -> None:
@@ -529,6 +556,10 @@ def test_video_verdict_requires_evidence(fields, message):
         finding_ids=[f"f_{0:026d}"],
     )
     assert VideoVerdict.model_validate(valid).violation == "yes"
+    # Kết luận cũ do LLM viết có trường model: bỏ khi đọc.
+    old_model = {"provider": "openrouter", "model": "x"}
+    legacy = VideoVerdict.model_validate(valid | {"model": old_model})
+    assert legacy == VideoVerdict.model_validate(valid)
     with pytest.raises(ValidationError, match=message):
         VideoVerdict.model_validate(valid | fields)
 

@@ -1094,7 +1094,7 @@ export interface components {
              * Analyzer
              * @enum {string}
              */
-            analyzer: "static" | "llm";
+            analyzer: "static" | "jev";
             /** Analyzer Version */
             analyzer_version: string;
             model?: components["schemas"]["ModelRef"] | null;
@@ -1911,7 +1911,6 @@ export interface components {
             video_id: string;
             /** Capture */
             capture: string;
-            model?: components["schemas"]["ModelRef"] | null;
             /** At */
             at: string;
         };

@@ -201,15 +201,6 @@ export default function CollectPage() {
                     {job.video_id || job.target}
                   </div>
                   {job.error && <p className="mt-1 text-xs whitespace-normal text-destructive">{job.error}</p>}
-                  {/* Bước phân tích cần nhà cung cấp AI có key; backend báo "no AI provider available" khi thiếu. */}
-                  {job.error?.includes('no AI provider available') && (
-                    <p className="mt-1 text-xs">
-                      <Link to="/settings/jev" className="underline">
-                        Add a Jev key in Settings
-                      </Link>
-                      , or collect at the <span className="font-mono">metadata</span> level.
-                    </p>
-                  )}
                 </TableCell>
                 <TableCell>{job.level}</TableCell>
                 <TableCell>

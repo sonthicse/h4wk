@@ -8,7 +8,7 @@ Tên trang, nút và nhãn trong các bước là chữ tiếng Anh đang hiện
 
 - [ ] **GPU.** `nvidia-smi` liệt kê GPU và phiên bản CUDA, không báo lỗi.
 - [ ] **Khóa Jev.** `TYPESAFE_API_KEY` có trong `.env` hoặc nhập ở Settings → Jev.
-- [ ] **Key.** Có key của nhà cung cấp đã chọn trong `.env` hoặc trong Settings → AI providers (key nhập ở Settings được ưu tiên). Giao diện chỉ hiện bản che của key.
+- [ ] **Key nguồn thu.** `YOUTUBE_API_KEY`, `SUPADATA_API_KEY` có trong `.env` hoặc nhập ở Settings → Sources (key nhập ở Settings được ưu tiên). Giao diện chỉ hiện bản che của key.
 - [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync --extra stt --extra match && uv run --no-sync h4wk init`, rồi `cd ../web && npm install` (từ thư mục `backend/`).
 
 > **Cảnh báo:** trong `backend/` **không chạy `uv sync` hay `uv run` trơn**. Hai lệnh này đồng bộ lại môi trường theo extra mặc định và gỡ torch cùng các thư viện CUDA của extra `stt`, `match`. Mọi lệnh dùng `uv run --no-sync ...`. Riêng worker GPU dùng `uv run --extra stt --extra match ...` như bên dưới.
@@ -57,7 +57,7 @@ Kết quả mong đợi: đủ ba loại nghi vấn, mỗi lần mở video phá
 ## 3. Màn 2: dán link trực tiếp
 
 - [ ] Chọn một video dài dưới 5 phút. Mở **Collect**, mục **New collection**, dán link vào ô "Video, playlist or channel link", đặt **Level** = `full`, bấm **Collect**. Ghi lại giờ bấm.
-- [ ] Bảng **Jobs** thêm một dòng của video này; cột Progress và Steps chạy lần lượt `collect → transcribe → frames → ocr → vlm → match → analyze` (job cũ hoặc job bị bỏ qua bước match vẫn có thể hiện `match` là done).
+- [ ] Bảng **Jobs** thêm một dòng của video này; cột Progress và Steps chạy lần lượt `collect → transcribe → frames → ocr → match → analyze` (job cũ hoặc job bị bỏ qua bước match vẫn có thể hiện `match` là done).
 - [ ] Job kết thúc ở trạng thái xong, không lỗi. Ghi lại giờ kết thúc và số phút xử lý.
 - [ ] Video mới hiện ở **Videos**; mở ra thấy transcript, khung hình và các nghi vấn (nếu video có nội dung liên quan).
 
@@ -103,7 +103,7 @@ Kết quả mong đợi: OK với bản thu nguyên vẹn; FAIL, `missing`, `une
 
 | Triệu chứng | Nguyên nhân và cách xử lý |
 | --- | --- |
-| Gemini hoặc OpenRouter báo 429 | Hết quota. Ảnh lỗi bị bỏ qua, phân tích LLM có thể bị bỏ qua và event có ghi chú. Chờ quota rồi chạy lại. |
+| Jev báo 429 hoặc lỗi | Jev được thử lại khi 429; vẫn lỗi thì job xong với tầng tĩnh, event ghi "Jev analysis skipped". Chờ rồi chạy lại phân tích. |
 | `No module named 'faster_whisper'` | Worker GPU chạy thiếu `--extra stt`. Chạy lại đúng lệnh ở mục 1. |
 | Thiếu `libcublas` hoặc cuDNN | Chưa cài extra `match`, hoặc chưa đặt `LD_LIBRARY_PATH` tới các thư mục `nvidia/*/lib` trong `backend/.venv`. |
 | torch hoặc thư viện CUDA biến mất | Lỡ chạy `uv sync` hoặc `uv run` trơn. Cài lại: `uv sync --extra stt --extra match`, rồi dùng `--no-sync`. |

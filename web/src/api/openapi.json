@@ -3210,7 +3210,7 @@
             "type": "string",
             "enum": [
               "static",
-              "llm"
+              "jev"
             ],
             "title": "Analyzer"
           },
@@ -5511,16 +5511,6 @@
             "type": "string",
             "pattern": "^\\d{8}T\\d{6}$",
             "title": "Capture"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ModelRef"
-              },
-              {
-                "type": "null"
-              }
-            ]
           },
           "at": {
             "type": "string",

@@ -152,7 +152,7 @@ def test_failed_step_marks_job_failed_and_audits(
     assert audit[-1]["action"] == "job.run" and audit[-1]["status"] == "error"
 
 
-def test_llm_failure_keeps_job_done(
+def test_jev_failure_keeps_job_done(
     client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from h4wk.analysis import jev
@@ -168,9 +168,9 @@ def test_llm_failure_keeps_job_done(
     assert job["status"] == "done" and job["error"] is None
     assert client.get("/api/findings").json(), "nghi vấn tĩnh vẫn còn"
     done = next(e for e in client.get("/api/events").json() if e["kind"] == "job_done")
-    assert "LLM analysis skipped" in done["message"]
+    assert "Jev analysis skipped" in done["message"]
     run = _lines(data_dir / "log" / "audit.jsonl")[-1]
-    assert run["action"] == "job.run" and "llm_error" in json.dumps(run)
+    assert run["action"] == "job.run" and "jev_error" in json.dumps(run)
 
 
 @pytest.mark.parametrize(

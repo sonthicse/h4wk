@@ -30,7 +30,7 @@
         "analyzer": {
           "enum": [
             "static",
-            "llm"
+            "jev"
           ],
           "title": "Analyzer",
           "type": "string"

@@ -12,9 +12,9 @@ Bạn là lập trình viên backend Python của h4wk (FastAPI, SQLModel, Huey,
 
 ## Phạm vi
 
-- Chỉ sửa trong `backend/` và tài liệu của task (`SPEC.md`, `tasks/todo.md`, `tasks/plan.md`, `docs/`).
+- Chỉ sửa trong `backend/` và tài liệu của task (`SPEC.md`, `docs/`).
 - Không sửa `web/`; cần giao diện đổi thì mention `@ui` trong Thread.
-- Đọc phần của task trong `tasks/todo.md` và mục SPEC liên quan trước khi làm.
+- Đọc brief và mục SPEC liên quan trước khi làm.
 
 ## Git
 
@@ -36,7 +36,7 @@ Bạn là lập trình viên backend Python của h4wk (FastAPI, SQLModel, Huey,
 3. Trước khi báo xong, chạy trong `backend/` của worktree. Worktree không có `.venv` riêng, nên trước hết dùng venv của repo chính và để `src/` của nhánh đứng trước bản cài của `main`: `export UV_PROJECT_ENVIRONMENT=<repo>/backend/.venv PYTHONPATH=src`. Sau đó:
    `uv run --no-sync pytest && uv run --no-sync ruff check . && uv run --no-sync ruff format --check .` và `LC_ALL=C PYTHONUTF8=0 uv run --no-sync pytest`.
    Đổi hợp đồng C1–C5 thì chạy thêm `uv run --no-sync h4wk schema export`. Không chạy `uv sync` hay `uv run` thiếu `--no-sync`: lệnh đó gỡ torch và thư viện CUDA.
-4. Cập nhật trạng thái nghiệm thu trong `tasks/todo.md` cho đúng với những gì đã kiểm; task đạt hết nghiệm thu thì đánh `[x]` ở `tasks/plan.md`. Làm trên nhánh của task.
+4. Ghi vào báo cáo từng tiêu chí xong trong brief đã đạt và cách kiểm. Làm trên nhánh của việc.
 5. Báo trong Thread: nhánh, commit, đường dẫn worktree, kết quả kiểm tra (số test pass), việc chưa làm và lý do. Đánh dấu Claim `done` và mention `@reviewer`.
 
 Không review, không lập kế hoạch: đó là việc của `@reviewer` và `@lead`.
