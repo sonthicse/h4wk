@@ -244,7 +244,10 @@ export default function FindingsPage() {
               </TableCell>
               <TableCell>{f.source_kind}</TableCell>
               <TableCell className="whitespace-nowrap">{entityName(f.entity)}</TableCell>
-              <TableCell className="max-w-80 truncate">{f.quote}</TableCell>
+              {/* Cột Quote lấy phần rộng còn lại và cắt chữ, để bảng vừa khung không cuộn ngang. */}
+              <TableCell className="w-full max-w-0 truncate" title={f.quote}>
+                {f.quote}
+              </TableCell>
               <TableCell>{f.category}</TableCell>
               <TableCell>
                 <Badge variant={severityVariant[f.severity]}>{f.severity}</Badge>

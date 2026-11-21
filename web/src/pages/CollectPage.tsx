@@ -17,18 +17,20 @@ import { formatVnDateTime } from '@/lib/format'
 
 type StepStatus = 'pending' | 'running' | 'done' | 'failed'
 
+// Theo bản phác: done nền đậm, running viền đậm, failed đỏ, queued viền nhạt.
 const statusVariant: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
-  queued: 'secondary',
-  running: 'default',
-  done: 'outline',
+  queued: 'outline',
+  running: 'outline',
+  done: 'default',
   failed: 'destructive',
 }
 
+// Mỗi bước là một chip: xong nền nhạt, đang chạy nền đậm, lỗi đỏ, chưa chạy viền đứt.
 const stepClass: Record<StepStatus, string> = {
-  pending: 'text-muted-foreground',
-  running: 'font-medium text-foreground',
-  done: 'text-foreground line-through decoration-muted-foreground',
-  failed: 'font-medium text-destructive',
+  pending: 'border border-dashed text-muted-foreground',
+  running: 'bg-primary text-primary-foreground',
+  done: 'bg-muted text-foreground/80',
+  failed: 'bg-destructive/10 text-destructive',
 }
 
 // Các bước con của job theo mức thu (backend jobs/pipeline.py). API cho biết bước đang chạy (`step`)
@@ -59,11 +61,10 @@ function Steps({ job }: { job: Job }) {
   const names = stepsOf(job)
   const steps = names.map((name, i) => ({ name, status: stepStatus(job, names, i) }))
   return (
-    <div className="flex flex-wrap items-center gap-1 text-xs">
-      {steps.map((s, i) => (
-        <span key={s.name} className="flex items-center gap-1">
-          {i > 0 && <span className="text-muted-foreground">→</span>}
-          <span className={stepClass[s.status]}>{s.name}</span>
+    <div className="flex flex-wrap gap-1 text-[11px]">
+      {steps.map((s) => (
+        <span key={s.name} className={`rounded-md px-1.5 py-px ${stepClass[s.status]}`}>
+          {s.name}
         </span>
       ))}
     </div>
@@ -196,7 +197,9 @@ export default function CollectPage() {
             {jobs.data?.map((job) => (
               <TableRow key={job.id} className="align-top">
                 <TableCell className="max-w-80">
-                  <div className="truncate font-mono text-xs">{job.target}</div>
+                  <div className="truncate font-mono text-xs" title={job.target}>
+                    {job.video_id || job.target}
+                  </div>
                   {job.error && <p className="mt-1 text-xs whitespace-normal text-destructive">{job.error}</p>}
                   {/* Bước phân tích cần nhà cung cấp AI có key; backend báo "no AI provider available" khi thiếu. */}
                   {job.error?.includes('no AI provider available') && (
@@ -210,13 +213,15 @@ export default function CollectPage() {
                 </TableCell>
                 <TableCell>{job.level}</TableCell>
                 <TableCell>
-                  <Badge variant={statusVariant[job.status] ?? 'outline'}>{job.status}</Badge>
+                  <Badge
+                    variant={statusVariant[job.status] ?? 'outline'}
+                    className={job.status === 'running' ? 'border-foreground' : job.status === 'queued' ? 'text-muted-foreground' : undefined}
+                  >
+                    {job.status}
+                  </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Progress value={job.progress} />
-                    <span className="w-9 text-right text-xs text-muted-foreground">{job.progress}%</span>
-                  </div>
+                  <Progress value={job.progress} aria-label={`${job.progress}%`} />
                 </TableCell>
                 <TableCell>
                   <Steps job={job} />

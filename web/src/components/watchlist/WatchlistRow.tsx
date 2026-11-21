@@ -62,7 +62,9 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
           <p className="mt-1 max-w-64 text-xs font-normal [overflow-wrap:anywhere] text-destructive">{item.last_error}</p>
         )}
       </TableCell>
-      <TableCell className="text-muted-foreground">{item.handle || '—'}</TableCell>
+      <TableCell className="max-w-36 truncate text-muted-foreground" title={item.handle || undefined}>
+        {item.handle || '—'}
+      </TableCell>
       <TableCell>
         <Switch
           aria-label={`Watch ${item.title}`}
@@ -86,7 +88,7 @@ export default function WatchlistRow({ item }: { item: WatchItem }) {
         </Select>
       </TableCell>
       <TableCell className="text-xs">{item.last_checked_at ? formatVnDateTime(item.last_checked_at) : 'Never'}</TableCell>
-      <TableCell className="max-w-64">
+      <TableCell className="w-full max-w-0">
         {item.latest_video ? (
           <>
             <Link

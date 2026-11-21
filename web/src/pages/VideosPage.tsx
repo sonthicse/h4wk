@@ -82,7 +82,7 @@ export default function VideosPage() {
                   }
                 }}
               >
-                <TableCell className="max-w-96">
+                <TableCell className="max-w-72">
                   <p className="truncate font-medium">{v.title ?? v.id}</p>
                   <p className="font-mono text-xs text-muted-foreground">{v.id}</p>
                 </TableCell>

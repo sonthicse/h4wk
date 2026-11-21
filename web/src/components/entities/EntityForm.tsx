@@ -30,44 +30,37 @@ export default function EntityForm({ entity }: { entity: Entity }) {
 
   return (
     <form
-      className="space-y-5"
+      className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault()
         if (dirty && form.name.trim()) save.mutate()
       }}
     >
-      <div className="space-y-2">
-        <Label htmlFor="entity-name">Name</Label>
-        <Input id="entity-name" className="max-w-md" value={form.name} onChange={(e) => set('name')(e.target.value)} />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="entity-name">Name</Label>
+          <Input id="entity-name" value={form.name} onChange={(e) => set('name')(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
           <Label htmlFor="entity-alias">Aliases</Label>
           <TermListInput id="entity-alias" values={form.aliases} placeholder="e.g. ông A" onChange={set('aliases')} />
-          <p className="text-xs text-muted-foreground">
-            Matched like the name: diacritics and case ignored, words of 4+ letters may have one typo.
-          </p>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="entity-abbr">Abbreviations</Label>
           <TermListInput id="entity-abbr" values={form.abbreviations} placeholder="e.g. NVA" onChange={set('abbreviations')} />
           <p className="text-xs text-muted-foreground">Matched exactly, as a whole word.</p>
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Label htmlFor="entity-description">Description</Label>
         <Textarea
           id="entity-description"
-          className="max-w-2xl"
-          rows={3}
+          rows={2}
+          className="resize-none"
           value={form.description}
           onChange={(e) => set('description')(e.target.value)}
         />
-        <p className="text-xs text-muted-foreground">
-          Who or what this entity covers, in English. Used by the Jev classifier to decide whether an attack targets this entity.
-        </p>
       </div>
 
       <div className="flex items-center gap-2">

@@ -88,7 +88,7 @@ export default function AppSidebar() {
         <SidebarHeader>
           {/* Ô logo giữ kích thước cố định để menu không nhảy khi thu gọn sidebar. */}
           <div className="flex items-center gap-2">
-            <Logo className="size-8 shrink-0" />
+            <Logo className="size-8 shrink-0 rounded-lg text-base" />
             {/* Ẩn chữ khi thu gọn; ô logo giữ nguyên kích thước nên menu không nhảy. */}
             <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">h4wk</span>
           </div>

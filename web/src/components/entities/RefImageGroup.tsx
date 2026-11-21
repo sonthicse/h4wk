@@ -20,12 +20,10 @@ export default function RefImageGroup({
   entity,
   kind,
   title,
-  description,
 }: {
   entity: Entity
   kind: RefKind
   title: string
-  description: string
 }) {
   const queryClient = useQueryClient()
   const fileInput = useRef<HTMLInputElement>(null)
@@ -57,67 +55,61 @@ export default function RefImageGroup({
   })
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="font-medium">
-            {title} <span className="text-sm font-normal text-muted-foreground">({images.length})</span>
-          </h3>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-        <input
-          ref={fileInput}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          hidden
-          onChange={(e) => {
-            const files = Array.from(e.target.files ?? [])
-            if (files.length > 0) upload.mutate(files)
-            e.target.value = '' // cho phép chọn lại cùng file
-          }}
-        />
-        <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()} disabled={upload.isPending}>
-          <UploadIcon />
-          {upload.isPending ? 'Uploading…' : 'Upload'}
-        </Button>
-      </div>
+    <section className="flex flex-col gap-2">
+      <h4 className="font-medium">
+        {title} <span className="font-normal text-muted-foreground">· {images.length}</span>
+      </h4>
+      <input
+        ref={fileInput}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        hidden
+        onChange={(e) => {
+          const files = Array.from(e.target.files ?? [])
+          if (files.length > 0) upload.mutate(files)
+          e.target.value = '' // cho phép chọn lại cùng file
+        }}
+      />
+      {/* Ảnh mẫu 88px xếp hàng, ô Upload ở cuối như bản phác. */}
+      <ul className="flex flex-wrap gap-2">
+        {images.map((img) => (
+          <li key={img.file} className="group relative">
+            <button
+              type="button"
+              className="block size-22 overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              onClick={() => setViewing(img)}
+              aria-label={`View ${img.file}`}
+              title={img.file}
+            >
+              <RefThumb image={img} className="size-full" />
+            </button>
+            <Button
+              variant="secondary"
+              size="icon-xs"
+              className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+              aria-label={`Delete ${img.file}`}
+              onClick={() => setDeleting(img)}
+            >
+              <Trash2Icon />
+            </Button>
+          </li>
+        ))}
+        <li>
+          <button
+            type="button"
+            onClick={() => fileInput.current?.click()}
+            disabled={upload.isPending}
+            className="flex size-22 flex-col items-center justify-center gap-1 rounded-lg border border-dashed text-sm text-muted-foreground hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+          >
+            <UploadIcon className="size-4" />
+            {upload.isPending ? 'Uploading…' : 'Upload'}
+          </button>
+        </li>
+      </ul>
 
       {upload.error && <p className="text-sm text-destructive">Could not upload: {upload.error.message}</p>}
       {refs.error && <p className="text-sm text-destructive">Could not load images: {refs.error.message}</p>}
-
-      {images.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-          No {title.toLowerCase()} yet.
-        </p>
-      ) : (
-        <ul className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-3">
-          {images.map((img) => (
-            <li key={img.file} className="group relative">
-              <button
-                type="button"
-                className="block w-full overflow-hidden rounded-lg border focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                onClick={() => setViewing(img)}
-                aria-label={`View ${img.file}`}
-              >
-                <RefThumb image={img} className="w-full" />
-              </button>
-              <Button
-                variant="secondary"
-                size="icon-xs"
-                className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
-                aria-label={`Delete ${img.file}`}
-                onClick={() => setDeleting(img)}
-              >
-                <Trash2Icon />
-              </Button>
-              <p className="mt-1 truncate text-xs text-muted-foreground" title={img.file}>
-                {img.file}
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
 
       {/* Xem ảnh lớn */}
       <Dialog open={viewing !== null} onOpenChange={(open) => !open && setViewing(null)}>
