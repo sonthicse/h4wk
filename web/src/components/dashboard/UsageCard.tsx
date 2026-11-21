@@ -49,7 +49,7 @@ export default function UsageCard({ youtubeQuota, supadataCredits, jevUsage }: {
           </div>
           {jevUsage ? (
             <p className="tabular-nums">
-              Input: {jevUsage.input_tokens?.toLocaleString('en-US') ?? 'Not reported'} · Output: {jevUsage.output_tokens?.toLocaleString('en-US') ?? 'Not reported'}
+              Requests: {jevUsage.requests.toLocaleString('en-US')} · Input: {jevUsage.input_tokens?.toLocaleString('en-US') ?? 'Not reported'} · Output: {jevUsage.output_tokens?.toLocaleString('en-US') ?? 'Not reported'}
             </p>
           ) : <p className="text-muted-foreground">No requests this month</p>}
           <p className="text-xs text-muted-foreground">Token counts reported by TypeSafe. Totals include only reported counts.</p>
