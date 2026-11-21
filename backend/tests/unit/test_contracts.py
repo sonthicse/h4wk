@@ -15,6 +15,7 @@ from h4wk.cli import export_schemas
 from h4wk.collectors.models import Cap, CollectLevel, Normalized
 from h4wk.core.config import REPO_ROOT
 from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig, load_toml
+from h4wk.core.entities import Entity
 from h4wk.evidence.models import Manifest
 from h4wk.media.timeline import Timeline
 
@@ -558,6 +559,7 @@ def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
         "c5-sources.json",
         "c5-ai.json",
         "c5-analysis.json",
+        "c5-entities.json",
     }
     for p in written:
         json.loads(p.read_text(encoding="utf-8"))
@@ -612,3 +614,14 @@ def test_video_review_decision_contract():
         VideoReviewDecision.model_validate(fields | {"note": " "})
     with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
         VideoReviewDecision.model_validate(fields | {"finding_id": "wrong"})
+
+
+def test_entity_description():
+    entity = {"id": "e_01", "name": "Đối tượng mẫu"}
+    assert Entity.model_validate(entity).description is None
+    assert Entity.model_validate({**entity, "description": "Mô tả mẫu"}).description == "Mô tả mẫu"
+    with pytest.raises(ValidationError) as exc:
+        Entity.model_validate({**entity, "description": ["Sai kiểu"]})
+    assert [(e["loc"], e["type"]) for e in exc.value.errors()] == [
+        (("description",), "string_type")
+    ]

@@ -299,7 +299,7 @@ Spec: [SPEC-local-ai.md](../SPEC-local-ai.md). VLM và LLM kết luận chạy c
 - [x] T51: `ai-gateway`: nhà cung cấp `ollama`
 - [ ] T52: `media`: mô tả ảnh qua Ollama, cache theo từng ảnh
 - [ ] T53: `analysis`: kết luận theo video bằng model cục bộ
-- [ ] T54: `analysis`: Jev cấu hình R10 cho lời nói và comment
+- [x] T54: `analysis`: Jev cấu hình R10 cho lời nói và comment
 - [ ] T55: `analysis`: Jev cho tiêu đề, mô tả, OCR, hình ảnh và thumbnail
 - [ ] T56: Bỏ tác vụ AI `analysis.classify`
 - [x] T57: UI ẩn lý do của nghi vấn Jev

@@ -54,7 +54,7 @@ Hợp đồng C5 có loại nhà cung cấp `ollama`: bắt buộc `base_url`, k
   - `state` có `protected_targets`, `source_type`, `text`, `video_title`, và ngữ cảnh theo loại (`parent_comment`; `speech_before`/`speech_after`);
   - câu hỏi `category` (criteria dạng `{what, examples}`), `severity`, `is_attack`, `target`;
   - giữ nghi vấn khi `is_attack.noul ≥ 0,5` và `target.choice ≠ "none"`; danh mục và `confidence` lấy từ `category`, `severity` từ `severity`.
-  - `protected_targets` và `target.criteria` sinh từ danh sách đối tượng (tên, biệt danh, mô tả), không viết cứng.
+  - `protected_targets` và `target.criteria` sinh từ danh sách đối tượng (tên, biệt danh, viết tắt, mô tả nếu có), không viết cứng.
 - Nguồn mới gửi Jev, mỗi mục một request:
   - tiêu đề video (`source_kind: title`), mô tả video (`description`);
   - mỗi đoạn timeline có OCR hoặc mô tả ảnh: `text` là các dòng OCR ghép bằng ` | ` (bỏ dòng trùng) cùng mô tả ảnh và `offensive_cues` (`source_kind: ocr` hoặc `visual`, kèm `frame`);

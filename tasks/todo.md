@@ -824,7 +824,7 @@ Theo SPEC 10.6 (bước 3): Jev xét mọi đoạn lời nói và mọi comment 
 
 Nghiệm thu:
 
-- [ ] Gán nhãn đủ 124 dòng ở `data/eval/jev/trial.csv` (còn 42 dòng chưa gán); Jev đạt recall không thấp hơn LLM trên cùng bộ nhãn.
+- [x] Thay phép gán nốt 42 dòng bằng phép đo Jev R10 ở T54: P 0,754 / R 0,920 trên 119 mục.
 - [x] Chạy thử trên mọi đoạn và comment của 8 video có sẵn, gán nhãn khoảng 50 mục không nhắc tên ai mà Jev đánh dấu, ghi precision vào `docs/eval/`.
 - [x] Test với Jev giả: đoạn và comment vi phạm sinh nghi vấn đúng danh mục và đối tượng; `target` là `none` thì không sinh nghi vấn; 429 được thử lại; Jev lỗi thì job vẫn xong, lỗi ghi vào `llm_error`.
 - [x] Thiếu `TYPESAFE_API_KEY` thì Settings báo thiếu key; job vẫn chạy, comment và lời nói chỉ có tầng tĩnh.
@@ -924,9 +924,11 @@ Người làm: Thi. Phụ thuộc: T52. Cỡ: S.
 
 Nghiệm thu:
 
-- [ ] Test với Jev giả: `is_attack` 0,49 thì không giữ, 0,5 thì giữ; `target` là `none` thì không giữ; hai đối tượng sinh hai khoá trong `target.criteria`.
-- [ ] Chạy `analysis/jev.py` mới trên bộ test 119 mục của `data/eval/jev/tune/` (gọi API thật): P và R trong khoảng ±0,02 so với R10 (P 0,754 / R 0,920). Lệch hơn thì ghi nguyên nhân và hỏi Thi trước khi chỉnh.
-- [ ] Đóng T47: thay mục “gán nốt 42 dòng” bằng kết quả này.
+- [x] Test với Jev giả: `is_attack` 0,49 thì không giữ, 0,5 thì giữ; `target` là `none` thì không giữ; hai đối tượng sinh hai khoá trong `target.criteria`.
+- [x] Chạy `analysis/jev.py` mới trên bộ test 119 mục của `data/eval/jev/tune/` (gọi API thật): P và R trong khoảng ±0,02 so với R10 (P 0,754 / R 0,920). Lệch hơn thì ghi nguyên nhân và hỏi Thi trước khi chỉnh.
+- [x] Đóng T47: thay mục “gán nốt 42 dòng” bằng kết quả này.
+
+Đo thật 119/119 mục mỗi lượt (nhãn do agent gán): với mô tả được đọc từ `data/entities.json`, hai lượt đều đạt P 0,754 / R 0,920 (TP/FP/FN/TN: 46/15/4/54); riêng 98 lời nói/comment đều đạt P 0,765 / R 0,907. Mốc đối chứng trước đó: không mô tả P 0,800 / R 0,800; chèn nguyên văn hai mô tả R10 trong script P 0,730 / R 0,920. Giữ nguyên ngưỡng 0,5.
 
 Kiểm tra: `uv run --no-sync pytest tests/unit/test_jev.py`.
 

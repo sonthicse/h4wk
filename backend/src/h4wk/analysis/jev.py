@@ -12,13 +12,140 @@ from h4wk.core.ids import new_ulid
 
 URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-latest"
-VIOLATIONS = {
-    "insult": "insults, slanders, curses or humiliates the target",
-    "unsupported_accusation": "accuses the target of wrongdoing or crimes without evidence",
-    "fabrication": "distorts facts or spreads made-up information about the target",
-    "incitement": "incites hatred, division, protest or violence against the target",
-    "state_secret": "reveals state secrets",
+QUESTIONS = {
+    "category": {
+        "type": "choice",
+        "instructions": (
+            "`text` is a Vietnamese YouTube item (see `source_type`). Decide whether `text` "
+            "itself attacks any of the `protected_targets`. The Party, State or regime counts "
+            "as attacked even when not named. An insult or accusation aimed at anyone else "
+            "(foreign leaders, historical figures, other commenters, the channel) is neutral. A"
+            " comment that only replies to `parent_comment` is judged by what the reply itself "
+            "says: agreeing with an attack counts, but a question, joke or remark about another"
+            " topic does not. Reporting facts, describing what leaders did, analysis and "
+            "predictions in news, titles, descriptions or narration are legitimate_criticism or"
+            " neutral unless they use insults, mockery, or accuse the protected targets of "
+            "crimes, corruption or betrayal without proof. Boilerplate such as links, donation "
+            "appeals and hashtags is neutral."
+        ),
+        "criteria": {
+            "insult": {
+                "what": (
+                    "insults, slanders, curses, mocks or humiliates a protected target, "
+                    "including sarcasm and derogatory nicknames"
+                ),
+                "examples": [
+                    "Thằng này ngu như bò",
+                    "Bọn cộng sản là lũ cướp",
+                    "Ngài tổng bí thư vĩ đại quá nhỉ, cười chết mất",
+                ],
+            },
+            "unsupported_accusation": {
+                "what": (
+                    "accuses a protected target of a crime, corruption or betrayal without "
+                    "presenting evidence"
+                ),
+                "examples": ["Ông ta bán nước cho Tàu", "Cả bộ máy này ăn hối lộ hết"],
+            },
+            "fabrication": {
+                "what": "distorts facts or spreads made-up information about a protected target",
+                "examples": [
+                    "Nghe nói ông ấy đã bỏ trốn ra nước ngoài",
+                    "Đảng đã tự tay giết hàng triệu dân",
+                ],
+            },
+            "incitement": {
+                "what": (
+                    "calls for hatred, violence, overthrow or division against a protected target"
+                ),
+                "examples": ["Đứng lên lật đổ chế độ này đi", "Phải treo cổ bọn lãnh đạo"],
+            },
+            "state_secret": {
+                "what": "reveals state secrets",
+                "examples": ["Đây là tài liệu mật của Bộ Chính trị, tôi tung lên đây"],
+            },
+            "legitimate_criticism": {
+                "what": (
+                    "criticizes, doubts or analyzes a policy, decision or the system of a "
+                    "protected target, or predicts its failure, without insults, mockery or "
+                    "unproven accusations of crimes"
+                ),
+                "examples": [
+                    "Chính sách sáp nhập tỉnh làm người dân mất giấy tờ, thủ tục rườm rà hơn",
+                    (
+                        "Tôi lo kế hoạch tăng trưởng hai con số khó thực hiện vì bất động sản "
+                        "đang đóng băng"
+                    ),
+                    "Chế độ độc đảng nào rồi cũng phải thay đổi nếu không theo kịp thời đại",
+                    "Vì sao luật mới có thể gây bất ổn cho chính quyền?",
+                ],
+            },
+            "neutral": {
+                "what": (
+                    "does not attack the protected targets: praise, neutral remarks, questions,"
+                    " news reporting, boilerplate links or hashtags, or insults aimed at "
+                    "someone else"
+                ),
+                "examples": [
+                    "Ông Tô Lâm gặp Tổng thống Putin hôm qua",
+                    "Ủng hộ ông Tô Lâm",
+                    "Ông Putin là kẻ xâm lược",
+                    "Video hay quá, cảm ơn kênh",
+                    "Đúng vậy",
+                    "Đăng ký kênh để xem thêm: https://youtube.com/...",
+                ],
+            },
+        },
+    },
+    "severity": {
+        "type": "score",
+        "instructions": "How severe is the violation in the speech or comment?",
+        "criteria": ["none or low", "medium", "high"],
+    },
+    "is_attack": {
+        "type": "noul",
+        "instructions": (
+            "Does `text` itself personally attack, slander, curse, mock, or accuse without "
+            "evidence any of the `protected_targets`? Say no for praise, news, questions, "
+            "predictions, historical analysis and reasoned criticism of policy."
+        ),
+    },
+    "target": {
+        "type": "choice",
+        "instructions": (
+            "Which listed entity does `text` target, explicitly or implicitly? Pick `none` when"
+            " `text` is not directed at any protected target."
+        ),
+        "criteria": {
+            "none": (
+                "does not target any protected entity: praise, news, other people, other "
+                "countries or off-topic"
+            )
+        },
+    },
 }
+VIOLATIONS = ("insult", "unsupported_accusation", "fabrication", "incitement", "state_secret")
+
+
+def _configuration(entities, video_title):
+    targets = {
+        e.id: ", ".join(
+            [e.name, *e.aliases, *e.abbreviations, *([e.description] if e.description else [])]
+        )
+        for e in entities
+    }
+    questions = {
+        **QUESTIONS,
+        "target": {
+            **QUESTIONS["target"],
+            "criteria": {**targets, **QUESTIONS["target"]["criteria"]},
+        },
+    }
+    return {"protected_targets": "; ".join(targets.values()), "video_title": video_title}, questions
+
+
+def _keep(answers):
+    return answers["is_attack"]["noul"] >= 0.5 and answers["target"]["choice"] != "none"
 
 
 def _call(key, state, questions):
@@ -48,40 +175,7 @@ def classify(
     key = secrets.get("TYPESAFE_API_KEY")
     if not key:
         return [], [], "jev: TYPESAFE_API_KEY is not set"
-    targets = {
-        e.id: f"{e.name} ({', '.join(e.aliases)})" if e.aliases else e.name for e in entities
-    }
-    questions = {
-        "category": {
-            "type": "choice",
-            "instructions": (
-                "Classify how the Vietnamese YouTube speech or comment treats the target. "
-                "Use surrounding speech or the parent comment as context. "
-                "The Party, State or regime may be attacked without being named."
-            ),
-            "criteria": {
-                **VIOLATIONS,
-                "legitimate_criticism": (
-                    "reasoned criticism of actions, decisions or policies without personal attacks"
-                ),
-                "neutral": "no violation or unrelated to the target",
-            },
-        },
-        "target": {
-            "type": "choice",
-            "instructions": "Which listed entity is targeted, explicitly or implicitly?",
-            "criteria": {**targets, "none": "does not target any listed entity"},
-        },
-        "severity": {
-            "type": "score",
-            "instructions": "How severe is the violation in the speech or comment?",
-            "criteria": ["none or low", "medium", "high"],
-        },
-    }
-    shared = {
-        "video_title": data.video.title if data.video else "",
-        "entities": [{"id": e.id, "name": e.name, "aliases": e.aliases} for e in entities],
-    }
+    shared, questions = _configuration(entities, data.video.title if data.video else "")
     items = []
     segments = timeline.segments
     for i, segment in enumerate(segments):
@@ -92,20 +186,18 @@ def classify(
                     segment,
                     {
                         "speech_before": segments[i - 1].speech if i else "",
-                        "speech": segment.speech,
+                        "source_type": "speech transcript segment",
+                        "text": segment.speech,
                         "speech_after": segments[i + 1].speech if i + 1 < len(segments) else "",
                     },
                 )
             )
     texts = {c.id: c.text for c in data.comments}
     for comment in data.comments[:max_comments]:
-        items.append(
-            (
-                comment.id,
-                None,
-                {"parent_comment": texts.get(comment.parent_id), "comment": comment.text},
-            )
-        )
+        content = {"source_type": "YouTube comment", "text": comment.text}
+        if parent := texts.get(comment.parent_id):
+            content["parent_comment"] = parent
+        items.append((comment.id, None, content))
     segment_hits = {}
     for hit in hits:
         if hit.segment_id:
@@ -127,9 +219,9 @@ def classify(
             record["model"] = reply["model"]
             target = answers["target"]["choice"]
             probs = answers["category"]["probabilities"]
-            if target == "none" or sum(probs.get(c, 0.0) for c in VIOLATIONS) < 0.5:
+            if not _keep(answers):
                 return None, record
-            if target not in targets:
+            if target not in questions["target"]["criteria"]:
                 raise ValueError("Unknown Jev target")
             category = max(VIOLATIONS, key=lambda c: probs.get(c, 0.0))
             p = probs[category]
@@ -150,7 +242,7 @@ def classify(
                 else dict(
                     source_kind="comment",
                     comment_id=item_id,
-                    quote=content["comment"],
+                    quote=content["text"],
                     triggers=[Trigger(via="comment", comment_id=item_id)],
                 )
             )

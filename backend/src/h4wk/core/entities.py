@@ -21,6 +21,7 @@ class Entity(Contract):
     name: str = Field(min_length=1)
     aliases: list[str] = []
     abbreviations: list[str] = []
+    description: str | None = None
 
 
 _ENTITIES = TypeAdapter(list[Entity])

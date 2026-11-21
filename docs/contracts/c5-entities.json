@@ -1,0 +1,58 @@
+{
+  "$defs": {
+    "Entity": {
+      "additionalProperties": false,
+      "description": "Đối tượng cần bảo vệ. Ảnh mẫu nằm ở entities/<id>/refs/{face,image}/.",
+      "properties": {
+        "abbreviations": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Abbreviations",
+          "type": "array"
+        },
+        "aliases": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Aliases",
+          "type": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "id": {
+          "pattern": "^e_\\d{2,}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "title": "Entity",
+      "type": "object"
+    }
+  },
+  "items": {
+    "$ref": "#/$defs/Entity"
+  },
+  "type": "array"
+}

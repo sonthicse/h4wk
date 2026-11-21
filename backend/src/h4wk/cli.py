@@ -25,7 +25,7 @@ from h4wk.core.auth import create_user
 from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
 from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig
 from h4wk.core.db import get_engine
-from h4wk.core.entities import add_entity, load_entities
+from h4wk.core.entities import Entity, add_entity, load_entities
 from h4wk.evidence.models import Manifest
 from h4wk.evidence.verify import FileStatus
 from h4wk.evidence.verify import verify as verify_capture
@@ -52,6 +52,7 @@ CONTRACTS: dict[str, object] = {
     "c5-sources": SourcesConfig,
     "c5-ai": AiConfig,
     "c5-analysis": AnalysisConfig,
+    "c5-entities": list[Entity],
 }
 
 
