@@ -64,6 +64,40 @@ def test_full_flow_ends_with_findings(
     assert timeline.thumbnails[0].ocr[0].text == "Chữ"
 
 
+def test_every_image_sent_to_jev_exists_on_disk(
+    client: TestClient, data_dir: Path, fake_source: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from h4wk.analysis import jev
+
+    sent: list[Path] = []
+
+    def fake_call(key, state, questions, images=()):  # noqa: ANN001, ANN202
+        sent.extend(images)
+        return {
+            "model": "jev-test",
+            "answers": {
+                "category": {"probabilities": {}},
+                "is_attack": {"noul": 0.0},
+                "target": {"choice": "none"},
+                "severity": {"score": 0.0},
+            },
+        }
+
+    monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
+    monkeypatch.setattr(jev, "_call", fake_call)
+    _entity(client)
+    r = client.post("/api/collect", json={"url": VIDEO})
+    job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
+    assert job["status"] == "done", job["error"]
+    assert sent, "phải có ảnh gửi đi (keyframe và thumbnail)"
+    assert all(path.is_file() for path in sent)
+    video = data_dir / "videos" / job["video_id"]
+    selected = json.loads(
+        (video / "derived" / job["capture"] / "frames/selected.json").read_bytes()
+    )
+    assert {video / "derived" / job["capture"] / f["file"] for f in selected} <= set(sent)
+
+
 def test_text_after_metadata_processes_only_thumbnails(client, fake_source, data_dir):
     _entity(client)
     for level in ["metadata", "text"]:

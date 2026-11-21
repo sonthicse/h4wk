@@ -1,7 +1,10 @@
+import base64
 import io
 import json
 from urllib.error import HTTPError
 
+import cv2
+import numpy as np
 import pytest
 from _analysis_sample import ENTITY, INSULT, _data
 
@@ -67,8 +70,8 @@ def test_classify(monkeypatch, target, probability, kept):
         "speech transcript segment",
         "video title",
         "video description",
-        "video thumbnail (OCR)",
-        "text overlaid on video frames (OCR)",
+        "video thumbnail image; `text` is the text on it (OCR)",
+        "video keyframe images; `text` is the text overlaid on them (OCR)",
     }
     for state in states:
         assert "Mẫu hai, Tên khác, MH, Mô tả mẫu" in state["protected_targets"]
@@ -140,7 +143,7 @@ def test_new_sources(monkeypatch):
     ]
     states = []
 
-    def reply(key, state, questions):
+    def reply(key, state, questions, images=()):
         states.append(state)
         return {
             "model": "jev-test",
@@ -182,3 +185,124 @@ def test_new_sources(monkeypatch):
             frame,
             quote,
         )
+
+
+def _write(path, width, height):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    assert cv2.imwrite(str(path), np.full((height, width, 3), 128, np.uint8))
+    return path
+
+
+def _capture_request(monkeypatch):
+    sent = []
+
+    def reply(request, timeout):
+        sent.append(request)
+        return io.BytesIO(b'{"model":"jev-test"}')
+
+    monkeypatch.setattr(jev.urllib.request, "urlopen", reply)
+    return sent
+
+
+def test_call_without_images_has_no_header_and_object_state(monkeypatch):
+    sent = _capture_request(monkeypatch)
+    jev._call("k", {"text": "a"}, {})
+    body = json.loads(sent[0].data)
+    assert not any(k.lower() == "typesafe-danger-zone-images" for k in sent[0].headers)
+    assert body["state"] == {"text": "a"} and "assets" not in body
+
+
+def test_call_with_images_resizes_and_lists_state(monkeypatch, tmp_path):
+    sent = _capture_request(monkeypatch)
+    wide = _write(tmp_path / "wide.jpg", 640, 200)
+    tall = _write(tmp_path / "tall.jpg", 270, 480)
+    jev._call("k", {"text": "a"}, {}, [wide, tall])
+    request = sent[0]
+    assert request.get_header("Typesafe-danger-zone-images") == "true"
+    body = json.loads(request.data)
+    assert body["state"] == ["<image-1>", "<image-2>", {"text": "a"}]
+    shapes = []
+    for name in ("<image-1>", "<image-2>"):
+        asset = body["assets"][name]
+        assert asset["type"] == "image" and asset["format"] == "jpeg"
+        raw = np.frombuffer(base64.b64decode(asset["data_base64"]), np.uint8)
+        shapes.append(cv2.imdecode(raw, cv2.IMREAD_COLOR).shape[:2])
+    assert shapes[0] == (320, 1024)  # 640x200 -> 1024x320
+    assert min(shapes[1]) == 320
+
+
+def test_call_unreadable_image_is_value_error(tmp_path):
+    with pytest.raises(ValueError, match="Cannot read image"):
+        jev._encode(tmp_path / "missing.jpg")
+
+
+def test_classify_sends_keyframes_and_thumbnail_images(monkeypatch, tmp_path):
+    data, timeline = _data()
+    derived, capture = tmp_path / "derived", tmp_path / "capture"
+    ocr = FrameOcr(text="Dòng chữ", bbox=[0, 0, 1, 1], frame="frames/1.jpg", t=0)
+    timeline.segments = [
+        Segment(
+            id="seg_0001",
+            start=0,
+            end=10,
+            ocr=[ocr, ocr],
+            frames=[Frame(frame=f"frames/{i}.jpg", t=i) for i in range(1, 8)],
+        ),
+        Segment(id="seg_0002", start=10, end=20, frames=[Frame(frame="frames/9.jpg", t=12)]),
+    ]
+    timeline.thumbnails[0].file = "sources/maxres.jpg"
+    calls = []
+
+    def reply(key, state, questions, images=()):
+        calls.append((state, list(images)))
+        return {
+            "model": "jev-test",
+            "answers": {
+                "category": {"probabilities": {"insult": 0.8}},
+                "is_attack": {"noul": 0.0},
+                "target": {"choice": "none"},
+                "severity": {"score": 0.0},
+            },
+        }
+
+    monkeypatch.setattr(jev.secrets, "get", lambda name: "k")
+    monkeypatch.setattr(jev, "_call", reply)
+    jev.classify(
+        data,
+        timeline,
+        [ENTITY],
+        [],
+        "r_x",
+        JevSettings(),
+        max_comments=0,
+        derived_dir=derived,
+        capture_dir=capture,
+    )
+    by_text = {s["source_type"]: (s, imgs) for s, imgs in calls if imgs}
+    keyframes = [(s, imgs) for s, imgs in calls if "keyframe" in s["source_type"]]
+    assert len(keyframes) == 2
+    first, second = sorted(keyframes, key=lambda c: c[0]["text"] == "")[0], keyframes[-1]
+    # 7 keyframe lấy cách đều còn 4; dòng OCR lặp chỉ gửi một lần.
+    assert first[0]["text"] == "Dòng chữ"
+    assert first[1] == [derived / f"frames/{i}.jpg" for i in (1, 3, 5, 7)]
+    assert second[0]["text"] == "" and second[1] == [derived / "frames/9.jpg"]
+    assert by_text["video thumbnail image; `text` is the text on it (OCR)"][1] == [
+        capture / "sources/maxres.jpg"
+    ]
+
+
+def test_classify_without_dirs_sends_text_only(monkeypatch):
+    data, timeline = _data()
+    timeline.segments = [
+        Segment(id="seg_0001", start=0, end=10, frames=[Frame(frame="frames/1.jpg", t=1)])
+    ]
+    calls = []
+
+    def reply(key, state, questions, images=()):
+        calls.append(list(images))
+        raise ValueError("stop")
+
+    monkeypatch.setattr(jev.secrets, "get", lambda name: "k")
+    monkeypatch.setattr(jev, "_call", reply)
+    jev.classify(data, timeline, [ENTITY], [], "r_x", JevSettings(), max_comments=0)
+    assert calls and all(images == [] for images in calls)

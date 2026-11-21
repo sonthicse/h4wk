@@ -1,10 +1,15 @@
 """Phân loại lời nói và bình luận qua Jev."""
 
+import base64
 import json
+import math
 import time
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+import cv2
 
 from h4wk.analysis.models import Finding, ModelRef, Trigger
 from h4wk.core import secrets
@@ -12,6 +17,7 @@ from h4wk.core.ids import new_ulid
 
 URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-latest"
+MAX_IMAGES = 4  # keyframe tối đa trong một request
 QUESTIONS = {
     "category": {
         "type": "choice",
@@ -148,12 +154,33 @@ def _keep(answers):
     return answers["is_attack"]["noul"] >= 0.5 and answers["target"]["choice"] != "none"
 
 
-def _call(key, state, questions):
-    request = urllib.request.Request(
-        URL,
-        data=json.dumps({"model": MODEL, "state": state, "questions": questions}).encode("utf-8"),
-        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
-    )
+def _encode(path: Path) -> str:
+    """JPEG base64 cạnh dài tối đa 1024, cạnh ngắn ít nhất 320 (Jev từ chối ảnh quá nhỏ)."""
+    image = cv2.imread(str(path))
+    if image is None:
+        raise ValueError(f"Cannot read image {path.name}")
+    h, w = image.shape[:2]
+    scale = max(min(1024 / max(w, h), 1), 320 / min(w, h))
+    if scale != 1:
+        image = cv2.resize(image, (round(w * scale), round(h * scale)))
+    ok, data = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    if not ok:
+        raise ValueError(f"Cannot encode image {path.name}")
+    return base64.b64encode(data.tobytes()).decode("ascii")
+
+
+def _call(key, state, questions, images=()):
+    body = {"model": MODEL, "state": state, "questions": questions}
+    headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    if images:
+        # Ảnh trên API Jev còn thử nghiệm, phải bật bằng header này.
+        headers["TypeSafe-Danger-Zone-Images"] = "true"
+        assets = {
+            f"<image-{i}>": {"type": "image", "format": "jpeg", "data_base64": _encode(path)}
+            for i, path in enumerate(images, 1)
+        }
+        body.update(assets=assets, state=[*assets, state])
+    request = urllib.request.Request(URL, data=json.dumps(body).encode("utf-8"), headers=headers)
     for attempt in range(5):
         try:
             with urllib.request.urlopen(request, timeout=60) as response:
@@ -190,21 +217,31 @@ def _location(kind, item_id, text, hits, target, *, segment=None, frame=None):
 
 
 def classify(
-    data, timeline, entities, hits, run_id, settings, *, max_comments=None
+    data,
+    timeline,
+    entities,
+    hits,
+    run_id,
+    settings,
+    *,
+    max_comments=None,
+    derived_dir: Path | None = None,
+    capture_dir: Path | None = None,
 ) -> tuple[list[Finding], list[dict], str | None]:
+    """Keyframe đọc từ `derived_dir`, thumbnail từ `capture_dir`; thiếu thư mục thì chỉ gửi chữ."""
     key = secrets.get("TYPESAFE_API_KEY")
     if not key:
         return [], [], "jev: TYPESAFE_API_KEY is not set"
     shared, questions = _configuration(entities, data.video.title if data.video else "")
     items = []
 
-    def add(kind, item_id, source_type, text, *, segment=None, frame=None, **context):
-        if text.strip():
+    def add(kind, item_id, source_type, text, *, segment=None, frame=None, images=(), **context):
+        if text.strip() or images:
             items.append(
                 (
                     item_id,
                     {"source_type": source_type, "text": text, **context},
-                    (kind, segment, frame),
+                    (kind, segment, frame, images),
                 )
             )
 
@@ -229,23 +266,28 @@ def classify(
             if line and line not in seen:
                 seen.add(line)
                 ocr.append(row)
-        if ocr:  # tạm chỉ gửi OCR, ảnh gửi thẳng ở T59
+        step = max(1, math.ceil(len(segment.frames) / MAX_IMAGES))
+        frames = segment.frames[::step] if derived_dir else []
+        if ocr or frames:
+            kind = "ocr" if ocr else "visual"
             add(
-                "ocr",
-                f"{segment.id}:ocr",
-                "text overlaid on video frames (OCR)",
+                kind,
+                f"{segment.id}:{kind}",
+                "video keyframe images; `text` is the text overlaid on them (OCR)",
                 " | ".join(row.text.strip() for row in ocr),
                 segment=segment,
-                frame=ocr[0].frame,
+                frame=ocr[0].frame if ocr else frames[0].frame,
+                images=[derived_dir / f.frame for f in frames],
             )
     for thumb in timeline.thumbnails:
         lines = list(dict.fromkeys(row.text.strip() for row in thumb.ocr))
         add(
             "thumbnail",
             thumb.file,
-            "video thumbnail (OCR)",
+            "video thumbnail image; `text` is the text on it (OCR)",
             " | ".join(line for line in lines if line),
             frame=thumb.file,
+            images=[capture_dir / thumb.file] if capture_dir else [],
         )
     texts = {c.id: c.text for c in data.comments}
     for comment in data.comments[:max_comments]:
@@ -259,7 +301,7 @@ def classify(
         )
 
     def request(item):
-        item_id, content, (kind, segment, frame) = item
+        item_id, content, (kind, segment, frame, images) = item
         record = {
             "task": "jev",
             "item_id": item_id,
@@ -270,7 +312,7 @@ def classify(
             "kept": False,
         }
         try:
-            reply = _call(key, {**shared, **content}, questions)
+            reply = _call(key, {**shared, **content}, questions, images)
             answers = record["answers"] = reply["answers"]
             record["model"] = reply["model"]
             target = answers["target"]["choice"]

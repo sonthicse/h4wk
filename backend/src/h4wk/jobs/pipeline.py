@@ -350,6 +350,8 @@ def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway, *, reject_quo
             comment_settings=settings.comments,
             jev_settings=settings.jev,
             extra_hits=ref_hits,
+            derived_dir=derived,
+            capture_dir=video_dir / "captures" / cap,
         )
         check_quota(llm_error)
         decision, verdict_error = verdict.decide(n, findings, run_id, timeline, gateway)

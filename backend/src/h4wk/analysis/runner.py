@@ -35,6 +35,8 @@ def analyze(
     comment_settings: CommentSettings | None = None,
     extra_hits: list[EntityHit] | None = None,
     jev_settings: JevSettings | None = None,
+    derived_dir: Path | None = None,
+    capture_dir: Path | None = None,
 ) -> tuple[list[EntityHit], list[Finding], str | None]:
     if lexicon is None:
         lexicon = load_lexicon()
@@ -115,7 +117,15 @@ def analyze(
     if jev_settings is not None:
         limit = (comment_settings or CommentSettings()).max_per_video
         part_findings, part_records, error = jev.classify(
-            data, timeline, entities, hits, run_id, jev_settings, max_comments=limit
+            data,
+            timeline,
+            entities,
+            hits,
+            run_id,
+            jev_settings,
+            max_comments=limit,
+            derived_dir=derived_dir,
+            capture_dir=capture_dir,
         )
         merge(part_findings, part_records)
         if error:
