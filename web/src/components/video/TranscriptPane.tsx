@@ -20,9 +20,12 @@ export default function TranscriptPane({
   activeId: string | null
   primaryKind: string | null
 }) {
-  const [kind, setKind] = useState<string>(primaryKind ?? transcripts[0]?.kind ?? '')
+  const [selectedKind, setSelectedKind] = useState<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
-  const transcript = transcripts.find((t) => t.kind === kind) ?? transcripts[0]
+  const transcript = transcripts.find((t) => t.kind === selectedKind)
+    ?? transcripts.find((t) => t.kind === primaryKind)
+    ?? transcripts[0]
+  const kind = transcript?.kind
 
   const activeIndex = transcript?.segments.findIndex((s) => player.currentTime >= s.start && player.currentTime < s.end) ?? -1
 
@@ -39,8 +42,8 @@ export default function TranscriptPane({
       <div className="flex items-center justify-between gap-2 border-b p-3">
         <h2 className="text-sm font-medium">Transcript</h2>
         {transcript && (
-          <Select value={transcript.kind} onValueChange={setKind}>
-            <SelectTrigger size="sm" className="w-40" aria-label="Transcript type">
+          <Select value={transcript.kind} onValueChange={setSelectedKind}>
+            <SelectTrigger size="sm" className="max-w-full" aria-label="Transcript type">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

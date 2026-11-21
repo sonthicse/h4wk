@@ -72,7 +72,7 @@ export default function FindingTimeline({
     box.scrollTo({ top: row.offsetTop - box.clientHeight / 3, behavior: 'smooth' })
   }, [nowKey])
   const [showAll, setShowAll] = useState(false)
-  const shown = showAll ? groups : groups.slice(0, MAX_GROUPS)
+  const shown = showAll ? groups : groups.filter((g, i) => i < MAX_GROUPS || g.key === nowKey)
 
   return (
     <div className="space-y-3">
@@ -141,7 +141,7 @@ export default function FindingTimeline({
         <p className="text-sm text-muted-foreground">No findings in this video.</p>
       ) : (
         <HoverHighlight>
-          <ul ref={listRef} className="max-h-72 space-y-1 overflow-y-auto">
+          <ul ref={listRef} className="relative max-h-72 space-y-1 overflow-y-auto">
             {shown.map(({ key, first: f, count, severity, ids }) => (
               <HoverItem key={key}>
                 <button

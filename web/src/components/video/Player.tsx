@@ -37,15 +37,20 @@ export default function Player({
   const hasMedia = src !== null && !failed
   const inFinding = activeFinding && inSpans(activeFinding, currentTime)
   const [boxesOn, setBoxesOn] = useState(true)
+  const [videoRatio, setVideoRatio] = useState(0)
   const near = nearestKeyframe(keyframes, currentTime)
   const hasBoxes = near !== null && near.ocr.length + near.faces.length + near.refImages.length > 0
   const size = useFrameSize(near ? frameUrl(videoId, near.id, capture) : null)
 
   return (
     <div className="space-y-2">
-      <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg bg-zinc-900 text-zinc-400">
+      <div className="relative flex aspect-video [container-type:size] items-center justify-center overflow-hidden rounded-lg bg-zinc-900 text-zinc-400">
         {hasMedia ? (
-          <video {...videoProps} src={src} preload="metadata" playsInline className="size-full bg-black object-contain" />
+          <video {...videoProps} src={src} preload="metadata" playsInline onLoadedMetadata={(event) => {
+            videoProps.onLoadedMetadata(event)
+            const { videoWidth, videoHeight } = event.currentTarget
+            setVideoRatio(videoHeight ? videoWidth / videoHeight : 0)
+          }} className="size-full bg-black object-contain" />
         ) : (
           <div className="px-4 text-center text-sm">
             <p className="text-zinc-200">No video file</p>
@@ -54,8 +59,10 @@ export default function Player({
             </p>
           </div>
         )}
-        {boxesOn && near && hasBoxes && (
-          <div className="pointer-events-none absolute inset-0">
+        {hasMedia && videoRatio > 0 && boxesOn && near && hasBoxes && (
+          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden"
+            data-video-overlay
+            style={{ width: `min(100cqw, ${videoRatio * 100}cqh)`, aspectRatio: videoRatio }}>
             <BoxLayer frame={near} size={size} />
             <span className="absolute top-2 right-2 rounded bg-black/55 px-1.5 font-mono text-[11px] text-zinc-50">
               keyframe {formatTime(near.t)}
