@@ -271,7 +271,7 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 
 ### Phase 5: Watchlist (tuần 4)
 
-- [ ] T30: `watchlist` backend: RSS, Check now, sự kiện (backend xong; còn chạy thủ công màn 3)
+- [x] T30: `watchlist` backend: RSS, Check now, sự kiện
 - [x] T31: UI Watchlist và dòng sự kiện
 
 ### Checkpoint E (cuối tuần 4): ba màn demo chạy trọn

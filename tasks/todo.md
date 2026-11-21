@@ -677,7 +677,7 @@ Nghiệm thu:
 
 - [x] Thêm kênh có 15 video trong RSS giả thì tạo đúng 10 job; lần poll tiếp theo không tạo job nào.
 - [x] Feed RSS giả thêm 1 entry thì tạo đúng 1 job; chạy lại không tạo job trùng.
-- [ ] Thủ công: một kênh tin tức trong watchlist đăng video mới thì video được tự thu và xử lý (bấm Check now nếu chưa thấy).
+- [x] Thủ công: một kênh tin tức trong watchlist đăng video mới thì video được tự thu và xử lý (bấm Check now nếu chưa thấy).
 
 Kiểm tra: `uv run pytest tests/unit/test_watchlist.py` và làm thủ công màn 3.
 
