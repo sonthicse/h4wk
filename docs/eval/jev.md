@@ -51,4 +51,4 @@ Bản sao capture `20261120T132008` của `1RUJ_6eruwA` (sau T58), `max_comments
 
 - [Models](https://docs.typesafe.ai/models) niêm yết Jev 1.13 và 1.14 ở mức **0,042 USD mỗi triệu token đầu vào**: “You pay per input token. Output tokens are free.” Đây là đơn giá USD, không phải công thức quy đổi credit hay số dư tài khoản.
 - [OpenAPI](https://api.typesafe.ai/openapi.json), được [Swagger](https://api.typesafe.ai/docs) trỏ tới, chỉ liệt kê `/v1/models` và `/v1/systemone`. `Usage` trả `input_tokens` (token đầu vào tính phí) và `output_tokens`; không có trường credit hay API số dư được công bố trong schema này.
-- Vì chưa có nguồn chính thức để xác định credit đã dùng hoặc còn lại, T65 thống kê token vào/ra và giữ `limit: null` trong API thống kê, `jev_usage: null` trên Dashboard trong lúc chờ chốt. Không suy credit từ token hoặc giá USD.
+- Theo quyết định ngày 21/11/2026, chỉ cộng riêng token vào/ra hợp lệ do TypeSafe báo; h4wk không tự đếm hoặc ước tính. Trường không có số hợp lệ trả `null`, lượt gọi vẫn được tính. Settings tổng hợp theo kỳ và nguồn; Dashboard tổng hợp tháng hiện tại theo giờ Việt Nam. Không hiển thị USD, credit, hạn mức hay số dư Jev.

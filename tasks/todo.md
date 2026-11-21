@@ -1052,7 +1052,7 @@ Người làm: agent backend. Phụ thuộc: T60. Cỡ: M (phần lớn là xoá
 
 ### T62: UI Settings → Jev (key, thử kết nối, usage)
 
-Theo SPEC-jev-only §5–§6 và bản phác `docs/design/phase-6d/SettingsJev.dc.html`. Mục Settings "AI providers" đổi thành "Jev", đường dẫn `/settings/jev`. Trang gồm thẻ API key rộng hết trang (trạng thái, key đã che, ô nhập, Save key, Remove, Test connection kèm kết quả model và độ trễ) và thẻ Usage (chọn Today / 7 days / 30 days; 5 ô: Requests, With images, Input tokens kèm output, Findings kept kèm tỉ lệ, Failed kèm số lần 429; bảng theo nguồn; lỗi gần nhất). Xoá `AddProviderDialog`, `ProviderCard`, `TaskRoutes`, `draft.ts` và hàm gọi `/api/settings/ai*`. Link trong `CollectPage.tsx` trỏ sang `/settings/jev`. Sinh lại kiểu API sau T61 và T65.
+Theo SPEC-jev-only §5–§6 và bản phác `docs/design/phase-6d/SettingsJev.dc.html`. Mục Settings "AI providers" đổi thành "Jev", đường dẫn `/settings/jev`. Trang gồm thẻ API key rộng hết trang (trạng thái, key đã che, ô nhập, Save key, Remove, Test connection kèm kết quả model và độ trễ) và thẻ Usage (chọn Today / 7 days / 30 days; 5 ô: Requests, With images, Input tokens kèm output, Findings kept kèm tỉ lệ, Failed kèm số lần 429; bảng theo nguồn; lỗi gần nhất). Xoá `AddProviderDialog`, `ProviderCard`, `TaskRoutes`, `draft.ts` và hàm gọi `/api/settings/ai*`. Link trong `CollectPage.tsx` trỏ sang `/settings/jev`. Sinh lại kiểu API sau T61 và T65. Ghi “Token counts reported by TypeSafe”; tổng chỉ gồm số được báo, không hiện hạn mức hay số dư Jev.
 
 Nghiệm thu:
 
@@ -1087,28 +1087,28 @@ Người làm: agent ui. Phụ thuộc: T58, T60. Cỡ: L (bố cục lại cả
 
 ### T65: `analysis`: nhật ký request Jev, API usage và thử kết nối
 
-Theo SPEC-jev-only §6. Usage của Jev tính theo credit của TypeSafe. Mỗi request Jev ghi một dòng vào `data/jev_calls.jsonl` (ghi nối, không xoá): `at` (giờ Việt Nam), `video_id`, `capture`, `run_id`, `source_kind`, `images` (số ảnh), `credits`, `input_tokens`, `output_tokens` (từ `usage` của phản hồi), `kept`, `status` (`ok` hoặc mã lỗi), `retries_429`. Không ghi nội dung văn bản hay ảnh. API:
+Theo SPEC-jev-only §6. Nhật ký `data/jev_calls.jsonl` ghi nối một dòng mỗi lượt gọi logic đã gửi (gồm thử kết nối), không chứa nội dung, ảnh hay key. Lượt thử không gắn video/bản thu/run; thiếu key thì không gửi và không ghi. API:
 
-- `GET /api/settings/jev/usage?period=today|7d|30d`: tổng request, số request có ảnh, credit đã dùng, số nghi vấn giữ lại, số lỗi, số lần 429, bảng theo nguồn (request, credit, giữ lại, lỗi; tiêu đề và mô tả gộp một dòng), 5 lỗi gần nhất (mã, nguồn, video, thời điểm); phần hạn mức: credit `used`, `limit`, `left` của tháng hiện tại.
+- `GET /api/settings/jev/usage?period=today|7d|30d`: tổng lượt gọi, lượt có ảnh, token vào/ra, nghi vấn giữ lại, lỗi, số retry 429; bảng theo nguồn (gộp tiêu đề/mô tả, thêm thử kết nối khi có) và 5 lỗi gần nhất.
 - `POST /api/settings/jev/test`: gọi Jev một câu hỏi `noul` ngắn, trả `ok`, `model`, `latency_ms` hoặc lỗi; có audit, không ghi key.
-- Dashboard (`GET /api/dashboard`): thêm credit Jev theo tháng (`used`, `limit`, `left`) để hiện cạnh YouTube API và Supadata.
+- `GET /api/dashboard`: `jev_usage` gồm `requests`, `input_tokens`, `output_tokens` của tháng hiện tại theo giờ Việt Nam; null nếu chưa có lượt.
 
-Credit và hạn mức: trước khi làm, thử xem phản hồi hoặc header của API TypeSafe có số credit mỗi request và số credit còn lại không (hoặc endpoint tài khoản). Có thì dùng đúng số đó. Không có số credit mỗi request thì hỏi Thi cách quy đổi từ token trước khi làm tiếp. Không có số còn lại thì C5 `analysis.toml` thêm `jev.monthly_credit_limit` (mặc định trống: không hiện `limit`, `left`), kèm ví dụ hợp lệ và bị từ chối trong `test_contracts.py`. Ghi kết quả thử vào `docs/eval/jev.md`.
+Chỉ cộng token TypeSafe báo hợp lệ; trường không có số hợp lệ trả null, không bỏ lượt khỏi tổng. Không quy đổi USD/credit, không có hạn mức hoặc số dư Jev. Nguồn số liệu: [báo cáo Jev](../docs/eval/jev.md).
 
 Nghiệm thu:
 
-- [ ] Test với Jev giả: mỗi request (ok, lỗi, 429 rồi ok) ghi đúng một dòng; tổng theo kỳ và theo nguồn đúng; nội dung văn bản không có trong file.
-- [ ] Test API usage, test và dashboard; không response nào chứa key; giờ trong response có `+07:00`.
-- [ ] Backend pytest, ruff qua; chạy `h4wk schema export` nếu đổi C5.
+- [x] Test với Jev giả: mỗi request (ok, lỗi, 429 rồi ok) ghi đúng một dòng; tổng theo kỳ và theo nguồn đúng; nội dung văn bản không có trong file.
+- [x] Test API usage, test và dashboard; không response nào chứa key; giờ trong response có `+07:00`.
+- [x] Backend pytest, ruff qua; chạy `h4wk schema export` nếu đổi C5.
 
-File: `analysis/jev.py`, `api/settings.py`, `api/dashboard.py`, `core/config_models.py` (nếu cần hạn mức), tests.
+File: `analysis/jev.py`, `analysis/jev_log.py`, `api/settings.py`, `api/dashboard.py`, tests.
 Người làm: agent backend. Phụ thuộc: T59. Cỡ: M.
 
 ### T66: UI Dashboard, Videos, Entities, Login theo bản phác
 
 Theo bản phác `docs/design/phase-6d/Dashboard.dc.html`, `Videos.dc.html`, `Entities.dc.html`, `Login.dc.html`.
 
-- Dashboard: cột phải đổi chỗ, thẻ Review (hàng đợi) rộng hai cột ở chỗ Events cũ, Events xuống chỗ Review cũ; thẻ Usage có thêm dòng Jev (credit) với thanh tiến độ, mỗi dòng (YouTube API, Supadata, Jev) ghi đã dùng / hạn mức và còn lại.
+- Dashboard: đổi chỗ Review và Events như bản phác. Thẻ Usage thêm token vào/ra tháng hiện tại do TypeSafe báo; tổng chỉ gồm số được báo. Không thêm thanh hạn mức hay số dư Jev; giữ hạn mức YouTube API và Supadata.
 - Videos: cột Latest capture hiện ngày giờ theo dạng `HH:MM dd/mm/yyyy`, giờ Việt Nam (vd `13:20 20/11/2026`).
 - Entities: dòng cảnh báo dữ liệu khuôn mặt ghi rằng khi demo dùng ảnh chân dung công khai của nhân vật công chúng (SPEC §13).
 - Login: thẻ cao hơn (khoảng 560 px), logo lớn ở giữa phía trên, chữ "Sign in" ngay dưới logo, rồi Username, Password, nút Sign in.

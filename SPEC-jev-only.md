@@ -111,9 +111,9 @@ Giao diện theo bản phác Thi duyệt ngày 2026-11-21 (`docs/design/phase-6d
 
 ### 6. Theo dõi usage của Jev
 
-- Usage tính theo credit của TypeSafe. Mỗi request Jev ghi một dòng vào `data/jev_calls.jsonl`: thời điểm, video, bản thu, run, nguồn, số ảnh, credit, token vào và ra, có giữ nghi vấn không, trạng thái hoặc mã lỗi, số lần thử lại vì 429. Không ghi nội dung văn bản hay ảnh.
-- API tổng hợp theo kỳ (hôm nay, 7 ngày, 30 ngày) và theo nguồn, 5 lỗi gần nhất, credit trong tháng (đã dùng, hạn mức, còn lại); API thử kết nối gọi Jev một câu ngắn.
-- Credit mỗi request và credit còn lại lấy từ API TypeSafe nếu có; không có số còn lại thì cấu hình `jev.monthly_credit_limit` trong `analysis.toml` (để trống thì không hiện hạn mức).
+- Mỗi lượt gọi Jev đã gửi ghi một dòng vào `data/jev_calls.jsonl`, kể cả thử kết nối và retry 429. Ghi thời điểm, video/bản thu/run (null khi thử kết nối), nguồn, số ảnh, token vào/ra, có giữ nghi vấn không, trạng thái và số retry. Không ghi nội dung, ảnh hay key.
+- API usage tổng hợp theo kỳ (hôm nay, 7 ngày, 30 ngày theo giờ Việt Nam), theo nguồn và trả 5 lỗi gần nhất. Dashboard tổng hợp tháng hiện tại theo giờ Việt Nam. API thử kết nối hỏi Jev một câu ngắn.
+- Chỉ cộng token vào/ra hợp lệ do TypeSafe báo trong `usage`; nếu không có số hợp lệ thì trả null, vẫn đếm lượt gọi. Không ước tính token, USD hay credit; không hiển thị hạn mức hoặc số dư Jev.
 
 ## Tiêu chí thành công
 

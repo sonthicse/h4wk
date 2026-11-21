@@ -4,9 +4,10 @@ from collections import Counter
 from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlmodel import Session, func, select
 
+from h4wk.analysis import jev_log
 from h4wk.collectors import quota
 from h4wk.collectors.providers import supadata
 from h4wk.core.config import data_dir
@@ -48,6 +49,16 @@ class Usage(BaseModel):
     limit: int
 
 
+class JevMonthUsage(BaseModel):
+    """Tổng tháng hiện tại theo giờ Việt Nam, chỉ gồm token TypeSafe báo."""
+
+    requests: int
+    input_tokens: int | None = Field(description="Input tokens reported by TypeSafe, if available.")
+    output_tokens: int | None = Field(
+        description="Output tokens reported by TypeSafe, if available."
+    )
+
+
 class TopVideo(BaseModel):
     id: str
     title: str | None
@@ -66,7 +77,7 @@ class Dashboard(BaseModel):
     activity: list[DayActivity]  # 14 ngày, cũ trước, theo giờ Việt Nam
     youtube_quota: Usage | None  # quota YouTube API hôm nay
     supadata_credits: Usage | None  # credit Supadata trong kỳ; None khi chưa có key hoặc lỗi
-    jev_usage: Usage | None  # credit Jev trong tháng; None cho tới khi có cách tính credit
+    jev_usage: JevMonthUsage | None
     top_video: TopVideo | None
 
 
@@ -122,7 +133,9 @@ def dashboard(latest_only: bool = False) -> Dashboard:
             findings=SeverityCounts(**per_video[best]),
         )
 
-    u = quota.usage(datetime.now(VN_TZ))
+    now = datetime.now(VN_TZ)
+    u = quota.usage(now)
+    jev = jev_log.summarize(jev_log.read(jev_log.month_start(now), now))["total"]
     c = supadata.credits_usage()
     return Dashboard(
         channel_count=channel_count,
@@ -136,6 +149,12 @@ def dashboard(latest_only: bool = False) -> Dashboard:
         ],
         youtube_quota=Usage(used=u.used, limit=u.limit),
         supadata_credits=Usage(used=c.used, limit=c.limit) if c else None,
-        jev_usage=None,
+        jev_usage=JevMonthUsage(
+            requests=jev["requests"],
+            input_tokens=jev.get("input_tokens"),
+            output_tokens=jev.get("output_tokens"),
+        )
+        if jev["requests"]
+        else None,
         top_video=top,
     )

@@ -84,8 +84,8 @@ def record(
         file.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 
-def read(since: datetime) -> list[dict[str, Any]]:
-    """Các dòng từ `since` trở đi; bỏ qua dòng hỏng."""
+def read(since: datetime, until: datetime) -> list[dict[str, Any]]:
+    """Các dòng trong khoảng `since` đến `until`; bỏ qua dòng hỏng."""
     target = path()
     if not target.is_file():
         return []
@@ -93,7 +93,7 @@ def read(since: datetime) -> list[dict[str, Any]]:
     for text in target.read_text(encoding="utf-8").splitlines():
         try:
             row = json.loads(text)
-            if datetime.fromisoformat(row["at"]) >= since:
+            if since <= datetime.fromisoformat(row["at"]) <= until:
                 rows.append(row)
         except (ValueError, KeyError, TypeError):
             continue
@@ -116,12 +116,14 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
         error = row.get("status") != "ok"
         parts = {
             "requests": 1,
-            "input_tokens": row.get("input_tokens") or 0,
-            "output_tokens": row.get("output_tokens") or 0,
             "kept": int(bool(row.get("kept"))),
             "errors": int(error),
         }
         source = by_source.setdefault(source_of(row.get("source_kind", "")), Counter())
+        for key in ("input_tokens", "output_tokens"):
+            value = row.get(key)
+            if type(value) is int and value >= 0:
+                parts[key] = value
         for key, value in parts.items():
             total[key] += value
             source[key] += value

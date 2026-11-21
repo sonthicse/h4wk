@@ -150,7 +150,7 @@ def test_usage_api_periods_sources_and_errors(client: TestClient, data_dir):
     assert week["recent_errors"][0]["source"] == "speech"
     month = client.get("/api/settings/jev/usage?period=30d").json()
     assert month["requests"] == 5  # dòng 40 ngày trước bị loại
-    assert month["limit"] is None
+    assert "limit" not in month
     for key in ("since", "until"):
         assert datetime.fromisoformat(month[key]).utcoffset() == timedelta(hours=7)
     assert datetime.fromisoformat(week["recent_errors"][0]["at"]).utcoffset() == timedelta(hours=7)
@@ -166,6 +166,8 @@ def test_recent_errors_capped_at_five_newest_first(client: TestClient, data_dir)
 def test_usage_empty_and_bad_period(client: TestClient, data_dir):
     body = client.get("/api/settings/jev/usage").json()
     assert body["requests"] == 0 and len(body["by_source"]) == 6
+    assert body["input_tokens"] is None and body["output_tokens"] is None
+    assert all(row["input_tokens"] is None for row in body["by_source"])
     assert client.get("/api/settings/jev/usage?period=1y").status_code == 422
 
 
@@ -238,3 +240,28 @@ def test_connection_retry_is_one_request(client, data_dir, monkeypatch):
     assert client.post("/api/settings/jev/test").json()["ok"] is True
     (row,) = _lines(data_dir)
     assert row["retries_429"] == 1 and row["input_tokens"] == 100
+
+
+def test_dashboard_month_counts_only_reported_tokens(client, data_dir, monkeypatch):
+    now = datetime.fromisoformat("2026-11-01T00:01:00+07:00")
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz):
+            return now.astimezone(tz)
+
+    monkeypatch.setattr("h4wk.api.dashboard.datetime", Clock)
+    _write(
+        data_dir,
+        [
+            {**_row(now - timedelta(minutes=2)), "input_tokens": 999},
+            {**_row(now - timedelta(minutes=1)), "input_tokens": 0, "output_tokens": None},
+            {**_row(now), "input_tokens": "invalid", "output_tokens": None},
+            {**_row(now + timedelta(minutes=1)), "input_tokens": 999},
+        ],
+    )
+    assert client.get("/api/dashboard").json()["jev_usage"] == {
+        "requests": 2,
+        "input_tokens": 0,
+        "output_tokens": None,
+    }

@@ -243,8 +243,10 @@ JEV_SOURCES = ("speech", "ocr", "visual", "thumbnail", "comment", "metadata")
 class JevSourceUsage(BaseModel):
     source: str
     requests: int
-    input_tokens: int
-    output_tokens: int
+    input_tokens: int | None = Field(description="Input tokens reported by TypeSafe, if available.")
+    output_tokens: int | None = Field(
+        description="Output tokens reported by TypeSafe, if available."
+    )
     kept: int
     errors: int
 
@@ -256,27 +258,21 @@ class JevError(BaseModel):
     video_id: str | None
 
 
-class JevLimit(BaseModel):
-    used: int
-    limit: int | None
-    left: int | None
-    unit: str
-
-
 class JevUsage(BaseModel):
     period: Literal["today", "7d", "30d"]
     since: VnDatetime
     until: VnDatetime
     requests: int
     image_requests: int
-    input_tokens: int
-    output_tokens: int
+    input_tokens: int | None = Field(description="Input tokens reported by TypeSafe, if available.")
+    output_tokens: int | None = Field(
+        description="Output tokens reported by TypeSafe, if available."
+    )
     kept: int
     errors: int
     retries_429: int
     by_source: list[JevSourceUsage]  # luôn đủ 6 nguồn nội dung
     recent_errors: list[JevError]  # tối đa 5, mới trước
-    limit: JevLimit | None  # credit; None cho tới khi có cách tính credit
 
 
 class JevTestResult(BaseModel):
@@ -290,7 +286,7 @@ class JevTestResult(BaseModel):
 def jev_usage(period: Literal["today", "7d", "30d"] = "7d") -> JevUsage:
     now = datetime.now(VN_TZ)
     since = jev_log.period_start(period, now)
-    rows = jev_log.read(since)
+    rows = jev_log.read(since, now)
     summary = jev_log.summarize(rows)
     total, by_source = summary["total"], summary["by_source"]
     errors = sorted((r for r in rows if r.get("status") != "ok"), key=lambda r: r["at"])
@@ -300,14 +296,18 @@ def jev_usage(period: Literal["today", "7d", "30d"] = "7d") -> JevUsage:
         until=now,
         requests=total["requests"],
         image_requests=total["image_requests"],
-        input_tokens=total["input_tokens"],
-        output_tokens=total["output_tokens"],
+        input_tokens=total.get("input_tokens"),
+        output_tokens=total.get("output_tokens"),
         kept=total["kept"],
         errors=total["errors"],
         retries_429=total["retries_429"],
         by_source=[
             JevSourceUsage(
-                source=name, **{k: by_source.get(name, {}).get(k, 0) for k in _SOURCE_KEYS}
+                source=name,
+                **{
+                    k: by_source.get(name, {}).get(k, None if k.endswith("_tokens") else 0)
+                    for k in _SOURCE_KEYS
+                },
             )
             for name in (
                 *JEV_SOURCES,
@@ -323,7 +323,6 @@ def jev_usage(period: Literal["today", "7d", "30d"] = "7d") -> JevUsage:
             )
             for r in reversed(errors[-jev_log.RECENT_ERRORS :])
         ],
-        limit=None,
     )
 
 
