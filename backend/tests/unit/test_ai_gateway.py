@@ -25,7 +25,7 @@ type = "anthropic"
 [providers.second.models.image]
 vision = true
 [tasks]
-"analysis.classify" = [{provider="first", model="text"}, {provider="second", model="image"}]
+"analysis.video_verdict" = [{provider="first", model="text"}, {provider="second", model="image"}]
 "media.vision" = [{provider="second", model="image"}]
 """
 OK = ProviderReply('{"label":"ok"}', input_tokens=10, output_tokens=4, cost_usd=0.001)
@@ -48,7 +48,7 @@ def logs(tmp_path):
 def test_complete_structured_with_route(config, tmp_path):
     gateway = AIGateway({"first": FakeProvider([OK])}, config_path=config, log_dir=tmp_path)
     answer, route = gateway.complete_structured_with_route(
-        "analysis.classify", [{"role": "user", "content": "x"}], Answer
+        "analysis.video_verdict", [{"role": "user", "content": "x"}], Answer
     )
     assert answer == Answer(label="ok")
     assert (route.provider, route.model) == ("first", "text")
@@ -57,14 +57,18 @@ def test_complete_structured_with_route(config, tmp_path):
 def test_missing_config_is_gateway_error(tmp_path):
     gateway = AIGateway({}, config_path=tmp_path / "none.toml", log_dir=tmp_path)
     with pytest.raises(GatewayError, match="ai.toml not found"):
-        gateway.complete_structured("analysis.classify", [{"role": "user", "content": "x"}], Answer)
+        gateway.complete_structured(
+            "analysis.video_verdict", [{"role": "user", "content": "x"}], Answer
+        )
 
 
 def test_repair_invalid_json(config, tmp_path):
     first = FakeProvider([ProviderReply("oops"), OK])
     gateway = AIGateway({"first": first}, config_path=config, log_dir=tmp_path)
     messages = [{"role": "user", "content": "classify"}]
-    assert gateway.complete_structured("analysis.classify", messages, Answer) == Answer(label="ok")
+    assert gateway.complete_structured("analysis.video_verdict", messages, Answer) == Answer(
+        label="ok"
+    )
     request, retry = first.requests
     assert request.model == "text" and request.structured
     assert request.schema == Answer.model_json_schema()
@@ -87,7 +91,7 @@ def test_repair_invalid_json(config, tmp_path):
 def test_fallback(config, tmp_path, failures):
     first, second = FakeProvider(failures), FakeProvider([OK])
     gateway = AIGateway({"first": first, "second": second}, config_path=config, log_dir=tmp_path)
-    assert gateway.complete_structured("analysis.classify", [], Answer).label == "ok"
+    assert gateway.complete_structured("analysis.video_verdict", [], Answer).label == "ok"
     assert len(first.requests) == len(failures)
     assert second.requests[0].messages == []
     assert [(r["provider"], r["model"]) for r in logs(tmp_path)] == (
@@ -103,7 +107,7 @@ def test_image_and_route_reload(config, tmp_path):
     assert request.image == b"pixels" and request.messages[-1]["content"] == "describe"
     assert request.model == "image" and not request.structured
     config.write_text(CONFIG.replace('{provider="first", model="text"}, ', ""), encoding="utf-8")
-    assert gateway.complete_structured("analysis.classify", [], Answer).label == "ok"
+    assert gateway.complete_structured("analysis.video_verdict", [], Answer).label == "ok"
     assert [r["status"] for r in logs(tmp_path)] == ["ok", "ok"]
 
 
@@ -141,10 +145,10 @@ def test_limit_is_per_provider(config, tmp_path):
 
     def classify():
         waiting.set()
-        return gateway.complete_structured("analysis.classify", [], Answer)
+        return gateway.complete_structured("analysis.video_verdict", [], Answer)
 
     with ThreadPoolExecutor(max_workers=3) as pool:
-        first = pool.submit(gateway.complete_structured, "analysis.classify", [], Answer)
+        first = pool.submit(gateway.complete_structured, "analysis.video_verdict", [], Answer)
         assert entered.wait(2)
         second = pool.submit(classify)
         assert waiting.wait(2)

@@ -6,8 +6,7 @@ from collections import Counter
 from difflib import SequenceMatcher
 from pathlib import Path
 
-from h4wk.ai.gateway import AIGateway, GatewayError
-from h4wk.analysis import jev, llm
+from h4wk.analysis import jev
 from h4wk.analysis.models import (
     Confidence,
     EntityHit,
@@ -33,7 +32,6 @@ def analyze(
     lexicon: list[LexiconEntry] | None,
     run_id: str,
     output_dir: Path,
-    gateway: AIGateway | None = None,
     comment_settings: CommentSettings | None = None,
     extra_hits: list[EntityHit] | None = None,
     jev_settings: JevSettings | None = None,
@@ -107,18 +105,13 @@ def analyze(
         records = (records or []) + part_records
 
         def slot(f):
-            # Lời nói và hình cùng đoạn do hai bộ phân loại độc lập xử lý.
+            # Giữ riêng nghi vấn lời nói và hình trong cùng đoạn.
             return _slot(f), f.source_kind == SourceKind.SPEECH
 
         replaced = {slot(f) for f in part_findings}
         findings = [f for f in findings if f.analyzer != "static" or slot(f) not in replaced]
         findings.extend(part_findings)
 
-    if gateway is not None and (items := llm.build_items(data, timeline, hits)):
-        try:
-            merge(*llm.classify(items, entities, data, timeline, hits, gateway, run_id))
-        except GatewayError as error:
-            errors.append(str(error))
     if jev_settings is not None:
         limit = (comment_settings or CommentSettings()).max_per_video
         part_findings, part_records, error = jev.classify(

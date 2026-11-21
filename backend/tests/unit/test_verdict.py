@@ -2,7 +2,7 @@ import json
 from unittest.mock import Mock
 
 import pytest
-from test_analysis_llm import _data
+from _analysis_sample import _data
 
 from h4wk.ai.gateway import GatewayError
 from h4wk.analysis.models import Finding
@@ -165,7 +165,6 @@ def test_analyze_all_stops_on_quota_without_replacing_run(monkeypatch, data_dir)
     from typer.testing import CliRunner
 
     from h4wk import cli
-    from h4wk.analysis import runner
     from h4wk.jobs.pipeline import _latest_runs
 
     data, timeline = _data()
@@ -180,15 +179,14 @@ def test_analyze_all_stops_on_quota_without_replacing_run(monkeypatch, data_dir)
         (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
         (old / "findings.json").write_text("[]", encoding="utf-8")
     before = _latest_runs(data_dir)
+    from h4wk.jobs import pipeline
+
+    monkeypatch.setattr(pipeline.runner, "analyze", lambda *args, **kwargs: ([], [], "HTTP 429"))
     gateway = Mock()
     gateway.complete_structured_with_route.side_effect = GatewayError("HTTP 429")
     monkeypatch.setattr(cli, "AIGateway", lambda: gateway)
-    monkeypatch.setattr(runner.llm, "build_items", lambda *args: [object()])
-    monkeypatch.setattr(
-        runner.llm, "classify", lambda *args: gateway.complete_structured_with_route()
-    )
     result = CliRunner().invoke(cli.app, ["analyze", "--all"])
     assert result.exit_code == 1, result.exception
     assert "429" in result.output
     assert _latest_runs(data_dir) == before
-    gateway.complete_structured_with_route.assert_called_once()
+    gateway.complete_structured_with_route.assert_not_called()

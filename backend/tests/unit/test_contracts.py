@@ -230,7 +230,7 @@ AI: dict[str, Any] = {
         },
     },
     "tasks": {
-        "analysis.classify": [{"provider": "anthropic", "model": "claude-sonnet-5-5"}],
+        "analysis.video_verdict": [{"provider": "anthropic", "model": "claude-sonnet-5-5"}],
         "analysis.classify_comment": [
             {"provider": "deepseek", "model": "some-text-model"},
             {"provider": "anthropic", "model": "claude-haiku-5-5"},
@@ -427,16 +427,16 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     ),
     (
         AiConfig,
-        {**AI, "tasks": {"analysis.classify": [{"provider": "openai", "model": "gpt"}]}},
+        {**AI, "tasks": {"analysis.video_verdict": [{"provider": "openai", "model": "gpt"}]}},
         "route tới provider chưa khai báo",
     ),
     (
         AiConfig,
-        {**AI, "tasks": {"analysis.classify": [{"provider": "anthropic", "model": "x"}]}},
+        {**AI, "tasks": {"analysis.video_verdict": [{"provider": "anthropic", "model": "x"}]}},
         "route tới model chưa khai báo",
     ),
     (AiConfig, {**AI, "tasks": {"media.ocr": []}}, "tác vụ AI ngoài 3 tác vụ V1"),
-    (AiConfig, {**AI, "tasks": {"analysis.classify": []}}, "danh sách route rỗng"),
+    (AiConfig, {**AI, "tasks": {"analysis.video_verdict": []}}, "danh sách route rỗng"),
     # C5: analysis
     (AnalysisConfig, _set("transcript_priority", ["uploaded", "uploaded"])(ANALYSIS), "trùng loại"),
     (AnalysisConfig, _set("comments", {"batch_size": 100})(ANALYSIS), "lô ngoài 20–50"),
@@ -522,11 +522,12 @@ def test_config_examples_load(name: str, model: type[BaseModel]) -> None:
     model.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))
 
 
-def test_legacy_comment_route_is_ignored(tmp_path: Path, caplog) -> None:
+@pytest.mark.parametrize("task", ["analysis.classify", "analysis.classify_comment"])
+def test_legacy_route_is_ignored(tmp_path: Path, caplog, task: str) -> None:
     path = tmp_path / "ai.toml"
-    path.write_text('[providers]\n[tasks]\n"analysis.classify_comment" = []\n', encoding="utf-8")
+    path.write_text(f'[providers]\n[tasks]\n"{task}" = []\n', encoding="utf-8")
     assert load_toml(path, AiConfig).tasks == {}
-    assert "Ignoring legacy analysis.classify_comment route" in caplog.text
+    assert f"Ignoring legacy {task} route" in caplog.text
 
 
 @pytest.mark.parametrize("concurrency", [0, 17])

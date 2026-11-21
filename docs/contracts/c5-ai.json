@@ -2,7 +2,6 @@
   "$defs": {
     "AiTask": {
       "enum": [
-        "analysis.classify",
         "analysis.video_verdict",
         "media.vision"
       ],

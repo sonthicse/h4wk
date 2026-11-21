@@ -39,8 +39,8 @@ def test_place_of() -> None:
     assert place_of(_hit(via="title")) == ("title", "title")
 
 
-def _row(label: str, static: str, llm: str) -> dict:
-    return {"label": label, "static": static, "llm": llm}
+def _row(label: str, static: str, jev: str) -> dict:
+    return {"label": label, "static": static, "jev": jev}
 
 
 def test_score_by_hand() -> None:
@@ -107,7 +107,7 @@ def _build_capture(data_dir: Path, video: str, with_llm: bool) -> None:
         data, timeline, [Entity(id="e_01", name="Trần Văn Mẫu")], None, "r", run
     )
     llm_findings = [
-        f.model_copy(update={"analyzer": "llm", "model": ModelRef(provider="p", model="m")})
+        f.model_copy(update={"analyzer": "llm", "model": ModelRef(provider="typesafe", model="m")})
         for f in findings
         if f.comment_id == "c1"
     ]
@@ -133,11 +133,11 @@ def test_collect_units(data_dir: Path) -> None:
     units = collect_units(data_dir)
     assert {u.video_id for u in units} == {"vidA"}  # vidB chưa chạy LLM
     by_place = {u.place: u for u in units}
-    assert by_place["c1"].llm and by_place["c1"].static  # static tính lại, không đọc findings.json
+    assert by_place["c1"].jev and by_place["c1"].static  # static tính lại, không đọc findings.json
     assert by_place["c1"].kind == "comment"
     assert "lừa đảo" in by_place["c1"].text
     segment = next(u for u in units if u.kind == "segment")
-    assert segment.static and not segment.llm
+    assert segment.static and not segment.jev
     assert "Trần Văn Mẫu" in segment.text
 
 
@@ -150,7 +150,7 @@ def test_cli_sample_and_score(data_dir: Path, tmp_path: Path) -> None:
     assert first.exit_code == 0, first.output
     assert (out / "labels.csv").is_file() and (out / "predictions.csv").is_file()
     header = (out / "labels.csv").read_text(encoding="utf-8").splitlines()[0]
-    assert "static" not in header and "llm" not in header
+    assert "static" not in header and "jev" not in header
     assert runner.invoke(app, ["eval", "sample", "--out", str(out)]).exit_code == 1
     assert runner.invoke(app, ["eval", "sample", "--out", str(out), "--force"]).exit_code == 0
 
@@ -196,4 +196,4 @@ def test_llm_finding_without_hit_becomes_unit(data_dir: Path) -> None:
     hits = json.loads((run / "hits.json").read_text(encoding="utf-8"))
     assert all(h.get("segment_id") != "seg_0004" for h in hits)  # đoạn này không có hit
     unit = next(u for u in collect_units(data_dir) if u.place == "seg_0004")
-    assert unit.llm and not unit.static and unit.kind == "segment"
+    assert unit.jev and not unit.static and unit.kind == "segment"

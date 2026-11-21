@@ -80,6 +80,5 @@ structured = false
 # Mỗi tác vụ AI: danh sách (provider, model) theo thứ tự ưu tiên.
 # media.vision chỉ được gán cho model có vision = true.
 [tasks]
-"analysis.classify" = [{ provider = "anthropic", model = "claude-sonnet-5-5" }]
 "analysis.video_verdict" = [{ provider = "anthropic", model = "claude-haiku-5-5" }]
 "media.vision" = [{ provider = "anthropic", model = "claude-sonnet-5-5" }]

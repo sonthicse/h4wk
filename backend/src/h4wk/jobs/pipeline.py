@@ -351,7 +351,6 @@ def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway, *, reject_quo
             None,
             run_id,
             target,
-            gateway=gateway,
             comment_settings=settings.comments,
             jev_settings=settings.jev,
             extra_hits=ref_hits,

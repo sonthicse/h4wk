@@ -29,7 +29,7 @@ class Unit:
     entity: str
     text: str
     static: bool
-    llm: bool
+    jev: bool
     unit_id: str = ""
 
 
@@ -39,7 +39,7 @@ def place_of(
     """Trả (vị trí, loại mục) theo cùng quy tắc với `runner._slot`.
 
     `thumbnails` là tên các file thumbnail của timeline; frame khác (keyframe không thuộc
-    đoạn nào) có loại "frame". Nếu `llm.py` sau này tạo mục cho keyframe lẻ thì phải sửa
+    đoạn nào) có loại "frame". Nếu Jev sau này tạo mục cho keyframe lẻ thì phải sửa
     `runner._slot` và hàm này cùng lúc."""
     if hit.comment_id:
         return hit.comment_id, "comment"
@@ -101,7 +101,7 @@ def _read(path: Path) -> str:
 
 
 def collect_units(root: Path) -> list[Unit]:
-    """Gom các mục từ mọi bản thu có run mới nhất đã chạy LLM (có llm.json)."""
+    """Gom các mục từ mọi bản thu có run mới nhất đã chạy bộ phân loại (có llm.json)."""
     entities = load_entities()
     units: list[Unit] = []
     for derived in sorted(root.glob("videos/*/derived/*")):
@@ -115,11 +115,14 @@ def collect_units(root: Path) -> list[Unit]:
         timeline = Timeline.model_validate_json(_read(derived / "timeline.json"))
         hits = _HITS.validate_json(_read(run / "hits.json"))
         findings = _FINDINGS.validate_json(_read(run / "findings.json"))
-        llm_slots = {slot for f in findings if f.analyzer == "llm" for slot in slots(f)}
+        jev_findings = [
+            f
+            for f in findings
+            if f.analyzer == "llm" and f.model and f.model.provider == "typesafe"
+        ]
+        jev_slots = {slot for f in jev_findings for slot in slots(f)}
         with tempfile.TemporaryDirectory() as tmp:
-            _, static_findings, _ = analyze(
-                data, timeline, entities, None, "r_eval", Path(tmp), gateway=None
-            )
+            _, static_findings, _ = analyze(data, timeline, entities, None, "r_eval", Path(tmp))
         static_slots = {slot for f in static_findings for slot in slots(f)}
         thumbnails = {t.file for t in timeline.thumbnails}
         pending: list[tuple[str, str, str]] = []  # (place, kind, entity)
@@ -127,7 +130,7 @@ def collect_units(root: Path) -> list[Unit]:
             pending.append((*place_of(hit, thumbnails), hit.entity))
         # Nghi vấn không có hit cùng (vị trí, đối tượng): đoạn chỉ có offensive_cues,
         # hoặc LLM kết luận về đối tượng khác với hit.
-        for finding in [*static_findings, *(f for f in findings if f.analyzer == "llm")]:
+        for finding in [*static_findings, *jev_findings]:
             for place, entity in slots(finding):
                 pending.append((place, _finding_kind(finding), entity))
         seen: set[tuple[str, str]] = set()
@@ -146,7 +149,7 @@ def collect_units(root: Path) -> list[Unit]:
                     entity=entity,
                     text=_text(kind, place, data, timeline),
                     static=slot in static_slots,
-                    llm=slot in llm_slots,
+                    jev=slot in jev_slots,
                 )
             )
     return units
@@ -155,8 +158,8 @@ def collect_units(root: Path) -> list[Unit]:
 def sample(units: list[Unit], n: int = 50, seed: int = 0) -> list[Unit]:
     """Lấy mọi mục dương (tối đa n//2), phần còn lại lấy ngẫu nhiên từ mục âm."""
     rng = random.Random(seed)
-    positives = [u for u in units if u.static or u.llm]
-    negatives = [u for u in units if not (u.static or u.llm)]
+    positives = [u for u in units if u.static or u.jev]
+    negatives = [u for u in units if not (u.static or u.jev)]
     if len(positives) > n // 2:
         positives = rng.sample(positives, n // 2)
     negatives = rng.sample(negatives, min(len(negatives), n - len(positives)))
@@ -170,7 +173,7 @@ def score(rows: list[dict]) -> dict[str, dict]:
     """Precision/recall của từng tầng trên các dòng đã gán nhãn (label rỗng thì bỏ qua)."""
     labelled = [r for r in rows if r.get("label") in ("1", "0")]
     result: dict[str, dict] = {}
-    for layer in ("static", "llm"):
+    for layer in ("static", "jev"):
         tp = fp = fn = tn = 0
         for r in labelled:
             truth, pred = r["label"] == "1", r[layer] == "1"

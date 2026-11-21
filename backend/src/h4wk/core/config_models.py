@@ -65,7 +65,6 @@ class SourcesConfig(Contract):
 
 
 class AiTask(StrEnum):
-    CLASSIFY = "analysis.classify"
     VIDEO_VERDICT = "analysis.video_verdict"
     VISION = "media.vision"
 
@@ -99,15 +98,16 @@ class AiConfig(Contract):
 
     @model_validator(mode="before")
     @classmethod
-    def _drop_legacy_comment_route(cls, data):
+    def _drop_legacy_routes(cls, data):
         if isinstance(data, dict) and isinstance(tasks := data.get("tasks"), dict):
-            if "analysis.classify_comment" in tasks:
-                logging.getLogger(__name__).warning(
-                    "Ignoring legacy analysis.classify_comment route"
-                )
-                tasks = dict(tasks)
-                del tasks["analysis.classify_comment"]
-                return {**data, "tasks": tasks}
+            legacy = tasks.keys() & {"analysis.classify", "analysis.classify_comment"}
+            if legacy:
+                for task in sorted(legacy):
+                    logging.getLogger(__name__).warning("Ignoring legacy %s route", task)
+                return {
+                    **data,
+                    "tasks": {key: value for key, value in tasks.items() if key not in legacy},
+                }
         return data
 
     @model_validator(mode="after")

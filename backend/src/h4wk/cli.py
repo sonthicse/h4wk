@@ -276,7 +276,7 @@ LABEL_COLUMNS = [
     "label",
     "note",
 ]
-PREDICTION_COLUMNS = ["unit_id", "run_id", "static", "llm"]
+PREDICTION_COLUMNS = ["unit_id", "run_id", "static", "jev"]
 
 
 def _write_csv(path: Path, columns: list[str], rows: list[dict]) -> None:
@@ -322,7 +322,7 @@ def eval_sample(
                 "unit_id": u.unit_id,
                 "run_id": u.run_id,
                 "static": int(u.static),
-                "llm": int(u.llm),
+                "jev": int(u.jev),
             }
             for u in chosen
         ],

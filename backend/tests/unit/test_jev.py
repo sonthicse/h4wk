@@ -3,7 +3,7 @@ import json
 from urllib.error import HTTPError
 
 import pytest
-from test_analysis_llm import ENTITY, INSULT, _data
+from _analysis_sample import ENTITY, INSULT, _data
 
 from h4wk.analysis import jev, runner
 from h4wk.analysis.models import EntityHit

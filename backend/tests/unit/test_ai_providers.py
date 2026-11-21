@@ -191,12 +191,12 @@ def test_gateway_through_real_sdk(name, monkeypatch, tmp_path):
     )
     config_path.write_text(
         f"[providers.{name}]\n{settings}\n[providers.{name}.models.model]\n"
-        f'structured = true\n[tasks]\n"analysis.classify" = '
+        f'structured = true\n[tasks]\n"analysis.video_verdict" = '
         f'[{{provider="{name}",model="model"}}]\n',
         encoding="utf-8",
     )
     answer = AIGateway(config_path=config_path, log_dir=tmp_path).complete_structured(
-        "analysis.classify", [{"role": "user", "content": "Hello"}], Result
+        "analysis.video_verdict", [{"role": "user", "content": "Hello"}], Result
     )
     assert answer.label == "ok"
 
