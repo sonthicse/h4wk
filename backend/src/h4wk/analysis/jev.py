@@ -176,7 +176,7 @@ def _image_text(lines, visual):
     return " | ".join(part.strip() for part in parts if part.strip())
 
 
-def _location(kind, item_id, text, hits, *, segment=None, frame=None):
+def _location(kind, item_id, text, hits, target, *, segment=None, frame=None):
     location = dict(source_kind=kind, quote=text, triggers=[])
     if kind == "comment":
         location.update(comment_id=item_id, triggers=[Trigger(via="comment", comment_id=item_id)])
@@ -188,8 +188,9 @@ def _location(kind, item_id, text, hits, *, segment=None, frame=None):
         location["triggers"] = [
             Trigger(**hit.model_dump(exclude={"entity"}))
             for hit in hits
-            if hit.segment_id == location.get("segment_id")
-            and (hit.via == kind or kind == "visual" and hit.via in {"face", "image"})
+            if hit.entity == target
+            and hit.segment_id == location.get("segment_id")
+            and (hit.via == kind or kind == "visual" and hit.via in {"face", "ref_image"})
             and (frame is None or hit.frame == frame)
         ]
     return location
@@ -210,7 +211,7 @@ def classify(
                 (
                     item_id,
                     {"source_type": source_type, "text": text, **context},
-                    _location(kind, item_id, text, hits, segment=segment, frame=frame),
+                    (kind, segment, frame),
                 )
             )
 
@@ -274,11 +275,11 @@ def classify(
         )
 
     def request(item):
-        item_id, content, location = item
+        item_id, content, (kind, segment, frame) = item
         record = {
             "task": "jev",
             "item_id": item_id,
-            "source_kind": location["source_kind"],
+            "source_kind": kind,
             "answers": {},
             "provider": "typesafe",
             "model": MODEL,
@@ -310,7 +311,9 @@ def classify(
                 reason=f"Jev: {category} p={p:.2f}",
                 severity="low" if score < 0.5 else "medium" if score < 1.5 else "high",
                 confidence="highly_likely" if p >= 0.85 else "likely" if p >= 0.6 else "unverified",
-                **location,
+                **_location(
+                    kind, item_id, content["text"], hits, target, segment=segment, frame=frame
+                ),
             )
             record["kept"] = True
             return finding, record

@@ -6,6 +6,7 @@ import pytest
 from test_analysis_llm import ENTITY, INSULT, _data
 
 from h4wk.analysis import jev, runner
+from h4wk.analysis.models import EntityHit
 from h4wk.core.config_models import JevSettings
 from h4wk.media.timeline import FrameOcr, FrameVisual, Segment
 
@@ -160,8 +161,14 @@ def test_new_sources(monkeypatch):
 
     monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
     monkeypatch.setattr(jev, "_call", reply)
+    hit = EntityHit(entity=ENTITY.id, via="ref_image", segment_id="seg_0002", frame=visual.frame)
+    hits = [
+        hit,
+        hit.model_copy(update={"entity": "e_02"}),
+        hit.model_copy(update={"frame": "frames/other.jpg"}),
+    ]
     findings, records, error = jev.classify(
-        data, timeline, [ENTITY], [], "r_x", JevSettings(), max_comments=0
+        data, timeline, [ENTITY], hits, "r_x", JevSettings(), max_comments=0
     )
     assert error is None
     by_kind = {f.source_kind: f for f in findings}
@@ -183,3 +190,5 @@ def test_new_sources(monkeypatch):
             frame,
             quote,
         )
+
+    assert [t.via for t in by_kind["visual"].triggers] == ["ref_image"]
