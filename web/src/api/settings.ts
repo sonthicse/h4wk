@@ -50,10 +50,10 @@ export function resumeSource(name: SourceName): Promise<SourceInfo> {
 // ---- AI providers (T34) ----
 // Kiểu dạng UI: models là mảng, tên trường camelCase. Hàm bên dưới đổi qua lại với dạng API.
 
-export type AiTask = 'analysis.classify' | 'analysis.video_verdict' | 'media.vision'
+export type AiTask = 'analysis.video_verdict' | 'media.vision'
 export type ProviderType = Schemas['ProviderInfo']['type']
 
-export const AI_TASKS: AiTask[] = ['analysis.classify', 'analysis.video_verdict', 'media.vision']
+export const AI_TASKS: AiTask[] = ['analysis.video_verdict', 'media.vision']
 
 export type AiModel = { name: string; vision: boolean; structured: boolean }
 

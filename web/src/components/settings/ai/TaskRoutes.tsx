@@ -8,7 +8,6 @@ import type { AiRoute, AiTask } from '@/api/settings'
 import { modelAllowed, routeProblem, type DraftProvider } from './draft'
 
 const taskInfo: Record<AiTask, string> = {
-  'analysis.classify': 'Classifies transcript and OCR segments into findings.',
   'analysis.video_verdict': 'Writes the per-video verdict from the findings.',
   'media.vision': 'Describes video frames. Only models with vision can be used.',
 }
