@@ -249,9 +249,9 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [x] T19: Keyframe theo mức thay đổi
 - [x] T20: OCR trên keyframe và thumbnail
 - [x] T21: VLM mô tả keyframe và thumbnail (test live chuyển sang Checkpoint 6c; VLM bị bỏ ở Phase 6d)
-- [ ] T22: Timeline đầy đủ (màn Collect đã nghiệm thu 20/11; còn đo thời gian xử lý trên máy demo)
+- [x] T22: Timeline đầy đủ (màn Collect đã nghiệm thu 20/11; bỏ phần đo thời gian ngày 21/11)
 
-### Checkpoint C: đo thời gian màn 2, kiểm tra timeline của video thật
+### Checkpoint C: đo thời gian màn 2, kiểm tra timeline của video thật — đạt (Thi xác nhận 21/11)
 
 ### Phase 4: Phân tích và rà soát (tuần 3)
 
@@ -267,14 +267,14 @@ Chi tiết từng task nằm ở [todo.md](todo.md).
 - [ ] T41: `analysis`: khớp khuôn mặt
 - [x] T42: Checklist demo
 
-### Checkpoint D: màn 1 và màn 2 chạy được
+### Checkpoint D: màn 1 và màn 2 chạy được — đạt (Thi xác nhận 21/11)
 
 ### Phase 5: Watchlist (tuần 4)
 
 - [x] T30: `watchlist` backend: RSS, Check now, sự kiện
 - [x] T31: UI Watchlist và dòng sự kiện
 
-### Checkpoint E (cuối tuần 4): ba màn demo chạy trọn
+### Checkpoint E (cuối tuần 4): ba màn demo chạy trọn — đạt (Thi xác nhận 21/11)
 
 ### Phase 6: Settings và dashboard (tuần 5)
 

@@ -476,8 +476,8 @@ Người làm: Bảo. Phụ thuộc: T20, T21, T12, T13. Cỡ: S.
 
 ### Checkpoint C
 
-- [ ] Đo màn 2 với video 5 phút trên máy demo, ghi vào `docs/spikes/latency.md`, gồm cả thời gian nạp model.
-- [ ] Mở `timeline.json` của 3 video thật và kiểm tra: đoạn có đúng mốc thời gian, chữ OCR đọc đúng, keyframe (`frames`) gắn đúng đoạn. Kiểm sau T58; phần `offensive_cues` bỏ cùng VLM (Phase 6d).
+- [x] Đo màn 2 với video 5 phút trên máy demo, ghi vào `docs/spikes/latency.md`, gồm cả thời gian nạp model. (bỏ đo; Thi xác nhận checkpoint đạt 21/11)
+- [x] Mở `timeline.json` của 3 video thật và kiểm tra: đoạn có đúng mốc thời gian, chữ OCR đọc đúng, keyframe (`frames`) gắn đúng đoạn. Kiểm sau T58; phần `offensive_cues` bỏ cùng VLM (Phase 6d). (Thi xác nhận đạt 21/11)
 
 ## Phase 4: Phân tích và rà soát
 
@@ -657,9 +657,9 @@ Người làm: Thi. Phụ thuộc: T13. Cỡ: S.
 
 ### Checkpoint D
 
-- [ ] Chạy màn 1 với 3–5 video thật: có ít nhất một nghi vấn speech, một ocr, một visual; video nhảy đúng đoạn; duyệt được nghi vấn.
-- [ ] Đo lại màn 2 và ghi vào `docs/spikes/latency.md`.
-- [ ] Hai người đọc lại code frontend do agent sinh ra.
+- [x] Chạy màn 1 với 3–5 video thật: có ít nhất một nghi vấn speech, một ocr, một visual; video nhảy đúng đoạn; duyệt được nghi vấn. (Thi xác nhận đạt 21/11)
+- [x] Đo lại màn 2 và ghi vào `docs/spikes/latency.md`. (bỏ đo; Thi xác nhận checkpoint đạt 21/11)
+- [-] Hai người đọc lại code frontend do agent sinh ra. (bỏ 21/11: Thi chỉ đọc phần thu thập và phân tích)
 
 ## Phase 5: Watchlist
 
@@ -703,8 +703,8 @@ Người làm: Thi. Phụ thuộc: T30, T13. Cỡ: S.
 
 ### Checkpoint E (cuối tuần 4)
 
-- [ ] Ba màn demo chạy trọn trên máy demo.
-- [ ] Đo màn 3 theo cả hai cách (chờ poll tự động và bấm Check now), ghi vào `docs/spikes/latency.md`.
+- [x] Ba màn demo chạy trọn trên máy demo. (Thi xác nhận đạt 21/11)
+- [x] Đo màn 3 theo cả hai cách (chờ poll tự động và bấm Check now), ghi vào `docs/spikes/latency.md`. (bỏ đo; Thi xác nhận checkpoint đạt 21/11)
 
 ## Phase 6: Settings và dashboard
 
