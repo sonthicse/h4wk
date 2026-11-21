@@ -957,9 +957,9 @@ Xoá `analysis/llm.py` và lời gọi trong `analysis/runner.py`. C5 bỏ `AiTa
 
 Nghiệm thu:
 
-- [ ] Test hợp đồng: cấu hình có `analysis.classify` nạp được, có cảnh báo, `tasks` không còn khoá này; ví dụ hợp lệ và bị từ chối được cập nhật.
-- [ ] `grep -rn "analysis.classify"` trong `backend/src`, `web/src`, `config/ai.toml.example` không còn kết quả (trừ chỗ đọc cấu hình cũ).
-- [ ] Backend pytest, ruff; web build, lint qua.
+- [x] Test hợp đồng: cấu hình có `analysis.classify` nạp được, có cảnh báo, `tasks` không còn khoá này; ví dụ hợp lệ và bị từ chối được cập nhật.
+- [x] `grep -rn "analysis.classify"` trong `backend/src`, `web/src`, `config/ai.toml.example` không còn kết quả (trừ chỗ đọc cấu hình cũ).
+- [x] Backend pytest, ruff; web build, lint qua.
 
 Kiểm tra: lệnh test, lint và build chung.
 
