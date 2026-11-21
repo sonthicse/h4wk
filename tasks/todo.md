@@ -1056,9 +1056,9 @@ Theo SPEC-jev-only §5–§6 và bản phác `docs/design/phase-6d/SettingsJev.d
 
 Nghiệm thu:
 
-- [ ] Ảnh chụp trang khớp bản phác (bố cục, nhãn, thứ tự khối); gửi Thi duyệt trước khi merge.
-- [ ] Nhập, che, xoá key được; Test connection hiện kết quả thật và lỗi khi key sai; số Usage khớp `GET /api/settings/jev/usage`.
-- [ ] `grep -rn "settings/ai\|TaskRoutes\|ProviderCard" web/src` không còn kết quả; `npm run build`, `npm run lint` không lỗi.
+- [x] Ảnh chụp trang khớp bản phác (bố cục, nhãn, thứ tự khối); gửi Thi duyệt trước khi merge.
+- [x] Nhập, che, xoá key được; Test connection hiện kết quả thật và lỗi khi key sai; số Usage khớp `GET /api/settings/jev/usage`.
+- [x] `grep -rn "settings/ai\|TaskRoutes\|ProviderCard" web/src` không còn kết quả; `npm run build`, `npm run lint` không lỗi.
 
 File: `web/src/App.tsx`, `web/src/pages/settings/SettingsLayout.tsx`, `web/src/pages/settings/AIProvidersPage.tsx` (thành trang Jev), `web/src/components/settings/ai/*`, `web/src/api/settings.ts`, `web/src/pages/CollectPage.tsx`, kiểu API sinh ra.
 Người làm: agent ui. Phụ thuộc: T61, T65. Cỡ: M.
