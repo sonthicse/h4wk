@@ -628,13 +628,13 @@ Người làm: Bảo. Phụ thuộc: T39, T19, T23. Cỡ: M.
 
 ### T41: `analysis`: khớp khuôn mặt
 
-Model khuôn mặt chọn ở T3, chạy trên máy qua hàng đợi `gpu`, phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng. Khuôn mặt khớp sinh dấu hiệu `via: face` có frame, bbox và điểm số. Đặc trưng của khuôn mặt không khớp chỉ nằm trong bộ nhớ và không được ghi ra đĩa. Tính năng có thể tắt bằng `analysis.toml`.
+OpenCV YuNet và SFace chạy cục bộ trên CPU trong bước xử lý media, phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng. Khuôn mặt khớp sinh dấu hiệu `via: face` có frame, bbox và điểm số. Đặc trưng của khuôn mặt không khớp chỉ nằm trong bộ nhớ và không được ghi ra đĩa. Tính năng có thể tắt bằng `analysis.toml`.
 
 Nghiệm thu:
 
 - [ ] Trên bản thu mẫu, đoạn ảnh chế khuôn mặt thành viên nhóm sinh dấu hiệu `face`.
-- [ ] Khuôn mặt của người khác trong clip thử không sinh dấu hiệu, và không có file nào chứa đặc trưng của họ.
-- [ ] Tắt tính năng trong `analysis.toml` thì bước này bị bỏ qua.
+- [x] Khuôn mặt của người khác trong clip thử không sinh dấu hiệu, và không có file nào chứa đặc trưng của họ.
+- [x] Tắt tính năng trong `analysis.toml` thì bước này bị bỏ qua.
 
 Kiểm tra: `uv run pytest tests/unit/test_faces.py` (đánh dấu `gpu` nếu cần).
 

@@ -14,7 +14,7 @@ from pydantic import TypeAdapter
 from sqlmodel import Session, select
 
 from h4wk.ai.gateway import AIGateway
-from h4wk.analysis import refimages, runner, verdict
+from h4wk.analysis import faces, refimages, runner, verdict
 from h4wk.analysis.models import EntityHit, Finding
 from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
@@ -237,6 +237,36 @@ def _match(
     )
 
 
+def _faces(job, cap_dir, out, frames, thumbnails, timeline):
+    target = out / "face_hits.json"
+    target.unlink(missing_ok=True)
+    if not _analysis_config().face.enabled:
+        return
+    try:
+        refs = {
+            entity.id: sorted(
+                p for p in refs_dir(entity.id, "face").glob("*") if REF_FILE.match(p.name)
+            )
+            for entity in load_entities()
+        }
+        refs = {entity: paths for entity, paths in refs.items() if paths}
+        if not refs:
+            return
+        images = [(f.file, out / f.file) for f in frames] + [
+            (t, cap_dir / t) for t in thumbnails if (cap_dir / t).is_file()
+        ]
+        matches = faces.match_faces(images, refs)
+        hits = faces.to_hits(matches, timeline, {f.file: f.t for f in frames})
+        target.write_text(
+            json.dumps([h.model_dump(mode="json", by_alias=True) for h in hits], ensure_ascii=False)
+            + "\n",
+            encoding="utf-8",
+        )
+    except Exception as e:
+        logger.warning("Face matching failed: %s", e)
+        audit.log(job.trigger, "media.face", job.id, {"error": str(e)}, status="error")
+
+
 @huey_gpu.task()
 def media(job_id: str) -> None:
     job = _update(job_id, status="running", step="media", progress=45)
@@ -276,6 +306,7 @@ def media(job_id: str) -> None:
                 audit.log(job.trigger, "media.vision", job.id, {"failed": failed}, status="error")
             job = _update(job_id, step="match", progress=68)
             _match(job, cap_dir, out, frames, thumbnails, timeline)
+            _faces(job, cap_dir, out, frames, thumbnails, timeline)
     except Exception as e:
         _fail(job_id, job.step or "media", e)
         return
@@ -295,12 +326,11 @@ def analyze_capture(video_dir: Path, cap: str, gateway: AIGateway, *, reject_quo
         (video_dir / "captures" / cap / "normalized.json").read_text("utf-8")
     )
     run_id = f"r_{new_ulid()}"
-    ref_path = derived / "ref_hits.json"
-    ref_hits = (
-        TypeAdapter(list[EntityHit]).validate_json(ref_path.read_bytes())
-        if ref_path.is_file()
-        else []
-    )
+    ref_hits = []
+    for name in ("ref_hits.json", "face_hits.json"):
+        path = derived / name
+        if path.is_file():
+            ref_hits.extend(TypeAdapter(list[EntityHit]).validate_json(path.read_bytes()))
     # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
     settings = _analysis_config()
     out = derived / "analysis" / run_id
