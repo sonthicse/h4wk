@@ -259,15 +259,15 @@ def test_classify_sends_keyframes_and_thumbnail_images(monkeypatch, tmp_path):
             "model": "jev-test",
             "answers": {
                 "category": {"probabilities": {"insult": 0.8}},
-                "is_attack": {"noul": 0.0},
-                "target": {"choice": "none"},
-                "severity": {"score": 0.0},
+                "is_attack": {"noul": 0.9},
+                "target": {"choice": ENTITY.id},
+                "severity": {"score": 1.0},
             },
         }
 
     monkeypatch.setattr(jev.secrets, "get", lambda name: "k")
     monkeypatch.setattr(jev, "_call", reply)
-    jev.classify(
+    findings, _, error = jev.classify(
         data,
         timeline,
         [ENTITY],
@@ -278,14 +278,24 @@ def test_classify_sends_keyframes_and_thumbnail_images(monkeypatch, tmp_path):
         derived_dir=derived,
         capture_dir=capture,
     )
+    assert error is None
     by_text = {s["source_type"]: (s, imgs) for s, imgs in calls if imgs}
     keyframes = [(s, imgs) for s, imgs in calls if "keyframe" in s["source_type"]]
     assert len(keyframes) == 2
-    first, second = sorted(keyframes, key=lambda c: c[0]["text"] == "")[0], keyframes[-1]
+    # Chọn theo nội dung, không theo thứ tự các luồng.
+    first = next(c for c in keyframes if c[0]["text"])
+    second = next(c for c in keyframes if not c[0]["text"])
     # 7 keyframe lấy cách đều còn 4; dòng OCR lặp chỉ gửi một lần.
     assert first[0]["text"] == "Dòng chữ"
     assert first[1] == [derived / f"frames/{i}.jpg" for i in (1, 3, 5, 7)]
     assert second[0]["text"] == "" and second[1] == [derived / "frames/9.jpg"]
+    # Đoạn chỉ có ảnh sinh nghi vấn visual đúng frame, quote rỗng; đoạn có chữ sinh ocr.
+    visual = [f for f in findings if f.source_kind == "visual"]
+    assert [(f.segment_id, f.frame, f.quote) for f in visual] == [("seg_0002", "frames/9.jpg", "")]
+    ocr_findings = [f for f in findings if f.source_kind == "ocr"]
+    assert [(f.segment_id, f.frame, f.quote) for f in ocr_findings] == [
+        ("seg_0001", "frames/1.jpg", "Dòng chữ")
+    ]
     assert by_text["video thumbnail image; `text` is the text on it (OCR)"][1] == [
         capture / "sources/maxres.jpg"
     ]

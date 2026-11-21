@@ -40,6 +40,7 @@ Bản sao capture `20261120T132008` của `1RUJ_6eruwA` (sau T58), `max_comments
 | ---: | ---: | ---: | ---: | ---: |
 | 26 | 8 | 11 | 0 | 19 |
 
-- Token Jev báo ở lần chạy thứ hai: request có ảnh 18 775 vào / 1 166 ra (8 request), request chỉ có chữ 28 556 vào / 2 664 ra (18 request). Token ảnh trung bình khoảng 2 350 vào mỗi request có ảnh, gồm cả phần chữ và câu hỏi nên chưa tách riêng được.
-- Đoạn có dòng "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" (OCR nhiễu dấu) sinh nghi vấn `source_kind: ocr` có `frame` ở 10 đoạn (ví dụ `frames/000014.jpg`), thumbnail sinh 2 nghi vấn. Cả 8 request có ảnh đều không lỗi.
+- Token Jev báo ở lần chạy thứ hai: request có ảnh 18 775 vào / 1 166 ra (8 request), request chỉ có chữ 28 556 vào / 2 664 ra (18 request). Trung bình khoảng 2 350 token đầu vào mỗi request có ảnh; đó là cả request (ảnh, chữ và câu hỏi). Phản hồi không báo riêng token của ảnh nên không tách được.
+- Nghi vấn theo nguồn: 6 lời nói, 10 OCR, 2 thumbnail, 1 tiêu đề (19). Trong 10 nghi vấn OCR, chỉ 2 mục có ảnh kèm theo (`seg_0002:ocr`, `seg_0004:ocr`); các mục còn lại thuộc đoạn không có keyframe trong timeline và chỉ gửi chữ. Dòng "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" (OCR nhiễu dấu) xuất hiện ở cả hai nhóm, ví dụ `frames/000014.jpg`. Đoạn `seg_0001` chỉ có ảnh sinh một request `visual`, không bị giữ.
+- Cả 8 request có ảnh đều không lỗi.
 - Chưa đối chiếu độ chính xác của nghi vấn bằng người; số trên chỉ xác nhận request có ảnh chạy được và sinh nghi vấn đúng loại nguồn.
