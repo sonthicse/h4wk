@@ -100,7 +100,7 @@ def build_items(data: Normalized, timeline: Timeline, hits: list[EntityHit]) -> 
         seg_hits = [h for h in hits if h.segment_id == segment.id]
         triggers = [_trigger(h) for h in seg_hits]
         cues = any(v.offensive_cues for v in segment.visual)
-        if not triggers and not cues:
+        if not any(h.via != SourceKind.SPEECH for h in seg_hits) and not cues:
             continue
         before = _segment_payload(segments[index - 1]) if index > 0 else None
         after = _segment_payload(segments[index + 1]) if index + 1 < len(segments) else None
@@ -232,7 +232,9 @@ def classify(
                 continue
             kept = False
             error_text = None
-            if verdict.category not in NO_VIOLATION:
+            if verdict.source_kind == SourceKind.SPEECH:
+                error_text = "Speech verdicts are handled by Jev"
+            elif verdict.category not in NO_VIOLATION:
                 try:
                     findings.append(_finding(item, verdict, route, timeline, run_id))
                     kept = True

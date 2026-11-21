@@ -485,6 +485,21 @@ def test_config_examples_load(name: str, model: type[BaseModel]) -> None:
     model.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))
 
 
+def test_legacy_comment_route_is_ignored(tmp_path: Path, caplog) -> None:
+    path = tmp_path / "ai.toml"
+    path.write_text('[providers]\n[tasks]\n"analysis.classify_comment" = []\n', encoding="utf-8")
+    assert load_toml(path, AiConfig).tasks == {}
+    assert "Ignoring legacy analysis.classify_comment route" in caplog.text
+
+
+@pytest.mark.parametrize("concurrency", [0, 17])
+def test_jev_concurrency_rejected(concurrency) -> None:
+    with pytest.raises(ValidationError) as exc:
+        AnalysisConfig.model_validate({"jev": {"concurrency": concurrency}})
+    assert exc.value.errors()[0]["loc"] == ("jev", "concurrency")
+    assert exc.value.errors()[0]["type"] in {"greater_than_equal", "less_than_equal"}
+
+
 def test_load_toml_reads_vietnamese_as_utf8(tmp_path: Path) -> None:
     path = tmp_path / "sources.toml"
     path.write_text('[sources.ytdlp]\ncookies_file = "/home/thi/tài liệu/cookies.txt"\n', "utf-8")

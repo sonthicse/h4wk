@@ -3,7 +3,7 @@
     "AiTask": {
       "enum": [
         "analysis.classify",
-        "analysis.classify_comment",
+        "analysis.video_verdict",
         "media.vision"
       ],
       "title": "AiTask",

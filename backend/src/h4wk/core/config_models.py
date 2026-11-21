@@ -3,6 +3,7 @@
 File cấu hình không chứa secret. API key nằm trong .env hoặc data/secrets.json.
 """
 
+import logging
 import tomllib
 from enum import StrEnum
 from pathlib import Path
@@ -65,7 +66,7 @@ class SourcesConfig(Contract):
 
 class AiTask(StrEnum):
     CLASSIFY = "analysis.classify"
-    CLASSIFY_COMMENT = "analysis.classify_comment"
+    VIDEO_VERDICT = "analysis.video_verdict"
     VISION = "media.vision"
 
 
@@ -96,6 +97,19 @@ class AiConfig(Contract):
     # Tác vụ AI → danh sách (provider, model) theo thứ tự ưu tiên.
     tasks: dict[AiTask, Annotated[list[Route], Field(min_length=1)]] = {}
 
+    @model_validator(mode="before")
+    @classmethod
+    def _drop_legacy_comment_route(cls, data):
+        if isinstance(data, dict) and isinstance(tasks := data.get("tasks"), dict):
+            if "analysis.classify_comment" in tasks:
+                logging.getLogger(__name__).warning(
+                    "Ignoring legacy analysis.classify_comment route"
+                )
+                tasks = dict(tasks)
+                del tasks["analysis.classify_comment"]
+                return {**data, "tasks": tasks}
+        return data
+
     @model_validator(mode="after")
     def _routes(self) -> Self:
         for task, routes in self.tasks.items():
@@ -124,8 +138,12 @@ class RefImageSettings(Contract):
 
 
 class CommentSettings(Contract):
-    batch_size: int = Field(default=30, ge=20, le=50)
+    batch_size: int = Field(default=30, ge=20, le=50)  # giữ để đọc cấu hình cũ
     max_per_video: int | None = Field(default=None, ge=1)  # None: không giới hạn
+
+
+class JevSettings(Contract):
+    concurrency: int = Field(default=4, ge=1, le=16)
 
 
 class AnalysisConfig(Contract):
@@ -138,6 +156,7 @@ class AnalysisConfig(Contract):
     face: FaceSettings = FaceSettings()
     ref_image: RefImageSettings = RefImageSettings()
     comments: CommentSettings = CommentSettings()
+    jev: JevSettings = JevSettings()
 
 
 def load_toml[M: BaseModel](path: Path, model: type[M]) -> M:

@@ -39,6 +39,20 @@
       "title": "FaceSettings",
       "type": "object"
     },
+    "JevSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "concurrency": {
+          "default": 4,
+          "maximum": 16,
+          "minimum": 1,
+          "title": "Concurrency",
+          "type": "integer"
+        }
+      },
+      "title": "JevSettings",
+      "type": "object"
+    },
     "RefImageSettings": {
       "additionalProperties": false,
       "properties": {
@@ -89,6 +103,12 @@
       "$ref": "#/$defs/FaceSettings",
       "default": {
         "enabled": true
+      }
+    },
+    "jev": {
+      "$ref": "#/$defs/JevSettings",
+      "default": {
+        "concurrency": 4
       }
     },
     "ref_image": {

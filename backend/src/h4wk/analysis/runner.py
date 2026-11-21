@@ -7,7 +7,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 from h4wk.ai.gateway import AIGateway, GatewayError
-from h4wk.analysis import comments, llm
+from h4wk.analysis import jev, llm
 from h4wk.analysis.models import (
     Confidence,
     EntityHit,
@@ -20,7 +20,7 @@ from h4wk.analysis.models import (
 from h4wk.analysis.normalize import matches_name, normalize
 from h4wk.analysis.static import LexiconEntry, find_insult, load_lexicon
 from h4wk.collectors.models import Normalized
-from h4wk.core.config_models import CommentSettings
+from h4wk.core.config_models import CommentSettings, JevSettings
 from h4wk.core.entities import Entity
 from h4wk.core.ids import new_ulid
 from h4wk.media.timeline import Timeline
@@ -36,6 +36,7 @@ def analyze(
     gateway: AIGateway | None = None,
     comment_settings: CommentSettings | None = None,
     extra_hits: list[EntityHit] | None = None,
+    jev_settings: JevSettings | None = None,
 ) -> tuple[list[EntityHit], list[Finding], str | None]:
     if lexicon is None:
         lexicon = load_lexicon()
@@ -100,32 +101,32 @@ def analyze(
 
     errors: list[str] = []
     records: list[dict] | None = None
-    if gateway is not None:
-        settings = comment_settings or CommentSettings()
-        items = llm.build_items(data, timeline, hits)
-        selected = comments.select_comments(data, hits, settings)
-        parts = []
-        if items:
-            parts.append(
-                lambda: llm.classify(items, entities, data, timeline, hits, gateway, run_id)
-            )
-        if selected:
-            parts.append(
-                lambda: comments.classify_comments(
-                    selected, entities, data, hits, gateway, run_id, timeline, settings
-                )
-            )
-        for part in parts:
-            try:
-                llm_findings, part_records = part()
-            except GatewayError as error:
-                # Một phần lỗi thì giữ nghi vấn tĩnh của nó; phần kia vẫn chạy.
-                errors.append(str(error))
-                continue
-            records = (records or []) + part_records
-            # LLM kết luận vi phạm cho một mục thì bỏ nghi vấn tĩnh của đúng mục đó.
-            replaced = {_slot(f) for f in llm_findings}
-            findings = [f for f in findings if _slot(f) not in replaced] + llm_findings
+
+    def merge(part_findings, part_records):
+        nonlocal findings, records
+        records = (records or []) + part_records
+
+        def slot(f):
+            # Lời nói và hình cùng đoạn do hai bộ phân loại độc lập xử lý.
+            return _slot(f), f.source_kind == SourceKind.SPEECH
+
+        replaced = {slot(f) for f in part_findings}
+        findings = [f for f in findings if f.analyzer != "static" or slot(f) not in replaced]
+        findings.extend(part_findings)
+
+    if gateway is not None and (items := llm.build_items(data, timeline, hits)):
+        try:
+            merge(*llm.classify(items, entities, data, timeline, hits, gateway, run_id))
+        except GatewayError as error:
+            errors.append(str(error))
+    if jev_settings is not None:
+        limit = (comment_settings or CommentSettings()).max_per_video
+        part_findings, part_records, error = jev.classify(
+            data, timeline, entities, hits, run_id, jev_settings, max_comments=limit
+        )
+        merge(part_findings, part_records)
+        if error:
+            errors.append(error)
     llm_error = "; ".join(errors) or None
     references = [data.video.title, data.video.description] if data.video else []
     references += [segment.speech for segment in timeline.segments]

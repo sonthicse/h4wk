@@ -302,6 +302,7 @@ def analyze(job_id: str, vision_failed: int = 0) -> None:
             else []
         )
         # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
+        settings = _analysis_config()
         _hits, findings, llm_error = runner.analyze(
             n,
             timeline,
@@ -310,7 +311,8 @@ def analyze(job_id: str, vision_failed: int = 0) -> None:
             run_id,
             derived / "analysis" / run_id,
             gateway=AIGateway(),
-            comment_settings=_analysis_config().comments,
+            comment_settings=settings.comments,
+            jev_settings=settings.jev,
             extra_hits=ref_hits,
         )
         with Session(get_engine()) as s:

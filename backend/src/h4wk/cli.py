@@ -8,6 +8,7 @@ from typing import Annotated
 
 import typer
 from pydantic import TypeAdapter
+from sqlmodel import Session
 
 from h4wk.analysis.evaluation import collect_units, markdown_table, sample, score
 from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
@@ -16,6 +17,7 @@ from h4wk.core.auth import create_user
 from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
 from h4wk.core.config_models import AiConfig, AnalysisConfig, SourcesConfig
 from h4wk.core.db import get_engine
+from h4wk.core.entities import add_entity, load_entities
 from h4wk.evidence.models import Manifest
 from h4wk.evidence.verify import FileStatus
 from h4wk.evidence.verify import verify as verify_capture
@@ -73,6 +75,22 @@ def init() -> None:
     typer.echo(f"data dir: {d}")
     for path in created:
         typer.echo(f"created: {path}")
+    if not load_entities():
+        with Session(get_engine(d)) as session:
+            add_entity(
+                session,
+                name="Đảng và Nhà nước Việt Nam",
+                aliases=[
+                    "Đảng",
+                    "Đảng Cộng sản",
+                    "Đảng Cộng sản Việt Nam",
+                    "nhà nước",
+                    "chế độ",
+                    "chính quyền",
+                    "chính phủ",
+                ],
+                abbreviations=["ĐCSVN", "ĐCS"],
+            )
     from h4wk.watchlist.service import seed_defaults
 
     for item in seed_defaults():

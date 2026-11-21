@@ -11,5 +11,7 @@ enabled = true
 # threshold = 0.85             # độ tương đồng tối thiểu (0–1); bỏ trống thì dùng mặc định chốt ở T40
 
 [comments]
-batch_size = 30                # số comment mỗi lô gửi LLM (20–50)
-# max_per_video = 500          # bỏ trống thì không giới hạn
+# max_per_video = 500          # giới hạn comment gửi Jev; bỏ trống thì không giới hạn
+
+[jev]
+concurrency = 4               # số yêu cầu Jev song song (1–16)

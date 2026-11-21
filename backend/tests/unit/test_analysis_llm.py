@@ -85,10 +85,8 @@ def test_build_items_context_and_cues_only_segment(tmp_path):
     data, timeline = _data()
     items = llm.build_items(data, timeline, _hits(data, timeline, tmp_path))
     by_segment = {i.segment.id: i for i in items if i.segment}
-    # seg_0001 nhắc tên: có context sau (seg_0002), chưa có context trước.
-    assert by_segment["seg_0001"].payload["context_before"] is None
-    assert by_segment["seg_0001"].payload["context_after"]["speech"].startswith("Mọi người")
-    assert by_segment["seg_0001"].triggers and by_segment["seg_0001"].triggers[0].via == "speech"
+    assert "seg_0001" not in by_segment
+    assert by_segment["seg_0002"].payload["context_before"]["speech"]
     # seg_0003 chỉ có ảnh chế, không nhắc tên: vẫn là mục, không có dấu hiệu.
     chế = by_segment["seg_0003"]
     assert chế.triggers == [] and chế.frames
@@ -134,9 +132,10 @@ def test_neutral_only_in_llm_json_and_invalid_verdicts_dropped(tmp_path):
     provider = FakeProvider(
         [
             _reply(
-                _verdict(ids["seg_0001"], category="neutral"),
-                _verdict(ids["seg_0002"], entity="e_99"),  # đối tượng lạ
-                _verdict("i_999"),  # mục lạ
+                _verdict(ids["description"], source_kind="description", category="neutral"),
+                _verdict(ids["thumbnail"], entity="e_99"),  # đối tượng lạ
+                _verdict("i_999"),
+                _verdict(ids["seg_0004"]),  # lời nói do Jev xử lý  # mục lạ
                 _verdict(ids["seg_0004"], source_kind="title"),  # loại sai cho mục đoạn
                 _verdict(ids["seg_0003"], source_kind="visual", frame="khong/co.jpg"),
             )
@@ -148,10 +147,11 @@ def test_neutral_only_in_llm_json_and_invalid_verdicts_dropped(tmp_path):
     for raw in json.loads((out / "findings.json").read_text(encoding="utf-8")):
         Finding.model_validate(raw)
     records = json.loads((out / "llm.json").read_text(encoding="utf-8"))
+    assert records[3]["error"] == "Speech verdicts are handled by Jev"
     kept = {r["item_id"]: r["kept"] for r in records}
     assert kept == {
-        ids["seg_0001"]: False,
-        ids["seg_0002"]: False,  # đối tượng lạ
+        ids["description"]: False,
+        ids["thumbnail"]: False,  # đối tượng lạ
         "i_999": False,  # mục lạ
         ids["seg_0003"]: True,
         ids["seg_0004"]: False,
@@ -159,7 +159,9 @@ def test_neutral_only_in_llm_json_and_invalid_verdicts_dropped(tmp_path):
     by_item = {r["item_id"]: r for r in records}
     assert "error" in by_item[ids["seg_0004"]] and "error" not in by_item[ids["seg_0003"]]
     assert (
-        by_item[ids["seg_0002"]]["error"] == by_item["i_999"]["error"] == ("unknown item or entity")
+        by_item[ids["thumbnail"]]["error"]
+        == by_item["i_999"]["error"]
+        == ("unknown item or entity")
     )
 
 
@@ -203,9 +205,14 @@ def test_llm_replaces_static_finding_of_same_item(tmp_path, category, static_kep
 def test_static_finding_of_other_entity_survives(tmp_path):
     data, timeline = _data()
     other = Entity(id="e_02", name="Hắn", aliases=[])
+    first = timeline.segments[0]
+    ocr = timeline.segments[3].ocr[0].model_copy(update={"text": first.speech})
+    timeline = timeline.model_copy(
+        update={"segments": [first.model_copy(update={"ocr": [ocr]}), *timeline.segments[1:]]}
+    )
     items = llm.build_items(data, timeline, _hits(data, timeline, tmp_path))
     seg1 = next(i for i in items if i.segment and i.segment.id == "seg_0001")
-    provider = FakeProvider([_reply(_verdict(seg1.id, category="insult"))])
+    provider = FakeProvider([_reply(_verdict(seg1.id, category="insult", source_kind="ocr"))])
     lexicon = [LexiconEntry("lừa đảo", "accusation", Category.UNSUPPORTED_ACCUSATION)]
     _, findings, _ = runner.analyze(
         data,
@@ -216,8 +223,15 @@ def test_static_finding_of_other_entity_survives(tmp_path):
         tmp_path / "out",
         gateway=_gateway(provider, tmp_path),
     )
-    seg1_findings = {(f.analyzer, f.entity) for f in findings if f.segment_id == "seg_0001"}
-    assert seg1_findings == {("llm", "e_01"), ("static", "e_02")}
+    seg1_findings = {
+        (f.analyzer, f.entity, f.source_kind) for f in findings if f.segment_id == "seg_0001"
+    }
+    assert seg1_findings == {
+        ("llm", "e_01", "ocr"),
+        ("static", "e_01", "speech"),
+        ("static", "e_02", "speech"),
+        ("static", "e_02", "ocr"),
+    }
 
 
 def test_thumbnail_item_only_for_thumbnail_with_hit(tmp_path):
