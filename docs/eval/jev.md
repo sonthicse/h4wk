@@ -31,3 +31,15 @@ Tính lại trên phản hồi đã lưu, không gửi thêm request. Hai cột 
 | 0,9 | 6/14 (42,9%) | 57/82 (69,5%) |
 
 T47 giữ ngưỡng 0,5 theo SPEC 10.6. Nâng ngưỡng loại bớt báo động sai nhưng cũng bỏ sót thêm bình luận vi phạm trong tập thử nghiệm; ngay ở 0,9 vẫn còn 8/14 mẫu báo động sai. Bảng này không đo recall của LLM cũ.
+
+## Chạy thật với ảnh (T59)
+
+Bản sao capture `20261120T132008` của `1RUJ_6eruwA` (sau T58), `max_comments=0`, chạy hai lần liên tiếp, không ghi vào dữ liệu gốc.
+
+| Request | Có ảnh | Ảnh gửi | Lỗi | Nghi vấn Jev |
+| ---: | ---: | ---: | ---: | ---: |
+| 26 | 8 | 11 | 0 | 19 |
+
+- Token Jev báo ở lần chạy thứ hai: request có ảnh 18 775 vào / 1 166 ra (8 request), request chỉ có chữ 28 556 vào / 2 664 ra (18 request). Token ảnh trung bình khoảng 2 350 vào mỗi request có ảnh, gồm cả phần chữ và câu hỏi nên chưa tách riêng được.
+- Đoạn có dòng "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" (OCR nhiễu dấu) sinh nghi vấn `source_kind: ocr` có `frame` ở 10 đoạn (ví dụ `frames/000014.jpg`), thumbnail sinh 2 nghi vấn. Cả 8 request có ảnh đều không lỗi.
+- Chưa đối chiếu độ chính xác của nghi vấn bằng người; số trên chỉ xác nhận request có ảnh chạy được và sinh nghi vấn đúng loại nguồn.

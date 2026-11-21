@@ -1019,7 +1019,7 @@ Nghiệm thu:
 - [x] Test với `urlopen` giả: request có ảnh có header và `state` dạng danh sách; request không ảnh không có header và `state` là object; ảnh 640×200 thành 1024×320, ảnh 270×480 có cạnh ngắn 320.
 - [x] Test `classify` với `_call` giả: đúng đường dẫn keyframe cho từng đoạn, thumbnail lấy từ `capture_dir`; đoạn chỉ có keyframe sinh mục `visual` với `quote` rỗng; dòng OCR lặp vẫn chỉ gửi một lần.
 - [x] Test pipeline với Jev giả: mọi ảnh gửi đi tồn tại trên đĩa.
-- [ ] Chạy thật trên bản sao bản thu `1RUJ_6eruwA` (sau T58): đoạn có chữ "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" sinh nghi vấn Jev `source_kind: ocr` có `frame`, request có ảnh; ghi số request, số request lỗi và số token ảnh vào `docs/eval/jev.md`.
+- [x] Chạy thật trên bản sao bản thu `1RUJ_6eruwA` (sau T58): đoạn có chữ "CHÍNH QUYỀN TÔ LÂM MỚI LÀ KẺ KHỦNG BỐ" sinh nghi vấn Jev `source_kind: ocr` có `frame`, request có ảnh; ghi số request, số request lỗi và số token ảnh vào `docs/eval/jev.md`.
 
 File: `analysis/jev.py`, `analysis/runner.py`, `jobs/pipeline.py`, `tests/unit/test_jev.py`, `tests/integration/test_pipeline.py`, `docs/eval/jev.md`.
 Người làm: agent backend. Phụ thuộc: T58. Cỡ: M.
