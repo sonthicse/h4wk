@@ -52,7 +52,7 @@ Một số từ dùng thống nhất trong các tài liệu:
 | Tác vụ nền và lập lịch | Huey, lưu hàng đợi bằng SQLite | Không cần Redis. Hai hàng đợi: `default` và `gpu` (1 worker). Kiểm tra RSS chạy bằng periodic task |
 | Thu thập | `yt-dlp` (thư viện Python), `google-api-python-client`, HTTP client cho Supadata | Phiên bản yt-dlp được ghi vào manifest. yt-dlp có thể cần thêm JS runtime (ví dụ Deno); spike T2 xác nhận |
 | Media | `ffmpeg`, PySceneDetect, `imagehash` | |
-| Speech-to-text | `faster-whisper` chạy trên GPU | Whisper large-v3 (chốt ở spike T3: WER 12,7% trên FLEURS tiếng Việt). Đổi model bằng `H4WK_STT_MODEL` trong `.env` |
+| Speech-to-text | `faster-whisper` chạy trên GPU | Whisper large-v3 (chốt ở spike T3: WER 12,7% trên FLEURS tiếng Việt). Model cố định trong `media/stt.py` (`MODEL`) |
 | OCR | PaddleOCR PP-OCRv5 (phát hiện mobile, nhận dạng tiếng Việt vi-latin-rec-v4) | Chạy bằng worker CPU riêng. Bộ nhận dạng tiếng Việt có giấy phép CC BY-NC 4.0 (phi thương mại) |
 | Khớp khuôn mặt | OpenCV YuNet (phát hiện) và SFace (so khớp), chạy cục bộ trên CPU | Ngưỡng cosine 0,363. [YuNet: MIT](https://huggingface.co/opencv/face_detection_yunet#license); [SFace: Apache-2.0](https://huggingface.co/opencv/face_recognition_sface#license). Chưa nghiệm thu chất lượng trên ảnh thành viên |
 | Khớp ảnh mẫu | DINOv2 ViT-S/14, cần `torch` | Giấy phép Apache-2.0. Spike T3: ảnh cắt 10% mỗi cạnh và ảnh giảm bão hoà còn cosine 0,91 và 0,96 so với ảnh gốc |
@@ -66,7 +66,7 @@ Rủi ro lớn nhất về cài đặt là bốn thư viện GPU (ctranslate2 ch
 
 ## 4. Lệnh
 
-Lệnh backend chạy trong thư mục `backend/`. Cấu hình của máy chỉ đọc từ file `.env` ở gốc repo, không đọc biến môi trường. Thư mục dữ liệu lấy từ `H4WK_DATA_DIR` trong `.env`, mặc định là `data/` ở gốc repo. File cấu hình nằm ở `config/` ở gốc repo.
+Lệnh backend chạy trong thư mục `backend/`. Dữ liệu luôn ở `data/`, cấu hình luôn ở `config/` của gốc repo (cố định, không đổi được). Tài khoản và API key chỉ đọc từ file `.env` ở gốc repo, không đọc biến môi trường.
 
 ```bash
 # Backend (trong backend/)
@@ -76,6 +76,7 @@ uv run python -m h4wk.jobs.worker                   # worker hàng đợi defaul
 uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1  # worker cho hàng đợi gpu
 uv run pytest                                       # test, không gọi mạng
 uv run pytest -m live                               # test có gọi mạng/API thật, chạy tay
+uv run pytest -m gpu                                # test chạy model thật trên GPU, chạy tay
 uv run ruff check . --fix && uv run ruff format .
 
 # Frontend (trong web/)

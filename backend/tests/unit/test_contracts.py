@@ -202,7 +202,7 @@ ANALYSIS: dict[str, Any] = {
     "transcript_priority": ["uploaded", "stt", "auto", "supadata_ai"],
     "face": {"enabled": True},
     "ref_image": {"enabled": True, "threshold": 0.85},
-    "comments": {"batch_size": 30, "max_per_video": None},
+    "comments": {"max_per_video": None},
 }
 
 
@@ -365,7 +365,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 9}}, "quá 8 luồng"),
     # C5: analysis
     (AnalysisConfig, _set("transcript_priority", ["uploaded", "uploaded"])(ANALYSIS), "trùng loại"),
-    (AnalysisConfig, _set("comments", {"batch_size": 100})(ANALYSIS), "lô ngoài 20–50"),
+    (AnalysisConfig, _set("comments", {"batch_size": 30})(ANALYSIS), "batch_size đã bỏ"),
     (
         AnalysisConfig,
         _set("ref_image", {"enabled": True, "threshold": 1.5})(ANALYSIS),

@@ -92,7 +92,7 @@ Máy chạy bắt buộc có GPU NVIDIA (CUDA); STT và khớp ảnh mẫu khôn
 - Đọc/ghi file văn bản luôn truyền `encoding="utf-8"`, kể cả trong test.
 - Tên code bằng tiếng Anh; comment, docstring, tài liệu và commit message bằng tiếng Việt. Giao diện web bằng tiếng Anh. Thông báo lỗi do code sinh ra (exception, `detail` của HTTP, lỗi job) bằng tiếng Anh vì hiện trên giao diện.
 - Không ghi secret vào `config/*.toml`. Key nằm trong `.env` hoặc `data/secrets.json` (nhập từ Settings, quyền 0600, được ưu tiên hơn `.env`); đọc key qua `h4wk.core.secrets`. Không commit `config/*.toml` và `data/`.
-- Cấu hình của máy chỉ đọc từ file `.env` qua `h4wk.core.config.dotenv()`, không đọc biến môi trường. Test không đọc `.env` thật: fixture `dotenv` trong `tests/conftest.py` thay bằng dict có tài khoản giả, `H4WK_DATA_DIR` và `H4WK_CONFIG_DIR` trỏ sang thư mục tạm; test cần key thì thêm vào dict đó. Code đọc cấu hình qua `config_dir()`, dữ liệu qua `data_dir()`.
+- Dữ liệu cố định ở `data/`, cấu hình ở `config/` của gốc repo. Tài khoản và API key chỉ đọc từ file `.env` qua `h4wk.core.config.dotenv()`, không đọc biến môi trường. Test không đọc `.env` và thư mục thật: fixture `dotenv` thay `.env` bằng dict có tài khoản giả (test cần key thì thêm vào dict), fixture `data_dir`, `config_dir` đổi `config.DATA_DIR`, `config.CONFIG_DIR` sang thư mục tạm. Code đọc cấu hình qua `config_dir()`, dữ liệu qua `data_dir()`.
 
 ## Git khi nhiều phiên cùng làm
 

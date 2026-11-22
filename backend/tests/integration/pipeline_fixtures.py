@@ -71,9 +71,7 @@ def fake_source(
     holder = {"fail": False}
     monkeypatch.setattr(registry, "COLLECTORS", {"fake": lambda: SampleCollector(holder["fail"])})
     if request.node.get_closest_marker("gpu"):
-        model = os.getenv("H4WK_STT_MODEL")
-        if not model:
-            pytest.skip("Cần H4WK_STT_MODEL để kiểm tra worker GPU")
+        model = stt.MODEL
     else:
         model = "test"
         monkeypatch.setattr(

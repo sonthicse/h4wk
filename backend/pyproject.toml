@@ -73,6 +73,6 @@ select = ["E", "F", "I", "UP", "B"]
 testpaths = ["tests"]
 markers = [
     "live: test gọi mạng/API thật, chạy tay bằng -m live",
-    "gpu: kiểm thử trên GPU với model và bản thu T44",
+    "gpu: kiểm thử trên GPU với model thật, chạy tay bằng -m gpu",
 ]
-addopts = "-m 'not live'"
+addopts = "-m 'not live and not gpu'"

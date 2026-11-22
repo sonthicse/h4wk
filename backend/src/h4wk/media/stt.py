@@ -15,6 +15,9 @@ from h4wk.media.transcripts import process_capture
 
 logger = logging.getLogger(__name__)
 
+# Chốt ở spike T3 (WER 12,7% trên FLEURS tiếng Việt).
+MODEL = "large-v3"
+
 
 def _load_model(model_name: str):
     # Nạp torch trước để thư viện CUDA (cuBLAS, cuDNN) của các gói nvidia-*-cu12 trong venv có sẵn

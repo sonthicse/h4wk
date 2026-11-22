@@ -70,7 +70,6 @@ class RefImageSettings(Contract):
 
 
 class CommentSettings(Contract):
-    batch_size: int = Field(default=30, ge=20, le=50)  # giữ để đọc cấu hình cũ
     max_per_video: int | None = Field(default=None, ge=1)  # None: không giới hạn
 
 

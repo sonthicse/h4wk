@@ -18,7 +18,7 @@ from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import Target, TargetKind, parse_target
 from h4wk.core import audit, events
-from h4wk.core.config import config_dir, data_dir, dotenv
+from h4wk.core.config import config_dir, data_dir
 from h4wk.core.config_models import AnalysisConfig, SourcesConfig, load_toml
 from h4wk.core.db import FindingRow, JobRow, finding_row, get_engine
 from h4wk.core.entities import REF_FILE, load_entities, refs_dir
@@ -33,7 +33,7 @@ from h4wk.media.enrich import enrich
 from h4wk.media.keyframes import Keyframe, extract_keyframes, select_keyframes, write_selected
 from h4wk.media.timeline import Timeline
 
-_stt_worker = stt.SttWorker(dotenv().get("H4WK_STT_MODEL", "large-v3"))
+_stt_worker = stt.SttWorker(stt.MODEL)
 _ref_embedder = refimages.DinoEmbedder()
 logger = logging.getLogger(__name__)
 

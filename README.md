@@ -33,7 +33,7 @@ Không có CLI; mọi thao tác làm trên giao diện web. Lần đầu API kh�
 
 Mọi cấu hình người dùng nằm trong `config/`: `sources.toml` (nguồn thu), `analysis.toml` (phân tích), `entities.toml` (đối tượng cần bảo vệ), `watchlist.toml` (kênh theo dõi). Secret nằm trong `.env` hoặc nhập ở Settings.
 
-Cấu hình của máy (tài khoản, API key, thư mục dữ liệu, model STT) chỉ đọc từ file `.env` ở gốc repo, không đọc biến môi trường; mẫu ở `.env.example`. Thư mục dữ liệu mặc định là `data/` ở gốc repo, muốn đặt chỗ khác thì ghi `H4WK_DATA_DIR` trong `.env`.
+Dữ liệu luôn nằm ở `data/` của gốc repo. Tài khoản và API key chỉ đọc từ file `.env` ở gốc repo, không đọc biến môi trường; mẫu ở `.env.example`.
 
 ## Chạy
 
@@ -57,7 +57,7 @@ Các bước chạy thử 3 màn demo nằm ở [docs/demo-checklist.md](docs/de
 
 Mở http://localhost:3000 và đăng nhập bằng `USERNAME`, `PASSWORD` trong `.env`.
 
-Worker GPU dùng model STT từ `H4WK_STT_MODEL` trong `.env` (mặc định `large-v3`). Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
+Worker GPU dùng model STT Whisper `large-v3`. Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
 
 ## Kiểm tra trước khi commit
 
@@ -66,7 +66,7 @@ cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check
 cd web && npm run build && npm run lint
 ```
 
-Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run pytest -m live`.
+Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run pytest -m live`. Test chạy model thật trên GPU: `uv run pytest -m gpu`.
 
 Các lệnh khác (worker, verify bản thu…) có ở [SPEC.md §4](SPEC.md#4-lệnh); lệnh nào chưa có thì sẽ được thêm dần theo task.
 

@@ -203,11 +203,10 @@ def test_stt_retry_preserves_ocr(clip, tmp_path, monkeypatch):
 
 @pytest.mark.gpu
 def test_real_stt_on_sample_capture(tmp_path, caplog):
-    model = os.getenv("H4WK_STT_MODEL")
     capture = os.getenv("H4WK_T44_CAPTURE")
-    if not model or not capture:
-        pytest.skip("Cần H4WK_STT_MODEL và H4WK_T44_CAPTURE để chạy nghiệm thu GPU")
-    worker = SttWorker(model)
+    if not capture:
+        pytest.skip("Cần H4WK_T44_CAPTURE (đường dẫn bản thu T44) để chạy nghiệm thu GPU")
+    worker = SttWorker(stt.MODEL)
     caplog.set_level("INFO", logger=stt.__name__)
     for i in range(2):
         output = tmp_path / str(i)
