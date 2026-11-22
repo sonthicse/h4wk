@@ -1,5 +1,3 @@
-"""T8: phân loại đầu vào thành video, kênh, @handle, playlist."""
-
 import pytest
 
 from h4wk.collectors.targets import TargetKind, parse_target

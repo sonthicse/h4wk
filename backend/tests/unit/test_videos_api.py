@@ -1,5 +1,3 @@
-"""API đọc video đã thu, dùng bản thu mẫu của T44."""
-
 import json
 import shutil
 from pathlib import Path
@@ -94,7 +92,6 @@ def test_verify_reports_changed_byte(client: TestClient, sample, data_dir: Path)
 
 
 def test_falls_back_to_latest_capture_with_data(client: TestClient, sample, data_dir: Path) -> None:
-    """Bản thu metadata mới hơn không có video, timeline, comment: API rơi về bản full cũ."""
     d = data_dir / "videos" / VID / "captures"
     newer = d / "20261119T090000"
     shutil.copytree(d / CAP, newer)

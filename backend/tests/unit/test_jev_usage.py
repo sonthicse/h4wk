@@ -1,5 +1,3 @@
-"""T65: nhật ký request Jev, API usage và thử kết nối (Jev giả, không gọi mạng)."""
-
 import io
 import json
 from datetime import datetime, timedelta
@@ -36,7 +34,6 @@ def _lines(data_dir):
 
 
 def _run(monkeypatch, replies):
-    """Chạy classify với `urlopen` giả trả lần lượt các phản hồi/ngoại lệ."""
     data, timeline = _data()
     data.video.title = TEXT_MARK
     data.video.description = ""

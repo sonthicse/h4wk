@@ -1,5 +1,3 @@
-"""T14: chuyển response của YouTube Data API sang dữ liệu chung, không gọi mạng thật."""
-
 import copy
 import json
 from pathlib import Path

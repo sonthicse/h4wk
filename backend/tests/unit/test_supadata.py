@@ -1,5 +1,3 @@
-"""T15: chuyển response của Supadata sang dữ liệu chung và gọi adapter qua MockTransport."""
-
 import json
 from pathlib import Path
 
@@ -50,7 +48,6 @@ def test_transcript_conversion() -> None:
 
 
 def test_no_vietnamese_subtitles_never_generates(supadata_api, tmp_path: Path) -> None:
-    """Không có phụ đề tiếng Việt thì báo Unsupported, không gọi AI của Supadata (tốn credit)."""
     for native in [(200, raw("transcript_native_en.json")), (206, raw("error_unavailable.json"))]:
         supadata_api.requests.clear()
         supadata_api.override["native"] = [native]

@@ -135,7 +135,6 @@ def test_content_violation(monkeypatch, violation, attack, expected):
 
 
 def test_no_entities_asks_only_content_violations(monkeypatch, tmp_path):
-    """Chưa khai báo đối tượng vẫn phát hiện vi phạm theo nội dung."""
     data, timeline = _data()
     monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
     seen = []

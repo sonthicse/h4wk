@@ -1,5 +1,3 @@
-"""T32: API Settings. Không response nào được chứa secret đầy đủ."""
-
 import json
 import shutil
 from datetime import datetime, timedelta

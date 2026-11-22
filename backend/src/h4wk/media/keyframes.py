@@ -1,5 +1,3 @@
-"""Lấy khung ứng viên từ proxy của một bản thu, rồi chọn keyframe theo hình và chữ OCR."""
-
 import fcntl
 import json
 import math
@@ -21,8 +19,6 @@ from h4wk.media.files import atomic_output
 
 
 class KeyframeSettings(Contract):
-    """Ngưỡng giữ khung (cố định trong code)."""
-
     phash_threshold: int = Field(default=6, ge=0, le=64)
     tile_threshold: float = Field(default=2.0, ge=0, le=255)
 
@@ -118,13 +114,6 @@ def select_keyframes(
     vectors: np.ndarray | None,
     similarity: float = 0.85,
 ) -> list[Keyframe]:
-    """Chọn keyframe từ các khung ứng viên (đã OCR).
-
-    Giữ khung khi (1) có dòng chữ chưa thấy ở keyframe giữ ngay trước, hoặc (2) khác về hình
-    với mọi keyframe đã giữ: cosine của embedding ảnh (L2 đã chuẩn hoá) với từng khung đã giữ
-    đều dưới `similarity`. So với mọi khung đã giữ, không chỉ khung trước, để cảnh quay lại
-    (phỏng vấn cắt qua lại) không bị giữ lặp. `texts` là các cặp (chữ, score) theo file khung.
-    `vectors` None (không có model ảnh) thì chỉ bỏ được khung trùng chữ và trùng hash."""
     kept: list[Keyframe] = []
     kept_vectors: list[np.ndarray] = []
     previous_text: list[str] = []
@@ -151,7 +140,6 @@ def select_keyframes(
 
 
 def write_selected(derived_dir: Path, frames: list[Keyframe]) -> None:
-    """Ghi keyframe đã chọn vào frames/selected.json (index.json vẫn là các khung ứng viên)."""
     content = json.dumps([f.model_dump() for f in frames], indent=2) + "\n"
     with atomic_output(derived_dir / "frames" / SELECTED_FILE) as path:
         path.write_text(content, encoding="utf-8")
@@ -160,7 +148,6 @@ def write_selected(derived_dir: Path, frames: list[Keyframe]) -> None:
 def extract_keyframes(
     derived_dir: Path, settings: KeyframeSettings | None = None
 ) -> list[Keyframe]:
-    """Đọc proxy_480p.mp4, trả các khung theo thứ tự thời gian. Đường dẫn tính từ derived_dir."""
     settings = settings or KeyframeSettings()
     proxy = derived_dir / "proxy_480p.mp4"
     source = proxy.stat()

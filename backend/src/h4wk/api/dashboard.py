@@ -1,5 +1,3 @@
-"""Số liệu dashboard (T35), tính từ chỉ mục và thư mục data/videos/."""
-
 from collections import Counter
 from datetime import date, datetime, timedelta
 
@@ -49,8 +47,6 @@ class Usage(BaseModel):
 
 
 class JevMonthUsage(BaseModel):
-    """Tổng tháng hiện tại theo giờ Việt Nam, chỉ gồm token TypeSafe báo."""
-
     requests: int
     input_tokens: int | None = Field(description="Input tokens reported by TypeSafe, if available.")
     output_tokens: int | None = Field(
@@ -86,7 +82,6 @@ def _day(capture: str) -> date:
 
 @router.get("/api/dashboard")
 def dashboard(latest_only: bool = False) -> Dashboard:
-    """latest_only=true: số nghi vấn và video nổi bật chỉ tính bản thu mới nhất mỗi video."""
     channel_count = len(watchlist.load_channels())
 
     root = data_dir() / "videos"

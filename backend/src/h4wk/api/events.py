@@ -1,6 +1,3 @@
-"""Dòng sự kiện (T30, T35): kèm tiêu đề video, tên kênh, số nghi vấn, lỗi để giao diện
-không phải tra thêm."""
-
 from typing import Literal
 
 from fastapi import APIRouter

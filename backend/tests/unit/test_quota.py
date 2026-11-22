@@ -1,5 +1,3 @@
-"""T14: bộ đếm quota YouTube API theo ngày giờ Pacific."""
-
 from datetime import datetime, timedelta
 from pathlib import Path
 

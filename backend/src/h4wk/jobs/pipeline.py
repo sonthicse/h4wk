@@ -1,6 +1,3 @@
-"""Luồng collect → media → analyze (T12). Mỗi bước là một task Huey; media chạy trên hàng
-đợi gpu. Mỗi bước cập nhật trạng thái và tiến độ của job trong chỉ mục."""
-
 import json
 import logging
 import time
@@ -97,7 +94,6 @@ def _trigger(job: JobRow) -> Trigger:
 
 
 def _next_in_lane(job: JobRow) -> None:
-    """Job của kênh watchlist xong (hay lỗi) thì đưa job chờ kế tiếp của kênh đó vào hàng đợi."""
     if job.trigger.startswith(_WATCH):
         lanes.fill(job.trigger)
 
@@ -123,7 +119,6 @@ def _recent_capture(job: JobRow) -> str | None:
 
 
 def playlist_video_ids(playlist_id: str) -> list[str]:
-    """ID video của playlist, cắt theo collect.playlist_max_videos trong sources.toml."""
     path = config_dir() / "sources.toml"
     cfg = load_toml(path, SourcesConfig) if path.exists() else SourcesConfig()
     ids = Orchestrator.from_config(root=data_dir()).list_video_ids(
@@ -166,7 +161,6 @@ def collect(job_id: str) -> None:
 def _select_frames(
     job: JobRow, out: Path, candidates: list[Keyframe], lines: list[ocr.OcrLine]
 ) -> list[Keyframe]:
-    """Chọn keyframe theo embedding ảnh (DINOv2) và chữ OCR; ghi frames/selected.json."""
     texts: dict[str, list[tuple[str, float]]] = {}
     for line in lines:
         texts.setdefault(line.frame, []).append((line.text, line.score))
@@ -192,7 +186,6 @@ def _match(
     thumbnails: list[str],
     timeline: Timeline,
 ) -> None:
-    """Khớp keyframe và thumbnail cục bộ với ảnh mẫu; ghi ref_hits.json."""
     (out / "ref_hits.json").unlink(missing_ok=True)
     refs = {}
     for entity in load_entities():
@@ -296,11 +289,10 @@ def media(job_id: str) -> None:
 
 
 class AnalysisQuotaError(RuntimeError):
-    """Phân tích lại mà hết quota Jev: không thay run cũ bằng run thiếu kết quả."""
+    pass
 
 
 def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
-    """Phân tích bản thu đã có timeline, không thu lại hay chạy media."""
     derived = video_dir / "derived" / cap
     timeline = Timeline.model_validate_json((derived / "timeline.json").read_text("utf-8"))
     n = Normalized.model_validate_json(
@@ -356,7 +348,6 @@ def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
 
 
 def prepared_capture(video_id: str) -> str | None:
-    """Bản thu mới nhất của video đã có timeline (phân tích lại được mà không thu lại)."""
     video = data_dir() / "videos" / video_id
     for cap in reversed(list_captures(video / "captures")):
         if (video / "derived" / cap / "timeline.json").is_file():
@@ -365,7 +356,6 @@ def prepared_capture(video_id: str) -> str | None:
 
 
 def create_reanalyze_job(video_id: str, capture: str, level: str, trigger: str) -> JobRow:
-    """Job chỉ chạy bước analyze trên bản thu đã có; hiện cùng danh sách job như Collect."""
     job = create_job(parse_target(video_id).url, video_id, level, False, trigger)
     job = _update(job.id, step="analyze", capture=capture, progress=70)
     reanalyze(job.id)
@@ -379,7 +369,6 @@ def analyze(job_id: str) -> None:
 
 @huey.task()
 def reanalyze(job_id: str) -> None:
-    """Phân tích lại: hết quota Jev thì job lỗi và run cũ giữ nguyên."""
     _analyze(job_id, reject_quota=True)
 
 
@@ -409,7 +398,6 @@ def _analyze(job_id: str, *, reject_quota: bool) -> None:
 
 
 def _latest_runs(root: Path) -> dict[tuple[str, str], str]:
-    """run_id mới nhất của mỗi (video, bản thu), chỉ tính run có findings.json."""
     latest: dict[tuple[str, str], str] = {}
     for path in root.glob("videos/*/derived/*/analysis/*/findings.json"):
         run = path.parent
@@ -419,13 +407,6 @@ def _latest_runs(root: Path) -> dict[tuple[str, str], str]:
 
 
 def latest_findings(latest_only: bool = False) -> list[Finding]:
-    """Nghi vấn của lần chạy mới nhất cho mỗi bản thu. latest_only=True: chỉ giữ bản thu
-    mới nhất đã phân tích của mỗi video, để thu lại cùng video không làm lặp nghi vấn.
-    "Mới nhất" xác định từ findings.json trong data/ (nguồn gốc), không từ bảng jobs. Run mới
-    nhất không có nghi vấn thì bản thu đó không hiện nghi vấn nào, run cũ không hiện lại.
-    Hạn chế: findings.json được ghi trước khi commit FindingRow. Commit DB lỗi thì bản thu
-    hiện 0 nghi vấn cho tới khi phân tích lại. findings.json hỏng thì run đó vẫn được
-    coi là mới nhất (chỉ xét tên file), phải sửa hoặc xoá file."""
     latest = _latest_runs(data_dir())
     newest: dict[str, str] = {}
     for vid, cap in latest:

@@ -1,5 +1,3 @@
-"""Mô hình dữ liệu chung, lưu thành normalized.json."""
-
 from typing import Literal, Self
 
 from pydantic import Field, model_validator

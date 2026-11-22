@@ -1,5 +1,3 @@
-"""T8: orchestrator thử nguồn theo thứ tự ưu tiên, chuyển nguồn khi lỗi, ghi manifest."""
-
 import json
 import os
 from collections.abc import Iterator
@@ -30,8 +28,6 @@ ALL = set(Cap)
 
 
 class FakeCollector:
-    """Nguồn giả: outcomes[cap] là danh sách kết quả lần lượt (None = thành công)."""
-
     def __init__(self, name: str, caps: set[Cap], outcomes: dict | None = None) -> None:
         self.name = name
         self.capabilities = caps

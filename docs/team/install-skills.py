@@ -1,13 +1,3 @@
-"""Cài skill cho từng Agent của team h4wk trên DSH.
-
-Agent của DSH chỉ thấy skill đi kèm plugin và thư mục riêng
-~/.dsh/agent-team/members/<memberId>/skills/. Script này copy skill từ
-~/.dsh/skill-sources/ vào đúng thư mục của từng Agent, tra Agent theo handle
-trong ledger (chỉ đọc). Chạy lại được nhiều lần; chạy sau khi tạo Agent hoặc
-sau khi cập nhật nguồn skill.
-
-Chạy: python3 docs/team/install-skills.py
-"""
 
 import json
 import shutil
@@ -39,7 +29,6 @@ SKILLS = {
 
 
 def members_by_handle() -> dict[str, str]:
-    """Đọc ledger (chỉ đọc) để lấy memberId theo handle mới nhất."""
     db = sqlite3.connect(f"file:{DSH / 'storages' / 'agent_team.sqlite'}?mode=ro", uri=True)
     rows = db.execute("select value from u_agent_team_operations").fetchall()
     ops = sorted((json.loads(v) for (v,) in rows), key=lambda o: o["sequence"])

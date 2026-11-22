@@ -1,6 +1,3 @@
-"""Điều phối thu thập: mỗi loại dữ liệu lấy từ một nguồn, thử các nguồn đang bật
-theo thứ tự ưu tiên, chuyển nguồn khi lỗi, rồi ghi bản thu qua CaptureWriter."""
-
 import tempfile
 import time
 from collections.abc import Callable
@@ -88,8 +85,6 @@ class Settings:
 
 
 class SourceState:
-    """Đếm lỗi liên tiếp và tạm ngưng nguồn, lưu trong database chỉ mục."""
-
     def __init__(self, now: Callable[[], datetime]) -> None:
         self.now = now
 
@@ -122,8 +117,6 @@ class _Workdirs(Protocol):
 
 
 class _TempWorkdirs:
-    """Thư mục tạm cho dữ liệu thô khi không lưu bản thu."""
-
     def __init__(self, root: Path) -> None:
         self.root = root
 
@@ -163,8 +156,6 @@ class Orchestrator:
     def collect(
         self, target: Target, level: CollectLevel, *, collector: str, trigger: Trigger
     ) -> Path:
-        """Thu một video hoặc hồ sơ kênh (theo channel_id) và trả về thư mục bản thu đã khoá.
-        Với kênh, mức thu không áp dụng: luôn lấy metadata kênh và danh sách video."""
         if target.kind == TargetKind.VIDEO:
             base, caps = self.root / "videos" / target.id, LEVEL_CAPS[level]
         elif target.kind == TargetKind.CHANNEL:
@@ -197,8 +188,6 @@ class Orchestrator:
         return writer.finalize(normalized, calls)
 
     def list_video_ids(self, target: Target) -> list[str]:
-        """ID video của một playlist, không lưu bản thu (người dùng đã quyết). Thử nguồn theo
-        thứ tự ưu tiên của Cap.PLAYLIST_VIDEOS; dữ liệu thô ghi vào thư mục tạm rồi bỏ."""
         if target.kind != TargetKind.PLAYLIST:
             raise ValueError(f"list_video_ids needs a playlist, got a {target.kind}")
         with tempfile.TemporaryDirectory() as tmp:
@@ -235,7 +224,6 @@ class Orchestrator:
     def _try_source(
         self, name: str, cap: Cap, target: Target, writer: _Workdirs, calls: list[SourceCall]
     ) -> tuple[Normalized | None, bool]:
-        """Trả về (dữ liệu, dừng hẳn loại dữ liệu này hay không)."""
         source = self.collectors[name]
         for attempt in range(TRANSIENT_RETRIES + 1):
             started = self.now()

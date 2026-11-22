@@ -1,5 +1,3 @@
-"""T9: thu đủ một video thật bằng yt-dlp (gọi mạng, chạy tay: uv run pytest -m live -k ytdlp)."""
-
 import os
 from pathlib import Path
 

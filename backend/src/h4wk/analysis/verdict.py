@@ -1,5 +1,3 @@
-"""Kết luận theo video từ các nghi vấn đã gộp."""
-
 import re
 from collections import Counter
 from datetime import datetime
@@ -23,7 +21,6 @@ def _rank(finding):
 
 
 def decide(findings, run_id, timeline) -> VideoVerdict:
-    """Kết luận theo quy tắc, không gọi AI; nghi vấn tĩnh `unverified` không tự đẩy lên `yes`."""
     base = dict(
         run_id=run_id, video_id=timeline.video_id, capture=timeline.capture, at=datetime.now(VN_TZ)
     )

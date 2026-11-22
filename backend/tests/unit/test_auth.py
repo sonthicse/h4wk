@@ -1,5 +1,3 @@
-"""Đăng nhập một tài khoản duy nhất (lấy từ .env) bằng session cookie."""
-
 import json
 from pathlib import Path
 
@@ -81,7 +79,6 @@ def test_missing_account_fails_clearly(monkeypatch: pytest.MonkeyPatch, dotenv) 
 
 
 def test_os_username_is_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Shell có thể tự đặt USERNAME; chỉ .env được dùng."""
     monkeypatch.setenv("USERNAME", "ubuntu")
     assert auth.account() == (USERNAME, PASSWORD)
 
@@ -92,7 +89,6 @@ def test_password_is_not_stored(client: TestClient, data_dir: Path) -> None:
 
 
 def test_legacy_users_table_is_dropped(data_dir: Path) -> None:
-    """Index cũ có bảng users và sessions trỏ khoá ngoại tới đó: bỏ cả hai, đăng nhập vẫn chạy."""
     import sqlite3
 
     data_dir.mkdir(parents=True)

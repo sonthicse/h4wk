@@ -1,5 +1,3 @@
-"""API đối tượng và ảnh mẫu (T6, T39). Mọi thao tác ghi đều để lại dòng audit, kể cả khi lỗi."""
-
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -32,7 +30,6 @@ class EntityUpdate(BaseModel):
 
 
 def _blank_to_none(fields: dict) -> dict:
-    """Mô tả rỗng hoặc chỉ có khoảng trắng nghĩa là xoá mô tả."""
     if "description" in fields:
         fields["description"] = (fields["description"] or "").strip() or None
     return fields
@@ -116,7 +113,6 @@ def list_refs(entity_id: str) -> dict[RefKind, list[entities.RefImage]]:
 async def add_ref(
     entity_id: str, kind: RefKind, request: Request, actor: ActorDep
 ) -> entities.RefImage:
-    """Thân request là bytes của ảnh (không dùng multipart)."""
     target = f"{entity_id}/{kind}"
     data = await request.body()
     try:

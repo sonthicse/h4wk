@@ -1,18 +1,3 @@
-"""Chạy lại job bị treo khi consumer khởi động (T46). Các bước của luồng là idempotent
-nên job chạy tiếp từ bước dở dang, không thu lại hay xử lý lại bước đã xong.
-
-Chỉ job "running" (đang chạy thật khi tiến trình chết) được đưa lại; job "queued" vẫn nằm
-trong Huey nên không đụng tới. Mỗi hàng đợi recover một lần mỗi tiến trình (nhiều worker
-trong cùng consumer không recover lặp), xem queue.py.
-
-Hạn chế:
-- Job đang chạy thật ở consumer khác cùng hàng đợi sẽ bị chạy trùng nếu chỉ khởi động lại
-  một consumer. Demo chạy một consumer mỗi hàng đợi nên chấp nhận.
-- Job force=True treo sau khi orch.collect ghi bản thu nhưng trước khi lưu capture vào job
-  thì recover tạo thêm bản thu thứ hai.
-- Analyze treo sau khi đã ghi FindingRow thì chạy lại sinh run mới (API chỉ lấy run mới nhất).
-- Tiến trình chết đúng giữa lúc đặt queued và lúc đưa vào hàng đợi thì job kẹt ở queued."""
-
 from datetime import datetime
 from typing import Literal
 
@@ -28,7 +13,6 @@ QUEUE_TASKS: dict[str, set[str]] = {"default": {"collect", "analyze"}, "gpu": {"
 
 
 def next_task(job: JobRow) -> Task:
-    """Bước cần chạy lại cho job đang running."""
     if job.step in (None, "collect"):
         return "media" if job.capture else "collect"
     if job.step == "analyze":
@@ -37,7 +21,6 @@ def next_task(job: JobRow) -> Task:
 
 
 def recover(queue: Literal["default", "gpu"]) -> list[str]:
-    """Đưa lại vào hàng đợi các job running có bước tiếp theo thuộc hàng đợi này."""
     from h4wk.jobs import pipeline
 
     with Session(get_engine()) as s:

@@ -1,4 +1,3 @@
-"""T12: toàn luồng collect → media → analyze với adapter giả, chạy Huey ở chế độ immediate."""
 # ruff: noqa: F811
 
 import json
@@ -224,8 +223,6 @@ def test_ytdlp_disabled_still_collects_text(
 
 
 class _SameVectorEmbedder:
-    """Mọi ô cắt đều trùng ảnh mẫu (cosine 1), dùng để kiểm luồng mà không cần model."""
-
     name = "same"
 
     def embed(self, images):  # noqa: ANN001, ANN201

@@ -1,6 +1,3 @@
-"""T14: thu video và kênh thật bằng YouTube Data API (gọi mạng, tốn quota, chạy tay:
-uv run pytest -m live -k ytapi). Cần YOUTUBE_API_KEY trong .env hoặc data/secrets.json."""
-
 from pathlib import Path
 
 import pytest

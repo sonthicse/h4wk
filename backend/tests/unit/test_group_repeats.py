@@ -1,5 +1,3 @@
-"""Gộp nghi vấn OCR lặp lại (băng rôn chạy suốt video) thành một nghi vấn có occurrences."""
-
 from h4wk.analysis.runner import analyze, group_repeats, slots
 from h4wk.analysis.static import LexiconEntry
 from h4wk.collectors.models import Normalized, Video

@@ -1,8 +1,3 @@
-"""Nhật ký request Jev (`data/jev_calls.jsonl`) và tổng hợp usage.
-
-Mỗi request logic một dòng, ghi nối. Không ghi nội dung văn bản, ảnh hay key.
-"""
-
 import json
 import re
 import threading
@@ -24,12 +19,10 @@ def path():
 
 
 def source_of(kind: str) -> str:
-    """Tiêu đề và mô tả gộp một nguồn `metadata`."""
     return "metadata" if kind in {"title", "description"} else kind
 
 
 def count_retry() -> None:
-    """Gọi từ `_call` mỗi lần gặp 429 rồi thử lại; request logic đọc lại bằng `take_retries`."""
     _LOCAL.retries = getattr(_LOCAL, "retries", 0) + 1
 
 
@@ -40,7 +33,6 @@ def take_retries() -> int:
 
 
 def error_status(text: str) -> str:
-    """Chỉ giữ mã HTTP; thông báo lỗi khác có thể chứa đường dẫn hoặc nội dung."""
     match = re.match(r"HTTP \d{3}\b", text)
     return match[0] if match else "error"
 
@@ -85,7 +77,6 @@ def record(
 
 
 def read(since: datetime, until: datetime) -> list[dict[str, Any]]:
-    """Các dòng trong khoảng `since` đến `until`; bỏ qua dòng hỏng."""
     target = path()
     if not target.is_file():
         return []

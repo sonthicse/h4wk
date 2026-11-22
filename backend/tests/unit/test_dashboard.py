@@ -1,5 +1,3 @@
-"""T35: số liệu dashboard và dòng sự kiện, dùng bản thu mẫu T44."""
-
 import json
 import shutil
 from pathlib import Path

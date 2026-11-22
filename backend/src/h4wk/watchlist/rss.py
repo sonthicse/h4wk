@@ -1,6 +1,3 @@
-"""Đọc RSS kênh YouTube. Feed bị cache tới 15 phút và có thể khác nhau giữa các máy chủ
-cache (spike T2), nên một video biến mất khỏi feed không có nghĩa là bị xoá."""
-
 import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -23,7 +20,6 @@ class FeedEntry:
 
 
 def parse_feed(xml: bytes) -> list[FeedEntry]:
-    """Các video trong feed, mới nhất trước (thứ tự của YouTube)."""
     root = ET.fromstring(xml)
     out = []
     for entry in root.findall("a:entry", _NS):

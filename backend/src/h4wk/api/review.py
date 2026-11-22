@@ -1,5 +1,3 @@
-"""API rà soát (T25): hàng đợi và quyết định. Mỗi quyết định ghi audit, kể cả khi lỗi."""
-
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -27,7 +25,6 @@ def review_queue(
     status: ReviewStatus | None = None,
     latest_only: bool = False,
 ) -> list[QueueItem]:
-    """latest_only=true: chỉ bản thu mới nhất của mỗi video (thu lại không làm lặp nghi vấn)."""
     return queue(video, source_kind, status, latest_only)
 
 

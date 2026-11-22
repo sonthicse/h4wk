@@ -1,5 +1,3 @@
-"""Ứng dụng FastAPI. Router của từng module được gắn vào đây."""
-
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
@@ -66,7 +64,6 @@ WRITE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
 @app.exception_handler(RequestValidationError)
 async def _audit_invalid_write(request: Request, exc: RequestValidationError) -> Response:
-    """Yêu cầu ghi bị từ chối vì dữ liệu sai cũng phải để lại dòng audit."""
     if request.method in WRITE_METHODS:
         audit.log(
             f"user:{getattr(request.state, 'username', '?')}",
@@ -80,5 +77,4 @@ async def _audit_invalid_write(request: Request, exc: RequestValidationError) ->
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
-    """Kiểm tra API còn sống."""
     return {"status": "ok"}

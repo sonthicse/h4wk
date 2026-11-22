@@ -1,5 +1,3 @@
-"""T46: link playlist tách thành mỗi video một job."""
-
 import json
 from pathlib import Path
 

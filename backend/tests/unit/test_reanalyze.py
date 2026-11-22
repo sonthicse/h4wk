@@ -1,5 +1,3 @@
-"""Phân tích lại từ giao diện: chỉ chạy bước analyze trên bản thu đã có timeline."""
-
 import shutil
 
 import pytest

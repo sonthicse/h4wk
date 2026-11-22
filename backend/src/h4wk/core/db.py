@@ -1,6 +1,3 @@
-"""Database chỉ mục SQLite (chế độ WAL) trong data/index.db. File trong data/ là nguồn gốc;
-database chỉ để tra cứu nhanh và dựng lại được (T45)."""
-
 from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
@@ -30,8 +27,6 @@ class SessionRow(SQLModel, table=True):
 
 
 class SourceStateRow(SQLModel, table=True):
-    """Tình trạng nguồn thu, dùng chung giữa các worker."""
-
     __tablename__ = "source_state"
     provider: str = Field(primary_key=True)
     consecutive_failures: int = 0
@@ -41,8 +36,6 @@ class SourceStateRow(SQLModel, table=True):
 
 
 class QuotaRow(SQLModel, table=True):
-    """Quota đã dùng của nguồn thu trong kỳ hiện tại (YouTube API: một ngày theo giờ Pacific)."""
-
     __tablename__ = "source_quota"
     provider: str = Field(primary_key=True)
     period: str
@@ -50,8 +43,6 @@ class QuotaRow(SQLModel, table=True):
 
 
 class JobRow(SQLModel, table=True):
-    """Một lần chạy luồng collect → media → analyze cho một video."""
-
     __tablename__ = "jobs"
     id: str = Field(primary_key=True)
     target: str
@@ -70,8 +61,6 @@ class JobRow(SQLModel, table=True):
 
 
 class FindingRow(SQLModel, table=True):
-    """Chỉ mục nghi vấn; nội dung đầy đủ nằm ở findings.json, ở đây giữ bản sao JSON."""
-
     __tablename__ = "findings"
     id: str = Field(primary_key=True)
     video_id: str
@@ -81,7 +70,6 @@ class FindingRow(SQLModel, table=True):
 
 
 def finding_row(f: "Finding") -> FindingRow:
-    """Dòng chỉ mục của một nghi vấn (dùng khi phân tích)."""
     return FindingRow(
         id=f.id,
         video_id=f.video_id,
@@ -92,8 +80,6 @@ def finding_row(f: "Finding") -> FindingRow:
 
 
 class DecisionRow(SQLModel, table=True):
-    """Chỉ mục quyết định rà soát; nguồn gốc là reviews.jsonl (chỉ ghi thêm)."""
-
     __tablename__ = "decisions"
     id: int | None = Field(default=None, primary_key=True)
     finding_id: str = Field(index=True)
@@ -109,8 +95,6 @@ class VideoDecisionRow(SQLModel, table=True):
 
 
 class WatchItemRow(SQLModel, table=True):
-    """Một kênh trong watchlist. initialized=False: chưa chạy bước thêm kênh."""
-
     __tablename__ = "watch_items"
     id: str = Field(primary_key=True)
     channel_id: str = Field(index=True)
@@ -125,8 +109,6 @@ class WatchItemRow(SQLModel, table=True):
 
 
 class KnownVideoRow(SQLModel, table=True):
-    """Video đã biết của một mục watchlist; video mới là video chưa có ở đây."""
-
     __tablename__ = "known_videos"
     watch_item: str = Field(primary_key=True)
     video_id: str = Field(primary_key=True)
@@ -136,8 +118,6 @@ class KnownVideoRow(SQLModel, table=True):
 
 
 class EventRow(SQLModel, table=True):
-    """Dòng sự kiện trên dashboard: new_video, channel_added, job_done, job_failed."""
-
     __tablename__ = "events"
     id: int | None = Field(default=None, primary_key=True)
     at: datetime = Field(index=True)
@@ -172,8 +152,6 @@ def get_engine(root: Path | None = None) -> Engine:
 
 
 def _drop_legacy_accounts(engine: Engine) -> None:
-    """Index cũ có bảng users (nhiều tài khoản) và sessions trỏ khoá ngoại tới đó. Nay chỉ còn
-    một tài khoản lấy từ .env: bỏ hai bảng cũ, sessions được tạo lại (phải đăng nhập lại)."""
     with engine.begin() as conn:
         tables = {r[0] for r in conn.exec_driver_sql("SELECT name FROM sqlite_master")}
         if "users" in tables:
@@ -182,8 +160,6 @@ def _drop_legacy_accounts(engine: Engine) -> None:
 
 
 def _add_missing_columns(engine: Engine) -> None:
-    """create_all không thêm cột mới vào bảng đã có. Cột mới luôn cho phép NULL nên thêm
-    bằng ALTER TABLE là đủ; chỉ mục dựng lại được từ data/ nên không cần công cụ migrate."""
     with engine.begin() as conn:
         for table in SQLModel.metadata.sorted_tables:
             have = {r[1] for r in conn.exec_driver_sql(f'PRAGMA table_info("{table.name}")')}
@@ -196,7 +172,6 @@ def _add_missing_columns(engine: Engine) -> None:
 
 
 def as_aware(dt: datetime) -> datetime:
-    """SQLite không lưu múi giờ; SQLAlchemy lưu giờ UTC. Đọc ra luôn đổi về giờ Việt Nam."""
     return (dt if dt.tzinfo else dt.replace(tzinfo=UTC)).astimezone(VN_TZ)
 
 

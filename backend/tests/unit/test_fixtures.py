@@ -1,5 +1,3 @@
-"""Bản thu mẫu (T44): mọi file JSON validate theo mô hình và SHA-256 trong manifest khớp."""
-
 import hashlib
 import json
 from pathlib import Path
@@ -100,7 +98,6 @@ def test_findings_match_run_and_capture(findings: list[Finding], timeline: Timel
 
 
 def test_triggers_match_hits(findings: list[Finding], hits: list[EntityHit]) -> None:
-    """Mỗi trigger của nghi vấn phải là một dấu hiệu có thật trong hits.json, cùng đối tượng."""
     by_loc = {(h.via, h.segment_id, h.comment_id, h.frame): h for h in hits}
     for f in findings:
         assert f.triggers, f.id

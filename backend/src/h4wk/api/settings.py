@@ -1,6 +1,3 @@
-"""API Settings (T32): nguồn thu, Jev, API key. Key chỉ gửi lên; response chỉ
-có bản che. Mọi thao tác ghi có audit nhưng không ghi giá trị key."""
-
 from datetime import datetime
 from time import perf_counter
 from typing import Annotated, Literal
@@ -241,8 +238,6 @@ def get_watchlist_settings() -> WatchlistSettingsView:
 
 @router.put("/watchlist")
 def put_watchlist_settings(body: WatchlistSettingsUpdate, actor: ActorDep) -> WatchlistSettingsView:
-    """Chu kỳ kiểm tra, số video xử lý khi thêm kênh, số luồng mỗi kênh ([watchlist] trong
-    sources.toml)."""
     data = settings.load_sources().model_dump(mode="json", by_alias=True, exclude_none=True)
     data.setdefault("watchlist", {}).update(body.model_dump(exclude_none=True))
     try:

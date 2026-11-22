@@ -1,9 +1,3 @@
-"""Chấm kết quả của violation_run.py theo đúng quy tắc của jev._content_violation: tổng xác
-suất các danh mục vi phạm ≥ ngưỡng thì là vi phạm, danh mục là cái cao nhất.
-
-python violation_score.py out.jsonl [ngưỡng]   # có ngưỡng thì in thêm các câu sai
-Nhãn "?" (dữ liệu thật chưa gán nhãn) chỉ đếm số câu bị đánh dấu.
-"""
 
 import json
 import sys

@@ -1,5 +1,3 @@
-"""Manifest của bản thu."""
-
 from enum import StrEnum
 from typing import Literal, Self
 
@@ -48,8 +46,6 @@ class Cost(Contract):
 
 
 class SourceCall(Contract):
-    """Một lần gọi (hoặc bỏ qua) một nguồn cho một loại dữ liệu."""
-
     provider: str | None
     what: Cap
     status: SourceStatus

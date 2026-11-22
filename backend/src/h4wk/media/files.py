@@ -1,5 +1,3 @@
-"""Ghi tệp phái sinh nguyên tử trong cùng hệ thống tệp."""
-
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path

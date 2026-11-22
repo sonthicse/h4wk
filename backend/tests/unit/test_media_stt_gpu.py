@@ -1,5 +1,3 @@
-"""STT bắt buộc có GPU NVIDIA."""
-
 import pytest
 
 from h4wk.media import stt

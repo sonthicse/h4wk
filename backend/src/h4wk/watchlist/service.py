@@ -1,9 +1,3 @@
-"""Nghiệp vụ watchlist: thêm kênh, kiểm tra định kỳ bằng RSS, Check now.
-
-Danh sách kênh nằm ở config/watchlist.toml (nguồn gốc, sửa tay được). Database chỉ giữ trạng
-thái chạy của từng kênh (đã khởi tạo, lần kiểm tra cuối, lỗi, video đã biết) và được đồng bộ
-theo file mỗi lần đọc."""
-
 import time
 from collections.abc import Callable
 from datetime import datetime, timedelta
@@ -75,8 +69,6 @@ def _save_channels(channels: list[WatchChannel]) -> None:
 
 
 def migrate_legacy() -> bool:
-    """Chưa có watchlist.toml mà database còn kênh (cách lưu cũ) thì ghi các kênh đó ra file.
-    Trả về True nếu đã ghi."""
     if watchlist_file().exists():
         return False
     with Session(get_engine()) as s:
@@ -96,8 +88,6 @@ def load_channels() -> list[WatchChannel]:
 
 
 def _sync() -> list[WatchChannel]:
-    """Đưa database theo file: thêm kênh mới (chưa khởi tạo), cập nhật trường cấu hình, bỏ kênh
-    đã xoá khỏi file cùng danh sách video đã biết của nó."""
     channels = load_channels()
     wanted = {c.id: c for c in channels}
     with Session(get_engine()) as s:
@@ -124,7 +114,6 @@ def _sync() -> list[WatchChannel]:
 
 
 def create_item(channel_id: str, handle: str | None, title: str, level: str) -> WatchItemRow:
-    """Thêm kênh vào file, ở trạng thái chưa khởi tạo; bước thêm kênh chạy ở initialize()."""
     channels = load_channels()
     if any(c.channel_id == channel_id for c in channels):
         raise Duplicate(f"channel {channel_id} is already in the watchlist")
@@ -141,7 +130,6 @@ def create_item(channel_id: str, handle: str | None, title: str, level: str) -> 
 
 
 def add_channel(text: str, level: str) -> WatchItemRow:
-    """Thêm kênh từ link kênh, channel ID hoặc @handle."""
     target = parse_target(text)
     if target.kind not in (TargetKind.CHANNEL, TargetKind.HANDLE):
         raise ValueError("not a channel link, channel id or @handle")
@@ -165,7 +153,6 @@ def list_items() -> list[WatchItemRow]:
 
 
 def update_item(item_id: str, **fields: object) -> WatchItemRow:
-    """Trường cấu hình ghi vào file, trường trạng thái ghi vào database."""
     config = {k: v for k, v in fields.items() if k in CONFIG_FIELDS}
     if config:
         channels = load_channels()
@@ -222,7 +209,6 @@ def _mark_known(item_id: str, entries: list[rss.FeedEntry]) -> None:
 
 
 def _start_job(item: WatchItemRow, video_id: str) -> str:
-    """Job chờ trong luồng riêng của kênh; lanes.fill đưa vào hàng đợi khi luồng rảnh."""
     target = parse_target(video_id)
     job = pipeline.create_job(target.url, video_id, item.level, False, trigger_of(item.id))
     with Session(get_engine()) as s:
@@ -236,7 +222,6 @@ def _start_job(item: WatchItemRow, video_id: str) -> str:
 
 
 def _channel_capture(item: WatchItemRow) -> list[str]:
-    """Bản thu hồ sơ kênh trong channels/<channel_id>/captures/; trả về ID video, mới trước."""
     now = _now()
     if (data_dir() / "channels" / item.channel_id / "captures" / f"{now:%Y%m%dT%H%M%S}").exists():
         time.sleep(1 - now.microsecond / 1_000_000)
@@ -254,7 +239,6 @@ def _channel_capture(item: WatchItemRow) -> list[str]:
 
 
 def initialize(item: WatchItemRow) -> list[str]:
-    """Bước thêm kênh: bản thu hồ sơ kênh, job cho N video mới nhất, đánh dấu feed là đã biết."""
     listed = _channel_capture(item)
     feed = fetch_feed(item.channel_id)
     newest = list(dict.fromkeys([*listed, *(e.video_id for e in feed)]))
@@ -276,8 +260,6 @@ def initialize(item: WatchItemRow) -> list[str]:
 
 
 def check(item_id: str, *, listing: bool = False) -> list[str]:
-    """Kiểm tra một mục; trả về ID video mới. listing=True (Check now) thu thêm danh sách
-    video của kênh, vì RSS có thể trễ tới 15 phút."""
     item = get_item(item_id)
     try:
         if not item.initialized:
@@ -310,7 +292,6 @@ def check(item_id: str, *, listing: bool = False) -> list[str]:
 
 
 def run_due() -> None:
-    """Gọi bởi periodic task: kiểm tra các mục đang bật đã tới chu kỳ."""
     interval = timedelta(minutes=_settings().check_interval_min)
     lanes.fill_all()
     now = _now()

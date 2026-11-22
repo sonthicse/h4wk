@@ -1,9 +1,3 @@
-"""Kiểu dùng chung cho các mô hình dữ liệu.
-
-Các enum `Cap` và `CollectLevel` thuộc collectors nhưng đặt ở đây, vì evidence-store cũng dùng
-mà evidence-store không được phụ thuộc collectors. `collectors.models` xuất lại hai enum này.
-"""
-
 from datetime import datetime, timedelta, timezone
 from enum import StrEnum
 from typing import Annotated
@@ -20,8 +14,6 @@ from pydantic import (
 
 
 class Contract(BaseModel):
-    """Lớp gốc của mọi mô hình quy ước: không nhận trường lạ."""
-
     model_config = ConfigDict(extra="forbid", validate_by_name=True, serialize_by_alias=True)
 
 
@@ -66,8 +58,6 @@ RelPath = Annotated[str, AfterValidator(_check_rel_path)]
 
 
 class Cap(StrEnum):
-    """Loại dữ liệu một nguồn thu lấy được. Giá trị dùng trong trường `what` của manifest."""
-
     VIDEO_METADATA = "video.metadata"
     CHANNEL_METADATA = "channel.metadata"
     CHANNEL_VIDEOS = "channel.videos"
@@ -79,8 +69,6 @@ class Cap(StrEnum):
 
 
 class CollectLevel(StrEnum):
-    """Mức thu."""
-
     METADATA = "metadata"
     TEXT = "text"
     FULL = "full"

@@ -1,5 +1,3 @@
-"""T9: chuyển dữ liệu thô của yt-dlp sang dữ liệu chung, không gọi mạng."""
-
 import json
 import shutil
 from datetime import UTC, datetime

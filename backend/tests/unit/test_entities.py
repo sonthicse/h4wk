@@ -1,5 +1,3 @@
-"""T6: đối tượng, nhật ký, chỉ mục."""
-
 import json
 from pathlib import Path
 

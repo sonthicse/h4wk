@@ -1,9 +1,3 @@
-"""Ghi bản thu.
-
-Adapter ghi dữ liệu thô vào thư mục tạm cùng ổ đĩa. `finalize` ghi normalized.json, tính
-SHA-256, ghi manifest sau cùng, `rename` sang captures/<ts> trong một bước, rồi khoá chỉ đọc.
-"""
-
 import hashlib
 import os
 import shutil
@@ -29,7 +23,6 @@ def sha256_file(path: Path) -> str:
 
 
 def list_captures(captures_dir: Path) -> list[str]:
-    """Các bản thu đã hoàn tất, theo thứ tự thời gian (bỏ qua thư mục tạm)."""
     if not captures_dir.is_dir():
         return []
     return sorted(
@@ -38,7 +31,6 @@ def list_captures(captures_dir: Path) -> list[str]:
 
 
 def lock_readonly(path: Path) -> None:
-    """Chống sửa nhầm: file 0444, thư mục 0555. Không chống được người cố tình sửa."""
     for root, dirs, files in os.walk(path, topdown=False):
         for f in files:
             os.chmod(Path(root) / f, 0o444)
@@ -48,8 +40,6 @@ def lock_readonly(path: Path) -> None:
 
 
 class CaptureWriter:
-    """Một lần thu: mở thư mục tạm, adapter ghi vào `workdir(provider)`, rồi `finalize`."""
-
     def __init__(
         self,
         captures_dir: Path,

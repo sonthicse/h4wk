@@ -1,5 +1,3 @@
-"""Timeline: timeline.json."""
-
 from typing import Literal, Self
 
 from pydantic import Field, model_validator
@@ -26,8 +24,6 @@ class FrameOcr(OcrText):
 
 
 class Frame(Contract):
-    """Keyframe thuộc một đoạn; ảnh gửi thẳng cho Jev, không có mô tả."""
-
     frame: RelPath
     t: NonNegFloat
 
@@ -67,7 +63,6 @@ class Timeline(Contract):
     @model_validator(mode="before")
     @classmethod
     def _legacy_visual(cls, data):
-        """Đọc timeline cũ: `visual` của đoạn thành `frames`, `visual` của thumbnail bị bỏ."""
         if not isinstance(data, dict):
             return data
         data = dict(data)

@@ -1,5 +1,3 @@
-"""Chuẩn hóa và tìm tên trong văn bản."""
-
 import re
 import unicodedata
 

@@ -1,11 +1,3 @@
-"""Luồng riêng cho từng kênh watchlist.
-
-Job của một kênh không vào hàng đợi ngay mà ở trạng thái `waiting`. Mỗi kênh chỉ có tối đa
-`watchlist.threads_per_channel` job đang xử lý (queued hoặc running); xong một job thì job
-đang chờ kế tiếp của kênh đó mới được đưa vào hàng đợi. Nhờ vậy các kênh chạy song song,
-kênh nhiều video không chặn kênh khác. Bước GPU vẫn dùng chung một hàng đợi.
-"""
-
 from datetime import datetime
 
 from sqlalchemy import update
@@ -27,7 +19,6 @@ def threads_per_channel() -> int:
 
 
 def fill(trigger: str) -> list[str]:
-    """Đưa job đang chờ của một kênh vào hàng đợi cho tới khi đủ số luồng; trả về ID job."""
     from h4wk.jobs import pipeline
 
     started = []
@@ -60,7 +51,6 @@ def fill(trigger: str) -> list[str]:
 
 
 def fill_all() -> None:
-    """Mọi kênh còn job chờ (sau khi worker khởi động lại, hoặc đổi số luồng)."""
     with Session(get_engine()) as s:
         triggers = s.exec(select(JobRow.trigger).where(JobRow.status == "waiting").distinct()).all()
     for trigger in triggers:
@@ -68,8 +58,6 @@ def fill_all() -> None:
 
 
 def worker_threads() -> int:
-    """Số luồng cho worker hàng đợi default: mỗi kênh đang bật N luồng, cộng 2 luồng cho
-    Collect thủ công và việc kiểm tra watchlist. Ít nhất 4."""
     from h4wk.watchlist.service import load_channels
 
     channels = sum(1 for c in load_channels() if c.enabled)

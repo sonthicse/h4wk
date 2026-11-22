@@ -1,5 +1,3 @@
-"""T32: secret, ghi toml, thêm cột mới vào chỉ mục cũ."""
-
 import os
 import sqlite3
 import tomllib

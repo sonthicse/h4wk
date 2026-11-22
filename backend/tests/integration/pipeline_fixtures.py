@@ -1,7 +1,3 @@
-"""Nguồn thu giả và fixture dùng chung cho test tích hợp luồng collect → media → analyze.
-
-Không đặt trong conftest.py vì test_auth.py import `conftest` của thư mục tests/."""
-
 import os
 import shutil
 from collections.abc import Iterator
@@ -24,8 +20,6 @@ VIDEO = "https://www.youtube.com/watch?v=h4wkDemo001"
 
 
 class SampleCollector:
-    """Nguồn giả trả về dữ liệu của bản thu mẫu T44."""
-
     name = "fake"
     capabilities = set(Cap)
     version = "fake-1"

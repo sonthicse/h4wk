@@ -1,5 +1,3 @@
-"""T5: ghi bản thu, manifest, verify."""
-
 import os
 import stat
 from collections.abc import Iterator
@@ -22,7 +20,6 @@ T2 = datetime(2026, 11, 19, 9, 30, 0, tzinfo=VN_TZ)
 
 
 def unlock(path: Path) -> None:
-    """Mở khoá chỉ đọc để test sửa hoặc dọn bản thu."""
     for root, dirs, files in os.walk(path):
         os.chmod(root, 0o755)
         for d in dirs:

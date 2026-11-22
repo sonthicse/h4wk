@@ -1,5 +1,3 @@
-"""Phân loại lời nói và bình luận qua Jev."""
-
 import base64
 import json
 import math
@@ -198,7 +196,6 @@ CONTENT_VIOLATIONS = ("violence", "hate", "state_secret", "forgery")
 
 
 def _configuration(entities, video_title):
-    """Câu hỏi gửi Jev. Không có đối tượng thì chỉ hỏi vi phạm theo nội dung và mức độ."""
     targets = {
         e.id: ", ".join(
             [e.name, *e.aliases, *e.abbreviations, *([e.description] if e.description else [])]
@@ -228,8 +225,6 @@ CONTENT_THRESHOLD = 0.6
 
 
 def _content_violation(answers):
-    """(danh mục, xác suất có vi phạm) hoặc None. Xét tổng xác suất các danh mục để câu vừa
-    bạo lực vừa thù hận (xác suất chia đôi) không bị bỏ sót; danh mục là cái cao nhất."""
     probs = answers.get("violation", {}).get("probabilities", {})
     total = sum(probs.get(c, 0.0) for c in CONTENT_VIOLATIONS)
     if total < CONTENT_THRESHOLD:
@@ -238,7 +233,6 @@ def _content_violation(answers):
 
 
 def _encode(path: Path) -> str:
-    """JPEG base64 cạnh dài tối đa 1024, cạnh ngắn ít nhất 320 (Jev từ chối ảnh quá nhỏ)."""
     image = cv2.imread(str(path))
     if image is None:
         raise ValueError(f"Cannot read image {path.name}")
@@ -290,7 +284,6 @@ def _validate_reply(reply) -> None:
 
 
 def test_connection() -> dict:
-    """Một câu hỏi `noul` ngắn để thử key; ghi thống kê nhưng không trả nội dung."""
     key = secrets.get("TYPESAFE_API_KEY")
     if not key:
         return {"ok": False, "error": "TYPESAFE_API_KEY is not set"}
@@ -357,7 +350,6 @@ def classify(
     derived_dir: Path | None = None,
     capture_dir: Path | None = None,
 ) -> tuple[list[Finding], list[dict], str | None]:
-    """Keyframe đọc từ `derived_dir`, thumbnail từ `capture_dir`; thiếu thư mục thì chỉ gửi chữ."""
     key = secrets.get("TYPESAFE_API_KEY")
     if not key:
         return [], [], "jev: TYPESAFE_API_KEY is not set"

@@ -1,5 +1,3 @@
-"""Hàng đợi và quyết định rà soát theo video."""
-
 from datetime import datetime
 from pathlib import Path
 

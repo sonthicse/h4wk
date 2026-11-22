@@ -53,9 +53,6 @@ class SourcesConfig(Contract):
 
 
 class WatchChannel(Contract):
-    """Một kênh trong watchlist. Trạng thái chạy (đã khởi tạo, lần kiểm tra cuối, video đã
-    biết) nằm trong database, không nằm ở đây."""
-
     id: str = Field(pattern=r"^w_\d{3,}$")
     channel_id: str = Field(min_length=1)
     handle: str | None = None
@@ -77,5 +74,4 @@ class WatchlistConfig(Contract):
 
 
 def load_toml[M: BaseModel](path: Path, model: type[M]) -> M:
-    """Đọc một file cấu hình và kiểm tra theo mô hình cấu hình."""
     return model.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))

@@ -1,4 +1,3 @@
-"""T46: chạy lại job bị treo khi consumer khởi động."""
 # ruff: noqa: F811
 
 import json

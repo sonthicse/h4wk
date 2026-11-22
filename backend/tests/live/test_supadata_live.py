@@ -1,6 +1,3 @@
-"""T15: thu transcript thật qua Supadata (gọi mạng, tốn credit, chạy tay:
-uv run pytest -m live -k supadata). Cần SUPADATA_API_KEY trong .env hoặc data/secrets.json."""
-
 from pathlib import Path
 
 import pytest

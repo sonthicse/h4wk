@@ -1,5 +1,3 @@
-"""T30: watchlist với RSS giả và nguồn kênh giả; job chỉ được ghi nhận, không chạy."""
-
 from datetime import datetime
 from pathlib import Path
 
@@ -68,14 +66,12 @@ def test_parse_feed() -> None:
 
 
 def _jobs(item_id: str) -> dict[str, str]:
-    """ID job → trạng thái, của một kênh."""
     with Session(get_engine()) as s:
         rows = s.exec(select(JobRow).where(JobRow.trigger == service.trigger_of(item_id)))
         return {j.id: j.status for j in rows}
 
 
 def _finish(job_id: str) -> None:
-    """Giả lập job xong: pipeline báo cho luồng của kênh."""
     job = pipeline._update(job_id, status="done")
     pipeline._next_in_lane(job)
 
@@ -114,8 +110,6 @@ def test_one_new_entry_makes_one_job_once(client: TestClient, fake) -> None:
 
 @pytest.mark.parametrize("threads", [1, 2])
 def test_each_channel_has_its_own_lane(client: TestClient, fake, config_dir, threads) -> None:
-    """Mỗi kênh tối đa N job đang xử lý; xong một job thì job chờ kế tiếp của kênh đó chạy.
-    Kênh khác không phải chờ."""
     (config_dir / "sources.toml").write_text(
         f"[watchlist]\nthreads_per_channel = {threads}\n", encoding="utf-8"
     )
@@ -169,7 +163,6 @@ def test_crud_and_duplicate(client: TestClient, fake) -> None:
 
 
 def test_watchlist_file_is_the_source(client: TestClient, fake, config_dir) -> None:
-    """Thêm, sửa ở giao diện ghi vào config/watchlist.toml; sửa tay file thì giao diện theo."""
     item = client.post("/api/watchlist", json={"url": "@VietTan"}).json()
     path = config_dir / "watchlist.toml"
     assert 'channel_id = "UCJDyIKGZ9zpTKDTEXpivGZw"' in path.read_text(encoding="utf-8")

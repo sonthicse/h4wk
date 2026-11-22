@@ -1,17 +1,3 @@
-"""Khớp ảnh mẫu bằng embedding ảnh (DINOv2 ViT-S/14): bắt ảnh bị cắt, ghép, đổi màu.
-
-Mỗi ảnh (keyframe, thumbnail) được cắt thành khung đầy đủ cùng lưới 2×2 và 3×3, mỗi ô
-được so cosine với embedding của các ảnh mẫu.
-
-DEFAULT_THRESHOLD đã hiệu chỉnh bằng test model thật (H4WK_TEST_DINO=1) trên ảnh mẫu
-`tests/fixtures/refs/e_01/image/ref_01.png` và bản thu mẫu T44 (cosine tốt nhất theo ô):
-  - khớp: nguyên bản 1,000; hue +30 0,971; giảm bão hoà 50% 0,941; cắt mỗi cạnh 10% 0,906;
-    khung T44 có ảnh mẫu cắt và đổi màu (000032, 000034) 0,898; cắt nửa ảnh 0,834;
-    ảnh mẫu thu nhỏ ghép vào góc khung T44 0,921;
-  - không khớp: khung T44 không có ảnh mẫu (000015 0,486; 000025 0,549).
-Ngưỡng 0,75 nằm giữa hai nhóm. Mới có hai khung âm tính nên ngưỡng cần kiểm lại trên video thật.
-"""
-
 import hashlib
 import logging
 from collections.abc import Sequence
@@ -34,14 +20,10 @@ DEFAULT_THRESHOLD = 0.75
 class Embedder(Protocol):
     name: str
 
-    def embed(self, images: list[np.ndarray]) -> np.ndarray:
-        """Ảnh RGB uint8 (h, w, 3) -> ma trận (n, d) đã chuẩn hoá L2."""
-        ...
+    def embed(self, images: list[np.ndarray]) -> np.ndarray: ...
 
 
 class DinoEmbedder:
-    """Nạp lười model một lần cho mỗi worker (như SttWorker). Bắt buộc có GPU NVIDIA (CUDA)."""
-
     name = f"{MODEL_ID}@{MODEL_REVISION}"
 
     def __init__(self) -> None:
@@ -76,7 +58,6 @@ class DinoEmbedder:
 
 
 def grid_crops(image: np.ndarray) -> list[tuple[tuple[int, int, int, int], np.ndarray]]:
-    """Khung đầy đủ cộng lưới 2×2 và 3×3; bbox [x, y, w, h] theo pixel của ảnh nguồn."""
     height, width = image.shape[:2]
     crops = [((0, 0, width, height), image)]
     for n in (2, 3):
@@ -112,8 +93,6 @@ def match_refs(
     threshold: float | None = None,
     cache: Path | None = None,
 ) -> list[tuple[str, str, tuple[int, int, int, int], float]]:
-    """Trả (entity, file, bbox, score). Mỗi cặp (ảnh, đối tượng) chỉ giữ ô điểm cao nhất
-    vượt ngưỡng. Embedding của ô cắt lưu ở `cache` (npz, khoá theo sha256 của ảnh)."""
     limit = DEFAULT_THRESHOLD if threshold is None else threshold
     ref_vectors: dict[str, np.ndarray] = {}
     for entity, paths in refs.items():
@@ -157,12 +136,6 @@ def to_hits(
     timeline: Timeline,
     frame_times: dict[str, float],
 ) -> list[EntityHit]:
-    """Đổi kết quả khớp thành EntityHit (via ref_image), gán segment_id theo timeline:
-    ưu tiên segment chứa khung trong frames hoặc ocr, sau đó segment có start <= t <= end.
-    Thumbnail (không có thời điểm) không có segment_id.
-
-    Giới hạn: khung khớp ảnh mẫu mà không thuộc segment nào (ngoài lời nói, không có keyframe
-    hay OCR) chỉ nằm trong hits.json, không được gửi cho Jev."""
     owner: dict[str, str] = {}
     for segment in timeline.segments:
         for item in [*segment.frames, *segment.ocr]:

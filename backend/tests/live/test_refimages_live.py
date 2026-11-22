@@ -1,7 +1,3 @@
-"""Khớp ảnh mẫu bằng DINOv2 thật (GPU nếu có). Lần đầu tải trọng số từ Hugging Face.
-
-Chạy: `uv run pytest -m live tests/live/test_refimages_live.py -s`."""
-
 from pathlib import Path
 
 import cv2

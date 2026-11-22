@@ -1,5 +1,3 @@
-"""Tầng tĩnh: tìm cụm từ trong từ điển, theo trọn từ, sau khi bỏ dấu và chuyển chữ thường."""
-
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -35,7 +33,6 @@ def load_lexicon(path: Path = LEXICON_PATH) -> list[LexiconEntry]:
 
 
 def find_insult(text: str, lexicon: list[LexiconEntry]) -> LexiconEntry | None:
-    """Cụm từ đầu tiên của từ điển có trong văn bản, hoặc None."""
     words = re.findall(r"\w+", normalize(text))
     for entry in lexicon:
         parts = re.findall(r"\w+", normalize(entry.phrase))

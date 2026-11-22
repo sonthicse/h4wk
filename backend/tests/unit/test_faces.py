@@ -24,7 +24,6 @@ def test_match_faces_does_not_store_features(monkeypatch, tmp_path):
 
 
 def test_pipeline_without_face_refs_does_nothing(monkeypatch, tmp_path):
-    """Không có ảnh khuôn mặt mẫu thì không chạy khớp khuôn mặt (cách để tắt bước này)."""
     monkeypatch.setattr(pipeline, "load_entities", lambda: [Mock(id="ref")])
     monkeypatch.setattr(pipeline, "refs_dir", lambda *_: tmp_path)
     matcher = Mock()

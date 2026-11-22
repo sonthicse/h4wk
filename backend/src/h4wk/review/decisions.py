@@ -1,6 +1,3 @@
-"""Quyết định rà soát. reviews.jsonl là nguồn gốc (chỉ ghi thêm); bảng decisions là chỉ mục.
-Ngoài record(), code không đặt trạng thái confirmed ở đâu khác."""
-
 from datetime import datetime
 
 from sqlmodel import Session, select
@@ -16,7 +13,6 @@ class NotFound(LookupError):
 
 
 def record(finding_id: str, status: str, note: str, by: str) -> ReviewDecision:
-    """Ghi một quyết định. Reject thiếu note bị mô hình chặn (ValidationError)."""
     with Session(get_engine()) as s:
         row = s.get(FindingRow, finding_id)
         if row is None:
@@ -49,7 +45,6 @@ def finding(finding_id: str) -> Finding:
 
 
 def decisions_for(finding_ids: list[str] | None = None) -> dict[str, list[ReviewDecision]]:
-    """Các quyết định theo finding_id, mới nhất trước."""
     with Session(get_engine()) as s:
         q = select(DecisionRow).order_by(DecisionRow.id.desc())  # type: ignore[union-attr]
         if finding_ids is not None:

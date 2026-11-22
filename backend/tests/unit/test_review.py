@@ -1,5 +1,3 @@
-"""T25: hàng đợi rà soát và quyết định, dùng nghi vấn mẫu của T44."""
-
 import json
 import shutil
 from pathlib import Path
@@ -19,7 +17,6 @@ FINDINGS = (
 
 
 def _write_run(data_dir: Path, video: str, capture: str, run: str, findings: list[Finding]) -> None:
-    """findings.json là nguồn gốc để biết lần chạy mới nhất."""
     folder = data_dir / "videos" / video / "derived" / capture / "analysis" / run
     folder.mkdir(parents=True, exist_ok=True)
     text = "[" + ",".join(f.model_dump_json() for f in findings) + "]"

@@ -1,5 +1,3 @@
-"""Nhật ký thao tác: mỗi thao tác ghi thêm một dòng JSON, kể cả khi thất bại."""
-
 import json
 from datetime import datetime
 from typing import Any, Literal
@@ -15,7 +13,6 @@ def log(
     detail: dict[str, Any] | None = None,
     status: Literal["ok", "error"] = "ok",
 ) -> None:
-    """Ghi một dòng vào data/log/audit.jsonl."""
     path = data_dir() / "log" / "audit.jsonl"
     path.parent.mkdir(parents=True, exist_ok=True)
     line = {

@@ -1,5 +1,3 @@
-"""Ghép các kết quả trên ảnh vào timeline."""
-
 from collections import defaultdict
 from pathlib import Path
 
@@ -16,7 +14,6 @@ def enrich(
     thumbnails: list[str],
     lines: list[OcrLine],
 ) -> None:
-    """Gắn mọi keyframe đã chọn (kể cả khung không chữ) và OCR vào timeline."""
     by_image = defaultdict(list)
     for line in lines:
         by_image[line.frame].append(OcrText(text=line.text, bbox=line.bbox))

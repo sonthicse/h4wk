@@ -1,13 +1,3 @@
-"""Dựng bản thu mẫu cho T44 trong tests/fixtures/ (chạy tay, cần ffmpeg).
-
-    cd backend && uv run python tests/fixtures/build_sample_capture.py
-
-Bản hiện tại dùng VIDEO TỔNG HỢP: ffmpeg vẽ chữ và ảnh, tiếng bíp thay giọng nói, lời nói chỉ
-nằm trong file phụ đề, khuôn mặt là hình vẽ. Khi nhóm quay video thật, thay các file trong
-INPUTS rồi chạy lại script để tính lại SHA-256. Đối tượng giả: Trần Văn Mẫu ("Mẫu Ca", "TVM").
-bbox trong timeline, hits và findings đo bằng mắt trên khung hình, sai lệch vài pixel.
-"""
-
 import hashlib
 import json
 import shutil
@@ -71,7 +61,6 @@ def ffmpeg(*args: str) -> None:
 
 
 def make_media(tmp: Path) -> None:
-    """Ảnh khuôn mặt giả, ảnh mẫu, video, thumbnail và các khung hình."""
     skin, eyes, mouth = (
         "lt(hypot(X-128,Y-128),100)",
         ("lt(hypot(X-95,Y-105),12)+lt(hypot(X-161,Y-105),12)"),

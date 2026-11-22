@@ -1,10 +1,7 @@
-# Cấu hình nguồn thu (quy ước C5). Không ghi API key ở đây: key nằm trong .env.
-# API chép file này thành sources.toml khi khởi động nếu chưa có.
 
 [sources.ytdlp]
 enabled = true
-fault_injection = false        # true: giả lập nguồn bị chặn, dùng cho test và demo
-# cookies_file = "/đường/dẫn/cookies.txt"
+fault_injection = false
 
 [sources.youtube_api]
 enabled = true
@@ -14,7 +11,6 @@ fault_injection = false
 enabled = true
 fault_injection = false
 
-# Thứ tự ưu tiên nguồn cho từng loại dữ liệu. Nguồn sau chỉ dùng khi nguồn trước lỗi.
 [priority]
 "video.metadata"    = ["youtube_api", "ytdlp", "supadata"]
 "channel.metadata"  = ["youtube_api", "ytdlp"]
@@ -26,9 +22,9 @@ fault_injection = false
 "video.media"       = ["ytdlp"]
 
 [collect]
-playlist_max_videos = 50       # link playlist: tối đa bấy nhiêu video, mỗi video một job
+playlist_max_videos = 50
 
 [watchlist]
-check_interval_min = 2         # chu kỳ kiểm tra RSS
-initial_videos = 10            # khi thêm kênh: xử lý ngay bấy nhiêu video mới nhất
-threads_per_channel = 1        # mỗi kênh xử lý song song tối đa bấy nhiêu video (1–8)
+check_interval_min = 2
+initial_videos = 10
+threads_per_channel = 1

@@ -1,5 +1,3 @@
-"""Fixture dùng chung: mỗi test có thư mục dữ liệu riêng."""
-
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -11,8 +9,6 @@ USERNAME, PASSWORD = "thi", "mật-khẩu-thử"
 
 @pytest.fixture(autouse=True)
 def dotenv(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
-    """Thay file .env thật của máy bằng tài khoản giả. Test thêm key vào dict này
-    (vd YOUTUBE_API_KEY) như sửa .env."""
     from h4wk.core import config
 
     values = {"USERNAME": USERNAME, "PASSWORD": PASSWORD}
@@ -22,7 +18,6 @@ def dotenv(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
 
 @pytest.fixture(autouse=True)
 def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Mỗi test một thư mục dữ liệu riêng, không đụng data/ thật."""
     from h4wk.core import config
 
     d = tmp_path / "data"
@@ -32,7 +27,6 @@ def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 @pytest.fixture(autouse=True)
 def config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Test không đọc cấu hình thật của máy; thư mục cấu hình rỗng thì dùng mặc định."""
     from h4wk.core import config
 
     d = tmp_path / "h4wk-config"
@@ -43,7 +37,6 @@ def config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 @pytest.fixture
 def anon_client(data_dir: Path) -> Iterator[TestClient]:
-    """Client chưa đăng nhập; tài khoản USERNAME lấy từ .env (giả)."""
     from h4wk.api.app import app
 
     with TestClient(app) as c:
@@ -52,7 +45,6 @@ def anon_client(data_dir: Path) -> Iterator[TestClient]:
 
 @pytest.fixture
 def client(anon_client: TestClient) -> TestClient:
-    """Client đã đăng nhập bằng USERNAME."""
     r = anon_client.post("/api/auth/login", json={"username": USERNAME, "password": PASSWORD})
     assert r.status_code == 204, r.text
     return anon_client
@@ -60,7 +52,6 @@ def client(anon_client: TestClient) -> TestClient:
 
 @pytest.fixture(autouse=True)
 def _no_network(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test thường không được gọi mạng; chỉ test đánh dấu `live` mới được."""
     if request.node.get_closest_marker("live"):
         return
     import socket
@@ -74,7 +65,6 @@ def _no_network(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch)
 
 @pytest.fixture(autouse=True)
 def _offline_supadata_credits(request, monkeypatch):  # noqa: ANN001, ANN202
-    """Không test nào hỏi /me của Supadata thật, kể cả khi máy có SUPADATA_API_KEY."""
     if "supadata_api" in request.fixturenames or request.node.get_closest_marker("live"):
         return
     from h4wk.collectors.providers import supadata
@@ -83,8 +73,6 @@ def _offline_supadata_credits(request, monkeypatch):  # noqa: ANN001, ANN202
 
 
 class FakeYtApi:
-    """YouTube Data API giả: trả response ghi sẵn ở tests/fixtures/raw/ytapi/ theo đường dẫn."""
-
     RAW = Path(__file__).parent / "fixtures" / "raw" / "ytapi"
 
     def __init__(self) -> None:
@@ -136,8 +124,6 @@ def ytapi(data_dir: Path) -> FakeYtApi:
 
 
 class FakeSupadata:
-    """Supadata giả: trả response ghi sẵn ở tests/fixtures/raw/supadata/ theo đường dẫn và mode."""
-
     RAW = Path(__file__).parent / "fixtures" / "raw" / "supadata"
 
     def __init__(self) -> None:

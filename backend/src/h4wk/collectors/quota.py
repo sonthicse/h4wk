@@ -1,8 +1,3 @@
-"""Quota YouTube Data API đếm theo ngày, reset lúc nửa đêm giờ Pacific.
-
-Bộ đếm lưu trong database chỉ mục nên mất database thì đưa về 0 (Google vẫn tự chặn khi hết thật).
-"""
-
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
@@ -32,14 +27,12 @@ def period(now: datetime) -> str:
 
 
 def resets_at(now: datetime) -> datetime:
-    """Nửa đêm Pacific kế tiếp (zoneinfo tự xử lý giờ mùa hè)."""
     local = now.astimezone(PACIFIC)
     nxt = datetime.combine(local.date() + timedelta(days=1), time(0), tzinfo=PACIFIC)
     return nxt.astimezone(VN_TZ)
 
 
 def _row(s: Session, now: datetime) -> QuotaRow:
-    """Dòng của kỳ hiện tại; chưa có hoặc đã thuộc kỳ cũ thì coi như used = 0 (chỉ đọc)."""
     row = s.get(QuotaRow, PROVIDER)
     if row is None or row.period != period(now):
         return QuotaRow(provider=PROVIDER, period=period(now))
@@ -53,7 +46,6 @@ def usage(now: datetime) -> QuotaUsage:
 
 
 def _ensure_period(s: Session, now: datetime) -> None:
-    """Tạo dòng của kỳ hiện tại, hoặc đưa used về 0 nếu dòng thuộc kỳ cũ (một câu SQL nguyên tử)."""
     s.connection().execute(
         text(
             "INSERT INTO source_quota (provider, period, used) VALUES (:p, :period, 0) "
@@ -65,7 +57,6 @@ def _ensure_period(s: Session, now: datetime) -> None:
 
 
 def spend(units: int, now: datetime) -> None:
-    """Cộng quota đã dùng; từ 90% giới hạn trở lên thì ném QuotaExceeded và không cộng."""
     with Session(get_engine()) as s:
         _ensure_period(s, now)
         done = s.connection().execute(
@@ -79,7 +70,6 @@ def spend(units: int, now: datetime) -> None:
 
 
 def exhaust(now: datetime) -> None:
-    """Google báo hết quota: coi như đã dùng hết cả ngày."""
     with Session(get_engine()) as s:
         _ensure_period(s, now)
         s.connection().execute(

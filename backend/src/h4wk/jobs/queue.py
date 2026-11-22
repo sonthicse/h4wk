@@ -1,11 +1,3 @@
-"""Hàng đợi Huey lưu bằng SQLite trong thư mục dữ liệu. Hai hàng đợi: default và gpu.
-
-uv run python -m h4wk.jobs.worker            # default; số luồng tự tính theo watchlist
-uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1
-
-Khi consumer khởi động, job đang running được đưa lại vào hàng đợi (xem recovery.py).
-"""
-
 import logging
 import threading
 
@@ -29,7 +21,6 @@ _recovered: set[str] = set()
 
 
 def _recover(queue: str) -> None:
-    """Mỗi hàng đợi chỉ recover một lần mỗi tiến trình: Huey gọi on_startup ở từng worker."""
     from h4wk.jobs import recovery
 
     with _recover_lock:

@@ -1,13 +1,3 @@
-"""Adapter Supadata (T15): transcript và metadata video, dùng khi yt-dlp bị chặn.
-
-Transcript chỉ lấy phụ đề tiếng Việt có sẵn của YouTube (mode native, kể cả phụ đề tự động).
-Không nhờ AI của Supadata tạo (mode generate, 2 credit/phút): video không có phụ đề thì bản thu
-full đã có speech-to-text chạy trên máy. Supadata không cho biết phụ đề là `uploaded` hay
-`auto`, nên transcript từ Supadata gắn `supadata_ai`.
-Credit trong kỳ thanh toán hỏi Supadata qua GET /me (nhớ 5 phút), không tự đếm; credit của từng
-lần gọi lấy từ header `x-billable-requests` và ghi vào manifest. Key gửi qua header `x-api-key`.
-"""
-
 import json
 import time
 from collections.abc import Callable
@@ -194,8 +184,6 @@ _me_cache: dict[str, tuple[float, CreditUsage | None]] = {}
 
 
 def credits_usage(collector: SupadataCollector | None = None) -> CreditUsage | None:
-    """Credit đã dùng trong kỳ thanh toán, hỏi Supadata qua /me và nhớ 5 phút; lỗi hoặc chưa có
-    key thì None."""
     c = collector or SupadataCollector()
     key = c.key()
     if not key:

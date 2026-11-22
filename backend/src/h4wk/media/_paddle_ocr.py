@@ -1,5 +1,3 @@
-"""Worker OCR CPU cô lập vì PaddleX và T19 cần hai bản OpenCV khác nhau."""
-
 import json
 import sys
 from pathlib import Path

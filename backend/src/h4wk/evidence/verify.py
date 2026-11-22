@@ -1,5 +1,3 @@
-"""Kiểm tra toàn vẹn một bản thu theo manifest."""
-
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -22,7 +20,6 @@ class FileCheck:
 
 
 def verify(capture_dir: Path) -> list[FileCheck]:
-    """Kết quả từng file, sắp theo đường dẫn. manifest.json không tự kiểm chính nó."""
     manifest = Manifest.model_validate_json(
         (capture_dir / "manifest.json").read_text(encoding="utf-8")
     )

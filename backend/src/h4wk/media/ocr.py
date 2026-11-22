@@ -1,5 +1,3 @@
-"""OCR các khung do T19 chọn và các thumbnail đã tải trong bản thu."""
-
 import json
 import os
 import subprocess

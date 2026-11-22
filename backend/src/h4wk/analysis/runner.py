@@ -1,5 +1,3 @@
-"""Phân tích tĩnh văn bản theo các đối tượng cần bảo vệ."""
-
 import json
 import re
 from collections import Counter
@@ -138,7 +136,6 @@ def analyze(
 
 
 def _slot(finding: Finding) -> tuple[str, str]:
-    """Mục chứa nghi vấn (cộng đối tượng): segment, file thumbnail, hoặc loại nguồn."""
     if finding.comment_id:
         place = finding.comment_id
     elif finding.segment_id:
@@ -155,7 +152,6 @@ def _write(path: Path, content: list) -> None:
 
 
 def slots(finding: Finding) -> list[tuple[str, str]]:
-    """Mọi mục chứa nghi vấn: mỗi chỗ xuất hiện một mục (nghi vấn đã gộp), còn lại như `_slot`."""
     if finding.occurrences:
         return [(o.segment_id, finding.entity) for o in finding.occurrences]
     return [_slot(finding)]
@@ -168,7 +164,6 @@ _CONFIDENCE = list(Confidence)
 
 
 def _fold(text: str) -> str:
-    """Bỏ dấu, chữ hoa và dấu câu: OCR hay đọc sai dấu (Í→Ĩ, Ô→Ổ) mà chữ cái vẫn đúng."""
     return " ".join(re.sub(r"[^\w]+", " ", normalize(text)).split())
 
 
@@ -177,9 +172,6 @@ def _ratio(a: str, b: str) -> float:
 
 
 def group_repeats(findings: list[Finding], references: list[str] = ()) -> list[Finding]:
-    """Gộp các nghi vấn OCR cùng tầng phân tích, đối tượng, danh mục và chữ gần giống nhau
-    thành một nghi vấn, ghi các đoạn xuất hiện vào `occurrences`. Giữ thứ tự ban đầu.
-    `references` là văn bản đáng tin hơn OCR (tiêu đề, mô tả, lời nói) để sửa trích dẫn."""
     groups: list[tuple[list[str], list[Finding]]] = []
     for finding in findings:
         if (
@@ -209,9 +201,6 @@ def group_repeats(findings: list[Finding], references: list[str] = ()) -> list[F
 
 
 def _reading(quotes: list[str], references: list[str]) -> str:
-    """Bản đọc tốt nhất của một dòng chữ OCR lặp lại: bỏ phiếu từng ký tự giữa các bản đọc có
-    độ dài phổ biến nhất, rồi nếu tiêu đề, mô tả hay lời nói có đúng câu đó (so sau khi bỏ dấu)
-    thì lấy nguyên văn từ đó, vì OCR hay sai dấu."""
     length = Counter(len(q) for q in quotes).most_common(1)[0][0]
     same = [q for q in quotes if len(q) == length]
     voted = "".join(Counter(chars).most_common(1)[0][0] for chars in zip(*same, strict=True))

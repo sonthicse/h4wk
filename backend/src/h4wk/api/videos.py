@@ -1,6 +1,3 @@
-"""API đọc video đã thu: danh sách, chi tiết, timeline, transcript, comment, media, khung hình.
-Chỉ đọc file trong data/videos/; không sửa gì."""
-
 import json
 import re
 from collections import Counter
@@ -92,7 +89,6 @@ def _normalized(d: Path, capture: str) -> Normalized | None:
 
 
 def _latest_with_video(d: Path) -> tuple[str, Normalized] | None:
-    """Bản thu mới nhất có metadata video."""
     for cap in reversed(_captures(d)):
         n = _normalized(d, cap)
         if n is not None and n.video is not None:
@@ -182,7 +178,6 @@ def get_video(video_id: str) -> VideoDetail:
 
 
 def _candidates(d: Path, capture: str | None) -> list[str]:
-    """Bản thu được chỉ định, hoặc mọi bản thu từ mới tới cũ để rơi về bản có dữ liệu."""
     return [_capture(d, capture)] if capture else list(reversed(_captures(d)))
 
 
@@ -199,7 +194,6 @@ def _media_path(d: Path, cap: str) -> Path | None:
 
 @router.get("/{video_id}/timeline")
 def get_timeline(video_id: str, capture: str | None = None) -> Timeline:
-    """Timeline của bản thu chỉ định, mặc định là bản thu mới nhất đã có timeline."""
     d = _video_dir(video_id)
     for cap in _candidates(d, capture):
         path = d / "derived" / cap / "timeline.json"
@@ -210,7 +204,6 @@ def get_timeline(video_id: str, capture: str | None = None) -> Timeline:
 
 @router.get("/{video_id}/transcripts")
 def get_transcripts(video_id: str, capture: str | None = None) -> list[Transcript]:
-    """Transcript của bản thu chỉ định, mặc định là bản thu mới nhất có transcript."""
     d = _video_dir(video_id)
     for cap in _candidates(d, capture):
         n = _normalized(d, cap)
@@ -222,7 +215,6 @@ def get_transcripts(video_id: str, capture: str | None = None) -> list[Transcrip
 
 @router.get("/{video_id}/comments")
 def get_comments(video_id: str, capture: str | None = None) -> list[Comment]:
-    """Comment phẳng, reply có parent_id. Mặc định lấy bản thu mới nhất đã thu comment."""
     d = _video_dir(video_id)
     for cap in _candidates(d, capture):
         n = _normalized(d, cap)
@@ -233,7 +225,6 @@ def get_comments(video_id: str, capture: str | None = None) -> list[Comment]:
 
 @router.get("/{video_id}/media", response_class=FileResponse)
 def get_media(video_id: str, capture: str | None = None) -> FileResponse:
-    """Bản proxy 480p nếu đã có, nếu không thì file video gốc. Hỗ trợ Range."""
     d = _video_dir(video_id)
     for cap in _candidates(d, capture):
         path = _media_path(d, cap)

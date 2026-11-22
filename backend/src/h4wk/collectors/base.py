@@ -1,5 +1,3 @@
-"""Quy ước adapter nguồn thu: giao diện Collector và năm loại lỗi."""
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
@@ -12,33 +10,31 @@ if TYPE_CHECKING:
 
 
 class CollectorError(Exception):
-    """Lỗi của nguồn thu. Orchestrator dựa vào loại lỗi để thử lại hay chuyển nguồn."""
+    pass
 
 
 class Transient(CollectorError):
-    """Lỗi tạm thời (mạng, timeout): thử lại tối đa 3 lần rồi chuyển nguồn."""
+    pass
 
 
 class Blocked(CollectorError):
-    """Bị chặn (bot check, 403): chuyển nguồn ngay."""
+    pass
 
 
 class QuotaExceeded(CollectorError):
-    """Hết quota hoặc credit: chuyển nguồn ngay."""
+    pass
 
 
 class NotFound(CollectorError):
-    """Video hoặc kênh không tồn tại, hoặc không công khai: không thử nguồn khác."""
+    pass
 
 
 class Unsupported(CollectorError):
-    """Nguồn không lấy được loại dữ liệu này cho mục tiêu này: thử nguồn tiếp theo."""
+    pass
 
 
 @dataclass(frozen=True)
 class FetchResult:
-    """Phần dữ liệu chung lấy được cho một Cap. Dữ liệu thô đã được ghi vào workdir."""
-
     normalized: Normalized
     cost: Cost | None = None
 

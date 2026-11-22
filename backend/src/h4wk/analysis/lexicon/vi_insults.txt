@@ -1,9 +1,3 @@
-# Từ điển cho tầng tĩnh. Dòng "[nhóm: category]" mở một nhóm; các dòng sau là cụm từ của nhóm.
-# category phải là một giá trị của C4: insult, unsupported_accusation, fabrication,
-# incitement, state_secret.
-# So khớp sau khi chuẩn hoá (bỏ dấu, chữ thường) và theo trọn từ. Tầng tĩnh chỉ chạy trên vùng
-# văn bản có dấu hiệu tên đối tượng; Jev và người rà soát quyết định cuối cùng.
-# Số trong ngoặc là mục tương ứng trong danh sách thông tin xâm phạm an ninh quốc gia.
 
 [xúc phạm, phỉ báng (1, 3): insult]
 xúc phạm

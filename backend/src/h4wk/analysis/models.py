@@ -1,6 +1,3 @@
-"""Dấu hiệu (hits.json), nghi vấn (findings.json), quyết định rà soát
-(một dòng trong reviews.jsonl). hits.json và findings.json là mảng JSON."""
-
 from enum import StrEnum
 from itertools import pairwise
 from typing import Annotated, Literal, Self
@@ -54,16 +51,12 @@ class Severity(StrEnum):
 
 
 class Confidence(StrEnum):
-    """Mức tin cậy viết bằng chữ, không dùng phần trăm."""
-
     UNVERIFIED = "unverified"
     LIKELY = "likely"
     HIGHLY_LIKELY = "highly_likely"
 
 
 class Trigger(Contract):
-    """Dấu hiệu đã kéo một đoạn vào phân tích."""
-
     via: Via
     segment_id: str | None = None
     comment_id: str | None = None
@@ -81,8 +74,6 @@ class Trigger(Contract):
 
 
 class EntityHit(Trigger):
-    """Một dấu hiệu đối tượng (một phần tử của hits.json)."""
-
     entity: str
 
 
@@ -98,8 +89,6 @@ _TIMED_KINDS = {SourceKind.SPEECH, SourceKind.OCR, SourceKind.VISUAL}
 
 
 class Occurrence(Contract):
-    """Một chỗ nghi vấn xuất hiện trong video (một segment của timeline)."""
-
     segment_id: str
     start: NonNegFloat
     end: NonNegFloat
@@ -113,12 +102,6 @@ class Occurrence(Contract):
 
 
 class Finding(Contract):
-    """Một nghi vấn (một phần tử của findings.json).
-
-    `occurrences` liệt kê mọi chỗ cùng một nội dung xuất hiện (vd băng rôn chạy suốt video
-    được OCR ở nhiều đoạn), theo thứ tự thời gian; `segment_id`, `start`, `end` là chỗ đầu tiên.
-    Rỗng khi nghi vấn chỉ ở một chỗ."""
-
     id: FindingId
     run_id: str
     video_id: str
@@ -145,8 +128,6 @@ class Finding(Contract):
     @model_validator(mode="before")
     @classmethod
     def _legacy_llm(cls, data):
-        """Đọc nghi vấn cũ: `analyzer: "llm"` của Jev (provider `typesafe`) thành `"jev"`.
-        Nghi vấn của các LLM khác đã bỏ khỏi dự án nên bị từ chối."""
         if not isinstance(data, dict) or data.get("analyzer") != "llm":
             return data
         model = data.get("model")
@@ -205,8 +186,6 @@ class VerdictAnswer(Contract):
 
 
 class VideoVerdict(VerdictAnswer):
-    """Kết luận theo video (verdict.json), một lần chạy một kết luận."""
-
     run_id: str
     video_id: str
     capture: CaptureTs
@@ -215,15 +194,12 @@ class VideoVerdict(VerdictAnswer):
     @model_validator(mode="before")
     @classmethod
     def _legacy_model(cls, data):
-        """Đọc kết luận cũ do LLM viết: bỏ trường `model`; kết luận nay sinh theo quy tắc."""
         if isinstance(data, dict) and "model" in data:
             data = {k: v for k, v in data.items() if k != "model"}
         return data
 
 
 class ReviewDecision(Contract):
-    """Một quyết định rà soát (một dòng của reviews.jsonl)."""
-
     finding_id: FindingId
     run_id: str
     status: Literal["confirmed", "rejected", "needs_info"]
@@ -239,8 +215,6 @@ class ReviewDecision(Contract):
 
 
 class VideoReviewDecision(Contract):
-    """Một quyết định rà soát cho kết luận của video."""
-
     video_id: str
     run_id: str
     status: Literal["confirmed", "rejected", "needs_info"]

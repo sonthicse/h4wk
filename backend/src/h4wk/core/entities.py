@@ -16,8 +16,6 @@ from h4wk.core.types import VN_TZ, Contract, VnDatetime
 
 
 class Entity(Contract):
-    """Đối tượng cần bảo vệ. Ảnh mẫu nằm ở entities/<id>/refs/{face,image}/."""
-
     id: str = Field(pattern=r"^e_\d{2,}$")
     name: str = Field(min_length=1)
     aliases: list[str] = []
@@ -33,8 +31,6 @@ def _unique_ids(items: list[Entity]) -> list[Entity]:
 
 
 class EntitiesConfig(Contract):
-    """Định dạng config/entities.toml, mỗi đối tượng một bảng [[entities]]."""
-
     entities: Annotated[list[Entity], AfterValidator(_unique_ids)] = []
 
 
@@ -43,13 +39,10 @@ def entities_file() -> Path:
 
 
 def _legacy_file() -> Path:
-    """Chỗ lưu cũ (trước khi gom cấu hình về config/)."""
     return data_dir() / "entities.json"
 
 
 def migrate_legacy() -> bool:
-    """Chưa có entities.toml mà còn data/entities.json thì chuyển sang; file cũ đổi tên thành
-    entities.json.migrated để không bị đọc lại. Trả về True nếu đã chuyển."""
     old = _legacy_file()
     if entities_file().exists() or not old.is_file():
         return False
@@ -115,7 +108,6 @@ def get_entity(entity_id: str) -> Entity:
 
 
 def update_entity(session: Session, entity_id: str, **fields: object) -> Entity:
-    """Sửa tên, biệt danh, viết tắt, mô tả; trường không truyền thì giữ nguyên."""
     entities = load_entities()
     for i, entity in enumerate(entities):
         if entity.id == entity_id:
@@ -182,7 +174,6 @@ def list_refs(entity_id: str) -> dict[str, list[RefImage]]:
 
 
 def add_ref(entity_id: str, kind: RefKind, data: bytes) -> RefImage:
-    """Lưu ảnh mẫu; tên file lấy từ SHA-256 nên tải lại cùng ảnh không tạo bản trùng."""
     get_entity(entity_id)
     if len(data) > MAX_REF_BYTES:
         raise TooLarge(f"image is larger than {MAX_REF_BYTES // (1024 * 1024)} MB")

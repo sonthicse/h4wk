@@ -1,9 +1,3 @@
-"""Adapter yt-dlp (T9): metadata, phụ đề tiếng Việt, comment, thumbnail, video 720p.
-
-Cần Deno trong PATH (JS runtime để giải challenge của YouTube) và curl_cffi (spike T2).
-Các hàm *_from_* là phần chuyển dữ liệu thô sang dữ liệu chung, test được không cần mạng.
-"""
-
 import json
 from datetime import UTC, datetime
 from pathlib import Path
@@ -61,7 +55,6 @@ _NOT_FOUND = (
 
 
 def classify_error(e: Exception) -> CollectorError:
-    """Phân loại lỗi yt-dlp theo nội dung thông báo. Lỗi không nhận ra coi là tạm thời."""
     msg = str(e).lower()
     if any(k in msg for k in _BLOCKED):
         return Blocked(str(e))
@@ -108,7 +101,6 @@ def channel_from_info(info: dict[str, Any]) -> Channel:
 
 
 def channel_from_video_info(info: dict[str, Any]) -> Channel:
-    """Thông tin kênh có sẵn trong metadata của một video (không gọi thêm trang kênh)."""
     handle = info.get("uploader_id")
     return Channel(
         id=info["channel_id"],
@@ -119,7 +111,6 @@ def channel_from_video_info(info: dict[str, Any]) -> Channel:
 
 
 def resolve_channel(url: str) -> tuple[str, str, str | None]:
-    """Đổi link kênh hoặc @handle thành (channel_id, tên kênh, handle)."""
     opts = {"quiet": True, "no_warnings": True, "extract_flat": True, "playlist_items": "0"}
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -154,7 +145,6 @@ def comments_from_info(info: dict[str, Any]) -> list[Comment]:
 
 
 def subtitle_langs(info: dict[str, Any]) -> tuple[list[str], list[str]]:
-    """(phụ đề người đăng tải lên tiếng Việt, phụ đề tự động gốc). Không lấy bản dịch máy."""
     manual = sorted(k for k in info.get("subtitles") or {} if k.startswith("vi"))
     auto = [AUTO_ORIG] if AUTO_ORIG in (info.get("automatic_captions") or {}) else []
     return manual, auto
@@ -193,7 +183,6 @@ def transcripts_from_dir(workdir: Path, video_id: str) -> list[Transcript]:
 
 
 def thumbnail_urls(info: dict[str, Any]) -> dict[str, str]:
-    """Bản jpg lớn nhất và các khung 0–3.jpg."""
     jpgs = [t for t in info.get("thumbnails") or [] if t["url"].split("?")[0].endswith(".jpg")]
     urls = {}
     if jpgs:

@@ -1,6 +1,3 @@
-"""Đăng nhập một tài khoản duy nhất. Tên và mật khẩu lấy từ `USERNAME`, `PASSWORD` trong file
-.env. Cookie chỉ chứa token ngẫu nhiên, database lưu SHA-256 của token."""
-
 import hashlib
 import hmac
 import secrets
@@ -26,7 +23,6 @@ def _token_hash(token: str) -> str:
 
 
 def account() -> tuple[str, str]:
-    """Tên và mật khẩu của tài khoản duy nhất; thiếu thì báo lỗi rõ."""
     env = config.dotenv()
     username, password = env.get(USERNAME), env.get(PASSWORD)
     if not username or not password:
@@ -54,7 +50,6 @@ def start_session(username: str) -> str:
 
 
 def session_user(token: str | None) -> str | None:
-    """Username của phiên còn hạn, hoặc None."""
     if not token:
         return None
     with Session(get_engine()) as s:

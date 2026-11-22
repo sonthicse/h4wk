@@ -1,5 +1,3 @@
-"""Hàng đợi rà soát: nghi vấn của lần chạy mới nhất cho mỗi bản thu, kèm trạng thái."""
-
 from typing import Literal
 
 from pydantic import BaseModel, ValidationError
@@ -43,7 +41,6 @@ def _video(video_id: str, capture: str) -> VideoRef:
 
 
 def video_ref(video_id: str) -> VideoRef:
-    """Tiêu đề và kênh theo bản thu mới nhất có metadata video."""
     from h4wk.evidence.writer import list_captures
 
     for cap in reversed(list_captures(data_dir() / "videos" / video_id / "captures")):

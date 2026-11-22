@@ -116,10 +116,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Add Ref
-         * @description Thân request là bytes của ảnh (không dùng multipart).
-         */
+        /** Add Ref */
         post: operations["add_ref_api_entities__entity_id__refs__kind__post"];
         delete?: never;
         options?: never;
@@ -154,10 +151,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Collect
-         * @description Link video: một job. Link playlist: mỗi video một job (tối đa playlist_max_videos).
-         */
+        /** Collect */
         post: operations["collect_api_collect_post"];
         delete?: never;
         options?: never;
@@ -174,11 +168,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Reanalyze
-         * @description Phân tích lại bản thu mới nhất đã có timeline, không thu lại hay chạy media. Dùng sau
-         *     khi sửa đối tượng hoặc từ điển.
-         */
+        /** Reanalyze */
         post: operations["reanalyze_api_reanalyze_post"];
         delete?: never;
         options?: never;
@@ -227,10 +217,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Findings
-         * @description latest_only=true: chỉ bản thu mới nhất của mỗi video.
-         */
+        /** Findings */
         get: operations["findings_api_findings_get"];
         put?: never;
         post?: never;
@@ -247,10 +234,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Review Queue
-         * @description latest_only=true: chỉ bản thu mới nhất của mỗi video (thu lại không làm lặp nghi vấn).
-         */
+        /** Review Queue */
         get: operations["review_queue_api_review_queue_get"];
         put?: never;
         post?: never;
@@ -386,10 +370,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get Timeline
-         * @description Timeline của bản thu chỉ định, mặc định là bản thu mới nhất đã có timeline.
-         */
+        /** Get Timeline */
         get: operations["get_timeline_api_videos__video_id__timeline_get"];
         put?: never;
         post?: never;
@@ -406,10 +387,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get Transcripts
-         * @description Transcript của bản thu chỉ định, mặc định là bản thu mới nhất có transcript.
-         */
+        /** Get Transcripts */
         get: operations["get_transcripts_api_videos__video_id__transcripts_get"];
         put?: never;
         post?: never;
@@ -426,10 +404,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get Comments
-         * @description Comment phẳng, reply có parent_id. Mặc định lấy bản thu mới nhất đã thu comment.
-         */
+        /** Get Comments */
         get: operations["get_comments_api_videos__video_id__comments_get"];
         put?: never;
         post?: never;
@@ -446,10 +421,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get Media
-         * @description Bản proxy 480p nếu đã có, nếu không thì file video gốc. Hỗ trợ Range.
-         */
+        /** Get Media */
         get: operations["get_media_api_videos__video_id__media_get"];
         put?: never;
         post?: never;
@@ -517,10 +489,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Get File
-         * @description Tải file gốc; chỉ file có trong manifest (hoặc chính manifest.json).
-         */
+        /** Get File */
         get: operations["get_file_api_videos__video_id__captures__capture__files__path__get"];
         put?: never;
         post?: never;
@@ -540,10 +509,7 @@ export interface paths {
         /** List Watchlist */
         get: operations["list_watchlist_api_watchlist_get"];
         put?: never;
-        /**
-         * Add Watch
-         * @description Thêm kênh; bước thêm kênh (thu hồ sơ, xử lý video mới nhất) chạy nền ngay sau đó.
-         */
+        /** Add Watch */
         post: operations["add_watch_api_watchlist_post"];
         delete?: never;
         options?: never;
@@ -578,10 +544,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Check Now
-         * @description Check now: RSS cộng danh sách video của kênh (không chờ cache RSS).
-         */
+        /** Check Now */
         post: operations["check_now_api_watchlist__item_id__check_post"];
         delete?: never;
         options?: never;
@@ -613,10 +576,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Dashboard
-         * @description latest_only=true: số nghi vấn và video nổi bật chỉ tính bản thu mới nhất mỗi video.
-         */
+        /** Dashboard */
         get: operations["dashboard_api_dashboard_get"];
         put?: never;
         post?: never;
@@ -705,11 +665,7 @@ export interface paths {
         };
         /** Get Watchlist Settings */
         get: operations["get_watchlist_settings_api_settings_watchlist_get"];
-        /**
-         * Put Watchlist Settings
-         * @description Chu kỳ kiểm tra, số video xử lý khi thêm kênh, số luồng mỗi kênh ([watchlist] trong
-         *     sources.toml).
-         */
+        /** Put Watchlist Settings */
         put: operations["put_watchlist_settings_api_settings_watchlist_put"];
         post?: never;
         delete?: never;
@@ -794,10 +750,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Health
-         * @description Kiểm tra API còn sống.
-         */
+        /** Health */
         get: operations["health_api_health_get"];
         put?: never;
         post?: never;
@@ -813,7 +766,6 @@ export interface components {
     schemas: {
         /**
          * Cap
-         * @description Loại dữ liệu một nguồn thu lấy được. Giá trị dùng trong trường `what` của manifest.
          * @enum {string}
          */
         Cap: "video.metadata" | "channel.metadata" | "channel.videos" | "playlist.videos" | "video.transcripts" | "video.comments" | "video.thumbnails" | "video.media";
@@ -910,7 +862,6 @@ export interface components {
         };
         /**
          * CollectLevel
-         * @description Mức thu.
          * @enum {string}
          */
         CollectLevel: "metadata" | "text" | "full";
@@ -933,7 +884,6 @@ export interface components {
         };
         /**
          * Confidence
-         * @description Mức tin cậy viết bằng chữ, không dùng phần trăm.
          * @enum {string}
          */
         Confidence: "unverified" | "likely" | "highly_likely";
@@ -987,10 +937,7 @@ export interface components {
              */
             note: string;
         };
-        /**
-         * Entity
-         * @description Đối tượng cần bảo vệ. Ảnh mẫu nằm ở entities/<id>/refs/{face,image}/.
-         */
+        /** Entity */
         Entity: {
             /** Id */
             id: string;
@@ -1116,14 +1063,7 @@ export interface components {
          * @enum {string}
          */
         FileStatus: "OK" | "FAIL" | "missing" | "unexpected";
-        /**
-         * Finding
-         * @description Một nghi vấn (một phần tử của findings.json).
-         *
-         *     `occurrences` liệt kê mọi chỗ cùng một nội dung xuất hiện (vd băng rôn chạy suốt video
-         *     được OCR ở nhiều đoạn), theo thứ tự thời gian; `segment_id`, `start`, `end` là chỗ đầu tiên.
-         *     Rỗng khi nghi vấn chỉ ở một chỗ.
-         */
+        /** Finding */
         Finding: {
             /** Id */
             id: string;
@@ -1182,10 +1122,7 @@ export interface components {
              */
             occurrences: components["schemas"]["Occurrence"][];
         };
-        /**
-         * Frame
-         * @description Keyframe thuộc một đoạn; ảnh gửi thẳng cho Jev, không có mô tả.
-         */
+        /** Frame */
         Frame: {
             /** Frame */
             frame: string;
@@ -1224,10 +1161,7 @@ export interface components {
             /** Video Id */
             video_id: string | null;
         };
-        /**
-         * JevMonthUsage
-         * @description Tổng tháng hiện tại theo giờ Việt Nam, chỉ gồm token TypeSafe báo.
-         */
+        /** JevMonthUsage */
         JevMonthUsage: {
             /** Requests */
             requests: number;
@@ -1417,10 +1351,7 @@ export interface components {
             /** Model */
             model: string;
         };
-        /**
-         * Occurrence
-         * @description Một chỗ nghi vấn xuất hiện trong video (một segment của timeline).
-         */
+        /** Occurrence */
         Occurrence: {
             /** Segment Id */
             segment_id: string;
@@ -1485,10 +1416,7 @@ export interface components {
             /** Url */
             url: string;
         };
-        /**
-         * ReviewDecision
-         * @description Một quyết định rà soát (một dòng của reviews.jsonl).
-         */
+        /** ReviewDecision */
         ReviewDecision: {
             /** Finding Id */
             finding_id: string;
@@ -1556,10 +1484,7 @@ export interface components {
              */
             low: number;
         };
-        /**
-         * SourceCall
-         * @description Một lần gọi (hoặc bỏ qua) một nguồn cho một loại dữ liệu.
-         */
+        /** SourceCall */
         SourceCall: {
             /** Provider */
             provider: string | null;
@@ -1886,10 +1811,7 @@ export interface components {
             /** View Count */
             view_count?: number | null;
         };
-        /**
-         * VideoReviewDecision
-         * @description Một quyết định rà soát cho kết luận của video.
-         */
+        /** VideoReviewDecision */
         VideoReviewDecision: {
             /** Video Id */
             video_id: string;
@@ -1926,10 +1848,7 @@ export interface components {
             /** Latest Capture */
             latest_capture: string;
         };
-        /**
-         * VideoVerdict
-         * @description Kết luận theo video (verdict.json), một lần chạy một kết luận.
-         */
+        /** VideoVerdict */
         VideoVerdict: {
             /**
              * Violation
@@ -2031,10 +1950,7 @@ export interface components {
             /** Worker Threads */
             worker_threads: number;
         };
-        /**
-         * Trigger
-         * @description Dấu hiệu đã kéo một đoạn vào phân tích.
-         */
+        /** Trigger */
         h4wk__analysis__models__Trigger: {
             via: components["schemas"]["Via"];
             /** Segment Id */

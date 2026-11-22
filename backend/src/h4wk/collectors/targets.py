@@ -1,5 +1,3 @@
-"""Phân loại đầu vào người dùng dán vào: link hoặc ID video, kênh, @handle, playlist."""
-
 import re
 from dataclasses import dataclass
 from enum import StrEnum

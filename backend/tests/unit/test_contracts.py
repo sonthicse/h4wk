@@ -1,5 +1,3 @@
-"""Test quy ước dữ liệu: mỗi mô hình có ví dụ hợp lệ và ví dụ bị từ chối."""
-
 import copy
 import json
 import tomllib
@@ -199,7 +197,6 @@ SOURCES: dict[str, Any] = {
 
 
 def _set(path: str, value: Any):
-    """Trả về hàm sửa một trường theo đường dẫn kiểu 'a.0.b'."""
 
     def mutate(d: dict[str, Any]) -> dict[str, Any]:
         d = copy.deepcopy(d)
@@ -395,7 +392,6 @@ def test_config_lists_rejected_for_the_right_rule(model, why: str, message: str)
 
 
 def test_legacy_jev_finding_becomes_jev() -> None:
-    """Nghi vấn cũ của Jev ghi `analyzer: "llm"` với provider `typesafe` được đọc thành `jev`."""
     finding = Finding.model_validate(_finding(analyzer="llm"))
     assert finding.analyzer == "jev"
     assert finding == Finding.model_validate(_finding())
@@ -409,7 +405,6 @@ def test_frame_outside_segment_rejected_for_the_right_rule() -> None:
 
 
 def test_legacy_timeline_visual_becomes_frames() -> None:
-    """Timeline cũ: visual của đoạn thành frames, visual của thumbnail bị bỏ."""
     legacy = copy.deepcopy(TIMELINE)
     legacy["segments"][0].pop("frames")
     legacy["segments"][0]["visual"] = [

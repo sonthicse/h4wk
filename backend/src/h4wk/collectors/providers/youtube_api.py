@@ -1,10 +1,3 @@
-"""Adapter YouTube Data API v3 (T14): metadata, comment, thumbnail, danh sách video.
-
-Không lấy transcript và video. Danh sách video của kênh lấy qua uploads playlist, không dùng
-`search.list` (tốn 100 đơn vị). Key gửi qua header `X-Goog-Api-Key`, không bao giờ đặt trong URL.
-Các hàm *_from_* là phần chuyển dữ liệu thô sang dữ liệu chung, test được không cần mạng.
-"""
-
 import json
 import re
 from collections.abc import Callable
@@ -70,7 +63,6 @@ _DURATION = re.compile(r"^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)
 
 
 def parse_duration(value: str | None) -> float | None:
-    """Đổi thời lượng ISO 8601 (PT4M13S, P1DT1S) sang giây."""
     if value is None:
         return None
     m = _DURATION.match(value)
@@ -81,7 +73,6 @@ def parse_duration(value: str | None) -> float | None:
 
 
 def _int(v: Any) -> int | None:
-    """API trả số dạng chuỗi."""
     return int(v) if v is not None else None
 
 
@@ -148,8 +139,6 @@ def _comment(c: dict[str, Any], parent_id: str | None) -> Comment:
 def comments_from_api(
     threads: list[dict[str, Any]], replies: dict[str, list[dict[str, Any]]]
 ) -> list[Comment]:
-    """Comment gốc rồi đến reply của nó. `replies` là reply đã lấy đủ qua comments.list; thread
-    không có trong đó thì dùng reply kèm sẵn (tối đa 5) trong response của thread."""
     out: dict[str, Comment] = {}
     for t in threads:
         for c in [_comment(t["snippet"]["topLevelComment"], None)] + [
@@ -161,14 +150,12 @@ def comments_from_api(
 
 
 def thumbnail_candidates(item: dict[str, Any]) -> list[tuple[str, int | None, int | None]]:
-    """Các bản thumbnail API liệt kê, lớn nhất trước."""
     thumbs = (item.get("snippet", {}).get("thumbnails") or {}).values()
     ordered = sorted(thumbs, key=lambda t: t.get("width") or 0, reverse=True)
     return [(t["url"], t.get("width"), t.get("height")) for t in ordered]
 
 
 def thumbnails_from_api(item: dict[str, Any]) -> dict[str, tuple[str, int | None, int | None]]:
-    """Bản lớn nhất và các khung 0–3.jpg (giống ytdlp.thumbnail_urls)."""
     candidates = thumbnail_candidates(item)
     out: dict[str, tuple[str, int | None, int | None]] = {}
     if candidates:
@@ -224,7 +211,6 @@ class YouTubeApiCollector:
     def _get(
         self, path: str, params: dict[str, Any], empty_on: str | None = None
     ) -> dict[str, Any]:
-        """Gọi một endpoint (1 đơn vị quota). Lỗi có reason `empty_on` coi như không có dữ liệu."""
         key = self.key()
         if not key:
             raise Blocked(f"{KEY_NAME} is not set")
@@ -310,7 +296,6 @@ class YouTubeApiCollector:
         return Normalized.model_validate(n)
 
     def _comments(self, target: Target, workdir: Path) -> list[Comment]:
-        """Toàn bộ comment: mọi trang thread, reply thiếu thì lấy thêm qua comments.list."""
         base = {"part": "snippet,replies", "videoId": target.id, "maxResults": 100}
         pages = self._pages(
             "commentThreads", base, textFormat="plainText", empty_on="commentsDisabled"
@@ -341,7 +326,6 @@ class YouTubeApiCollector:
         empty_on: str | None = None,
         **extra: Any,
     ) -> list[dict[str, Any]]:
-        """Đọc lần lượt các trang tới khi hết nextPageToken (hoặc đủ `limit` mục)."""
         params = {**params, **extra}
         pages: list[dict[str, Any]] = []
         count = 0

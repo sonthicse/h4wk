@@ -1,5 +1,3 @@
-"""Gom câu phụ đề thành các đoạn timeline."""
-
 from pathlib import Path
 
 from pydantic import ValidationError
@@ -21,15 +19,11 @@ TRANSCRIPT_PRIORITY = [
 
 
 def _starts_sentence(previous: TranscriptSegment, sentence: TranscriptSegment) -> bool:
-    """Mẩu phụ đề mở đầu câu mới: mẩu trước kết thúc bằng dấu câu, hoặc mẩu này viết hoa
-    chữ đầu. Mẩu bắt đầu bằng chữ thường là phần tiếp của câu trước."""
     text = sentence.text.lstrip(" -\"“'(")
     return previous.text.rstrip().endswith((".", "?", "!", "…")) or not text[:1].islower()
 
 
 def group_segments(sentences: list[TranscriptSegment]) -> list[Segment]:
-    """Gom mẩu phụ đề thành đoạn dài từ SEGMENT_MIN_S giây, chỉ cắt ở ranh giới câu để một
-    câu không bị chia sang hai đoạn; câu quá dài thì cắt khi đoạn vượt SEGMENT_MAX_S giây."""
     groups: list[list[TranscriptSegment]] = []
     for sentence in sorted(sentences, key=lambda item: item.start):
         if groups:

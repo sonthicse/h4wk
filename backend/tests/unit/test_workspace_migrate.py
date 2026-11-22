@@ -11,13 +11,11 @@ from h4wk.watchlist import service
 
 
 def test_init_adds_no_entity_or_channel(data_dir, config_dir):
-    """Khởi tạo không tự thêm đối tượng hay kênh: ai dùng cũng tự khai báo của mình."""
     init_workspace(data_dir, config_dir)
     assert load_entities() == [] and service.load_channels() == []
 
 
 def test_init_moves_old_entities_and_watchlist_to_config(data_dir, config_dir):
-    """Máy đang chạy bản cũ: đối tượng ở data/entities.json, kênh chỉ ở database."""
     data_dir.mkdir(parents=True)
     old = [{"id": "e_01", "name": "Nguyễn Văn A", "aliases": ["Ông A"], "abbreviations": []}]
     (data_dir / "entities.json").write_text(json.dumps(old), encoding="utf-8")

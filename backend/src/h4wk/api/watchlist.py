@@ -1,5 +1,3 @@
-"""API watchlist và dòng sự kiện (T30). Mọi thao tác ghi đều để lại dòng audit."""
-
 from datetime import datetime
 from typing import Annotated
 
@@ -89,7 +87,6 @@ def list_watchlist() -> list[WatchItem]:
 
 @router.post("/api/watchlist", status_code=status.HTTP_201_CREATED)
 def add_watch(body: WatchCreate, actor: ActorDep) -> WatchItem:
-    """Thêm kênh; bước thêm kênh (thu hồ sơ, xử lý video mới nhất) chạy nền ngay sau đó."""
     try:
         item = service.add_channel(body.url, body.level)
     except service.Duplicate as e:
@@ -126,7 +123,6 @@ def delete_watch(item_id: str, actor: ActorDep) -> Response:
 
 @router.post("/api/watchlist/{item_id}/check")
 def check_now(item_id: str, actor: ActorDep) -> CheckResult:
-    """Check now: RSS cộng danh sách video của kênh (không chờ cache RSS)."""
     try:
         new = service.check(item_id, listing=True)
     except service.NotFound:

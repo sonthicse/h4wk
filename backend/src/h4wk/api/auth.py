@@ -1,5 +1,3 @@
-"""API đăng nhập, đăng xuất (T7). Đăng nhập sai được ghi vào system audit."""
-
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from pydantic import BaseModel
 

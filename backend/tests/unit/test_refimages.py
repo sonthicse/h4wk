@@ -1,5 +1,3 @@
-"""T40: khớp ảnh mẫu, dùng embedder giả (không cần torch)."""
-
 from pathlib import Path
 
 import cv2
@@ -11,8 +9,6 @@ from h4wk.media.timeline import Frame, FrameOcr, Segment, Timeline
 
 
 class ColorEmbedder:
-    """Embedding giả: màu trung bình đã chuẩn hoá L2 (đủ để phân biệt ô đỏ với ô xanh)."""
-
     name = "fake-color"
 
     def __init__(self):
@@ -126,7 +122,6 @@ def test_to_hits_assigns_segment_by_timeline():
 
 
 def test_embedder_requires_cuda(monkeypatch):
-    """Máy không có GPU NVIDIA: khớp ảnh mẫu báo lỗi rõ, không lặng lẽ chạy CPU."""
     import torch
 
     monkeypatch.setattr(torch.cuda, "is_available", lambda: False)

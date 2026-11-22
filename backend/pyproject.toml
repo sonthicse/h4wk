@@ -14,13 +14,11 @@ dependencies = [
     "yt-dlp[curl-cffi,default]>=2026.10.26",
     "huey>=2.5",
     "httpx2>=2.16",
-    # STT (faster-whisper) và khớp ảnh mẫu (torch, transformers) chạy trên GPU NVIDIA; máy chạy bắt buộc có GPU.
     "av==16.1.0",
     "faster-whisper>=1.2.1",
     "torch==2.6.0",
     "torchvision==0.21.0",
     "transformers>=4.49,<5",
-    # Wheel torch cu126 trên index PyTorch không khai báo thư viện CUDA; ghim từng gói.
     "nvidia-cublas-cu12==12.6.4.1",
     "nvidia-cuda-cupti-cu12==12.6.80",
     "nvidia-cuda-nvrtc-cu12==12.6.77",
@@ -43,7 +41,6 @@ dev = [
 ]
 
 [tool.uv]
-# Chỉ chạy trên Linux x86_64 (WSL2) có GPU NVIDIA; lock chỉ giải cho môi trường này.
 environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
 
 [tool.uv.sources]

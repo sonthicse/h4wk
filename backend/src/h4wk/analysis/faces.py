@@ -1,5 +1,3 @@
-"""Khớp khuôn mặt cục bộ; không lưu đặc trưng ảnh đầu vào."""
-
 import hashlib
 from functools import lru_cache
 from pathlib import Path

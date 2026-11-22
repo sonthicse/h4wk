@@ -1,5 +1,3 @@
-"""API bằng chứng (T29): manifest, file gốc và kiểm tra toàn vẹn của một bản thu."""
-
 from datetime import datetime
 from typing import Annotated
 
@@ -94,7 +92,6 @@ def verify_capture(video_id: str, capture: str, actor: ActorDep) -> VerifyResult
 
 @router.get("/files/{path:path}", response_class=FileResponse)
 def get_file(video_id: str, capture: str, path: str) -> FileResponse:
-    """Tải file gốc; chỉ file có trong manifest (hoặc chính manifest.json)."""
     cap_dir = _dir(video_id, capture)
     m = _manifest(video_id, capture)
     if path != "manifest.json" and path not in m.files:

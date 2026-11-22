@@ -1,9 +1,3 @@
-"""Chạy câu hỏi violation của Jev trên một CSV (label,group,text); ghi phản hồi thô ra jsonl.
-
-Chạy trong backend/:
-    uv run python ../docs/eval/violation_run.py ../docs/eval/violation_set.csv out.jsonl
-Cần TYPESAFE_API_KEY. Mỗi dòng là một request (tính token).
-"""
 
 import csv
 import json

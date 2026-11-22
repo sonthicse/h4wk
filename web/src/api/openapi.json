@@ -251,7 +251,6 @@
           "entities"
         ],
         "summary": "Add Ref",
-        "description": "Th\u00e2n request l\u00e0 bytes c\u1ee7a \u1ea3nh (kh\u00f4ng d\u00f9ng multipart).",
         "operationId": "add_ref_api_entities__entity_id__refs__kind__post",
         "parameters": [
           {
@@ -442,7 +441,6 @@
           "jobs"
         ],
         "summary": "Collect",
-        "description": "Link video: m\u1ed9t job. Link playlist: m\u1ed7i video m\u1ed9t job (t\u1ed1i \u0111a playlist_max_videos).",
         "operationId": "collect_api_collect_post",
         "requestBody": {
           "content": {
@@ -488,7 +486,6 @@
           "jobs"
         ],
         "summary": "Reanalyze",
-        "description": "Ph\u00e2n t\u00edch l\u1ea1i b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 c\u00f3 timeline, kh\u00f4ng thu l\u1ea1i hay ch\u1ea1y media. D\u00f9ng sau\nkhi s\u1eeda \u0111\u1ed1i t\u01b0\u1ee3ng ho\u1eb7c t\u1eeb \u0111i\u1ec3n.",
         "operationId": "reanalyze_api_reanalyze_post",
         "requestBody": {
           "content": {
@@ -601,7 +598,6 @@
           "jobs"
         ],
         "summary": "Findings",
-        "description": "latest_only=true: ch\u1ec9 b\u1ea3n thu m\u1edbi nh\u1ea5t c\u1ee7a m\u1ed7i video.",
         "operationId": "findings_api_findings_get",
         "parameters": [
           {
@@ -649,7 +645,6 @@
           "review"
         ],
         "summary": "Review Queue",
-        "description": "latest_only=true: ch\u1ec9 b\u1ea3n thu m\u1edbi nh\u1ea5t c\u1ee7a m\u1ed7i video (thu l\u1ea1i kh\u00f4ng l\u00e0m l\u1eb7p nghi v\u1ea5n).",
         "operationId": "review_queue_api_review_queue_get",
         "parameters": [
           {
@@ -1110,7 +1105,6 @@
           "videos"
         ],
         "summary": "Get Timeline",
-        "description": "Timeline c\u1ee7a b\u1ea3n thu ch\u1ec9 \u0111\u1ecbnh, m\u1eb7c \u0111\u1ecbnh l\u00e0 b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 c\u00f3 timeline.",
         "operationId": "get_timeline_api_videos__video_id__timeline_get",
         "parameters": [
           {
@@ -1169,7 +1163,6 @@
           "videos"
         ],
         "summary": "Get Transcripts",
-        "description": "Transcript c\u1ee7a b\u1ea3n thu ch\u1ec9 \u0111\u1ecbnh, m\u1eb7c \u0111\u1ecbnh l\u00e0 b\u1ea3n thu m\u1edbi nh\u1ea5t c\u00f3 transcript.",
         "operationId": "get_transcripts_api_videos__video_id__transcripts_get",
         "parameters": [
           {
@@ -1232,7 +1225,6 @@
           "videos"
         ],
         "summary": "Get Comments",
-        "description": "Comment ph\u1eb3ng, reply c\u00f3 parent_id. M\u1eb7c \u0111\u1ecbnh l\u1ea5y b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 thu comment.",
         "operationId": "get_comments_api_videos__video_id__comments_get",
         "parameters": [
           {
@@ -1295,7 +1287,6 @@
           "videos"
         ],
         "summary": "Get Media",
-        "description": "B\u1ea3n proxy 480p n\u1ebfu \u0111\u00e3 c\u00f3, n\u1ebfu kh\u00f4ng th\u00ec file video g\u1ed1c. H\u1ed7 tr\u1ee3 Range.",
         "operationId": "get_media_api_videos__video_id__media_get",
         "parameters": [
           {
@@ -1509,7 +1500,6 @@
           "captures"
         ],
         "summary": "Get File",
-        "description": "T\u1ea3i file g\u1ed1c; ch\u1ec9 file c\u00f3 trong manifest (ho\u1eb7c ch\u00ednh manifest.json).",
         "operationId": "get_file_api_videos__video_id__captures__capture__files__path__get",
         "parameters": [
           {
@@ -1586,7 +1576,6 @@
           "watchlist"
         ],
         "summary": "Add Watch",
-        "description": "Th\u00eam k\u00eanh; b\u01b0\u1edbc th\u00eam k\u00eanh (thu h\u1ed3 s\u01a1, x\u1eed l\u00fd video m\u1edbi nh\u1ea5t) ch\u1ea1y n\u1ec1n ngay sau \u0111\u00f3.",
         "operationId": "add_watch_api_watchlist_post",
         "requestBody": {
           "content": {
@@ -1713,7 +1702,6 @@
           "watchlist"
         ],
         "summary": "Check Now",
-        "description": "Check now: RSS c\u1ed9ng danh s\u00e1ch video c\u1ee7a k\u00eanh (kh\u00f4ng ch\u1edd cache RSS).",
         "operationId": "check_now_api_watchlist__item_id__check_post",
         "parameters": [
           {
@@ -1803,7 +1791,6 @@
           "dashboard"
         ],
         "summary": "Dashboard",
-        "description": "latest_only=true: s\u1ed1 nghi v\u1ea5n v\u00e0 video n\u1ed5i b\u1eadt ch\u1ec9 t\u00ednh b\u1ea3n thu m\u1edbi nh\u1ea5t m\u1ed7i video.",
         "operationId": "dashboard_api_dashboard_get",
         "parameters": [
           {
@@ -2122,7 +2109,6 @@
           "settings"
         ],
         "summary": "Put Watchlist Settings",
-        "description": "Chu k\u1ef3 ki\u1ec3m tra, s\u1ed1 video x\u1eed l\u00fd khi th\u00eam k\u00eanh, s\u1ed1 lu\u1ed3ng m\u1ed7i k\u00eanh ([watchlist] trong\nsources.toml).",
         "operationId": "put_watchlist_settings_api_settings_watchlist_put",
         "requestBody": {
           "content": {
@@ -2311,7 +2297,6 @@
     "/api/health": {
       "get": {
         "summary": "Health",
-        "description": "Ki\u1ec3m tra API c\u00f2n s\u1ed1ng.",
         "operationId": "health_api_health_get",
         "responses": {
           "200": {
@@ -2346,8 +2331,7 @@
           "video.thumbnails",
           "video.media"
         ],
-        "title": "Cap",
-        "description": "Lo\u1ea1i d\u1eef li\u1ec7u m\u1ed9t ngu\u1ed3n thu l\u1ea5y \u0111\u01b0\u1ee3c. Gi\u00e1 tr\u1ecb d\u00f9ng trong tr\u01b0\u1eddng `what` c\u1ee7a manifest."
+        "title": "Cap"
       },
       "CaptureDetail": {
         "properties": {
@@ -2632,8 +2616,7 @@
           "text",
           "full"
         ],
-        "title": "CollectLevel",
-        "description": "M\u1ee9c thu."
+        "title": "CollectLevel"
       },
       "Comment": {
         "properties": {
@@ -2717,8 +2700,7 @@
           "likely",
           "highly_likely"
         ],
-        "title": "Confidence",
-        "description": "M\u1ee9c tin c\u1eady vi\u1ebft b\u1eb1ng ch\u1eef, kh\u00f4ng d\u00f9ng ph\u1ea7n tr\u0103m."
+        "title": "Confidence"
       },
       "Cost": {
         "properties": {
@@ -2931,8 +2913,7 @@
           "id",
           "name"
         ],
-        "title": "Entity",
-        "description": "\u0110\u1ed1i t\u01b0\u1ee3ng c\u1ea7n b\u1ea3o v\u1ec7. \u1ea2nh m\u1eabu n\u1eb1m \u1edf entities/<id>/refs/{face,image}/."
+        "title": "Entity"
       },
       "EntityCreate": {
         "properties": {
@@ -3487,8 +3468,7 @@
           "confidence",
           "reason"
         ],
-        "title": "Finding",
-        "description": "M\u1ed9t nghi v\u1ea5n (m\u1ed9t ph\u1ea7n t\u1eed c\u1ee7a findings.json).\n\n`occurrences` li\u1ec7t k\u00ea m\u1ecdi ch\u1ed7 c\u00f9ng m\u1ed9t n\u1ed9i dung xu\u1ea5t hi\u1ec7n (vd b\u0103ng r\u00f4n ch\u1ea1y su\u1ed1t video\n\u0111\u01b0\u1ee3c OCR \u1edf nhi\u1ec1u \u0111o\u1ea1n), theo th\u1ee9 t\u1ef1 th\u1eddi gian; `segment_id`, `start`, `end` l\u00e0 ch\u1ed7 \u0111\u1ea7u ti\u00ean.\nR\u1ed7ng khi nghi v\u1ea5n ch\u1ec9 \u1edf m\u1ed9t ch\u1ed7."
+        "title": "Finding"
       },
       "Frame": {
         "properties": {
@@ -3508,8 +3488,7 @@
           "frame",
           "t"
         ],
-        "title": "Frame",
-        "description": "Keyframe thu\u1ed9c m\u1ed9t \u0111o\u1ea1n; \u1ea3nh g\u1eedi th\u1eb3ng cho Jev, kh\u00f4ng c\u00f3 m\u00f4 t\u1ea3."
+        "title": "Frame"
       },
       "FrameOcr": {
         "properties": {
@@ -3642,8 +3621,7 @@
           "input_tokens",
           "output_tokens"
         ],
-        "title": "JevMonthUsage",
-        "description": "T\u1ed5ng th\u00e1ng hi\u1ec7n t\u1ea1i theo gi\u1edd Vi\u1ec7t Nam, ch\u1ec9 g\u1ed3m token TypeSafe b\u00e1o."
+        "title": "JevMonthUsage"
       },
       "JevSettingsView": {
         "properties": {
@@ -4197,8 +4175,7 @@
           "start",
           "end"
         ],
-        "title": "Occurrence",
-        "description": "M\u1ed9t ch\u1ed7 nghi v\u1ea5n xu\u1ea5t hi\u1ec7n trong video (m\u1ed9t segment c\u1ee7a timeline)."
+        "title": "Occurrence"
       },
       "OcrText": {
         "properties": {
@@ -4395,8 +4372,7 @@
           "by",
           "at"
         ],
-        "title": "ReviewDecision",
-        "description": "M\u1ed9t quy\u1ebft \u0111\u1ecbnh r\u00e0 so\u00e1t (m\u1ed9t d\u00f2ng c\u1ee7a reviews.jsonl)."
+        "title": "ReviewDecision"
       },
       "Segment": {
         "properties": {
@@ -4558,8 +4534,7 @@
           "what",
           "status"
         ],
-        "title": "SourceCall",
-        "description": "M\u1ed9t l\u1ea7n g\u1ecdi (ho\u1eb7c b\u1ecf qua) m\u1ed9t ngu\u1ed3n cho m\u1ed9t lo\u1ea1i d\u1eef li\u1ec7u."
+        "title": "SourceCall"
       },
       "SourceInfo": {
         "properties": {
@@ -5524,8 +5499,7 @@
           "by",
           "at"
         ],
-        "title": "VideoReviewDecision",
-        "description": "M\u1ed9t quy\u1ebft \u0111\u1ecbnh r\u00e0 so\u00e1t cho k\u1ebft lu\u1eadn c\u1ee7a video."
+        "title": "VideoReviewDecision"
       },
       "VideoSummary": {
         "properties": {
@@ -5664,8 +5638,7 @@
           "capture",
           "at"
         ],
-        "title": "VideoVerdict",
-        "description": "K\u1ebft lu\u1eadn theo video (verdict.json), m\u1ed9t l\u1ea7n ch\u1ea1y m\u1ed9t k\u1ebft lu\u1eadn."
+        "title": "VideoVerdict"
       },
       "VideoVerdictDetail": {
         "properties": {
@@ -5988,8 +5961,7 @@
         "required": [
           "via"
         ],
-        "title": "Trigger",
-        "description": "D\u1ea5u hi\u1ec7u \u0111\u00e3 k\u00e9o m\u1ed9t \u0111o\u1ea1n v\u00e0o ph\u00e2n t\u00edch."
+        "title": "Trigger"
       },
       "h4wk__evidence__models__Trigger": {
         "properties": {

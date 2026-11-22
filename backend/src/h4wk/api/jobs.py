@@ -1,5 +1,3 @@
-"""API thu thập, job và nghi vấn (T12)."""
-
 import re
 from datetime import datetime
 from typing import Annotated
@@ -53,7 +51,6 @@ class Job(BaseModel):
 
 @router.post("/api/collect", status_code=status.HTTP_202_ACCEPTED)
 def collect(body: CollectBody, actor: ActorDep) -> list[Job]:
-    """Link video: một job. Link playlist: mỗi video một job (tối đa playlist_max_videos)."""
 
     def reject(code: int, msg: str) -> HTTPException:
         audit.log(actor, "job.create", body.url, {"error": msg}, status="error")
@@ -98,8 +95,6 @@ class ReanalyzeBody(BaseModel):
 
 @router.post("/api/reanalyze", status_code=status.HTTP_202_ACCEPTED)
 def reanalyze(body: ReanalyzeBody, actor: ActorDep, session: SessionDep) -> list[Job]:
-    """Phân tích lại bản thu mới nhất đã có timeline, không thu lại hay chạy media. Dùng sau
-    khi sửa đối tượng hoặc từ điển."""
     root = pipeline.data_dir() / "videos"
     ids = body.video_ids
     if ids is None:
@@ -144,5 +139,4 @@ def get_job(job_id: str, session: SessionDep) -> Job:
 
 @router.get("/api/findings")
 def findings(latest_only: bool = False) -> list[Finding]:
-    """latest_only=true: chỉ bản thu mới nhất của mỗi video."""
     return pipeline.latest_findings(latest_only)

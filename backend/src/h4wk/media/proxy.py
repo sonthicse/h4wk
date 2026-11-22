@@ -1,5 +1,3 @@
-"""Tạo các tệp media phái sinh trong thư mục riêng của một bản thu bất biến."""
-
 import json
 import subprocess
 from pathlib import Path

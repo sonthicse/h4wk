@@ -1,5 +1,3 @@
-"""Bước xử lý bản thu full, gọi trong worker GPU với một SttWorker dùng lại giữa các job."""
-
 import logging
 from pathlib import Path
 
