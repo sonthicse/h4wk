@@ -200,7 +200,7 @@ def _media_path(d: Path, cap: str) -> Path | None:
 
 @router.get("/{video_id}/timeline")
 def get_timeline(video_id: str, capture: str | None = None) -> Timeline:
-    """Timeline (C3) của bản thu chỉ định, mặc định là bản thu mới nhất đã có timeline."""
+    """Timeline của bản thu chỉ định, mặc định là bản thu mới nhất đã có timeline."""
     d = _video_dir(video_id)
     for cap in _candidates(d, capture):
         path = d / "derived" / cap / "timeline.json"
@@ -223,7 +223,7 @@ def get_transcripts(video_id: str, capture: str | None = None) -> list[Transcrip
 
 @router.get("/{video_id}/comments")
 def get_comments(video_id: str, capture: str | None = None) -> list[Comment]:
-    """Comment phẳng theo C2, reply có parent_id. Mặc định lấy bản thu mới nhất đã thu comment."""
+    """Comment phẳng, reply có parent_id. Mặc định lấy bản thu mới nhất đã thu comment."""
     d = _video_dir(video_id)
     for cap in _candidates(d, capture):
         n = _normalized(d, cap)

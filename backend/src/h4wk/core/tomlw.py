@@ -1,4 +1,4 @@
-"""Ghi TOML cho file cấu hình C5 (Python chỉ có sẵn bộ đọc tomllib). Chỉ hỗ trợ kiểu C5 dùng:
+"""Ghi TOML cho file cấu hình (Python chỉ có sẵn bộ đọc tomllib). Chỉ hỗ trợ kiểu cấu hình dùng:
 bảng lồng nhau, chuỗi, số, bool, mảng giá trị đơn, mảng bảng nội tuyến và mảng bảng ở cấp gốc.
 Comment không giữ lại."""
 

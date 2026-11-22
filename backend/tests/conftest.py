@@ -32,7 +32,7 @@ def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 @pytest.fixture(autouse=True)
 def config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Test không đọc cấu hình thật của máy; thư mục cấu hình rỗng thì dùng mặc định C5."""
+    """Test không đọc cấu hình thật của máy; thư mục cấu hình rỗng thì dùng mặc định."""
     from h4wk.core import config
 
     d = tmp_path / "h4wk-config"

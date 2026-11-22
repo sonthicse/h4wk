@@ -1,7 +1,7 @@
 # Statement of intent: công cụ SOCMINT cho YouTube (bản demo bài tập lớn)
 
 > Xác nhận ngày 2026-11-18 qua phỏng vấn (`interview-me`), cập nhật cùng ngày khi viết spec và sau vòng review.
-> Mô tả gốc đầy đủ nằm ở [.tmp/MO_TA_DU_AN.md](../../.tmp/MO_TA_DU_AN.md). Tài liệu này thu hẹp phạm vi đó cho bản demo và được ưu tiên khi hai tài liệu mâu thuẫn. Chi tiết kỹ thuật nằm ở [SPEC.md](../../SPEC.md), và SPEC.md được ưu tiên hơn cả hai.
+> Mô tả gốc đầy đủ nằm ở [.tmp/MO_TA_DU_AN.md](../../.tmp/MO_TA_DU_AN.md). Tài liệu này thu hẹp phạm vi đó cho bản demo và được ưu tiên khi hai tài liệu mâu thuẫn.
 
 ## Kết quả mong muốn
 
@@ -84,35 +84,35 @@ Cùng ngày, sau phần 1 của spike T2:
 - Chỉ thu phụ đề tiếng Việt, không thu phụ đề mọi ngôn ngữ.
 - Nhóm không có kênh YouTube riêng. Màn 3 theo dõi kênh tin tức nên chỉ trình diễn phát hiện và tự xử lý video mới, không trình diễn nghi vấn mới.
 
-Cùng ngày, khi duyệt quy ước C1–C5:
+Cùng ngày, khi duyệt quy ước dữ liệu:
 
 - Mọi thời gian dùng giờ Việt Nam (UTC+07:00) thay cho UTC.
 - Phân tích lại một video thì phải rà soát lại toàn bộ nghi vấn; bỏ cơ chế giữ quyết định cũ theo `key`.
 - `id` của nghi vấn có dạng `f_<ULID>`, duy nhất trong cả case, để quyết định rà soát trỏ đúng nghi vấn.
-- Quy ước C4 từ chối quyết định Reject không có lý do.
+- Mô hình phân tích từ chối quyết định Reject không có lý do.
 
 Ngày 2026-11-19, khi gộp phần của Bảo:
 
-- Từ điển tầng tĩnh chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia; mỗi nhóm gắn một category của C4.
-- C4 thêm hai category `incitement` (kích động, chia rẽ, bạo lực) và `state_secret` (bí mật nhà nước).
+- Từ điển tầng tĩnh chia nhóm theo danh sách thông tin xâm phạm an ninh quốc gia; mỗi nhóm gắn một category của mô hình phân tích.
+- Mô hình phân tích thêm hai category `incitement` (kích động, chia rẽ, bạo lực) và `state_secret` (bí mật nhà nước).
 - Đối tượng thường là lãnh đạo Đảng và Nhà nước; tầng tĩnh vẫn chỉ chạy ở vùng nhắc tên đối tượng.
 - Viết tắt của đối tượng so không phân biệt hoa thường.
-- Bỏ khái niệm case: cả hệ thống là một cuộc theo dõi duy nhất, vì demo chỉ dùng một case. Đối tượng, watchlist, video, nghi vấn và nhật ký dùng chung; C4 bỏ `case_id`.
+- Bỏ khái niệm case: cả hệ thống là một cuộc theo dõi duy nhất, vì demo chỉ dùng một case. Đối tượng, watchlist, video, nghi vấn và nhật ký dùng chung; mô hình phân tích bỏ `case_id`.
 - Watchlist mặc định theo dõi bốn kênh ví dụ ở mức `metadata`: Việt Tân, BBC News Tiếng Việt, Chân Trời Mới Media, Luật Khoa tạp chí.
-- C2: comment có thêm `author_name` (tên hiển thị lúc thu).
-- Chốt model theo spike T3: Whisper large-v3, PaddleOCR PP-OCRv5 chạy CPU, DINOv2 ViT-S/14, InsightFace buffalo_l. Đạt Checkpoint A; từ đây mọi thay đổi quy ước C1–C5 phải được người phụ trách chính đồng ý.
+- MÃ´ hÃ¬nh dá»¯ liá»u chung: comment có thêm `author_name` (tên hiển thị lúc thu).
+- Chốt model theo spike T3: Whisper large-v3, PaddleOCR PP-OCRv5 chạy CPU, DINOv2 ViT-S/14, InsightFace buffalo_l. Đạt Checkpoint A; từ đây mọi thay đổi quy ước dữ liệu phải được người phụ trách chính đồng ý.
 
 Ngày 2026-11-22:
 
 - Đăng nhập bằng một tài khoản duy nhất đặt trong `.env`, bỏ hai tài khoản trong database.
-- Mọi cấu hình người dùng gom về `config/`: thêm `entities.toml` (thay `data/entities.json`) và `watchlist.toml` (danh sách kênh, trước chỉ nằm trong database). C5 thêm hai định dạng này.
+- Mọi cấu hình người dùng gom về `config/`: thêm `entities.toml` (thay `data/entities.json`) và `watchlist.toml` (danh sách kênh, trước chỉ nằm trong database). Mô hình cấu hình thêm hai định dạng này.
 - Bỏ đối tượng mặc định "Đảng và Nhà nước Việt Nam" và bốn kênh watchlist ví dụ, để ai cũng dùng được công cụ với đối tượng và kênh của mình.
 - Gỡ câu "The Party, State or regime counts as attacked even when not named" khỏi prompt Jev; lưu ở `docs/notes/jev-prompt.md`.
 - Bỏ lệnh `h4wk schema export` và thư mục `docs/contracts/`: không còn nơi nào dùng các file JSON Schema này.
-- Đổi cách gọi "hợp đồng" C1–C5 thành "quy ước".
+- Đổi cách gọi "hợp đồng" dữ liệu thành "quy ước".
 - Bỏ CLI `h4wk`: API tự khởi tạo `data/` và `config/` khi khởi động; phân tích lại bằng nút Re-analyze trên web; bỏ `reindex` và `verdict`.
 - Mỗi kênh watchlist có luồng xử lý riêng, số luồng mỗi kênh đặt ở Settings → Watchlist.
-- Thêm vi phạm xét theo nội dung, không cần đối tượng: `violence`, `hate`, `forgery` (thêm vào C4) và `state_secret`. Chỉ lấy các mục trong danh sách thông tin xâm phạm an ninh quốc gia mà nội dung tự gây hại (kích động bạo lực, khủng bố, thù hận dân tộc và tôn giáo, lộ bí mật, giả mạo giấy tờ và deepfake); không làm các mục nhắm vào phát ngôn chính trị. Nghi vấn loại này có `entity` trống.
+- Thêm vi phạm xét theo nội dung, không cần đối tượng: `violence`, `hate`, `forgery` (thêm vào mô hình phân tích) và `state_secret`. Chỉ lấy các mục trong danh sách thông tin xâm phạm an ninh quốc gia mà nội dung tự gây hại (kích động bạo lực, khủng bố, thù hận dân tộc và tôn giáo, lộ bí mật, giả mạo giấy tờ và deepfake); không làm các mục nhắm vào phát ngôn chính trị. Nghi vấn loại này có `entity` trống.
 - Cố định thư mục `data/`, `config/` và model STT `large-v3`; `.env` chỉ còn tài khoản và API key.
 - Supadata không còn nhờ AI tạo transcript (đã tốn 140 credit, vượt gói 100/tháng); chỉ lấy phụ đề YouTube có sẵn. Video không có phụ đề dùng speech-to-text trên máy.
 - Bỏ `config/analysis.toml`: thứ tự transcript, số request Jev song song cố định trong code; Jev luôn xét mọi comment, mỗi comment một request; khớp khuôn mặt và ảnh mẫu chỉ chạy khi đối tượng có ảnh mẫu (bỏ ảnh là tắt).

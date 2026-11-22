@@ -1,4 +1,4 @@
-"""Điều phối thu thập (SPEC 10.3): mỗi loại dữ liệu lấy từ một nguồn, thử các nguồn đang bật
+"""Điều phối thu thập: mỗi loại dữ liệu lấy từ một nguồn, thử các nguồn đang bật
 theo thứ tự ưu tiên, chuyển nguồn khi lỗi, rồi ghi bản thu qua CaptureWriter."""
 
 import tempfile

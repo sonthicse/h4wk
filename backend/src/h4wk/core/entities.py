@@ -33,7 +33,7 @@ def _unique_ids(items: list[Entity]) -> list[Entity]:
 
 
 class EntitiesConfig(Contract):
-    """C5: định dạng config/entities.toml, mỗi đối tượng một bảng [[entities]]."""
+    """Định dạng config/entities.toml, mỗi đối tượng một bảng [[entities]]."""
 
     entities: Annotated[list[Entity], AfterValidator(_unique_ids)] = []
 

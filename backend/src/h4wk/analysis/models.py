@@ -1,5 +1,5 @@
-"""Quy ước C4: dấu hiệu (hits.json), nghi vấn (findings.json), quyết định rà soát
-(một dòng trong reviews.jsonl). hits.json và findings.json là mảng JSON (SPEC 10.6)."""
+"""Dấu hiệu (hits.json), nghi vấn (findings.json), quyết định rà soát
+(một dòng trong reviews.jsonl). hits.json và findings.json là mảng JSON."""
 
 from enum import StrEnum
 from itertools import pairwise

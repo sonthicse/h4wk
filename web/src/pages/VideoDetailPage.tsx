@@ -31,7 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatVnDateTime } from '@/lib/format'
 import { timedSources } from '@/lib/findings'
 
-// Nhảy tới start − 2s, không âm (SPEC 8, màn 1).
+// Nhảy tới start − 2s, không âm.
 const LEAD_S = 2
 
 type Tab = 'comments' | 'captures'

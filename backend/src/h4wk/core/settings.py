@@ -1,5 +1,5 @@
-"""Đọc và ghi cấu hình C5 từ trang Settings. Ghi đè cả file toml (comment trong file mẫu
-không giữ lại); dữ liệu luôn được kiểm tra theo C5 trước khi ghi."""
+"""Đọc và ghi cấu hình từ trang Settings. Ghi đè cả file toml (comment trong file mẫu
+không giữ lại); dữ liệu luôn được kiểm tra trước khi ghi."""
 
 from pathlib import Path
 

@@ -1,4 +1,4 @@
-"""Test quy ước C1–C5: mỗi mô hình có ví dụ hợp lệ và ví dụ bị từ chối."""
+"""Test quy ước dữ liệu: mỗi mô hình có ví dụ hợp lệ và ví dụ bị từ chối."""
 
 import copy
 import json
@@ -265,7 +265,7 @@ def test_valid_examples(model: type[BaseModel], data: dict[str, Any]) -> None:
 # ----------------------------------------------------------- ví dụ bị từ chối
 
 REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
-    # C1
+    # manifest
     (Manifest, _set("schema", "h4wk.manifest/2")(MANIFEST), "sai phiên bản schema"),
     (Manifest, _set("sources.3.provider", "ytdlp")(MANIFEST), "no_source mà có provider"),
     (Manifest, _set("sources.0.provider", None)(MANIFEST), "ok mà không có provider"),
@@ -292,7 +292,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Manifest, _set("level", "everything")(MANIFEST), "mức thu không tồn tại"),
     (Manifest, _set("trigger", {"type": "watchlist"})(MANIFEST), "watchlist thiếu watch_item"),
     (Manifest, _set("api_key", "sk-123")(MANIFEST), "trường lạ"),
-    # C2
+    # normalized
     (Normalized, _set("transcripts.0.kind", "manual")(NORMALIZED), "loại transcript lạ"),
     (
         Normalized,
@@ -305,7 +305,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Normalized, _set("comments.0.parent_id", "c1")(NORMALIZED), "comment tự trả lời chính nó"),
     (Normalized, _set("comments.0.author_name", 123)(NORMALIZED), "author_name không phải chuỗi"),
     (Normalized, _set("video.views", 1)(NORMALIZED), "trường lạ"),
-    # C3
+    # timeline
     (Timeline, _set("segments.0.end", 90.0)(TIMELINE), "end < start"),
     (Timeline, _set("segments.0.ocr.0.t", 200.0)(TIMELINE), "khung hình ngoài đoạn"),
     (Timeline, _set("segments.0.frames.0.t", 200.0)(TIMELINE), "keyframe ngoài đoạn"),
@@ -315,11 +315,11 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Timeline, _set("segments.0.id", "7")(TIMELINE), "id đoạn sai dạng"),
     (Timeline, _set("capture", "hôm nay")(TIMELINE), "capture sai dạng"),
     (Timeline, _set("capture", "20261118T084530Z")(TIMELINE), "capture dạng UTC cũ"),
-    # C4: hit
+    # hit
     (EntityHit, _set("via", "voice")(HIT), "via lạ"),
     (EntityHit, {**HIT, "via": "comment", "comment_id": None}, "via comment thiếu comment_id"),
     (EntityHit, {**HIT, "via": "face", "frame": None}, "via face thiếu frame"),
-    # C4: finding
+    # finding
     (Finding, _finding(source_kind="visual", frame=None), "visual thiếu frame"),
     (
         Finding,
@@ -343,23 +343,23 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Finding, _finding(source_kind="visual", segment_id=None), "visual thiếu segment_id"),
     (Finding, _finding(id="f_01jd3z8k5q6r7s8t9v0w1x2y3z"), "id ULID chữ thường"),
     (Finding, _finding(key="b" * 64), "trường key đã bỏ"),
-    # C4: review
+    # review
     (ReviewDecision, _set("status", "approved")(REVIEW), "status lạ"),
     (ReviewDecision, _set("by", "thi")(REVIEW), "actor thiếu tiền tố"),
     (ReviewDecision, _set("finding_id", "f_0001")(REVIEW), "finding_id sai dạng"),
     (ReviewDecision, {**REVIEW, "status": "rejected", "note": ""}, "reject không lý do"),
     (ReviewDecision, {**REVIEW, "status": "rejected", "note": "   "}, "reject lý do trắng"),
-    # C5: sources
+    # sources
     (SourcesConfig, _set("priority", {"video.media": ["tiktok"]})(SOURCES), "nguồn lạ"),
     (SourcesConfig, _set("priority", {"video.media": ["ytdlp", "ytdlp"]})(SOURCES), "trùng nguồn"),
     (SourcesConfig, _set("sources.youtube_api.api_key", "AIza…")(SOURCES), "secret trong toml"),
     (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 0}}, "0 luồng mỗi kênh"),
     (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 9}}, "quá 8 luồng"),
-    # C5: entities
+    # entities
     (EntitiesConfig, _set("entities.1.id", "e_01")(ENTITIES), "trùng id đối tượng"),
     (EntitiesConfig, _set("entities.0.id", "nva")(ENTITIES), "id đối tượng sai dạng"),
     (EntitiesConfig, _set("entities.0.name", "")(ENTITIES), "đối tượng thiếu tên"),
-    # C5: watchlist
+    # watchlist
     (WatchlistConfig, _set("channels.1.channel_id", "UC1")(WATCHLIST), "trùng kênh"),
     (WatchlistConfig, _set("channels.1.id", "w_001")(WATCHLIST), "trùng id kênh"),
     (WatchlistConfig, _set("channels.0.level", "video")(WATCHLIST), "mức thu lạ"),

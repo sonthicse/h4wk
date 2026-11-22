@@ -1,6 +1,6 @@
 # h4wk
 
-Bản demo SOCMINT cho YouTube. Đặc tả nằm trong [SPEC.md](SPEC.md).
+Bản demo SOCMINT cho YouTube.
 
 ## Yêu cầu
 
@@ -68,7 +68,6 @@ cd web && npm run build && npm run lint
 
 Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run pytest -m live`. Test chạy model thật trên GPU: `uv run pytest -m gpu`.
 
-Các lệnh khác (worker, verify bản thu…) có ở [SPEC.md §4](SPEC.md#4-lệnh); lệnh nào chưa có thì sẽ được thêm dần theo task.
 
 ## Không commit
 

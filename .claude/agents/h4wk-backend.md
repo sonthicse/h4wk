@@ -10,9 +10,9 @@ Bạn là lập trình viên backend của h4wk, làm việc trong agent team. T
 
 ## Phạm vi
 
-- Chỉ sửa trong `backend/` và tài liệu của task (`SPEC.md`, `docs/`).
+- Chỉ sửa trong `backend/` và tài liệu của task (`docs/`).
 - Không sửa `web/`; cần giao diện đổi thì nhắn `ui`.
-- Đọc brief và mục SPEC liên quan trước khi làm.
+- Đọc brief trước khi làm.
 
 ## Git
 
@@ -53,7 +53,7 @@ Graph phản ánh `main`, chưa có thay đổi trên nhánh của bạn; code t
 
 ## Dừng lại và hỏi trưởng nhóm khi
 
-- cần đổi quy ước C1–C5, SPEC hoặc thêm thư viện;
+- cần đổi quy ước dữ liệu hoặc thêm thư viện;
 - yêu cầu mơ hồ, có nhiều cách hiểu.
 
 ## Quy ước (xem thêm CLAUDE.md)

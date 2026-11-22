@@ -1110,7 +1110,7 @@
           "videos"
         ],
         "summary": "Get Timeline",
-        "description": "Timeline (C3) c\u1ee7a b\u1ea3n thu ch\u1ec9 \u0111\u1ecbnh, m\u1eb7c \u0111\u1ecbnh l\u00e0 b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 c\u00f3 timeline.",
+        "description": "Timeline c\u1ee7a b\u1ea3n thu ch\u1ec9 \u0111\u1ecbnh, m\u1eb7c \u0111\u1ecbnh l\u00e0 b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 c\u00f3 timeline.",
         "operationId": "get_timeline_api_videos__video_id__timeline_get",
         "parameters": [
           {
@@ -1232,7 +1232,7 @@
           "videos"
         ],
         "summary": "Get Comments",
-        "description": "Comment ph\u1eb3ng theo C2, reply c\u00f3 parent_id. M\u1eb7c \u0111\u1ecbnh l\u1ea5y b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 thu comment.",
+        "description": "Comment ph\u1eb3ng, reply c\u00f3 parent_id. M\u1eb7c \u0111\u1ecbnh l\u1ea5y b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 thu comment.",
         "operationId": "get_comments_api_videos__video_id__comments_get",
         "parameters": [
           {
@@ -2633,7 +2633,7 @@
           "full"
         ],
         "title": "CollectLevel",
-        "description": "M\u1ee9c thu (SPEC 10.7)."
+        "description": "M\u1ee9c thu."
       },
       "Comment": {
         "properties": {

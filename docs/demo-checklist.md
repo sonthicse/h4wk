@@ -1,6 +1,6 @@
 # Checklist demo
 
-Checklist diễn tập 3 màn demo của SPEC §8 (T42). Chạy cuối mỗi tuần từ tuần 3 và cập nhật khi có tính năng mới. Người chạy tick `- [ ]` và ghi kết quả vào bảng "Lịch sử chạy" ở cuối file.
+Checklist diễn tập 3 màn demo (T42). Chạy cuối mỗi tuần từ tuần 3 và cập nhật khi có tính năng mới. Người chạy tick `- [ ]` và ghi kết quả vào bảng "Lịch sử chạy" ở cuối file.
 
 Tên trang, nút và nhãn trong các bước là chữ tiếng Anh đang hiện trên giao diện. Giờ hiển thị theo giờ Việt Nam.
 

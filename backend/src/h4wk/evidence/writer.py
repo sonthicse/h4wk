@@ -1,4 +1,4 @@
-"""Ghi bản thu theo C1 (SPEC 10.2).
+"""Ghi bản thu.
 
 Adapter ghi dữ liệu thô vào thư mục tạm cùng ổ đĩa. `finalize` ghi normalized.json, tính
 SHA-256, ghi manifest sau cùng, `rename` sang captures/<ts> trong một bước, rồi khoá chỉ đọc.

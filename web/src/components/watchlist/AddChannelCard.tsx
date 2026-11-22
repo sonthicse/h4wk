@@ -9,7 +9,7 @@ import type { CollectLevel } from '@/api/jobs'
 import { addWatchItem, levels } from '@/api/watchlist'
 import { useWatchlistSettings } from '@/hooks/use-watchlist-settings'
 
-// Form thêm kênh vào watchlist (SPEC 10.9). Mức thu mặc định là `full` (SPEC 10.7).
+// Form thêm kênh vào watchlist. Mức thu mặc định là `full`.
 export default function AddChannelCard() {
   const queryClient = useQueryClient()
   const [input, setInput] = useState('')

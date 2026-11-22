@@ -388,7 +388,7 @@ export interface paths {
         };
         /**
          * Get Timeline
-         * @description Timeline (C3) của bản thu chỉ định, mặc định là bản thu mới nhất đã có timeline.
+         * @description Timeline của bản thu chỉ định, mặc định là bản thu mới nhất đã có timeline.
          */
         get: operations["get_timeline_api_videos__video_id__timeline_get"];
         put?: never;
@@ -428,7 +428,7 @@ export interface paths {
         };
         /**
          * Get Comments
-         * @description Comment phẳng theo C2, reply có parent_id. Mặc định lấy bản thu mới nhất đã thu comment.
+         * @description Comment phẳng, reply có parent_id. Mặc định lấy bản thu mới nhất đã thu comment.
          */
         get: operations["get_comments_api_videos__video_id__comments_get"];
         put?: never;
@@ -910,7 +910,7 @@ export interface components {
         };
         /**
          * CollectLevel
-         * @description Mức thu (SPEC 10.7).
+         * @description Mức thu.
          * @enum {string}
          */
         CollectLevel: "metadata" | "text" | "full";

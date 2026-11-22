@@ -1,6 +1,6 @@
-"""Kiểu dùng chung cho các quy ước C1–C5.
+"""Kiểu dùng chung cho các mô hình dữ liệu.
 
-Các enum `Cap` và `CollectLevel` thuộc C2 nhưng đặt ở đây, vì C1 (evidence-store) cũng dùng
+Các enum `Cap` và `CollectLevel` thuộc collectors nhưng đặt ở đây, vì evidence-store cũng dùng
 mà evidence-store không được phụ thuộc collectors. `collectors.models` xuất lại hai enum này.
 """
 
@@ -33,7 +33,7 @@ def _to_vn(d: datetime) -> datetime:
     return d.astimezone(VN_TZ)
 
 
-# Thời gian luôn có múi giờ, được đổi sang giờ Việt Nam, ghi ra ISO-8601 kèm +07:00 (SPEC §6).
+# Thời gian luôn có múi giờ, được đổi sang giờ Việt Nam, ghi ra ISO-8601 kèm +07:00.
 VnDatetime = Annotated[
     AwareDatetime, AfterValidator(_to_vn), PlainSerializer(datetime.isoformat, return_type=str)
 ]
@@ -85,7 +85,7 @@ class Cap(StrEnum):
 
 
 class CollectLevel(StrEnum):
-    """Mức thu (SPEC 10.7)."""
+    """Mức thu."""
 
     METADATA = "metadata"
     TEXT = "text"

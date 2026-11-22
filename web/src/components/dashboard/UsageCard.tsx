@@ -29,7 +29,7 @@ function Meter({ label, period, usage, unit }: { label: string; period: string; 
   )
 }
 
-// Quota YouTube Data API, credit Supadata và token Jev đã dùng (SPEC 10.3).
+// Quota YouTube Data API, credit Supadata và token Jev đã dùng.
 export default function UsageCard({ youtubeQuota, supadataCredits, jevUsage }: { youtubeQuota: Usage | null | undefined; supadataCredits: Usage | null | undefined; jevUsage: DashboardStats['jev_usage'] }) {
   return (
     <Card className="self-start">

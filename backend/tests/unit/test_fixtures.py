@@ -1,4 +1,4 @@
-"""Bản thu mẫu (T44): mọi file JSON validate theo C1–C4 và SHA-256 trong manifest khớp."""
+"""Bản thu mẫu (T44): mọi file JSON validate theo mô hình và SHA-256 trong manifest khớp."""
 
 import hashlib
 import json

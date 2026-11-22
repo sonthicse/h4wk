@@ -1,4 +1,4 @@
-// Mọi thời gian trên giao diện hiện theo giờ Việt Nam (SPEC 6).
+// Mọi thời gian trên giao diện hiện theo giờ Việt Nam.
 const TZ = 'Asia/Ho_Chi_Minh'
 
 // Dạng `HH:MM dd/mm/yyyy`, giờ Việt Nam, ví dụ `13:20 20/11/2026`.

@@ -1,4 +1,4 @@
-"""Nghiệp vụ watchlist (SPEC 10.9): thêm kênh, kiểm tra định kỳ bằng RSS, Check now.
+"""Nghiệp vụ watchlist: thêm kênh, kiểm tra định kỳ bằng RSS, Check now.
 
 Danh sách kênh nằm ở config/watchlist.toml (nguồn gốc, sửa tay được). Database chỉ giữ trạng
 thái chạy của từng kênh (đã khởi tạo, lần kiểm tra cuối, lỗi, video đã biết) và được đồng bộ
@@ -241,7 +241,7 @@ def _start_job(item: WatchItemRow, video_id: str) -> str:
 
 def _channel_capture(item: WatchItemRow) -> list[str]:
     """Bản thu hồ sơ kênh trong channels/<channel_id>/captures/; trả về ID video, mới trước."""
-    # C1 đặt tên bản thu chính xác đến giây; hai lần thu liền nhau thì chờ sang giây kế.
+    # Tên bản thu chính xác đến giây; hai lần thu liền nhau thì chờ sang giây kế.
     now = _now()
     if (data_dir() / "channels" / item.channel_id / "captures" / f"{now:%Y%m%dT%H%M%S}").exists():
         time.sleep(1 - now.microsecond / 1_000_000)

@@ -1,4 +1,4 @@
-"""Ghép các kết quả trên ảnh vào timeline theo C3."""
+"""Ghép các kết quả trên ảnh vào timeline."""
 
 from collections import defaultdict
 from pathlib import Path

@@ -1,4 +1,4 @@
-"""Quy ước C2: mô hình dữ liệu chung, lưu thành normalized.json (SPEC 10.3)."""
+"""Mô hình dữ liệu chung, lưu thành normalized.json."""
 
 from typing import Literal, Self
 

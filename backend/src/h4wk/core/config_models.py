@@ -85,5 +85,5 @@ class WatchlistConfig(Contract):
 
 
 def load_toml[M: BaseModel](path: Path, model: type[M]) -> M:
-    """Đọc một file cấu hình và kiểm tra theo C5."""
+    """Đọc một file cấu hình và kiểm tra theo mô hình cấu hình."""
     return model.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))

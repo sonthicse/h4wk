@@ -162,7 +162,7 @@ class SupadataCollector:
     def _fetch(self, cap: Cap, target: Target, workdir: Path) -> Normalized:
         n: dict[str, Any] = {"schema": "h4wk.normalized/1"}
         if cap == Cap.VIDEO_METADATA:
-            # /youtube/video bị đánh dấu deprecated, nhưng /metadata không trả channel id mà C2
+            # /youtube/video bị đánh dấu deprecated, nhưng /metadata không trả channel id mà Video
             # bắt buộc, nên vẫn dùng.
             _, d = self._get("youtube/video", {"id": target.id})
             self._write_json(workdir / f"{target.id}.video.json", d)

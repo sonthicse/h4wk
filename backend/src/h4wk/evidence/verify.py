@@ -1,4 +1,4 @@
-"""Kiểm tra toàn vẹn một bản thu theo manifest (SPEC 10.2)."""
+"""Kiểm tra toàn vẹn một bản thu theo manifest."""
 
 from dataclasses import dataclass
 from enum import StrEnum

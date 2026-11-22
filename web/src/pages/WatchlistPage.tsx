@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { listWatchItems } from '@/api/watchlist'
 import { useWatchlistSettings } from '@/hooks/use-watchlist-settings'
 
-// Trang Watchlist (T31, SPEC 10.9): các kênh được kiểm tra video mới bằng RSS.
+// Trang Watchlist (T31): các kênh được kiểm tra video mới bằng RSS.
 export default function WatchlistPage() {
   const { check_interval_min } = useWatchlistSettings()
   const items = useQuery({ queryKey: ['watchlist'], queryFn: listWatchItems,

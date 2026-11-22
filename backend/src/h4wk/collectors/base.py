@@ -1,4 +1,4 @@
-"""Quy ước adapter nguồn thu (SPEC 10.3): giao diện Collector và năm loại lỗi."""
+"""Quy ước adapter nguồn thu: giao diện Collector và năm loại lỗi."""
 
 from dataclasses import dataclass
 from pathlib import Path

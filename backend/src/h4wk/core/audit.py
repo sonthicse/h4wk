@@ -1,4 +1,4 @@
-"""Nhật ký thao tác (SPEC 10.1): mỗi thao tác ghi thêm một dòng JSON, kể cả khi thất bại."""
+"""Nhật ký thao tác: mỗi thao tác ghi thêm một dòng JSON, kể cả khi thất bại."""
 
 import json
 from datetime import datetime

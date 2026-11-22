@@ -109,7 +109,7 @@ class VideoDecisionRow(SQLModel, table=True):
 
 
 class WatchItemRow(SQLModel, table=True):
-    """Một kênh trong watchlist. initialized=False: chưa chạy bước thêm kênh (SPEC 10.9)."""
+    """Một kênh trong watchlist. initialized=False: chưa chạy bước thêm kênh."""
 
     __tablename__ = "watch_items"
     id: str = Field(primary_key=True)  # w_001

@@ -142,7 +142,7 @@ def collect(job_id: str) -> None:
     try:
         capture = None if job.force else _recent_capture(job)
         if capture is None:
-            # C1 dùng tên bản thu chính xác đến giây.
+            # Tên bản thu chính xác đến giây.
             now = _now()
             if (_video_dir(job) / "captures" / now.strftime(CAPTURE_TS_FORMAT)).exists():
                 time.sleep(1 - now.microsecond / 1_000_000)

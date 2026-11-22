@@ -29,7 +29,7 @@ Tính lại trên phản hồi đã lưu, không gửi thêm request. Hai cột 
 | 0,7 | 8/33 (24,2%) | 70/82 (85,4%) |
 | 0,9 | 6/14 (42,9%) | 57/82 (69,5%) |
 
-T47 giữ ngưỡng 0,5 theo SPEC 10.6. Nâng ngưỡng loại bớt báo động sai nhưng cũng bỏ sót thêm bình luận vi phạm trong tập thử nghiệm; ngay ở 0,9 vẫn còn 8/14 mẫu báo động sai. Bảng này không đo recall của LLM cũ.
+T47 giữ ngưỡng 0,5. Nâng ngưỡng loại bớt báo động sai nhưng cũng bỏ sót thêm bình luận vi phạm trong tập thử nghiệm; ngay ở 0,9 vẫn còn 8/14 mẫu báo động sai. Bảng này không đo recall của LLM cũ.
 
 ## Chạy thật với ảnh (T59)
 

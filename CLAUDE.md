@@ -72,8 +72,8 @@ Công cụ SOCMINT cho YouTube, bài tập lớn của nhóm 2 người (Thi ch�
 
 ## Đọc gì trước
 
-- `SPEC.md` là nguồn chuẩn. Khi tài liệu mâu thuẫn: `SPEC.md` > `docs/intent/socmint-youtube.md` > bản mô tả gốc.
-- Quy ước C1–C5 là mô hình Pydantic: `core/types.py`, `evidence/models.py` (C1), `collectors/models.py` (C2), `media/timeline.py` (C3), `analysis/models.py` (C4), `core/config_models.py` (C5).
+- `docs/intent/socmint-youtube.md` là nguồn chuẩn về phạm vi; khi mâu thuẫn với bản mô tả gốc thì nó được ưu tiên.
+- Quy ước dữ liệu là mô hình Pydantic: `core/types.py`, `evidence/models.py` (bản thu), `collectors/models.py` (dữ liệu chung), `media/timeline.py` (timeline), `analysis/models.py` (phân tích), `core/config_models.py` (cấu hình).
 - Bản thu mẫu: `backend/tests/fixtures/` (video tổng hợp, dựng bằng `tests/fixtures/build_sample_capture.py`).
 
 ## Lệnh
