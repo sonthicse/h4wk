@@ -1,6 +1,5 @@
-"""Đăng nhập một tài khoản duy nhất. Tên và mật khẩu chỉ lấy từ `USERNAME`, `PASSWORD` trong
-file .env, không lấy biến môi trường (shell có thể tự đặt USERNAME). Cookie chỉ chứa token
-ngẫu nhiên, database lưu SHA-256 của token."""
+"""Đăng nhập một tài khoản duy nhất. Tên và mật khẩu lấy từ `USERNAME`, `PASSWORD` trong file
+.env. Cookie chỉ chứa token ngẫu nhiên, database lưu SHA-256 của token."""
 
 import hashlib
 import hmac
@@ -9,7 +8,7 @@ from datetime import datetime, timedelta
 
 from sqlmodel import Session
 
-from h4wk.core import secrets as keys
+from h4wk.core import config
 from h4wk.core.db import SessionRow, as_aware, get_engine
 from h4wk.core.types import VN_TZ
 
@@ -28,7 +27,7 @@ def _token_hash(token: str) -> str:
 
 def account() -> tuple[str, str]:
     """Tên và mật khẩu của tài khoản duy nhất; thiếu thì báo lỗi rõ."""
-    env = keys.dotenv()
+    env = config.dotenv()
     username, password = env.get(USERNAME), env.get(PASSWORD)
     if not username or not password:
         raise RuntimeError(f"set {USERNAME} and {PASSWORD} in .env")

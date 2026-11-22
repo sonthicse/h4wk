@@ -10,32 +10,37 @@ USERNAME, PASSWORD = "thi", "mật-khẩu-thử"
 
 
 @pytest.fixture(autouse=True)
-def account(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Tài khoản duy nhất trong .env; test thay .env thật của máy bằng giá trị cố định."""
-    from h4wk.core import secrets
+def dotenv(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
+    """Thay file .env thật của máy: tài khoản cố định, thư mục dữ liệu và cấu hình riêng mỗi
+    test. Test thêm key vào dict này (vd YOUTUBE_API_KEY) như sửa .env."""
+    from h4wk.core import config
 
-    monkeypatch.setattr(secrets, "dotenv", lambda: {"USERNAME": USERNAME, "PASSWORD": PASSWORD})
+    values = {
+        "USERNAME": USERNAME,
+        "PASSWORD": PASSWORD,
+        "H4WK_DATA_DIR": str(tmp_path / "data"),
+        "H4WK_CONFIG_DIR": str(tmp_path / "h4wk-config"),
+    }
+    monkeypatch.setattr(config, "dotenv", lambda: dict(values))
+    return values
 
 
 @pytest.fixture(autouse=True)
-def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    d = tmp_path / "data"
-    monkeypatch.setenv("H4WK_DATA_DIR", str(d))
-    return d
+def data_dir(dotenv: dict[str, str]) -> Path:
+    return Path(dotenv["H4WK_DATA_DIR"])
 
 
 @pytest.fixture(autouse=True)
-def config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def config_dir(dotenv: dict[str, str]) -> Path:
     """Test không đọc cấu hình thật của máy; thư mục cấu hình rỗng thì dùng mặc định C5."""
-    d = tmp_path / "h4wk-config"
+    d = Path(dotenv["H4WK_CONFIG_DIR"])
     d.mkdir()
-    monkeypatch.setenv("H4WK_CONFIG_DIR", str(d))
     return d
 
 
 @pytest.fixture
 def anon_client(data_dir: Path) -> Iterator[TestClient]:
-    """Client chưa đăng nhập; tài khoản USERNAME lấy từ biến môi trường."""
+    """Client chưa đăng nhập; tài khoản USERNAME lấy từ .env (giả)."""
     from h4wk.api.app import app
 
     with TestClient(app) as c:

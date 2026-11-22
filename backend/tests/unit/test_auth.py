@@ -69,8 +69,8 @@ def test_only_the_env_account_logs_in() -> None:
     assert not auth.authenticate("khác", PASSWORD)
 
 
-def test_missing_account_fails_clearly(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(auth.keys, "dotenv", lambda: {"USERNAME": USERNAME})
+def test_missing_account_fails_clearly(monkeypatch: pytest.MonkeyPatch, dotenv) -> None:
+    del dotenv["PASSWORD"]
     monkeypatch.setenv("PASSWORD", PASSWORD)  # biến môi trường không được tính
     with pytest.raises(RuntimeError, match="USERNAME and PASSWORD"):
         auth.account()

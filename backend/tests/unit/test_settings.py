@@ -136,8 +136,8 @@ def _stored(data_dir: Path) -> dict:
     return json.loads((data_dir / "secrets.json").read_text(encoding="utf-8"))
 
 
-def test_jev_key_lifecycle(client: TestClient, monkeypatch) -> None:
-    monkeypatch.setattr("h4wk.core.secrets.env_values", lambda: {})
+def test_jev_key_lifecycle(client: TestClient, dotenv) -> None:
+    dotenv.pop("TYPESAFE_API_KEY", None)
     assert client.get("/api/settings/jev").json()["key"]["set"] is False
     result = client.put("/api/settings/jev/key", json={"value": AI_KEY})
     assert result.status_code == 200

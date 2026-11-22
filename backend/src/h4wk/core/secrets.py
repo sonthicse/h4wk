@@ -1,14 +1,14 @@
 """Secret (API key). Đặt từ Settings thì lưu ở data/secrets.json (quyền 0600) và được ưu tiên
-hơn biến môi trường và .env. API chỉ trả bản che."""
+hơn .env. Không đọc biến môi trường. API chỉ trả bản che."""
 
 import json
 import os
 from typing import Literal
 
-from dotenv import dotenv_values
 from pydantic import BaseModel
 
-from h4wk.core.config import REPO_ROOT, data_dir
+from h4wk.core import config
+from h4wk.core.config import data_dir
 
 
 class KeyInfo(BaseModel):
@@ -39,19 +39,9 @@ def _save(values: dict[str, str]) -> None:
     tmp.replace(path)
 
 
-def dotenv() -> dict[str, str]:
-    """Chỉ giá trị trong file .env ở gốc repo, không lấy biến môi trường."""
-    return {k: v for k, v in dotenv_values(REPO_ROOT / ".env").items() if v}
-
-
-def env_values() -> dict[str, str]:
-    """.env rồi biến môi trường (biến môi trường thắng)."""
-    return {**dotenv(), **{k: v for k, v in os.environ.items() if v}}
-
-
 def all_keys() -> dict[str, str]:
-    """Mọi secret đang có hiệu lực: secrets.json thắng .env và biến môi trường."""
-    return {**env_values(), **_load()}
+    """Mọi secret đang có hiệu lực: secrets.json thắng .env."""
+    return {**config.dotenv(), **_load()}
 
 
 def get(name: str) -> str | None:
@@ -81,7 +71,7 @@ def info(name: str) -> KeyInfo:
     stored = _load().get(name)
     if stored:
         return KeyInfo(set=True, masked=mask(stored), origin="settings")
-    env = env_values().get(name)
+    env = config.dotenv().get(name)
     if env:
         return KeyInfo(set=True, masked=mask(env), origin="env")
     return KeyInfo(set=False, masked=None, origin=None)

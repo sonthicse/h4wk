@@ -25,7 +25,7 @@ Tự đọc diff và kiểm theo mục "Kiểm tra những gì" bên dưới.
 Bạn điều khiển trình duyệt thật (Chromium headless) bằng `playwright-cli` qua `bash`, giống người dùng: mở trang, đọc cây phần tử, bấm, gõ, chụp màn hình. Cách dùng đầy đủ ở skill `playwright-cli`; nạp skill đó trước lần dùng đầu.
 
 1. Chạy server từ worktree bằng background job:
-   - backend: trong `<worktree>/backend`, với hai biến môi trường như ở bước 4, `uv run --no-sync uvicorn h4wk.api.app:app --port 8000`. Cổng 8000 đã có tiến trình khác thì đừng tắt nó: nhánh chỉ đổi `web/` thì dùng luôn backend đang chạy; nhánh đổi cả `backend/` thì báo `@lead`.
+   - backend: chép `.env` của repo chính vào `<worktree>/` (app chỉ đọc file `.env`, không đọc biến môi trường), rồi trong `<worktree>/backend`, với hai biến môi trường của `uv` như ở bước 4, `uv run --no-sync uvicorn h4wk.api.app:app --port 8000`. Cổng 8000 đã có tiến trình khác thì đừng tắt nó: nhánh chỉ đổi `web/` thì dùng luôn backend đang chạy; nhánh đổi cả `backend/` thì báo `@lead`.
    - web: trong `<worktree>/web`, `npm run dev -- --port 5180 --strictPort` (Vite chuyển `/api` sang cổng 8000).
 2. Mở trình duyệt. Luôn chạy `playwright-cli` khi đang đứng ở `<worktree>/.tmp/` (tạo nếu chưa có): CLI ghi snapshot và ảnh vào `.playwright-cli/` của thư mục hiện tại, và `.tmp/` bị gitignore. Luôn dùng phiên riêng `-s=reviewer`:
    `playwright-cli -s=reviewer open --browser=chromium http://127.0.0.1:5180/login`

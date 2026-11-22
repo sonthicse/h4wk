@@ -33,7 +33,7 @@ Không có CLI; mọi thao tác làm trên giao diện web. Lần đầu API kh�
 
 Mọi cấu hình người dùng nằm trong `config/`: `sources.toml` (nguồn thu), `analysis.toml` (phân tích), `entities.toml` (đối tượng cần bảo vệ), `watchlist.toml` (kênh theo dõi). Secret nằm trong `.env` hoặc nhập ở Settings.
 
-Thư mục dữ liệu mặc định là `data/` ở gốc repo. Muốn đặt chỗ khác thì đặt biến `H4WK_DATA_DIR`.
+Cấu hình của máy (tài khoản, API key, thư mục dữ liệu, model STT) chỉ đọc từ file `.env` ở gốc repo, không đọc biến môi trường; mẫu ở `.env.example`. Thư mục dữ liệu mặc định là `data/` ở gốc repo, muốn đặt chỗ khác thì ghi `H4WK_DATA_DIR` trong `.env`.
 
 ## Chạy
 
@@ -55,9 +55,9 @@ cd web && npm run dev
 
 Các bước chạy thử 3 màn demo nằm ở [docs/demo-checklist.md](docs/demo-checklist.md).
 
-Mở http://localhost:3000 và đăng nhập bằng `USERNAME`, `PASSWORD` trong `.env` (chỉ đọc từ file `.env`, không lấy biến môi trường).
+Mở http://localhost:3000 và đăng nhập bằng `USERNAME`, `PASSWORD` trong `.env`.
 
-Worker GPU dùng model STT từ `H4WK_STT_MODEL` (mặc định `large-v3`). Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
+Worker GPU dùng model STT từ `H4WK_STT_MODEL` trong `.env` (mặc định `large-v3`). Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
 
 ## Kiểm tra trước khi commit
 

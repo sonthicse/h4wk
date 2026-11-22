@@ -52,7 +52,7 @@ Một số từ dùng thống nhất trong các tài liệu:
 | Tác vụ nền và lập lịch | Huey, lưu hàng đợi bằng SQLite | Không cần Redis. Hai hàng đợi: `default` và `gpu` (1 worker). Kiểm tra RSS chạy bằng periodic task |
 | Thu thập | `yt-dlp` (thư viện Python), `google-api-python-client`, HTTP client cho Supadata | Phiên bản yt-dlp được ghi vào manifest. yt-dlp có thể cần thêm JS runtime (ví dụ Deno); spike T2 xác nhận |
 | Media | `ffmpeg`, PySceneDetect, `imagehash` | |
-| Speech-to-text | `faster-whisper` chạy trên GPU | Whisper large-v3 (chốt ở spike T3: WER 12,7% trên FLEURS tiếng Việt). Đổi model bằng `H4WK_STT_MODEL` |
+| Speech-to-text | `faster-whisper` chạy trên GPU | Whisper large-v3 (chốt ở spike T3: WER 12,7% trên FLEURS tiếng Việt). Đổi model bằng `H4WK_STT_MODEL` trong `.env` |
 | OCR | PaddleOCR PP-OCRv5 (phát hiện mobile, nhận dạng tiếng Việt vi-latin-rec-v4) | Chạy bằng worker CPU riêng. Bộ nhận dạng tiếng Việt có giấy phép CC BY-NC 4.0 (phi thương mại) |
 | Khớp khuôn mặt | OpenCV YuNet (phát hiện) và SFace (so khớp), chạy cục bộ trên CPU | Ngưỡng cosine 0,363. [YuNet: MIT](https://huggingface.co/opencv/face_detection_yunet#license); [SFace: Apache-2.0](https://huggingface.co/opencv/face_recognition_sface#license). Chưa nghiệm thu chất lượng trên ảnh thành viên |
 | Khớp ảnh mẫu | DINOv2 ViT-S/14, cần `torch` | Giấy phép Apache-2.0. Spike T3: ảnh cắt 10% mỗi cạnh và ảnh giảm bão hoà còn cosine 0,91 và 0,96 so với ảnh gốc |
@@ -66,7 +66,7 @@ Rủi ro lớn nhất về cài đặt là bốn thư viện GPU (ctranslate2 ch
 
 ## 4. Lệnh
 
-Lệnh backend chạy trong thư mục `backend/`. Thư mục dữ liệu lấy từ biến môi trường `H4WK_DATA_DIR`, mặc định là `data/` ở gốc repo. File cấu hình nằm ở `config/` ở gốc repo.
+Lệnh backend chạy trong thư mục `backend/`. Cấu hình của máy chỉ đọc từ file `.env` ở gốc repo, không đọc biến môi trường. Thư mục dữ liệu lấy từ `H4WK_DATA_DIR` trong `.env`, mặc định là `data/` ở gốc repo. File cấu hình nằm ở `config/` ở gốc repo.
 
 ```bash
 # Backend (trong backend/)
@@ -213,7 +213,7 @@ Không có CLI: API tự tạo `data/` và `config/*.toml` từ file mẫu khi k
 
 Nghiệm thu:
 
-- Một tài khoản duy nhất: tên và mật khẩu đặt ở `USERNAME`, `PASSWORD` trong file `.env` (không lấy biến môi trường) (thiếu thì API không khởi động). Đăng nhập bằng session cookie; database chỉ lưu SHA-256 của token phiên, không lưu mật khẩu.
+- Một tài khoản duy nhất: tên và mật khẩu đặt ở `USERNAME`, `PASSWORD` trong file `.env` (thiếu thì API không khởi động). Đăng nhập bằng session cookie; database chỉ lưu SHA-256 của token phiên, không lưu mật khẩu.
 - Mọi API ghi dữ liệu đều để lại một dòng nhật ký, kể cả khi thao tác thất bại.
 
 ### 10.2 `evidence-store`

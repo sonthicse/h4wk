@@ -25,8 +25,8 @@ def test_save_and_load_sources(config_dir: Path) -> None:
     assert (config_dir / "sources.toml").is_file()
 
 
-def test_secrets_file_is_0600_and_wins_over_env(data_dir: Path, monkeypatch) -> None:
-    monkeypatch.setenv("YOUTUBE_API_KEY", "from-env-1234567890")
+def test_secrets_file_is_0600_and_wins_over_env(data_dir: Path, dotenv) -> None:
+    dotenv["YOUTUBE_API_KEY"] = "from-env-1234567890"
     assert secrets.info("YOUTUBE_API_KEY").origin == "env"
     secrets.put("YOUTUBE_API_KEY", "AIzaSyFromSettings0000abcd")
     assert os.stat(data_dir / "secrets.json").st_mode & 0o777 == 0o600
