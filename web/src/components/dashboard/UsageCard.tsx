@@ -44,11 +44,10 @@ export default function UsageCard({ youtubeQuota, supadataCredits, jevUsage }: {
             <span className="font-medium">Jev</span>
             <span className="text-muted-foreground">This month (VN)</span>
           </div>
-          {jevUsage ? (
-            <p className="tabular-nums">
-              Requests: {num(jevUsage.requests)} · Input: {jevUsage.input_tokens != null ? num(jevUsage.input_tokens) : 'Not reported'} · Output: {jevUsage.output_tokens != null ? num(jevUsage.output_tokens) : 'Not reported'}
-            </p>
-          ) : <p className="text-muted-foreground">No requests this month</p>}
+          {/* Chưa có request hoặc TypeSafe không báo số thì hiện 0. */}
+          <p className="tabular-nums">
+            Requests: {num(jevUsage?.requests ?? 0)} · Input: {num(jevUsage?.input_tokens ?? 0)} · Output: {num(jevUsage?.output_tokens ?? 0)}
+          </p>
           <p className="text-xs text-muted-foreground">Token counts reported by TypeSafe. Totals include only reported counts.</p>
         </div>
       </CardContent>

@@ -29,8 +29,8 @@ function eventText(event: WatchEvent) {
     case 'new_video':
       return `New video detected on ${channel ?? 'a watched channel'}${video ? `: ${video}` : ''}`
     case 'job_done': {
-      const n = event.findings
-      return `Processed video ${video ?? ''}${n != null ? `: ${n} ${n === 1 ? 'finding' : 'findings'}` : ''}`
+      const n = event.findings ?? 0
+      return `Processed video ${video ?? ''}: ${n} ${n === 1 ? 'finding' : 'findings'}`
     }
     case 'job_failed':
       return `Collect failed: ${event.error ?? video ?? event.message}`

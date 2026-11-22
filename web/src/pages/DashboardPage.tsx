@@ -41,7 +41,7 @@ function StatCard({ label, value, to }: { label: string; value: number; to: stri
 
 // Thẻ đếm theo nhóm; cả thẻ là link sang trang tương ứng.
 // Màu cung trên vòng tròn theo bản phác, khớp màu badge mức độ: high đỏ, medium hổ phách, low xám nhạt.
-// Trạng thái rà soát: chưa rà soát hổ phách, xác nhận đỏ, bác bỏ xám, cần thêm thông tin xám nhạt.
+// Trạng thái rà soát mỗi trạng thái một màu: chưa rà soát hổ phách, xác nhận đỏ, bác bỏ xám, cần thêm thông tin xanh.
 const sliceColor: Record<string, string> = {
   high: '#dc2626',
   medium: '#f59e0b',
@@ -49,7 +49,17 @@ const sliceColor: Record<string, string> = {
   unreviewed: '#f59e0b',
   confirmed: '#dc2626',
   rejected: '#737373',
-  needs_info: '#d4d4d4',
+  needs_info: '#3b82f6',
+}
+
+type BadgeVariant = 'severe' | 'warning' | 'outline' | 'info' | 'neutral'
+
+// Badge cùng màu với cung trên vòng tròn.
+const reviewVariant: Record<ReviewStatus, BadgeVariant> = {
+  unreviewed: 'warning',
+  confirmed: 'severe',
+  rejected: 'neutral',
+  needs_info: 'info',
 }
 
 function Breakdown<K extends string>({
@@ -64,8 +74,7 @@ function Breakdown<K extends string>({
   to: string
   keys: K[]
   counts: Record<K, number>
-  // Có variant thì nhãn hiện dạng badge (mức độ); không có thì là chữ thường (trạng thái rà soát).
-  variant?: Record<K, 'severe' | 'warning' | 'outline'>
+  variant: Record<K, BadgeVariant>
   centerLabel: string
 }) {
   return (
@@ -81,13 +90,13 @@ function Breakdown<K extends string>({
         <CardContent className="flex items-center gap-4">
           <Donut
             centerLabel={centerLabel}
-            slices={keys.map((k) => ({ key: k, label: k, value: counts[k], color: sliceColor[k] ?? 'var(--muted-foreground)' }))}
+            slices={keys.map((k) => ({ key: k, label: k, value: counts[k] ?? 0, color: sliceColor[k] ?? 'var(--muted-foreground)' }))}
           />
-          <ul className={`min-w-0 flex-1 space-y-1.5 ${variant ? '' : 'text-[13px]'}`}>
+          <ul className="min-w-0 flex-1 space-y-1.5">
             {keys.map((k) => (
               <li key={k} className="flex items-center justify-between gap-2">
-                {variant ? <Badge variant={variant[k]}>{k}</Badge> : <span>{k}</span>}
-                <span className="tabular-nums">{counts[k]}</span>
+                <Badge variant={variant[k]}>{k}</Badge>
+                <span className="tabular-nums">{counts[k] ?? 0}</span>
               </li>
             ))}
           </ul>
@@ -143,7 +152,7 @@ export default function DashboardPage() {
         <div className="-m-1 min-h-0 overflow-y-auto p-1 pr-2">
           <div className="grid grid-cols-2 gap-4">
             <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findings_by_severity} variant={severityVariant} />
-            <Breakdown title="Review" to="/review" centerLabel={d.videos_by_review_status ? 'videos' : 'findings'} keys={statuses} counts={d.videos_by_review_status ?? d.findings_by_status} />
+            <Breakdown title="Review" to="/review" centerLabel={d.videos_by_review_status ? 'videos' : 'findings'} keys={statuses} counts={d.videos_by_review_status ?? d.findings_by_status} variant={reviewVariant} />
             <div className="col-span-2">
               <ReviewQueueCard />
             </div>
