@@ -73,14 +73,13 @@ Công cụ SOCMINT cho YouTube, bài tập lớn của nhóm 2 người (Thi ch�
 ## Đọc gì trước
 
 - `SPEC.md` là nguồn chuẩn. Khi tài liệu mâu thuẫn: `SPEC.md` > `docs/intent/socmint-youtube.md` > bản mô tả gốc.
-- Hợp đồng C1–C5 là mô hình Pydantic: `core/types.py`, `evidence/models.py` (C1), `collectors/models.py` (C2), `media/timeline.py` (C3), `analysis/models.py` (C4), `core/config_models.py` (C5). JSON Schema sinh ra ở `docs/contracts/`.
+- Quy ước C1–C5 là mô hình Pydantic: `core/types.py`, `evidence/models.py` (C1), `collectors/models.py` (C2), `media/timeline.py` (C3), `analysis/models.py` (C4), `core/config_models.py` (C5).
 - Bản thu mẫu: `backend/tests/fixtures/` (video tổng hợp, dựng bằng `tests/fixtures/build_sample_capture.py`).
 
 ## Lệnh
 
 ```bash
 cd backend && uv run pytest && uv run ruff check . && uv run ruff format --check .
-cd backend && uv run h4wk schema export      # chạy lại khi đổi hợp đồng C1–C5
 cd web && npm run build && npm run lint
 ```
 
@@ -89,7 +88,7 @@ Máy chạy bắt buộc có GPU NVIDIA (CUDA); STT và khớp ảnh mẫu khôn
 ## Quy ước dễ sai
 
 - Thời gian luôn có múi giờ, theo giờ Việt Nam (`+07:00`); giờ UTC từ YouTube đổi sang khi đọc vào. Thư mục bản thu dạng `YYYYMMDDTHHMMSS`.
-- Mô hình hợp đồng kế thừa `Contract` (cấm trường lạ). Đổi hợp đồng thì thêm cả ví dụ hợp lệ lẫn ví dụ bị từ chối vào `tests/unit/test_contracts.py`, và kiểm tra ví dụ bị từ chối bị chặn đúng vì quy tắc nó muốn kiểm.
+- Mô hình quy ước kế thừa `Contract` (cấm trường lạ). Đổi quy ước thì thêm cả ví dụ hợp lệ lẫn ví dụ bị từ chối vào `tests/unit/test_contracts.py`, và kiểm tra ví dụ bị từ chối bị chặn đúng vì quy tắc nó muốn kiểm.
 - Đọc/ghi file văn bản luôn truyền `encoding="utf-8"`, kể cả trong test.
 - Tên code bằng tiếng Anh; comment, docstring, tài liệu và commit message bằng tiếng Việt. Giao diện web bằng tiếng Anh. Thông báo lỗi do code sinh ra (exception, `detail` của HTTP, lỗi job) bằng tiếng Anh vì hiện trên giao diện.
 - Không ghi secret vào `config/*.toml`. Key nằm trong `.env` hoặc `data/secrets.json` (nhập từ Settings, quyền 0600, được ưu tiên hơn `.env`); đọc key qua `h4wk.core.secrets`. Không commit `config/*.toml` và `data/`.

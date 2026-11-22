@@ -14,11 +14,11 @@ Dự án đang ở giai đoạn thử nghiệm. Một số hạn chế được 
 
 ## 2. Bản đồ module (đã duyệt)
 
-| Module id | Trách nhiệm | Phụ thuộc | Hợp đồng cung cấp |
+| Module id | Trách nhiệm | Phụ thuộc | Quy ước cung cấp |
 |---|---|---|---|
 | `core` | Đối tượng và ảnh mẫu của đối tượng, một tài khoản đăng nhập, nhật ký, database chỉ mục, cấu hình và lưu secret | không có | Mô hình Đối tượng, `audit.log()`, C5: định dạng file cấu hình |
 | `evidence-store` | Bản thu được khoá chống sửa nhầm, manifest, SHA-256, tách dữ liệu gốc và phái sinh, kiểm tra toàn vẹn | `core` | C1: cấu trúc bản thu |
-| `collectors` | Hợp đồng adapter, danh sách nguồn thu, điều phối theo thứ tự ưu tiên và chuyển nguồn khi lỗi; adapter yt-dlp, YouTube API, Supadata | `evidence-store` | C2: mô hình dữ liệu chung, giao diện `Collector` |
+| `collectors` | Quy ước adapter, danh sách nguồn thu, điều phối theo thứ tự ưu tiên và chuyển nguồn khi lỗi; adapter yt-dlp, YouTube API, Supadata | `evidence-store` | C2: mô hình dữ liệu chung, giao diện `Collector` |
 | `media-pipeline` | Bản 480p, tách audio, speech-to-text, keyframe theo mức thay đổi, OCR, ghép timeline | `evidence-store` | C3: cấu trúc timeline |
 | `analysis` | Tìm dấu hiệu đối tượng (tên, khuôn mặt, ảnh mẫu), lọc tĩnh rồi Jev (nhận cả văn bản lẫn keyframe, thumbnail) trên timeline, tiêu đề, mô tả, thumbnail và comment, kết luận theo video bằng quy tắc | `media-pipeline`, `core` | C4: dấu hiệu, nghi vấn và quyết định rà soát |
 | `jobs` | Chạy tác vụ nền, nối luồng thu → xử lý → phân tích, tiến độ, thử lại khi lỗi | `collectors`, `media-pipeline`, `analysis` | API gửi job và xem tiến độ |
@@ -28,7 +28,7 @@ Dự án đang ở giai đoạn thử nghiệm. Một số hạn chế được 
 
 `analysis` là module phân tích chung. V1 chỉ cài bộ phân tích cho K1; các kịch bản khác sau này thêm vào cùng module.
 
-Việc đầu tiên là dựng một luồng tối giản chạy được từ đầu đến cuối, sau đó mới làm sâu từng phần (chi tiết ở [phần 9](#9-thứ-tự-làm-và-mốc-kiểm-tra)). Năm hợp đồng C1–C5 được chốt vào cuối tuần 1. Sau mốc này, mọi thay đổi hợp đồng phải được Thi đồng ý.
+Việc đầu tiên là dựng một luồng tối giản chạy được từ đầu đến cuối, sau đó mới làm sâu từng phần (chi tiết ở [phần 9](#9-thứ-tự-làm-và-mốc-kiểm-tra)). Năm quy ước C1–C5 được chốt vào cuối tuần 1. Sau mốc này, mọi thay đổi quy ước phải được Thi đồng ý.
 
 Một số từ dùng thống nhất trong các tài liệu:
 
@@ -72,7 +72,6 @@ Lệnh backend chạy trong thư mục `backend/`. Thư mục dữ liệu lấy 
 # Backend (trong backend/)
 uv sync                                             # cài dependency
 uv run h4wk init                                    # tạo data/, database chỉ mục, file cấu hình mẫu; không thêm đối tượng hay kênh
-uv run h4wk schema export                           # xuất JSON Schema của C1–C5 vào docs/contracts/
 uv run uvicorn h4wk.api.app:app --reload            # chạy API ở :8000
 uv run huey_consumer h4wk.jobs.queue.huey -w 2      # worker cho hàng đợi default
 uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1  # worker cho hàng đợi gpu
@@ -95,7 +94,6 @@ npm run build && npm run lint && npx tsc --noEmit
 h4wk/
 ├── SPEC.md
 ├── docs/intent/                ← statement of intent
-├── docs/contracts/             ← JSON Schema sinh từ C1–C5
 ├── backend/
 │   ├── pyproject.toml
 │   ├── src/h4wk/
@@ -212,7 +210,7 @@ Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh m
 
 `audit.log(actor, action, target, detail, status)` ghi thêm một dòng vào `data/log/audit.jsonl`, kể cả đăng nhập và đổi Settings. Secret nằm trong `data/secrets.json` (quyền 0600) hoặc trong `.env`, và API chỉ trả về giá trị đã che.
 
-Hợp đồng C5 là định dạng của các file cấu hình người dùng trong `config/`: `sources.toml`, `analysis.toml`, `entities.toml` (đối tượng) và `watchlist.toml` (kênh theo dõi), viết bằng Pydantic. Mọi cấu hình người dùng nằm ở đây, sửa tay được; giao diện ghi lại file thì comment mất. Secret không nằm ở đây. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
+Quy ước C5 là định dạng của các file cấu hình người dùng trong `config/`: `sources.toml`, `analysis.toml`, `entities.toml` (đối tượng) và `watchlist.toml` (kênh theo dõi), viết bằng Pydantic. Mọi cấu hình người dùng nằm ở đây, sửa tay được; giao diện ghi lại file thì comment mất. Secret không nằm ở đây. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
 
 Hạn chế được chấp nhận: phiên đăng nhập, trạng thái chạy của watchlist (đã khởi tạo, lần kiểm tra cuối, danh sách video đã biết) và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên; danh sách kênh còn nguyên trong `config/watchlist.toml`, nhưng mỗi kênh sẽ chạy lại bước thêm kênh.
 
@@ -224,7 +222,7 @@ Nghiệm thu:
 
 ### 10.2 `evidence-store`
 
-Hợp đồng C1 gồm cấu trúc thư mục và định dạng manifest dưới đây.
+Quy ước C1 gồm cấu trúc thư mục và định dạng manifest dưới đây.
 
 ```
 data/
@@ -279,7 +277,7 @@ Nghiệm thu:
 
 ### 10.3 `collectors`
 
-Hợp đồng C2 là mô hình dữ liệu chung viết bằng Pydantic, lưu thành `normalized.json`:
+Quy ước C2 là mô hình dữ liệu chung viết bằng Pydantic, lưu thành `normalized.json`:
 
 - `Video`: id, channel_id, title, description, tags, category, duration_s, published_at, view/like/comment_count, availability, is_live
 - `Channel`: id, handle, title, description, country, created_at, sub/view/video_count, avatar/banner, links
@@ -320,7 +318,7 @@ Module chỉ xử lý media; mọi việc liên quan tới đối tượng nằm
 
 Các bước dùng GPU chạy trên hàng đợi `gpu`, mỗi lúc một bước.
 
-Hợp đồng C3 là `timeline.json`:
+Quy ước C3 là `timeline.json`:
 
 ```json
 {
@@ -385,7 +383,7 @@ Bước 4 là kết luận theo video bằng quy tắc, không gọi AI (`verdic
 - `categories` xếp theo số nghi vấn giảm dần; `severity` là mức cao nhất; `confidence` là của nghi vấn xếp đầu; `finding_ids` là 10 nghi vấn đầu khi xếp theo `severity` rồi xác suất Jev. `summary` sinh theo mẫu, ví dụ "12 nghi vấn vi phạm; danh mục: insult (8), incitement (4); mức cao nhất: high."
 - `h4wk verdict` bỏ qua run đã có `verdict.json`, trừ khi có `--force`.
 
-Hợp đồng C4 gồm ba cấu trúc. Dấu hiệu (`hits.json`):
+Quy ước C4 gồm ba cấu trúc. Dấu hiệu (`hits.json`):
 
 ```json
 {"entity": "e_01", "via": "speech|ocr|title|description|comment|thumbnail|face|ref_image",
@@ -563,10 +561,10 @@ Các quyết định đã chốt:
 - Chỉ thu phụ đề tiếng Việt: bản người đăng tải lên (`vi*`) và bản tự động gốc (`vi-orig`). Không thu bản dịch máy, vì lấy mọi ngôn ngữ kéo theo hơn 100 bản dịch và bị YouTube trả HTTP 429 (spike T2).
 - Giữ mức thu, mặc định là `full`.
 - Mọi thời gian trong dữ liệu, nhật ký và giao diện dùng giờ Việt Nam (UTC+07:00).
-- `id` của nghi vấn là `f_<ULID>`, duy nhất trong toàn hệ thống. Không có khái niệm case; cả hệ thống là một cuộc theo dõi. Quyết định Reject bắt buộc có lý do, kiểm tra ngay trong hợp đồng C4.
+- `id` của nghi vấn là `f_<ULID>`, duy nhất trong toàn hệ thống. Không có khái niệm case; cả hệ thống là một cuộc theo dõi. Quyết định Reject bắt buộc có lý do, kiểm tra ngay trong quy ước C4.
 - Phân tích lại một video thì mọi nghi vấn của lần chạy mới phải được rà soát lại; quyết định cũ không tự áp dụng.
 - Comment được gửi nguyên văn cho Jev, kể cả tên và ID người bình luận.
 - Ngày 2026-11-21 Thi chốt Jev là nhà cung cấp AI duy nhất, bỏ `ai-gateway`, VLM và mô tả ảnh (10.4); đảo yêu cầu đa nhà cung cấp trong `docs/intent/socmint-youtube.md`.
 - Có khớp khuôn mặt, với các giới hạn ở 10.6 và phần 11. Điều này đảo ngược quy định "không nhận diện khuôn mặt" trong mô tả gốc (mục 13, 14); dữ liệu khuôn mặt là dữ liệu cá nhân nhạy cảm theo Nghị định 13/2023, và báo cáo môn học giải thích lý do thay đổi. Ngày 2026-11-21 Thi đổi quyết định: đối tượng demo là nhân vật công chúng Tô Lâm, ảnh khuôn mặt mẫu là ảnh chân dung công khai trên Wikimedia Commons (ghi nguồn và giấy phép trong báo cáo), nghiệm thu trên video thật đã thu; không còn quay video có khuôn mặt thành viên nhóm.
 - Nhóm không có kênh YouTube riêng. Màn 3 theo dõi kênh tin tức đăng thường xuyên, nên chỉ trình diễn việc phát hiện và tự xử lý video mới, không trình diễn nghi vấn mới.
-- Thi là người chịu trách nhiệm chính và duyệt mọi thay đổi hợp đồng sau checkpoint A.
+- Thi là người chịu trách nhiệm chính và duyệt mọi thay đổi quy ước sau checkpoint A.

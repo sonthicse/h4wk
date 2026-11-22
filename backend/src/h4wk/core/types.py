@@ -1,4 +1,4 @@
-"""Kiểu dùng chung cho các hợp đồng C1–C5.
+"""Kiểu dùng chung cho các quy ước C1–C5.
 
 Các enum `Cap` và `CollectLevel` thuộc C2 nhưng đặt ở đây, vì C1 (evidence-store) cũng dùng
 mà evidence-store không được phụ thuộc collectors. `collectors.models` xuất lại hai enum này.
@@ -20,7 +20,7 @@ from pydantic import (
 
 
 class Contract(BaseModel):
-    """Lớp gốc của mọi mô hình hợp đồng: không nhận trường lạ."""
+    """Lớp gốc của mọi mô hình quy ước: không nhận trường lạ."""
 
     model_config = ConfigDict(extra="forbid", validate_by_name=True, serialize_by_alias=True)
 

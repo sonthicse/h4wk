@@ -21,7 +21,7 @@ export function decide(findingId: string, status: DecisionStatus, note = ''): Pr
   return api(`/api/findings/${encodeURIComponent(findingId)}/decision`, { method: 'POST', body: { status, note } })
 }
 
-// ---- Rà soát theo video (T48/T49). Kiểu viết tay theo hợp đồng, chưa có trong schema.d.ts. ----
+// ---- Rà soát theo video (T48/T49). Kiểu viết tay theo quy ước, chưa có trong schema.d.ts. ----
 type Category = Schemas['Category']
 export type VideoVerdict = {
   run_id: string

@@ -29,11 +29,11 @@ Chỉ tạo thành viên mà task cần. Task chỉ có backend thì không tạ
 1. **Hiểu yêu cầu.** Đọc yêu cầu của người dùng và mục SPEC liên quan; chốt tiêu chí xong với người dùng nếu yêu cầu chưa nêu.
 2. **Kiểm tra điều kiện.** Việc cần một thay đổi khác làm trước: báo người dùng và đề xuất làm việc đó trước.
 3. **Khảo sát code.** Tra graph trước: `graphify query "<câu hỏi>"`, `graphify explain "<node>"`, `graphify path "<A>" "<B>"`, hoặc đọc `graphify-out/GRAPH_REPORT.md`; sau đó mới Read/`rg` đúng chỗ.
-4. **Chia việc.** Chia thành các bước nhỏ, độc lập, kiểm được. Mỗi bước ghi: ai làm, file nào (đường dẫn cụ thể), thứ tự và lý do, tiêu chí xong lấy từ bước 1. Có API mới: backend gửi hợp đồng cho `ui` góp ý trước khi code. Tạo task list với phụ thuộc: bước code → bước review của `reviewer`.
-5. **Rủi ro và quyết định.** Nêu điểm dễ sai, thay đổi phá vỡ tương thích, giả định. Việc cần người dùng quyết (đổi hợp đồng C1–C5, đổi SPEC, thêm thư viện, lựa chọn thiết kế): hỏi theo quy tắc trong CLAUDE.md (vấn đề, ví dụ, lựa chọn, hệ quả, đề xuất) và **chờ trả lời trước khi giao việc**.
+4. **Chia việc.** Chia thành các bước nhỏ, độc lập, kiểm được. Mỗi bước ghi: ai làm, file nào (đường dẫn cụ thể), thứ tự và lý do, tiêu chí xong lấy từ bước 1. Có API mới: backend gửi quy ước cho `ui` góp ý trước khi code. Tạo task list với phụ thuộc: bước code → bước review của `reviewer`.
+5. **Rủi ro và quyết định.** Nêu điểm dễ sai, thay đổi phá vỡ tương thích, giả định. Việc cần người dùng quyết (đổi quy ước C1–C5, đổi SPEC, thêm thư viện, lựa chọn thiết kế): hỏi theo quy tắc trong CLAUDE.md (vấn đề, ví dụ, lựa chọn, hệ quả, đề xuất) và **chờ trả lời trước khi giao việc**.
 6. **Báo kế hoạch rồi giao việc.** Báo người dùng kế hoạch ngắn gọn (danh sách đánh số). Không có câu hỏi mở thì giao việc ngay; có thì chờ.
 7. **Theo dõi.** Chờ thành viên xong, không làm thay. Thành viên kẹt hoặc đi sai hướng thì chỉnh lại. Trạng thái task không cập nhật thì hỏi thành viên rồi cập nhật.
-8. **Review.** Bước code xong thì giao `reviewer` (gửi tên nhánh, đường dẫn worktree, task). Reviewer báo lỗi (`CHANGES REQUESTED`, hoặc `APPROVE` còn mục "nên sửa") thì **giao người làm sửa ngay trên cùng nhánh, không chờ người dùng duyệt**, rồi giao `reviewer` xem lại. Lặp tới khi reviewer `APPROVE` và hết mục "nên sửa" thì merge. Mục "nên sửa" ngoài phạm vi nhánh thì ghi lại để làm sau, không chặn merge. Chỉ dừng hỏi người dùng khi cách sửa đụng tới việc ở bước 5 (đổi hợp đồng C1–C5, SPEC, thêm thư viện); "Câu hỏi cho người dùng" khác của reviewer thì tự quyết theo đề xuất của reviewer và ghi vào báo cáo trước khi push.
+8. **Review.** Bước code xong thì giao `reviewer` (gửi tên nhánh, đường dẫn worktree, task). Reviewer báo lỗi (`CHANGES REQUESTED`, hoặc `APPROVE` còn mục "nên sửa") thì **giao người làm sửa ngay trên cùng nhánh, không chờ người dùng duyệt**, rồi giao `reviewer` xem lại. Lặp tới khi reviewer `APPROVE` và hết mục "nên sửa" thì merge. Mục "nên sửa" ngoài phạm vi nhánh thì ghi lại để làm sau, không chặn merge. Chỉ dừng hỏi người dùng khi cách sửa đụng tới việc ở bước 5 (đổi quy ước C1–C5, SPEC, thêm thư viện); "Câu hỏi cho người dùng" khác của reviewer thì tự quyết theo đề xuất của reviewer và ghi vào báo cáo trước khi push.
 9. **Merge rồi hỏi người dùng push** (xem phần Merge).
 
 ## Giao việc cho thành viên
@@ -48,7 +48,7 @@ Mỗi brief gồm:
 - **Thay đổi cụ thể:** từng file sửa hoặc tạo; hàm, lớp, endpoint cần thêm hoặc đổi, kèm chữ ký (tham số, kiểu trả về); hình dạng dữ liệu (trường, kiểu, ví dụ JSON); hành vi ở trường hợp lỗi và trường hợp biên. File không được sửa.
 - **Test cần viết:** liệt kê từng ca test (đầu vào, kết quả mong đợi), file test đặt ở đâu, dùng fixture nào có sẵn.
 - **Xong khi:** tiêu chí xong phải đạt, lệnh kiểm tra phải pass.
-- **Phối hợp:** hợp đồng API đầy đủ (bạn viết sẵn, gửi cho cả `backend` và `ui`), ai chờ ai.
+- **Phối hợp:** quy ước API đầy đủ (bạn viết sẵn, gửi cho cả `backend` và `ui`), ai chờ ai.
 - **Tài nguyên:** mọi link, tài liệu, ảnh người dùng gửi kèm, giữ nguyên văn (không rút gọn URL, không bỏ query, không diễn giải thành "link ở trên"). Bước con cần tài nguyên nào thì kèm đúng tài nguyên đó.
 
 Task lớn thì chia thành nhiều brief nhỏ, mỗi brief một phần độc lập kiểm được. Thành viên hỏi lại vì brief thiếu thì bổ sung brief, đừng để họ tự đoán.

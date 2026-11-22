@@ -1,4 +1,4 @@
-"""Hợp đồng C1: manifest của bản thu (SPEC 10.2)."""
+"""Quy ước C1: manifest của bản thu (SPEC 10.2)."""
 
 from enum import StrEnum
 from typing import Literal, Self

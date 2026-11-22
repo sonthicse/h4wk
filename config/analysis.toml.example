@@ -1,4 +1,4 @@
-# Cấu hình phân tích (hợp đồng C5).
+# Cấu hình phân tích (quy ước C5).
 
 # Thứ tự chọn transcript chính để ghép timeline và phân tích.
 transcript_priority = ["uploaded", "stt", "auto", "supadata_ai"]

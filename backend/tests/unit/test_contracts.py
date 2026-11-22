@@ -1,4 +1,4 @@
-"""Test hợp đồng C1–C5: mỗi mô hình có ví dụ hợp lệ và ví dụ bị từ chối."""
+"""Test quy ước C1–C5: mỗi mô hình có ví dụ hợp lệ và ví dụ bị từ chối."""
 
 import copy
 import json
@@ -11,7 +11,6 @@ import pytest
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
-from h4wk.cli import export_schemas
 from h4wk.collectors.models import Cap, CollectLevel, Normalized
 from h4wk.core.config import REPO_ROOT
 from h4wk.core.config_models import AnalysisConfig, SourcesConfig, WatchlistConfig, load_toml
@@ -527,7 +526,7 @@ def test_hits_and_findings_files_are_lists() -> None:
     TypeAdapter(list[Finding]).validate_python([FINDING])
 
 
-# ----------------------------------------------------- file mẫu và JSON Schema
+# ------------------------------------------------------------------- file mẫu
 
 
 @pytest.mark.parametrize(
@@ -557,31 +556,6 @@ def test_load_toml_reads_vietnamese_as_utf8(tmp_path: Path) -> None:
     path.write_text('[sources.ytdlp]\ncookies_file = "/home/thi/tài liệu/cookies.txt"\n', "utf-8")
     cfg = load_toml(path, SourcesConfig)
     assert cfg.sources.ytdlp.cookies_file == "/home/thi/tài liệu/cookies.txt"
-
-
-def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
-    written = export_schemas(tmp_path)
-    names = {p.name for p in written}
-    assert names == {
-        "c1-manifest.json",
-        "c2-normalized.json",
-        "c3-timeline.json",
-        "c4-hits.json",
-        "c4-findings.json",
-        "c4-review-decision.json",
-        "c4-verdict.json",
-        "c4-video-review-decision.json",
-        "c5-sources.json",
-        "c5-analysis.json",
-        "c5-entities.json",
-        "c5-watchlist.json",
-    }
-    for p in written:
-        json.loads(p.read_text(encoding="utf-8"))
-    # Chạy lại cho ra đúng nội dung cũ, để docs/contracts/ không đổi vô cớ.
-    before = {p.name: p.read_text(encoding="utf-8") for p in written}
-    export_schemas(tmp_path)
-    assert before == {p.name: p.read_text(encoding="utf-8") for p in written}
 
 
 @pytest.mark.parametrize(

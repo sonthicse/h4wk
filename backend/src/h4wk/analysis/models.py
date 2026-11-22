@@ -1,4 +1,4 @@
-"""Hợp đồng C4: dấu hiệu (hits.json), nghi vấn (findings.json), quyết định rà soát
+"""Quy ước C4: dấu hiệu (hits.json), nghi vấn (findings.json), quyết định rà soát
 (một dòng trong reviews.jsonl). hits.json và findings.json là mảng JSON (SPEC 10.6)."""
 
 from enum import StrEnum
@@ -227,7 +227,7 @@ class ReviewDecision(Contract):
 
     @model_validator(mode="after")
     def _reject_needs_reason(self) -> Self:
-        # reviews.jsonl chỉ ghi thêm, ghi sai thì không sửa được, nên chặn ngay ở hợp đồng.
+        # reviews.jsonl chỉ ghi thêm, ghi sai thì không sửa được, nên chặn ngay ở quy ước.
         if self.status == "rejected" and not self.note.strip():
             raise ValueError("Reject needs a note")
         return self

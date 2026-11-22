@@ -16,7 +16,7 @@ class NotFound(LookupError):
 
 
 def record(finding_id: str, status: str, note: str, by: str) -> ReviewDecision:
-    """Ghi một quyết định. Reject thiếu note bị hợp đồng C4 chặn (ValidationError)."""
+    """Ghi một quyết định. Reject thiếu note bị quy ước C4 chặn (ValidationError)."""
     with Session(get_engine()) as s:
         row = s.get(FindingRow, finding_id)
         if row is None:

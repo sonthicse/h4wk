@@ -1,4 +1,4 @@
-# Cấu hình nguồn thu (hợp đồng C5). Không ghi API key ở đây: key nằm trong .env.
+# Cấu hình nguồn thu (quy ước C5). Không ghi API key ở đây: key nằm trong .env.
 # `uv run h4wk init` chép file này thành sources.toml nếu chưa có.
 
 [sources.ytdlp]

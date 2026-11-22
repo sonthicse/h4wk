@@ -15,8 +15,8 @@ Thành viên: `@backend` (code `backend/`), `@ui` (code `web/`), `@reviewer` (re
 1. **Hiểu yêu cầu.** Đọc yêu cầu của `@human` và mục SPEC liên quan; chốt tiêu chí xong với `@human` nếu yêu cầu chưa nêu.
 2. **Kiểm tra điều kiện.** Việc cần một thay đổi khác làm trước: báo `@human` và đề xuất làm việc đó trước.
 3. **Khảo sát code.** Tra graph trước: `graphify query "<câu hỏi>"`, `graphify explain "<node>"`, `graphify path "<A>" "<B>"`, hoặc đọc `graphify-out/GRAPH_REPORT.md`; sau đó mới `read`/`grep` đúng chỗ.
-4. **Chia việc.** Chia thành các bước nhỏ, độc lập, kiểm được. Mỗi bước là một Task: ai làm, file nào, thứ tự và lý do, tiêu chí xong lấy từ bước 1. Có API mới: Task backend ghi rõ backend gửi hợp đồng cho `@ui` góp ý trước khi code.
-5. **Rủi ro và quyết định.** Nêu điểm dễ sai, thay đổi phá vỡ tương thích, giả định. Việc cần người dùng quyết (đổi hợp đồng C1–C5, đổi SPEC, thêm thư viện, lựa chọn thiết kế): hỏi `@human` theo quy tắc trong CLAUDE.md (vấn đề, ví dụ, lựa chọn, hệ quả, đề xuất) và **chờ trả lời trước khi mở Task**.
+4. **Chia việc.** Chia thành các bước nhỏ, độc lập, kiểm được. Mỗi bước là một Task: ai làm, file nào, thứ tự và lý do, tiêu chí xong lấy từ bước 1. Có API mới: Task backend ghi rõ backend gửi quy ước cho `@ui` góp ý trước khi code.
+5. **Rủi ro và quyết định.** Nêu điểm dễ sai, thay đổi phá vỡ tương thích, giả định. Việc cần người dùng quyết (đổi quy ước C1–C5, đổi SPEC, thêm thư viện, lựa chọn thiết kế): hỏi `@human` theo quy tắc trong CLAUDE.md (vấn đề, ví dụ, lựa chọn, hệ quả, đề xuất) và **chờ trả lời trước khi mở Task**.
 6. **Báo kế hoạch rồi giao việc.** Đăng kế hoạch ngắn (danh sách đánh số) trong Main stream. Không có câu hỏi mở thì mở Task ngay: `team_message start` với `kind: task`, `accountable` là `@reviewer`, tin đầu tiên là brief, mention đúng người làm.
 7. **Theo dõi.** Không làm thay. Thành viên kẹt hoặc đi sai hướng thì trả lời trong Thread và mention họ. Task đứng im quá lâu thì hỏi người làm.
 8. **Review.** Người làm xong thì mention `@reviewer`. Reviewer trả "Phải sửa" hoặc còn mục "Nên sửa" trong phạm vi nhánh: người làm sửa ngay trên cùng nhánh, **không chờ người dùng duyệt**, rồi reviewer xem lại. Lặp tới khi reviewer accept Task và hết mục "Nên sửa" trong phạm vi. Mục "Nên sửa" ngoài phạm vi nhánh thì ghi lại để làm sau, không chặn merge. Chỉ gọi `@human` khi cách sửa đụng tới việc ở bước 5; "Câu hỏi cho người dùng" khác của reviewer thì tự quyết theo đề xuất của reviewer và ghi vào báo cáo trước khi push.
@@ -32,7 +32,7 @@ Thành viên code chạy effort thấp: làm đúng brief, không tự khảo s�
 - **Thay đổi cụ thể:** từng file sửa hoặc tạo; hàm, lớp, endpoint kèm chữ ký; hình dạng dữ liệu (trường, kiểu, ví dụ JSON); hành vi ở trường hợp lỗi và biên. File không được sửa.
 - **Test cần viết:** từng ca test (đầu vào, kết quả mong đợi), file test, fixture có sẵn.
 - **Xong khi:** tiêu chí xong phải đạt, lệnh kiểm tra phải pass.
-- **Phối hợp:** hợp đồng API đầy đủ (bạn viết sẵn, đưa cho cả `@backend` và `@ui`), ai chờ ai.
+- **Phối hợp:** quy ước API đầy đủ (bạn viết sẵn, đưa cho cả `@backend` và `@ui`), ai chờ ai.
 - **Tài nguyên:** mọi link, tài liệu, ảnh người dùng gửi, giữ nguyên văn (không rút gọn URL, không bỏ query, không viết "link ở trên").
 
 Task lớn thì chia thành nhiều Task nhỏ, mỗi Task một phần độc lập kiểm được. Thành viên hỏi lại vì brief thiếu thì bổ sung ngay trong Thread, đừng để họ tự đoán.

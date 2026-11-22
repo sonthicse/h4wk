@@ -24,9 +24,9 @@ QUESTIONS = {
         "type": "choice",
         "instructions": (
             "`text` is a Vietnamese YouTube item (see `source_type`). Decide whether `text` "
-            "itself attacks any of the `protected_targets`. The Party, State or regime counts "
-            "as attacked even when not named. An insult or accusation aimed at anyone else "
-            "(foreign leaders, historical figures, other commenters, the channel) is neutral. A"
+            "itself attacks any of the `protected_targets`. An insult or accusation aimed at "
+            "anyone else (foreign leaders, historical figures, other commenters, the channel) is "
+            "neutral. A"
             " comment that only replies to `parent_comment` is judged by what the reply itself "
             "says: agreeing with an attack counts, but a question, joke or remark about another"
             " topic does not. Reporting facts, describing what leaders did, analysis and "

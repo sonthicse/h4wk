@@ -1,7 +1,7 @@
 import pytest
 from _analysis_sample import _data
 
-from h4wk.analysis.models import Finding
+from h4wk.analysis.models import Finding, VideoVerdict
 from h4wk.analysis.verdict import decide
 
 
@@ -136,7 +136,7 @@ def test_analyze_cli_creates_run(data_dir):
     assert result.exit_code == 0, result.exception
     (path,) = derived.glob("analysis/*/verdict.json")
     assert path.with_name("findings.json").is_file()
-    assert cli.VideoVerdict.model_validate_json(path.read_bytes()).run_id == path.parent.name
+    assert VideoVerdict.model_validate_json(path.read_bytes()).run_id == path.parent.name
 
 
 def test_analyze_all_stops_on_quota_without_replacing_run(monkeypatch, data_dir):

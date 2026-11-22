@@ -1,6 +1,5 @@
 """CLI `h4wk`."""
 
-import json
 import shutil
 from pathlib import Path
 from typing import Annotated
@@ -10,41 +9,15 @@ from pydantic import TypeAdapter
 
 from h4wk.analysis import verdict
 from h4wk.analysis.models import (
-    EntityHit,
     Finding,
-    ReviewDecision,
-    VideoReviewDecision,
-    VideoVerdict,
 )
-from h4wk.collectors.models import Normalized
-from h4wk.core.config import REPO_ROOT, config_dir, data_dir
-from h4wk.core.config_models import AnalysisConfig, SourcesConfig, WatchlistConfig
+from h4wk.core.config import config_dir, data_dir
 from h4wk.core.db import get_engine
-from h4wk.core.entities import EntitiesConfig
-from h4wk.evidence.models import Manifest
 from h4wk.evidence.verify import FileStatus
 from h4wk.evidence.verify import verify as verify_capture
 from h4wk.media.timeline import Timeline
 
 app = typer.Typer(no_args_is_help=True)
-schema_app = typer.Typer(no_args_is_help=True, help="JSON Schema của hợp đồng C1–C5.")
-app.add_typer(schema_app, name="schema")
-
-# Tên file → kiểu cần xuất JSON Schema.
-CONTRACTS: dict[str, object] = {
-    "c1-manifest": Manifest,
-    "c2-normalized": Normalized,
-    "c3-timeline": Timeline,
-    "c4-hits": list[EntityHit],
-    "c4-findings": list[Finding],
-    "c4-video-review-decision": VideoReviewDecision,
-    "c4-verdict": VideoVerdict,
-    "c4-review-decision": ReviewDecision,
-    "c5-sources": SourcesConfig,
-    "c5-analysis": AnalysisConfig,
-    "c5-entities": EntitiesConfig,
-    "c5-watchlist": WatchlistConfig,
-}
 
 
 @app.callback()
@@ -157,26 +130,6 @@ def backfill_verdict(
         findings = TypeAdapter(list[Finding]).validate_json(latest.read_text(encoding="utf-8"))
         verdict.write(target, verdict.decide(findings, latest.parent.name, timeline))
         typer.echo(f"wrote: {target}")
-
-
-def export_schemas(out_dir: Path) -> list[Path]:
-    """Ghi JSON Schema của C1–C5 vào out_dir. Nội dung ổn định giữa các lần chạy."""
-    out_dir.mkdir(parents=True, exist_ok=True)
-    written = []
-    for name, tp in CONTRACTS.items():
-        schema = TypeAdapter(tp).json_schema(mode="validation")
-        path = out_dir / f"{name}.json"
-        text = json.dumps(schema, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
-        path.write_text(text, encoding="utf-8")
-        written.append(path)
-    return written
-
-
-@schema_app.command("export")
-def schema_export() -> None:
-    """Xuất JSON Schema của C1–C5 vào docs/contracts/."""
-    for path in export_schemas(REPO_ROOT / "docs" / "contracts"):
-        typer.echo(f"wrote: {path}")
 
 
 @app.command()

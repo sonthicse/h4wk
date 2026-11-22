@@ -29,7 +29,7 @@ Trưởng nhóm gửi brief chi tiết: file, hàm, chữ ký, hình dạng dữ
 
 ## Cách làm
 
-1. Nhận hợp đồng API từ `backend`: góp ý về hình dạng dữ liệu giao diện cần trước khi `backend` viết code.
+1. Nhận quy ước API từ `backend`: góp ý về hình dạng dữ liệu giao diện cần trước khi `backend` viết code.
 2. Sau khi backend đổi API: chạy `npm run gen:api` trong `web/` để sinh lại kiểu từ OpenAPI. Không tự viết kiểu trùng với kiểu đã sinh.
 3. Truyền `latest_only=true` ở Review, Findings, Dashboard, danh sách video; Video detail xem bản thu cũ thì không truyền.
 4. Trước khi báo xong, chạy trong `web/` của worktree: `npm run build && npm run lint`. Nếu có backend chạy thử thì kiểm tra thủ công luồng vừa nối và ghi lại đã kiểm những gì.

@@ -32,7 +32,7 @@ Bạn là lập trình viên giao diện web của h4wk (Vite, React, Tailwind v
 
 ## Cách làm
 
-1. Nhận hợp đồng API từ `@backend` trong Thread: góp ý về hình dạng dữ liệu giao diện cần trước khi `@backend` viết code.
+1. Nhận quy ước API từ `@backend` trong Thread: góp ý về hình dạng dữ liệu giao diện cần trước khi `@backend` viết code.
 2. Sau khi backend đổi API: chạy `npm run gen:api` trong `web/` để sinh lại kiểu từ OpenAPI. Không tự viết kiểu trùng với kiểu đã sinh.
 3. Truyền `latest_only=true` ở Review, Findings, Dashboard, danh sách video; Video detail xem bản thu cũ thì không truyền.
 4. Trước khi báo xong, chạy trong `web/` của worktree (chưa có `node_modules` thì `npm ci` trước): `npm run build && npm run lint`. Sau đó tự dùng thử giao diện như reviewer sẽ làm: theo mục "Xem giao diện" trong `docs/team/roles/reviewer.md` (skill `playwright-cli`), nhưng Vite chạy ở cổng `5181` và phiên trình duyệt là `-s=ui`. Đi hết luồng vừa làm, xem ảnh ở cả 1440×900 và 390×844, sửa chỗ hỏng, lệch, tràn, rối mắt trước khi báo xong. Ghi lại đã kiểm những trang và luồng nào.

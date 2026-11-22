@@ -243,7 +243,7 @@ def _reading(quotes: list[str], references: list[str]) -> str:
 def _merge(members: list[Finding], references: list[str]) -> Finding:
     if len(members) == 1:
         return members[0]
-    # Nghi vấn OCR luôn có segment_id và start (hợp đồng C4).
+    # Nghi vấn OCR luôn có segment_id và start (quy ước C4).
     members = sorted(members, key=lambda f: f.start or 0.0)
     head = members[0]
     occurrences: dict[str, Occurrence] = {}

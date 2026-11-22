@@ -1,4 +1,4 @@
-"""Hợp đồng C3: timeline.json (SPEC 10.5)."""
+"""Quy ước C3: timeline.json (SPEC 10.5)."""
 
 from typing import Literal, Self
 

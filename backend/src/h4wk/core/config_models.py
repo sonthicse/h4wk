@@ -1,4 +1,5 @@
-"""Hợp đồng C5: định dạng config/sources.toml, analysis.toml (SPEC 10.1).
+"""Quy ước C5: định dạng config/sources.toml, analysis.toml, watchlist.toml (SPEC 10.1);
+entities.toml định nghĩa ở core/entities.py.
 
 File cấu hình không chứa secret. API key nằm trong .env hoặc data/secrets.json.
 """

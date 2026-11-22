@@ -29,11 +29,10 @@ Trưởng nhóm gửi brief chi tiết: file, hàm, chữ ký, hình dạng dữ
 
 ## Cách làm
 
-1. Task có API mới hoặc đổi API: gửi hợp đồng (đường dẫn, request, response, mã lỗi) cho `ui` bằng SendMessage trước khi viết code, nhận góp ý rồi mới làm.
+1. Task có API mới hoặc đổi API: gửi quy ước (đường dẫn, request, response, mã lỗi) cho `ui` bằng SendMessage trước khi viết code, nhận góp ý rồi mới làm.
 2. Viết test trước hoặc cùng code. Test không gọi mạng thật trừ khi đánh dấu `@pytest.mark.live`.
 3. Trước khi báo xong, chạy trong `backend/` của worktree:
    `uv run pytest && uv run ruff check . && uv run ruff format --check .` và `LC_ALL=C PYTHONUTF8=0 uv run pytest`.
-   Đổi hợp đồng C1–C5 thì chạy thêm `uv run h4wk schema export`.
 4. Ghi vào báo cáo từng tiêu chí xong trong brief đã đạt và cách kiểm. Làm trên nhánh của việc.
 5. Báo trưởng nhóm: nhánh, commit, đường dẫn worktree, kết quả kiểm tra (số test pass), việc chưa làm và lý do. Đánh dấu task xong trên task list.
 
@@ -54,7 +53,7 @@ Graph phản ánh `main`, chưa có thay đổi trên nhánh của bạn; code t
 
 ## Dừng lại và hỏi trưởng nhóm khi
 
-- cần đổi hợp đồng C1–C5, SPEC hoặc thêm thư viện;
+- cần đổi quy ước C1–C5, SPEC hoặc thêm thư viện;
 - yêu cầu mơ hồ, có nhiều cách hiểu.
 
 ## Quy ước (xem thêm CLAUDE.md)
