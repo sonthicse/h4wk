@@ -66,15 +66,23 @@ function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: t
 }
 
 function ApiStatus() {
-  const { data, error, isPending } = useQuery({ queryKey: ['health'], queryFn: getHealth })
+  // Kiểm lại định kỳ để chấm trạng thái đổi khi API tắt hoặc bật lại.
+  const { error, isPending } = useQuery({ queryKey: ['health'], queryFn: getHealth, refetchInterval: 15000 })
 
-  let status = 'loading…'
-  if (error) status = 'unreachable'
-  else if (!isPending) status = data.status
+  let label = 'Connecting to API…'
+  let dot = 'bg-muted-foreground'
+  if (error) {
+    label = 'API unreachable'
+    dot = 'bg-destructive'
+  } else if (!isPending) {
+    label = 'API connected'
+    dot = 'bg-green-600'
+  }
 
   return (
-    <p className="px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
-      API: <span data-testid="api-status" className="font-mono text-foreground">{status}</span>
+    <p className="flex items-center gap-1.5 p-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
+      <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${dot}`} />
+      <span data-testid="api-status">{label}</span>
     </p>
   )
 }

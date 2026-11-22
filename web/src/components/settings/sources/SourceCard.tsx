@@ -103,7 +103,6 @@ export default function SourceCard({ source, enabled, onEnabledChange, newKey, o
                 <code id={`key-${source.name}`} className="flex-1 rounded-md border bg-muted px-3 py-1.5 font-mono">
                   {source.key?.masked ?? 'Not set'}
                 </code>
-                {source.key?.origin === 'env' && <span className="text-xs text-muted-foreground">from .env</span>}
                 <Button variant="outline" onClick={() => setEditingKey(true)}>
                   {source.key?.masked ? 'Change key' : 'Set key'}
                 </Button>

@@ -10,8 +10,8 @@ export default function Donut({ slices, centerLabel }: { slices: DonutSlice[]; c
   const data = total > 0 ? slices.filter((s) => s.value > 0) : [{ key: 'empty', label: 'None', value: 1, color: 'var(--muted)' }]
 
   return (
-    <div className="relative size-32 shrink-0">
-      <ChartContainer config={config} className="relative z-10 aspect-square size-32">
+    <div className="relative size-22 shrink-0">
+      <ChartContainer config={config} className="relative z-10 aspect-square size-22">
         <PieChart>
           {/* Tooltip hiện ngay tại chỗ (không trượt theo chuột) và nằm trên số ở giữa vòng tròn. */}
           {total > 0 && (
@@ -25,8 +25,8 @@ export default function Donut({ slices, centerLabel }: { slices: DonutSlice[]; c
             data={data}
             dataKey="value"
             nameKey="key"
-            innerRadius={42}
-            outerRadius={60}
+            innerRadius={30}
+            outerRadius={44}
             paddingAngle={total > 0 && data.length > 1 ? 2 : 0}
             strokeWidth={0}
             isAnimationActive={false}
@@ -38,8 +38,8 @@ export default function Donut({ slices, centerLabel }: { slices: DonutSlice[]; c
         </PieChart>
       </ChartContainer>
       <div className="pointer-events-none absolute inset-0 z-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-semibold tabular-nums">{total}</span>
-        <span className="text-[10px] tracking-wide text-muted-foreground uppercase">{centerLabel}</span>
+        <span className="text-lg leading-tight font-semibold tabular-nums">{total}</span>
+        <span className="text-[10px] text-muted-foreground">{centerLabel}</span>
       </div>
     </div>
   )

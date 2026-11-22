@@ -15,28 +15,19 @@ function reviewLink(item: QueueItem) {
   return `/videos/${encodeURIComponent(f.video_id)}?finding=${encodeURIComponent(f.id)}`
 }
 
+// Một dòng như bản phác: mức độ rồi trích dẫn, cắt bớt nếu dài; chi tiết trong tooltip.
 function QueueItemRow({ item }: { item: QueueItem }) {
   const f = item.finding
+  const detail = `${item.video.title ?? item.video.id} · ${f.source_kind}${f.start != null ? ` · ${formatTime(f.start)}` : ''} · ${f.category}`
   return (
     <HoverItem className="rounded-md focus-within:bg-muted">
-      <div className="flex gap-3 py-2.5">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <Link to={reviewLink(item)} className="line-clamp-2 text-sm font-medium hover:underline">
-              {f.quote}
-            </Link>
-            <Badge variant={severityVariant[f.severity]} className="shrink-0">
-              {f.severity}
-            </Badge>
-          </div>
-          <p className="mt-0.5 flex justify-between gap-2 text-xs text-muted-foreground">
-            <span className="truncate">
-              {item.video.title ?? item.video.id} · {f.source_kind}
-              {f.start != null && ` · ${formatTime(f.start)}`}
-            </span>
-            <span className="shrink-0">{f.category}</span>
-          </p>
-        </div>
+      <div className="flex items-center gap-1.5 py-1">
+        <Badge variant={severityVariant[f.severity]} className="shrink-0">
+          {f.severity}
+        </Badge>
+        <Link to={reviewLink(item)} title={detail} className="min-w-0 flex-1 truncate hover:underline">
+          {f.quote}
+        </Link>
       </div>
     </HoverItem>
   )
@@ -54,7 +45,7 @@ export default function ReviewQueueCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-xl">Review</CardTitle>
+        <CardTitle className="text-lg">Review</CardTitle>
       </CardHeader>
       <CardContent className="max-h-[calc(66svh-9rem)] overflow-y-auto pr-1">
         {queue.error && <p className="text-sm text-destructive">Could not load the review queue.</p>}
@@ -64,7 +55,7 @@ export default function ReviewQueueCard() {
         )}
         {pending.length > 0 && (
           <HoverHighlight>
-            <ol className="divide-y">
+            <ol>
               {pending.slice(0, MAX_ITEMS).map((it) => (
                 <QueueItemRow key={it.finding.id} item={it} />
               ))}

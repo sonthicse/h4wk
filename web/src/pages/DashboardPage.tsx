@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { severityVariant, statusVariant } from '@/lib/findings'
+import { severityVariant } from '@/lib/findings'
 import { getDashboard } from '@/api/dashboard'
 import type { Finding } from '@/api/findings'
 import type { ReviewStatus } from '@/api/review'
@@ -40,15 +40,16 @@ function StatCard({ label, value, to }: { label: string; value: number; to: stri
 }
 
 // Thẻ đếm theo nhóm; cả thẻ là link sang trang tương ứng.
-// Màu cung trên vòng tròn, khớp màu badge: high đỏ, medium cam, low xanh; trạng thái rà soát theo mức cần chú ý.
+// Màu cung trên vòng tròn theo bản phác, khớp màu badge mức độ: high đỏ, medium hổ phách, low xám nhạt.
+// Trạng thái rà soát: chưa rà soát hổ phách, xác nhận đỏ, bác bỏ xám, cần thêm thông tin xám nhạt.
 const sliceColor: Record<string, string> = {
-  high: 'var(--destructive)',
-  medium: 'oklch(0.75 0.16 65)',
-  low: 'oklch(0.62 0.17 255)',
-  unreviewed: 'oklch(0.75 0.16 65)',
-  needs_info: 'oklch(0.62 0.17 255)',
-  confirmed: 'var(--destructive)',
-  rejected: 'var(--muted-foreground)',
+  high: '#dc2626',
+  medium: '#f59e0b',
+  low: '#d4d4d4',
+  unreviewed: '#f59e0b',
+  confirmed: '#dc2626',
+  rejected: '#737373',
+  needs_info: '#d4d4d4',
 }
 
 function Breakdown<K extends string>({
@@ -63,7 +64,8 @@ function Breakdown<K extends string>({
   to: string
   keys: K[]
   counts: Record<K, number>
-  variant: Record<K, 'destructive' | 'default' | 'secondary' | 'outline'>
+  // Có variant thì nhãn hiện dạng badge (mức độ); không có thì là chữ thường (trạng thái rà soát).
+  variant?: Record<K, 'severe' | 'warning' | 'outline'>
   centerLabel: string
 }) {
   return (
@@ -76,19 +78,16 @@ function Breakdown<K extends string>({
         <CardHeader>
           <CardTitle>{title}</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-wrap items-center justify-center gap-4">
+        <CardContent className="flex items-center gap-4">
           <Donut
             centerLabel={centerLabel}
             slices={keys.map((k) => ({ key: k, label: k, value: counts[k], color: sliceColor[k] ?? 'var(--muted-foreground)' }))}
           />
-          <ul className="min-w-36 flex-1 space-y-2">
+          <ul className={`min-w-0 flex-1 space-y-1.5 ${variant ? '' : 'text-[13px]'}`}>
             {keys.map((k) => (
               <li key={k} className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-2">
-                  <span className="size-2.5 shrink-0 rounded-full" style={{ background: sliceColor[k] }} />
-                  <Badge variant={variant[k]}>{k}</Badge>
-                </span>
-                <span className="text-lg font-medium tabular-nums">{counts[k]}</span>
+                {variant ? <Badge variant={variant[k]}>{k}</Badge> : <span>{k}</span>}
+                <span className="tabular-nums">{counts[k]}</span>
               </li>
             ))}
           </ul>
@@ -144,7 +143,7 @@ export default function DashboardPage() {
         <div className="-m-1 min-h-0 overflow-y-auto p-1 pr-2">
           <div className="grid grid-cols-2 gap-4">
             <Breakdown title="Findings" to="/findings" centerLabel="findings" keys={severities} counts={d.findings_by_severity} variant={severityVariant} />
-            <Breakdown title="Review" to="/review" centerLabel={d.videos_by_review_status ? 'videos' : 'findings'} keys={statuses} counts={d.videos_by_review_status ?? d.findings_by_status} variant={statusVariant} />
+            <Breakdown title="Review" to="/review" centerLabel={d.videos_by_review_status ? 'videos' : 'findings'} keys={statuses} counts={d.videos_by_review_status ?? d.findings_by_status} />
             <div className="col-span-2">
               <ReviewQueueCard />
             </div>

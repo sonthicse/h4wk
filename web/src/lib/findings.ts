@@ -4,10 +4,11 @@ import type { ReviewStatus } from '@/api/review'
 
 type Severity = Finding['severity']
 
-export const severityVariant: Record<Severity, 'destructive' | 'default' | 'secondary'> = {
-  high: 'destructive',
-  medium: 'default',
-  low: 'secondary',
+// Màu theo bản phác: high đỏ đặc, medium hổ phách, low viền.
+export const severityVariant: Record<Severity, 'severe' | 'warning' | 'outline'> = {
+  high: 'severe',
+  medium: 'warning',
+  low: 'outline',
 }
 
 export const statusVariant: Record<ReviewStatus, 'outline' | 'default' | 'secondary'> = {

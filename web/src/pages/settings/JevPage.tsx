@@ -3,7 +3,6 @@ import { CheckIcon, TriangleAlertIcon } from 'lucide-react'
 import { useState } from 'react'
 import { deleteJevKey, getJevSettings, getJevUsage, setJevKey, testJev, type JevUsagePeriod } from '@/api/settings'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -35,12 +34,14 @@ function KeyCard() {
   const queryClient = useQueryClient()
   const jev = useQuery({ queryKey: ['jev-settings'], queryFn: getJevSettings })
   const [value, setValue] = useState('')
+  const [editing, setEditing] = useState(false)
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['jev-settings'] })
 
   const save = useMutation({
     mutationFn: () => setJevKey(value.trim()),
     onSuccess: () => {
       setValue('')
+      setEditing(false)
       test.reset()
       return refresh()
     },
@@ -60,21 +61,18 @@ function KeyCard() {
   const key = jev.data?.key
   const error = save.error ?? remove.error
 
+  const cancel = () => {
+    setValue('')
+    setEditing(false)
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          API key
-          {key && (
-            <Badge variant={key.set ? 'default' : 'outline'}>
-              {key.set ? `Key set${key.origin ? ` · ${key.origin}` : ''}` : 'No key'}
-            </Badge>
-          )}
-          {key?.set && <span className="ml-auto font-mono text-sm font-normal text-muted-foreground">{key.masked}</span>}
-        </CardTitle>
+        <CardTitle>API key</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {jev.error && <p className="text-sm text-destructive">Could not load Jev settings.</p>}
+      <CardContent className="space-y-4 text-sm">
+        {jev.error && <p className="text-destructive">Could not load Jev settings.</p>}
         {key && !key.set && (
           <Alert>
             <TriangleAlertIcon />
@@ -82,30 +80,54 @@ function KeyCard() {
             <AlertDescription>Add a TypeSafe API key to analyse speech, comments, titles and images.</AlertDescription>
           </Alert>
         )}
-        <form
-          className="flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            if (value.trim()) save.mutate()
-          }}
-        >
-          <Input
-            type="password"
-            autoComplete="off"
-            aria-label="Jev API key"
-            placeholder={key?.set ? 'Replace the key' : 'TypeSafe API key'}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-          />
-          <Button type="submit" disabled={busy || !value.trim()}>
-            {save.isPending ? 'Saving…' : 'Save key'}
-          </Button>
-          {key?.set && key.origin === 'settings' && (
-            <Button type="button" variant="outline" disabled={busy} onClick={() => remove.mutate()}>
-              Remove
-            </Button>
+        {/* Cùng cách nhập key như thẻ nguồn ở Settings → Sources. */}
+        <div className="space-y-1.5">
+          <label htmlFor="jev-key" className="font-medium">
+            TypeSafe API key
+          </label>
+          {editing ? (
+            <form
+              className="flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (value.trim()) save.mutate()
+              }}
+            >
+              <Input
+                id="jev-key"
+                type="password"
+                autoComplete="off"
+                autoFocus
+                placeholder="Paste the new key"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+              />
+              <Button type="submit" disabled={busy || !value.trim()}>
+                {save.isPending ? 'Saving…' : 'Save key'}
+              </Button>
+              <Button type="button" variant="ghost" onClick={cancel}>
+                Cancel
+              </Button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-2">
+              <code id="jev-key" className="flex-1 rounded-md border bg-muted px-3 py-1.5 font-mono">
+                {key?.masked ?? 'Not set'}
+              </code>
+              <Button variant="outline" onClick={() => setEditing(true)}>
+                {key?.set ? 'Change key' : 'Set key'}
+              </Button>
+              {key?.set && key.origin === 'settings' && (
+                <Button variant="outline" disabled={busy} onClick={() => remove.mutate()}>
+                  Remove
+                </Button>
+              )}
+            </div>
           )}
-        </form>
+          <p className="text-xs text-muted-foreground">
+            The saved key is never shown again. To change it, enter a new one and save.
+          </p>
+        </div>
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error.message}
