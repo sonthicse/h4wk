@@ -1,14 +1,24 @@
-import { cn } from '@/lib/utils'
+// Logo meme-generator vẽ bằng nét theo màu chữ (currentColor): nền sáng nét đen, dark mode tự đảo thành nét trắng.
 
-// Logo theo bản phác: ô vuông bo góc nền đậm, chữ "h". Cỡ, bo góc và cỡ chữ do nơi dùng truyền qua className.
 export default function Logo({ className }: { className?: string }) {
   return (
-    <span
+    <svg
+      viewBox="0 0 48 48"
       role="img"
       aria-label="h4wk logo"
-      className={cn('flex items-center justify-center bg-primary font-semibold text-primary-foreground', className)}
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
-      h
-    </span>
+      <path d="M7.48,5.5a2,2,0,0,0-2,2v33a2,2,0,0,0,2,2H40.52a2,2,0,0,0,2-2V7.5a2,2,0,0,0-2-2Z" />
+      <path d="M8.5,26.7357v-3.367a2.1044,2.1044,0,0,1,2.1044-2.1044h0a2.1044,2.1044,0,0,1,2.1043,2.1044v3.367" />
+      <path d="M12.7087,23.3687a2.1044,2.1044,0,0,1,2.1044-2.1044h0a2.1044,2.1044,0,0,1,2.1043,2.1044v3.367" />
+      <path d="M22.7235,25.7263a2.1035,2.1035,0,0,1-1.8284,1.062h0a2.1044,2.1044,0,0,1-2.1044-2.1044V23.3161a2.1044,2.1044,0,0,1,2.1044-2.1044h0a2.1044,2.1044,0,0,1,2.1043,2.1044V24H18.7907" />
+      <path d="M25.0006,26.7357v-3.367a2.1044,2.1044,0,0,1,2.1043-2.1044h0a2.1044,2.1044,0,0,1,2.1044,2.1044v3.367" />
+      <path d="M29.2093,23.3687a2.1044,2.1044,0,0,1,2.1043-2.1044h0a2.1044,2.1044,0,0,1,2.1044,2.1044v3.367" />
+      <path d="M39.2241,25.7263a2.1037,2.1037,0,0,1-1.8285,1.062h0a2.1044,2.1044,0,0,1-2.1043-2.1044V23.3161a2.1044,2.1044,0,0,1,2.1043-2.1044h0A2.1044,2.1044,0,0,1,39.5,23.3161V24H35.2913" />
+    </svg>
   )
 }

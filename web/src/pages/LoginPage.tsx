@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Logo from '@/components/Logo'
+import ThemeToggle from '@/components/ThemeToggle'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -32,10 +33,11 @@ export default function LoginPage() {
   else if (signIn.error) error = 'Could not reach the server. Try again.'
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted px-4">
+    <div className="relative flex min-h-svh items-center justify-center bg-muted px-4">
+      <ThemeToggle className="absolute top-4 right-4" />
       <Card className="w-full max-w-md min-h-140 justify-center py-12">
         <CardHeader className="flex flex-col items-center gap-4 px-10">
-          <Logo className="size-28 rounded-[28px] text-[56px]" />
+          <Logo className="size-28 text-foreground" />
           <CardTitle className="text-2xl">
             <h1>Sign in</h1>
           </CardTitle>

@@ -138,7 +138,7 @@ function KeyCard() {
             {test.isPending ? 'Testing…' : 'Test connection'}
           </Button>
           {test.data?.ok && (
-            <span role="status" className="flex items-center gap-1.5 text-sm text-green-700">
+            <span role="status" className="flex items-center gap-1.5 text-sm text-green-700 dark:text-green-400">
               <CheckIcon className="size-4" />
               Connected{test.data.model ? ` · ${test.data.model}` : ''}
               {test.data.latency_ms != null ? ` · ${test.data.latency_ms} ms` : ''}
