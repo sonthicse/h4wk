@@ -2,19 +2,17 @@ import json
 from datetime import datetime
 
 from sqlmodel import Session
-from typer.testing import CliRunner
 
-from h4wk.cli import app
 from h4wk.core.db import WatchItemRow, get_engine
 from h4wk.core.entities import load_entities
 from h4wk.core.types import VN_TZ
+from h4wk.core.workspace import init_workspace
 from h4wk.watchlist import service
 
 
 def test_init_adds_no_entity_or_channel(data_dir, config_dir):
-    """init không tự thêm đối tượng hay kênh: ai dùng cũng tự khai báo của mình."""
-    result = CliRunner().invoke(app, ["init"])
-    assert result.exit_code == 0, result.exception
+    """Khởi tạo không tự thêm đối tượng hay kênh: ai dùng cũng tự khai báo của mình."""
+    init_workspace(data_dir, config_dir)
     assert load_entities() == [] and service.load_channels() == []
 
 
@@ -38,8 +36,7 @@ def test_init_moves_old_entities_and_watchlist_to_config(data_dir, config_dir):
         s.commit()
 
     for _ in range(2):
-        result = CliRunner().invoke(app, ["init"])
-        assert result.exit_code == 0, result.exception
+        init_workspace(data_dir, config_dir)
 
     assert (config_dir / "entities.toml").is_file()
     assert not (data_dir / "entities.json").exists()

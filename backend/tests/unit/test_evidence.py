@@ -7,9 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from typer.testing import CliRunner
 
-from h4wk.cli import app
 from h4wk.collectors.models import Normalized
 from h4wk.core.types import VN_TZ, Cap
 from h4wk.evidence.models import Manifest, SourceCall, SourceStatus, Trigger
@@ -131,13 +129,3 @@ def test_failed_finalize_leaves_no_capture(captures_dir: Path) -> None:
 
 def test_sample_capture_verifies_ok() -> None:
     assert all(r.status == FileStatus.OK for r in verify(FIXTURE_CAPTURE))
-
-
-def test_cli_verify_exit_code(captures_dir: Path) -> None:
-    cap = _capture(captures_dir, T1)
-    ok = CliRunner().invoke(app, ["verify", str(cap)])
-    assert ok.exit_code == 0 and "OK" in ok.output
-    unlock(cap)
-    (cap / "normalized.json").write_text("{}", encoding="utf-8")
-    bad = CliRunner().invoke(app, ["verify", str(cap)])
-    assert bad.exit_code == 1 and "FAIL" in bad.output

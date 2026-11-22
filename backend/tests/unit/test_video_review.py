@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from h4wk.analysis.models import VideoVerdict
-from h4wk.core.reindex import reindex
 from h4wk.core.types import VN_TZ
 
 
@@ -48,7 +47,3 @@ def test_video_review_lifecycle(client, data_dir):
     assert "review.decide_video" in (data_dir / "log" / "audit.jsonl").read_text(encoding="utf-8")
     old_and_new = client.get(queue, params={"latest_only": False}).json()
     assert [i["status"] for i in old_and_new] == ["unreviewed", "confirmed"]
-    assert reindex().decisions == 1
-    from h4wk.review.videos import queue as load_queue
-
-    assert [i.model_dump(mode="json") for i in load_queue(latest_only=False)] == old_and_new

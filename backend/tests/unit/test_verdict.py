@@ -1,7 +1,7 @@
 import pytest
 from _analysis_sample import _data
 
-from h4wk.analysis.models import Finding, VideoVerdict
+from h4wk.analysis.models import Finding
 from h4wk.analysis.verdict import decide
 
 
@@ -84,83 +84,3 @@ def test_ten_ids_ranked_by_severity_then_jev_probability():
     result = decide(findings, "r_test", timeline)
     assert result.finding_ids == [f.id for f in reversed(findings[90:100])]
     assert result.summary.startswith("200 nghi vấn vi phạm")
-
-
-@pytest.mark.parametrize("args", [["demo"], ["--all"]])
-def test_backfill_writes_once_and_force_rewrites(data_dir, args):
-    from typer.testing import CliRunner
-
-    from h4wk import cli
-    from h4wk.analysis.models import VideoVerdict
-
-    data, timeline = _data()
-    video = data_dir / "videos" / "demo"
-    capture = video / "captures" / timeline.capture
-    derived = video / "derived" / timeline.capture
-    run = derived / "analysis" / "r_test"
-    capture.mkdir(parents=True)
-    run.mkdir(parents=True)
-    (capture / "normalized.json").write_text(data.model_dump_json(), encoding="utf-8")
-    (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
-    finding = _finding(timeline, 1, confidence="highly_likely")
-    (run / "findings.json").write_text(f"[{finding.model_dump_json()}]", encoding="utf-8")
-    runner = CliRunner()
-    assert runner.invoke(cli.app, ["verdict"]).exit_code == 2
-    result = runner.invoke(cli.app, ["verdict", *args])
-    assert result.exit_code == 0, result.exception
-    path = run / "verdict.json"
-    first = VideoVerdict.model_validate_json(path.read_bytes())
-    assert first.violation == "yes"
-    # Chạy lại không ghi đè: đổi nội dung rồi kiểm tra còn nguyên.
-    path.write_text(first.model_copy(update={"summary": "giữ"}).model_dump_json(), encoding="utf-8")
-    assert runner.invoke(cli.app, ["verdict", *args]).exit_code == 0
-    assert VideoVerdict.model_validate_json(path.read_bytes()).summary == "giữ"
-    assert runner.invoke(cli.app, ["verdict", *args, "--force"]).exit_code == 0
-    assert VideoVerdict.model_validate_json(path.read_bytes()).summary.startswith("1 nghi vấn")
-
-
-def test_analyze_cli_creates_run(data_dir):
-    from typer.testing import CliRunner
-
-    from h4wk import cli
-
-    data, timeline = _data()
-    video = data_dir / "videos" / timeline.video_id
-    capture = video / "captures" / timeline.capture
-    derived = video / "derived" / timeline.capture
-    capture.mkdir(parents=True)
-    derived.mkdir(parents=True)
-    (capture / "normalized.json").write_text(data.model_dump_json(), encoding="utf-8")
-    (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
-    result = CliRunner().invoke(cli.app, ["analyze", timeline.video_id])
-    assert result.exit_code == 0, result.exception
-    (path,) = derived.glob("analysis/*/verdict.json")
-    assert path.with_name("findings.json").is_file()
-    assert VideoVerdict.model_validate_json(path.read_bytes()).run_id == path.parent.name
-
-
-def test_analyze_all_stops_on_quota_without_replacing_run(monkeypatch, data_dir):
-    from typer.testing import CliRunner
-
-    from h4wk import cli
-    from h4wk.jobs.pipeline import _latest_runs
-
-    data, timeline = _data()
-    for video_id in (timeline.video_id, "zz-next"):
-        video = data_dir / "videos" / video_id
-        capture = video / "captures" / timeline.capture
-        derived = video / "derived" / timeline.capture
-        old = derived / "analysis" / "r_00000000000000000000000000"
-        capture.mkdir(parents=True)
-        old.mkdir(parents=True)
-        (capture / "normalized.json").write_text(data.model_dump_json(), encoding="utf-8")
-        (derived / "timeline.json").write_text(timeline.model_dump_json(), encoding="utf-8")
-        (old / "findings.json").write_text("[]", encoding="utf-8")
-    before = _latest_runs(data_dir)
-    from h4wk.jobs import pipeline
-
-    monkeypatch.setattr(pipeline.runner, "analyze", lambda *args, **kwargs: ([], [], "HTTP 429"))
-    result = CliRunner().invoke(cli.app, ["analyze", "--all"])
-    assert result.exit_code == 1, result.exception
-    assert "429" in result.output
-    assert _latest_runs(data_dir) == before

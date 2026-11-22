@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from h4wk.cli import init_workspace
+from h4wk.core.workspace import init_workspace
 
 
 def _make_examples(config_dir: Path) -> None:

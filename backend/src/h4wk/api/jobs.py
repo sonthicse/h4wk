@@ -1,5 +1,6 @@
 """API thu thập, job và nghi vấn (T12)."""
 
+import re
 from datetime import datetime
 from typing import Annotated
 
@@ -13,6 +14,7 @@ from h4wk.collectors.models import CollectLevel
 from h4wk.collectors.targets import TargetKind, parse_target
 from h4wk.core import audit
 from h4wk.core.db import JobRow, as_aware, get_session
+from h4wk.evidence.models import Manifest
 from h4wk.jobs import pipeline
 
 router = APIRouter(tags=["jobs"])
@@ -87,6 +89,43 @@ def collect(body: CollectBody, actor: ActorDep) -> list[Job]:
             row = s.get(JobRow, job.id)
             assert row is not None
             jobs.append(Job.of(row))
+    return jobs
+
+
+class ReanalyzeBody(BaseModel):
+    # Bỏ trống: mọi video đã có bản thu xử lý xong.
+    video_ids: list[str] | None = None
+
+
+@router.post("/api/reanalyze", status_code=status.HTTP_202_ACCEPTED)
+def reanalyze(body: ReanalyzeBody, actor: ActorDep, session: SessionDep) -> list[Job]:
+    """Phân tích lại bản thu mới nhất đã có timeline, không thu lại hay chạy media. Dùng sau
+    khi sửa đối tượng hoặc từ điển."""
+    root = pipeline.data_dir() / "videos"
+    ids = body.video_ids
+    if ids is None:
+        ids = sorted(p.name for p in root.iterdir() if p.is_dir()) if root.is_dir() else []
+    jobs = []
+    for video_id in ids:
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", video_id):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, f"invalid video id: {video_id}")
+        cap = pipeline.prepared_capture(video_id)
+        if cap is None:
+            if body.video_ids is not None:
+                error = {"error": "no prepared capture"}
+                audit.log(actor, "job.reanalyze", video_id, error, status="error")
+                raise HTTPException(
+                    status.HTTP_409_CONFLICT, f"video {video_id} has no processed capture yet"
+                )
+            continue
+        manifest = (root / video_id / "captures" / cap / "manifest.json").read_bytes()
+        level = Manifest.model_validate_json(manifest).level
+        job = pipeline.create_reanalyze_job(video_id, cap, level, actor)
+        audit.log(actor, "job.reanalyze", job.id, {"video_id": video_id, "capture": cap})
+        row = session.get(JobRow, job.id)
+        assert row is not None
+        session.refresh(row)
+        jobs.append(Job.of(row))
     return jobs
 
 

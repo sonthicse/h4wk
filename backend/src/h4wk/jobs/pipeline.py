@@ -306,7 +306,7 @@ def media(job_id: str) -> None:
 
 
 class AnalysisQuotaError(RuntimeError):
-    """Không công bố run CLI khi hết quota."""
+    """Phân tích lại mà hết quota Jev: không thay run cũ bằng run thiếu kết quả."""
 
 
 def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
@@ -368,12 +368,41 @@ def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
     return run_id, findings, jev_error
 
 
+def prepared_capture(video_id: str) -> str | None:
+    """Bản thu mới nhất của video đã có timeline (phân tích lại được mà không thu lại)."""
+    video = data_dir() / "videos" / video_id
+    for cap in reversed(list_captures(video / "captures")):
+        if (video / "derived" / cap / "timeline.json").is_file():
+            return cap
+    return None
+
+
+def create_reanalyze_job(video_id: str, capture: str, level: str, trigger: str) -> JobRow:
+    """Job chỉ chạy bước analyze trên bản thu đã có; hiện cùng danh sách job như Collect."""
+    job = create_job(parse_target(video_id).url, video_id, level, False, trigger)
+    job = _update(job.id, step="analyze", capture=capture, progress=70)
+    reanalyze(job.id)
+    return job
+
+
 @huey.task()
 def analyze(job_id: str) -> None:
+    _analyze(job_id, reject_quota=False)
+
+
+@huey.task()
+def reanalyze(job_id: str) -> None:
+    """Phân tích lại: hết quota Jev thì job lỗi và run cũ giữ nguyên."""
+    _analyze(job_id, reject_quota=True)
+
+
+def _analyze(job_id: str, *, reject_quota: bool) -> None:
     job = _update(job_id, status="running", step="analyze", progress=75)
     try:
         cap = str(job.capture)
-        run_id, findings, jev_error = analyze_capture(_video_dir(job), cap)
+        run_id, findings, jev_error = analyze_capture(
+            _video_dir(job), cap, reject_quota=reject_quota
+        )
     except Exception as e:
         _fail(job_id, "analyze", e)
         return

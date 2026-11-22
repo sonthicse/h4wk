@@ -171,16 +171,6 @@ def get_engine(root: Path | None = None) -> Engine:
     return _engines[path]
 
 
-def drop_index() -> None:
-    """Đóng engine đang cache (nếu có) rồi xoá index.db cùng file -wal, -shm."""
-    path = (data_dir() / "index.db").resolve()
-    engine = _engines.pop(path, None)
-    if engine is not None:
-        engine.dispose()
-    for suffix in ("", "-wal", "-shm"):
-        Path(f"{path}{suffix}").unlink(missing_ok=True)
-
-
 def _drop_legacy_accounts(engine: Engine) -> None:
     """Index cũ có bảng users (nhiều tài khoản) và sessions trỏ khoá ngoại tới đó. Nay chỉ còn
     một tài khoản lấy từ .env: bỏ hai bảng cũ, sessions được tạo lại (phải đăng nhập lại)."""
