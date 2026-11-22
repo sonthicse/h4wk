@@ -101,3 +101,9 @@ Ngày 2026-11-19, khi gộp phần của Bảo:
 - Watchlist mặc định theo dõi bốn kênh ví dụ ở mức `metadata`: Việt Tân, BBC News Tiếng Việt, Chân Trời Mới Media, Luật Khoa tạp chí.
 - C2: comment có thêm `author_name` (tên hiển thị lúc thu).
 - Chốt model theo spike T3: Whisper large-v3, PaddleOCR PP-OCRv5 chạy CPU, DINOv2 ViT-S/14, InsightFace buffalo_l. Đạt Checkpoint A; từ đây mọi thay đổi hợp đồng C1–C5 phải được người phụ trách chính đồng ý.
+
+Ngày 2026-11-22:
+
+- Đăng nhập bằng một tài khoản duy nhất đặt trong `.env`, bỏ hai tài khoản trong database.
+- Mọi cấu hình người dùng gom về `config/`: thêm `entities.toml` (thay `data/entities.json`) và `watchlist.toml` (danh sách kênh, trước chỉ nằm trong database). C5 thêm hai định dạng này.
+- Bỏ đối tượng mặc định "Đảng và Nhà nước Việt Nam" và bốn kênh watchlist ví dụ, để ai cũng dùng được công cụ với đối tượng và kênh của mình.

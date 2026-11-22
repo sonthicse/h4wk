@@ -1,31 +1,29 @@
-"""Nghiệp vụ watchlist (SPEC 10.9): thêm kênh, kiểm tra định kỳ bằng RSS, Check now."""
+"""Nghiệp vụ watchlist (SPEC 10.9): thêm kênh, kiểm tra định kỳ bằng RSS, Check now.
+
+Danh sách kênh nằm ở config/watchlist.toml (nguồn gốc, sửa tay được). Database chỉ giữ trạng
+thái chạy của từng kênh (đã khởi tạo, lần kiểm tra cuối, lỗi, video đã biết) và được đồng bộ
+theo file mỗi lần đọc."""
 
 import time
 from collections.abc import Callable
 from datetime import datetime, timedelta
+from pathlib import Path
 
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, func, select
 
 from h4wk.collectors.models import CollectLevel, Normalized
 from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import Target, TargetKind, parse_target
-from h4wk.core import audit
+from h4wk.core import audit, tomlw
 from h4wk.core.config import config_dir, data_dir
-from h4wk.core.config_models import SourcesConfig, load_toml
+from h4wk.core.config_models import SourcesConfig, WatchChannel, WatchlistConfig, load_toml
 from h4wk.core.db import JobRow, KnownVideoRow, WatchItemRow, get_engine
 from h4wk.core.events import record as event
 from h4wk.core.types import VN_TZ
 from h4wk.evidence.models import Trigger
 from h4wk.jobs import pipeline
 from h4wk.watchlist import rss
-
-# Kênh theo dõi sẵn làm ví dụ khi khởi tạo (h4wk init): (channel_id, handle, tên).
-DEFAULT_CHANNELS = [
-    ("UCJDyIKGZ9zpTKDTEXpivGZw", "@VietTan", "Việt Tân"),
-    ("UCpoNfKwZbecrcFpzm0ET4uw", "@bbctiengviet", "BBC News Tiếng Việt"),
-    ("UCmQoHmnqQBjnCGr0oM4OWKw", "@chantroimoimedia-u4s", "Chân Trời Mới Media"),
-    ("UCPK0O9S6qKCVVUc3-IF-BPw", "@luat-khoa", "Luật Khoa tạp chí"),
-]
 
 # Có thể thay trong test.
 fetch_feed: Callable[[str], list[rss.FeedEntry]] = rss.fetch_feed
@@ -61,29 +59,89 @@ def trigger_of(item_id: str) -> str:
     return f"system:watchlist:{item_id}"
 
 
-def _next_id(s: Session) -> str:
-    ids = s.exec(select(WatchItemRow.id)).all()
-    n = max((int(i.removeprefix("w_")) for i in ids), default=0) + 1
-    return f"w_{n:03d}"
+# ------------------------------------------------------------ config/watchlist.toml
+
+# Trường cấu hình (ghi vào file); trường còn lại của WatchItemRow là trạng thái chạy.
+CONFIG_FIELDS = set(WatchChannel.model_fields) - {"id"}
+
+
+def watchlist_file() -> Path:
+    return config_dir() / "watchlist.toml"
+
+
+def _save_channels(channels: list[WatchChannel]) -> None:
+    path = watchlist_file()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = WatchlistConfig(channels=channels).model_dump(mode="json")
+    tmp = path.with_suffix(".toml.tmp")
+    tmp.write_text(tomlw.dumps(data), encoding="utf-8")
+    tmp.replace(path)
+
+
+def migrate_legacy() -> bool:
+    """Chưa có watchlist.toml mà database còn kênh (cách lưu cũ) thì ghi các kênh đó ra file.
+    Trả về True nếu đã ghi."""
+    if watchlist_file().exists():
+        return False
+    with Session(get_engine()) as s:
+        rows = s.exec(select(WatchItemRow).order_by(WatchItemRow.id)).all()
+    if not rows:
+        return False
+    _save_channels(
+        [WatchChannel.model_validate(r.model_dump(include={"id", *CONFIG_FIELDS})) for r in rows]
+    )
+    return True
+
+
+def load_channels() -> list[WatchChannel]:
+    migrate_legacy()
+    path = watchlist_file()
+    return load_toml(path, WatchlistConfig).channels if path.exists() else []
+
+
+def _sync() -> list[WatchChannel]:
+    """Đưa database theo file: thêm kênh mới (chưa khởi tạo), cập nhật trường cấu hình, bỏ kênh
+    đã xoá khỏi file cùng danh sách video đã biết của nó."""
+    channels = load_channels()
+    wanted = {c.id: c for c in channels}
+    with Session(get_engine()) as s:
+        rows = {r.id: r for r in s.exec(select(WatchItemRow)).all()}
+        for row_id, row in rows.items():
+            if row_id not in wanted:
+                for k in s.exec(select(KnownVideoRow).where(KnownVideoRow.watch_item == row_id)):
+                    s.delete(k)
+                s.delete(row)
+        for c in channels:
+            row = rows.get(c.id)
+            fields = c.model_dump(include=CONFIG_FIELDS)
+            if row is None:
+                s.add(WatchItemRow(id=c.id, created_at=_now(), **fields))
+            elif any(getattr(row, k) != v for k, v in fields.items()):
+                for k, v in fields.items():
+                    setattr(row, k, v)
+                s.add(row)
+        try:
+            s.commit()
+        except IntegrityError:  # tiến trình khác vừa đồng bộ cùng lúc; kết quả như nhau
+            s.rollback()
+    return channels
 
 
 def create_item(channel_id: str, handle: str | None, title: str, level: str) -> WatchItemRow:
-    """Thêm mục ở trạng thái chưa khởi tạo; bước thêm kênh chạy ở initialize()."""
+    """Thêm kênh vào file, ở trạng thái chưa khởi tạo; bước thêm kênh chạy ở initialize()."""
+    channels = load_channels()
+    if any(c.channel_id == channel_id for c in channels):
+        raise Duplicate(f"channel {channel_id} is already in the watchlist")
     with Session(get_engine()) as s:
-        if s.exec(select(WatchItemRow).where(WatchItemRow.channel_id == channel_id)).first():
-            raise Duplicate(f"channel {channel_id} is already in the watchlist")
-        item = WatchItemRow(
-            id=_next_id(s),
-            channel_id=channel_id,
-            handle=handle,
-            title=title,
-            level=level,
-            created_at=_now(),
-        )
-        s.add(item)
-        s.commit()
-        s.refresh(item)
-        return item
+        used = [*s.exec(select(WatchItemRow.id)).all(), *(c.id for c in channels)]
+    n = max((int(i.removeprefix("w_")) for i in used), default=0) + 1
+    item_id = f"w_{n:03d}"
+    channel = WatchChannel(
+        id=item_id, channel_id=channel_id, handle=handle, title=title, level=level
+    )
+    _save_channels([*channels, channel])
+    _sync()
+    return get_item(item_id)
 
 
 def add_channel(text: str, level: str) -> WatchItemRow:
@@ -95,16 +153,8 @@ def add_channel(text: str, level: str) -> WatchItemRow:
     return create_item(channel_id, handle, title, level)
 
 
-def seed_defaults() -> list[WatchItemRow]:
-    """Watchlist trống thì thêm các kênh ví dụ (chưa gọi mạng; khởi tạo ở lần kiểm tra đầu)."""
-    with Session(get_engine()) as s:
-        if s.exec(select(WatchItemRow.id)).first():
-            return []
-    # Mức metadata cho nhẹ (40 job full cần GPU và key AI); khi demo đổi kênh cần dùng sang full.
-    return [create_item(c, h, title, CollectLevel.METADATA) for c, h, title in DEFAULT_CHANNELS]
-
-
 def get_item(item_id: str) -> WatchItemRow:
+    _sync()
     with Session(get_engine()) as s:
         item = s.get(WatchItemRow, item_id)
     if item is None:
@@ -113,11 +163,24 @@ def get_item(item_id: str) -> WatchItemRow:
 
 
 def list_items() -> list[WatchItemRow]:
+    _sync()
     with Session(get_engine()) as s:
         return list(s.exec(select(WatchItemRow).order_by(WatchItemRow.id)).all())
 
 
 def update_item(item_id: str, **fields: object) -> WatchItemRow:
+    """Trường cấu hình ghi vào file, trường trạng thái ghi vào database."""
+    config = {k: v for k, v in fields.items() if k in CONFIG_FIELDS}
+    if config:
+        channels = load_channels()
+        for i, c in enumerate(channels):
+            if c.id == item_id:
+                channels[i] = WatchChannel.model_validate({**c.model_dump(), **config})
+                _save_channels(channels)
+                break
+        else:
+            raise NotFound(item_id)
+        _sync()
     with Session(get_engine()) as s:
         item = s.get(WatchItemRow, item_id)
         if item is None:
@@ -131,14 +194,11 @@ def update_item(item_id: str, **fields: object) -> WatchItemRow:
 
 
 def delete_item(item_id: str) -> None:
-    with Session(get_engine()) as s:
-        item = s.get(WatchItemRow, item_id)
-        if item is None:
-            raise NotFound(item_id)
-        for k in s.exec(select(KnownVideoRow).where(KnownVideoRow.watch_item == item_id)).all():
-            s.delete(k)
-        s.delete(item)
-        s.commit()
+    channels = load_channels()
+    if not any(c.id == item_id for c in channels):
+        raise NotFound(item_id)
+    _save_channels([c for c in channels if c.id != item_id])
+    _sync()
 
 
 def _known(item_id: str) -> set[str]:

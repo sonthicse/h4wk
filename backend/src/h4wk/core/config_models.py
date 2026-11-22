@@ -10,7 +10,7 @@ from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, Field
 
-from h4wk.core.types import Cap, Contract, TranscriptKind
+from h4wk.core.types import Cap, CollectLevel, Contract, TranscriptKind
 
 
 def _no_duplicates[T](items: list[T]) -> list[T]:
@@ -92,6 +92,33 @@ class AnalysisConfig(Contract):
     ref_image: RefImageSettings = RefImageSettings()
     comments: CommentSettings = CommentSettings()
     jev: JevSettings = JevSettings()
+
+
+# -------------------------------------------------------------- watchlist.toml
+
+
+class WatchChannel(Contract):
+    """Một kênh trong watchlist. Trạng thái chạy (đã khởi tạo, lần kiểm tra cuối, video đã
+    biết) nằm trong database, không nằm ở đây."""
+
+    id: str = Field(pattern=r"^w_\d{3,}$")
+    channel_id: str = Field(min_length=1)
+    handle: str | None = None
+    title: str = ""
+    level: CollectLevel = CollectLevel.FULL
+    enabled: bool = True
+
+
+def _unique_channels(items: list[WatchChannel]) -> list[WatchChannel]:
+    for field in ("id", "channel_id"):
+        values = [getattr(c, field) for c in items]
+        if len(values) != len(set(values)):
+            raise ValueError(f"duplicate {field} in watchlist")
+    return items
+
+
+class WatchlistConfig(Contract):
+    channels: Annotated[list[WatchChannel], AfterValidator(_unique_channels)] = []
 
 
 def load_toml[M: BaseModel](path: Path, model: type[M]) -> M:

@@ -30,7 +30,9 @@ npm install
 cd ..
 ```
 
-`h4wk init` không ghi đè file `config/*.toml` đã có, nên chạy lại lệnh này vẫn an toàn.
+`h4wk init` không ghi đè file `config/*.toml` đã có, nên chạy lại lệnh này vẫn an toàn. Lệnh không thêm đối tượng hay kênh nào; máy đang dùng bản cũ thì lệnh chuyển `data/entities.json` và danh sách kênh trong database sang `config/`.
+
+Mọi cấu hình người dùng nằm trong `config/`: `sources.toml` (nguồn thu), `analysis.toml` (phân tích), `entities.toml` (đối tượng cần bảo vệ), `watchlist.toml` (kênh theo dõi). Secret nằm trong `.env` hoặc nhập ở Settings.
 
 Thư mục dữ liệu mặc định là `data/` ở gốc repo. Muốn đặt chỗ khác thì đặt biến `H4WK_DATA_DIR`.
 

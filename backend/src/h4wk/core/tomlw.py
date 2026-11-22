@@ -1,5 +1,6 @@
 """Ghi TOML cho file cấu hình C5 (Python chỉ có sẵn bộ đọc tomllib). Chỉ hỗ trợ kiểu C5 dùng:
-bảng lồng nhau, chuỗi, số, bool, mảng giá trị đơn và mảng bảng nội tuyến. Comment không giữ lại."""
+bảng lồng nhau, chuỗi, số, bool, mảng giá trị đơn, mảng bảng nội tuyến và mảng bảng ở cấp gốc.
+Comment không giữ lại."""
 
 import json
 import re
@@ -41,5 +42,15 @@ def dumps(data: dict[str, Any]) -> str:
         for k, v in tables.items():
             table([*path, k], v)
 
-    table([], data)
+    def is_tables(v: Any) -> bool:
+        return isinstance(v, list) and bool(v) and all(isinstance(x, dict) for x in v)
+
+    # Mảng bảng ở cấp gốc (entities.toml, watchlist.toml) ghi dạng [[tên]] cho dễ sửa tay.
+    arrays = {k: v for k, v in data.items() if is_tables(v)}
+    table([], {k: v for k, v in data.items() if k not in arrays})
+    for k, items in arrays.items():
+        for item in items:
+            out.append(f"[[{_key(k)}]]")
+            out.extend(f"{_key(x)} = {_value(y)}" for x, y in item.items() if y is not None)
+            out.append("")
     return "\n".join(out).rstrip() + "\n"

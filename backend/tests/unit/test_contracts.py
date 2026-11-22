@@ -14,8 +14,8 @@ from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
 from h4wk.cli import export_schemas
 from h4wk.collectors.models import Cap, CollectLevel, Normalized
 from h4wk.core.config import REPO_ROOT
-from h4wk.core.config_models import AnalysisConfig, SourcesConfig, load_toml
-from h4wk.core.entities import Entity
+from h4wk.core.config_models import AnalysisConfig, SourcesConfig, WatchlistConfig, load_toml
+from h4wk.core.entities import EntitiesConfig, Entity
 from h4wk.evidence.models import Manifest
 from h4wk.media.timeline import Timeline
 
@@ -228,6 +228,20 @@ def _set(path: str, value: Any):
     return mutate
 
 
+ENTITIES: dict[str, Any] = {
+    "entities": [
+        {"id": "e_01", "name": "Nguyễn Văn A", "aliases": ["Ông A"], "abbreviations": ["NVA"]},
+        {"id": "e_02", "name": "Công ty B", "description": "Doanh nghiệp"},
+    ]
+}
+WATCHLIST: dict[str, Any] = {
+    "channels": [
+        {"id": "w_001", "channel_id": "UC1", "handle": "@a", "title": "Kênh A", "level": "full"},
+        {"id": "w_002", "channel_id": "UC2", "level": "metadata", "enabled": False},
+    ]
+}
+
+
 VALID: list[tuple[Any, dict[str, Any]]] = [
     (Manifest, MANIFEST),
     (Normalized, NORMALIZED),
@@ -240,6 +254,10 @@ VALID: list[tuple[Any, dict[str, Any]]] = [
     (ReviewDecision, REVIEW),
     (SourcesConfig, SOURCES),
     (AnalysisConfig, ANALYSIS),
+    (EntitiesConfig, ENTITIES),
+    (EntitiesConfig, {}),
+    (WatchlistConfig, WATCHLIST),
+    (WatchlistConfig, {}),
 ]
 
 
@@ -348,6 +366,20 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
         _set("ref_image", {"enabled": True, "threshold": 1.5})(ANALYSIS),
         "ngưỡng > 1",
     ),
+    # C5: entities
+    (EntitiesConfig, _set("entities.1.id", "e_01")(ENTITIES), "trùng id đối tượng"),
+    (EntitiesConfig, _set("entities.0.id", "nva")(ENTITIES), "id đối tượng sai dạng"),
+    (EntitiesConfig, _set("entities.0.name", "")(ENTITIES), "đối tượng thiếu tên"),
+    # C5: watchlist
+    (WatchlistConfig, _set("channels.1.channel_id", "UC1")(WATCHLIST), "trùng kênh"),
+    (WatchlistConfig, _set("channels.1.id", "w_001")(WATCHLIST), "trùng id kênh"),
+    (WatchlistConfig, _set("channels.0.level", "video")(WATCHLIST), "mức thu lạ"),
+    (WatchlistConfig, _set("channels.0.id", "w_1")(WATCHLIST), "id kênh sai dạng"),
+    (
+        WatchlistConfig,
+        _set("channels.0.initialized", True)(WATCHLIST),
+        "trạng thái chạy trong file",
+    ),
 ]
 
 
@@ -371,6 +403,21 @@ def test_finding_analyzer_rejected_for_the_right_rule(why: str, message: str) ->
     data = next(d for m, d, w in REJECTED if m is Finding and w == why)
     with pytest.raises(ValidationError, match=message):
         Finding.model_validate(data)
+
+
+@pytest.mark.parametrize(
+    ("model", "why", "message"),
+    [
+        (EntitiesConfig, "trùng id đối tượng", "duplicate entity id"),
+        (WatchlistConfig, "trùng kênh", "duplicate channel_id"),
+        (WatchlistConfig, "trùng id kênh", "duplicate id"),
+        (WatchlistConfig, "trạng thái chạy trong file", "Extra inputs are not permitted"),
+    ],
+)
+def test_config_lists_rejected_for_the_right_rule(model, why: str, message: str) -> None:
+    data = next(d for m, d, w in REJECTED if m is model and w == why)
+    with pytest.raises(ValidationError, match=message):
+        model.model_validate(data)
 
 
 def test_legacy_jev_finding_becomes_jev() -> None:
@@ -485,7 +532,12 @@ def test_hits_and_findings_files_are_lists() -> None:
 
 @pytest.mark.parametrize(
     ("name", "model"),
-    [("sources", SourcesConfig), ("analysis", AnalysisConfig)],
+    [
+        ("sources", SourcesConfig),
+        ("analysis", AnalysisConfig),
+        ("entities", EntitiesConfig),
+        ("watchlist", WatchlistConfig),
+    ],
 )
 def test_config_examples_load(name: str, model: type[BaseModel]) -> None:
     path = REPO_ROOT / "config" / f"{name}.toml.example"
@@ -522,6 +574,7 @@ def test_schema_export_writes_all_contracts(tmp_path: Path) -> None:
         "c5-sources.json",
         "c5-analysis.json",
         "c5-entities.json",
+        "c5-watchlist.json",
     }
     for p in written:
         json.loads(p.read_text(encoding="utf-8"))

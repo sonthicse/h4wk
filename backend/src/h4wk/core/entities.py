@@ -1,15 +1,19 @@
-"""Đối tượng cần bảo vệ. entities.json là nguồn gốc; database chỉ mục được cập nhật theo."""
+"""Đối tượng cần bảo vệ. config/entities.toml là nguồn gốc (cùng chỗ với mọi cấu hình khác của
+người dùng); database chỉ mục được cập nhật theo. Ảnh mẫu vẫn nằm trong data/."""
 
 import hashlib
+import json
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import Field, TypeAdapter
+from pydantic import AfterValidator, Field, TypeAdapter
 from sqlmodel import Session
 
-from h4wk.core.config import data_dir
+from h4wk.core import tomlw
+from h4wk.core.config import config_dir, data_dir
+from h4wk.core.config_models import load_toml
 from h4wk.core.db import EntityRow
 from h4wk.core.types import VN_TZ, Contract, VnDatetime
 
@@ -24,25 +28,54 @@ class Entity(Contract):
     description: str | None = None
 
 
-_ENTITIES = TypeAdapter(list[Entity])
+def _unique_ids(items: list[Entity]) -> list[Entity]:
+    ids = [e.id for e in items]
+    if len(ids) != len(set(ids)):
+        raise ValueError("duplicate entity id")
+    return items
+
+
+class EntitiesConfig(Contract):
+    """C5: định dạng config/entities.toml, mỗi đối tượng một bảng [[entities]]."""
+
+    entities: Annotated[list[Entity], AfterValidator(_unique_ids)] = []
 
 
 def entities_file() -> Path:
+    return config_dir() / "entities.toml"
+
+
+def _legacy_file() -> Path:
+    """Chỗ lưu cũ (trước khi gom cấu hình về config/)."""
     return data_dir() / "entities.json"
 
 
+def migrate_legacy() -> bool:
+    """Chưa có entities.toml mà còn data/entities.json thì chuyển sang; file cũ đổi tên thành
+    entities.json.migrated để không bị đọc lại. Trả về True nếu đã chuyển."""
+    old = _legacy_file()
+    if entities_file().exists() or not old.is_file():
+        return False
+    items = TypeAdapter(list[Entity]).validate_python(json.loads(old.read_text(encoding="utf-8")))
+    _save(items)
+    old.replace(old.with_name("entities.json.migrated"))
+    return True
+
+
 def load_entities() -> list[Entity]:
+    migrate_legacy()
     path = entities_file()
     if not path.is_file():
         return []
-    return _ENTITIES.validate_json(path.read_text(encoding="utf-8"))
+    return load_toml(path, EntitiesConfig).entities
 
 
 def _save(entities: list[Entity]) -> None:
     path = entities_file()
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(_ENTITIES.dump_json(entities, indent=2).decode("utf-8"), encoding="utf-8")
+    data = EntitiesConfig(entities=entities).model_dump(mode="json")
+    tmp = path.with_suffix(".toml.tmp")
+    tmp.write_text(tomlw.dumps(data), encoding="utf-8")
     tmp.replace(path)
 
 

@@ -5,19 +5,18 @@ from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-from sqlmodel import Session, func, select
 
 from h4wk.analysis import jev_log
 from h4wk.collectors import quota
 from h4wk.collectors.providers import supadata
 from h4wk.core.config import data_dir
-from h4wk.core.db import WatchItemRow, get_engine
 from h4wk.core.types import VN_TZ
 from h4wk.evidence.writer import CAPTURE_TS_FORMAT, list_captures
 from h4wk.jobs.pipeline import latest_findings
 from h4wk.review.decisions import decisions_for
 from h4wk.review.queue import video_ref
 from h4wk.review.videos import queue as video_queue
+from h4wk.watchlist import service as watchlist
 
 router = APIRouter(tags=["dashboard"])
 
@@ -88,8 +87,7 @@ def _day(capture: str) -> date:
 @router.get("/api/dashboard")
 def dashboard(latest_only: bool = False) -> Dashboard:
     """latest_only=true: số nghi vấn và video nổi bật chỉ tính bản thu mới nhất mỗi video."""
-    with Session(get_engine()) as s:
-        channel_count = s.exec(select(func.count()).select_from(WatchItemRow)).one()
+    channel_count = len(watchlist.load_channels())  # danh sách kênh nằm ở config/watchlist.toml
 
     root = data_dir() / "videos"
     captures_by_video = {

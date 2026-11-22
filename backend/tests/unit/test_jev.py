@@ -131,6 +131,16 @@ def test_failure_keeps_static(monkeypatch, tmp_path, key):
     assert ("HTTP 500" if key else "TYPESAFE_API_KEY is not set") in error
 
 
+def test_no_entities_skips_jev(monkeypatch, tmp_path):
+    monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
+    monkeypatch.setattr(jev, "classify", lambda *a, **k: pytest.fail("Jev must not be called"))
+    data, timeline = _data()
+    _, findings, error = runner.analyze(
+        data, timeline, [], INSULT, "r_x", tmp_path, jev_settings=JevSettings()
+    )
+    assert findings == [] and error is None
+
+
 def test_new_sources(monkeypatch):
     data, timeline = _data()
     ocr = FrameOcr(text="Dòng chữ mẫu", bbox=[0, 0, 1, 1], frame="frames/a.jpg", t=0)

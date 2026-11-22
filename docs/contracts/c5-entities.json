@@ -51,8 +51,18 @@
       "type": "object"
     }
   },
-  "items": {
-    "$ref": "#/$defs/Entity"
+  "additionalProperties": false,
+  "description": "C5: định dạng config/entities.toml, mỗi đối tượng một bảng [[entities]].",
+  "properties": {
+    "entities": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Entity"
+      },
+      "title": "Entities",
+      "type": "array"
+    }
   },
-  "type": "array"
+  "title": "EntitiesConfig",
+  "type": "object"
 }

@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "CollectLevel": {
+      "description": "Mức thu (SPEC 10.7).",
+      "enum": [
+        "metadata",
+        "text",
+        "full"
+      ],
+      "title": "CollectLevel",
+      "type": "string"
+    },
+    "WatchChannel": {
+      "additionalProperties": false,
+      "description": "Một kênh trong watchlist. Trạng thái chạy (đã khởi tạo, lần kiểm tra cuối, video đã\nbiết) nằm trong database, không nằm ở đây.",
+      "properties": {
+        "channel_id": {
+          "minLength": 1,
+          "title": "Channel Id",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "handle": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Handle"
+        },
+        "id": {
+          "pattern": "^w_\\d{3,}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "level": {
+          "$ref": "#/$defs/CollectLevel",
+          "default": "full"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "channel_id"
+      ],
+      "title": "WatchChannel",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "channels": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/WatchChannel"
+      },
+      "title": "Channels",
+      "type": "array"
+    }
+  },
+  "title": "WatchlistConfig",
+  "type": "object"
+}

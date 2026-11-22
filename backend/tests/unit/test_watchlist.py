@@ -118,16 +118,27 @@ def test_crud_and_duplicate(client: TestClient, fake) -> None:
     assert r.status_code == 400
 
 
-def test_seed_defaults_once(data_dir) -> None:
-    items = service.seed_defaults()
-    assert [i.handle for i in items] == [
-        "@VietTan",
-        "@bbctiengviet",
-        "@chantroimoimedia-u4s",
-        "@luat-khoa",
-    ]
-    assert {i.level for i in items} == {"metadata"}
-    assert service.seed_defaults() == []
+def test_watchlist_file_is_the_source(client: TestClient, fake, config_dir) -> None:
+    """Thêm, sửa ở giao diện ghi vào config/watchlist.toml; sửa tay file thì giao diện theo."""
+    item = client.post("/api/watchlist", json={"url": "@VietTan"}).json()
+    path = config_dir / "watchlist.toml"
+    assert 'channel_id = "UCJDyIKGZ9zpTKDTEXpivGZw"' in path.read_text(encoding="utf-8")
+    client.patch(f"/api/watchlist/{item['id']}", json={"level": "metadata"})
+    assert 'level = "metadata"' in path.read_text(encoding="utf-8")
+    service.update_item(item["id"], last_error="boom")  # trạng thái chạy không vào file
+    assert "boom" not in path.read_text(encoding="utf-8")
+
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        + '\n[[channels]]\nid = "w_007"\nchannel_id = "UC777"\ntitle = "Sửa tay"\n',
+        encoding="utf-8",
+    )
+    got = client.get("/api/watchlist").json()
+    assert [(i["id"], i["title"], i["initialized"]) for i in got][1] == ("w_007", "Sửa tay", False)
+    assert client.get("/api/dashboard").json()["channel_count"] == 2
+
+    path.write_text("", encoding="utf-8")
+    assert client.get("/api/watchlist").json() == []
 
 
 def test_collected_count_counts_done_jobs(client: TestClient, fake) -> None:

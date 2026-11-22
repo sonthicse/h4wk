@@ -71,7 +71,7 @@ Lệnh backend chạy trong thư mục `backend/`. Thư mục dữ liệu lấy 
 ```bash
 # Backend (trong backend/)
 uv sync                                             # cài dependency
-uv run h4wk init                                    # tạo data/, database chỉ mục, file cấu hình mẫu
+uv run h4wk init                                    # tạo data/, database chỉ mục, file cấu hình mẫu; không thêm đối tượng hay kênh
 uv run h4wk schema export                           # xuất JSON Schema của C1–C5 vào docs/contracts/
 uv run uvicorn h4wk.api.app:app --reload            # chạy API ở :8000
 uv run huey_consumer h4wk.jobs.queue.huey -w 2      # worker cho hàng đợi default
@@ -115,7 +115,7 @@ h4wk/
 │       └── fixtures/           ← bản thu mẫu, raw response đã ghi sẵn, video ngắn tự quay
 ├── web/                        ← React app
 │   └── src/{pages,components,api,lib}/
-├── config/                     ← sources.toml, analysis.toml (không chứa secret; có bản *.example)
+├── config/                     ← mọi cấu hình người dùng: sources.toml, analysis.toml, entities.toml, watchlist.toml (không chứa secret; có bản *.example)
 └── data/                       ← đã .gitignore; xem C1
 ```
 
@@ -208,13 +208,13 @@ Checkpoint là mốc để cả nhóm kiểm tra lại, không chặn việc b�
 
 Cả hệ thống là một cuộc theo dõi duy nhất, không có khái niệm case: đối tượng, watchlist, video, nghi vấn và nhật ký đều dùng chung. Module quản lý đối tượng cần bảo vệ, một tài khoản đăng nhập, nhật ký thao tác, cấu hình và secret.
 
-Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh mẫu: ảnh khuôn mặt (dùng cho khớp khuôn mặt) và ảnh hay bị dùng lại như ảnh chân dung quen thuộc hoặc logo (dùng cho khớp ảnh mẫu). Ảnh mẫu lưu ở `data/entities/<entity_id>/refs/{face,image}/`; danh sách đối tượng nằm trong `data/entities.json`.
+Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh mẫu: ảnh khuôn mặt (dùng cho khớp khuôn mặt) và ảnh hay bị dùng lại như ảnh chân dung quen thuộc hoặc logo (dùng cho khớp ảnh mẫu). Ảnh mẫu lưu ở `data/entities/<entity_id>/refs/{face,image}/`; danh sách đối tượng nằm trong `config/entities.toml`.
 
 `audit.log(actor, action, target, detail, status)` ghi thêm một dòng vào `data/log/audit.jsonl`, kể cả đăng nhập và đổi Settings. Secret nằm trong `data/secrets.json` (quyền 0600) hoặc trong `.env`, và API chỉ trả về giá trị đã che.
 
-Hợp đồng C5 là định dạng của `config/sources.toml` và `config/analysis.toml`, viết bằng Pydantic. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
+Hợp đồng C5 là định dạng của các file cấu hình người dùng trong `config/`: `sources.toml`, `analysis.toml`, `entities.toml` (đối tượng) và `watchlist.toml` (kênh theo dõi), viết bằng Pydantic. Mọi cấu hình người dùng nằm ở đây, sửa tay được; giao diện ghi lại file thì comment mất. Secret không nằm ở đây. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
 
-Hạn chế được chấp nhận: phiên đăng nhập, watchlist, danh sách video đã biết và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại đối tượng, video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên.
+Hạn chế được chấp nhận: phiên đăng nhập, trạng thái chạy của watchlist (đã khởi tạo, lần kiểm tra cuối, danh sách video đã biết) và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên; danh sách kênh còn nguyên trong `config/watchlist.toml`, nhưng mỗi kênh sẽ chạy lại bước thêm kênh.
 
 Nghiệm thu:
 
@@ -228,7 +228,6 @@ Hợp đồng C1 gồm cấu trúc thư mục và định dạng manifest dướ
 
 ```
 data/
-├── entities.json                        ← danh sách đối tượng
 ├── log/audit.jsonl
 ├── entities/<entity_id>/refs/{face,image}/
 ├── channels/<channel_id>/captures/<YYYYMMDDTHHMMSS>/...
@@ -377,7 +376,7 @@ Bước 3 phân loại nội dung bằng Jev cho mọi nguồn (quyết định 
 - Nghi vấn của Jev ghi `analyzer: "jev"` và `model` là `{"provider": "typesafe", "model": <phiên bản Jev>}`. Nghi vấn cũ ghi `analyzer: "llm"` với provider `typesafe` được đọc thành `"jev"`; nghi vấn của các LLM đã bỏ bị từ chối. Trường `model` trong `verdict.json` cũ bị bỏ khi đọc.
 - Theo dõi usage: mỗi request đã gửi ghi đúng một dòng vào `data/jev_calls.jsonl` (kể cả thử kết nối, retry 429 gộp trong một dòng): thời điểm, video/bản thu/run (null khi thử kết nối), nguồn, số ảnh, token vào/ra, có giữ nghi vấn không, trạng thái, số retry. Không ghi nội dung, ảnh hay key. Chỉ cộng token hợp lệ do TypeSafe báo trong `usage`; thiếu thì null, vẫn đếm lượt gọi. Không ước tính token, USD hay credit; không hiển thị hạn mức hoặc số dư.
 
-Đối tượng có thể là tổ chức. `h4wk init` thêm sẵn đối tượng "Đảng và Nhà nước Việt Nam" (biệt danh như Đảng, Đảng Cộng sản, nhà nước, chế độ, chính quyền, chính phủ; viết tắt ĐCSVN, ĐCS) khi danh sách đối tượng còn trống.
+Đối tượng có thể là tổ chức. Không có đối tượng mặc định: người dùng tự khai báo ở trang Entities hoặc trong `config/entities.toml`. Chưa có đối tượng nào thì không có nghi vấn.
 
 Bước 4 là kết luận theo video bằng quy tắc, không gọi AI (`verdict.decide`). Kết luận ghi ở `analysis/<run_id>/verdict.json` (cấu trúc `VideoVerdict`, thêm vào C4):
 
@@ -482,7 +481,7 @@ Nghiệm thu: như màn 1 ở [phần 8](#8-tiêu-chí-thành-công).
 
 ### 10.9 `watchlist`
 
-Mỗi mục watchlist là một kênh. V1 chỉ phát hiện sự kiện video mới. `h4wk init` thêm sẵn bốn kênh làm ví dụ khi watchlist còn trống: `@VietTan`, `@bbctiengviet`, `@chantroimoimedia-u4s`, `@luat-khoa`, ở mức thu `metadata` (khi demo đổi kênh cần dùng sang `full`).
+Mỗi mục watchlist là một kênh. V1 chỉ phát hiện sự kiện video mới. Danh sách kênh nằm ở `config/watchlist.toml`; database chỉ giữ trạng thái chạy và được đồng bộ theo file mỗi lần đọc, nên sửa tay file cũng có hiệu lực. Không có kênh mặc định.
 
 Khi một kênh được thêm vào watchlist (từ trang Watchlist hoặc bằng cách dán link kênh ở màn Collect):
 

@@ -7,7 +7,6 @@ from typing import Annotated
 
 import typer
 from pydantic import TypeAdapter
-from sqlmodel import Session
 
 from h4wk.analysis import verdict
 from h4wk.analysis.models import (
@@ -18,10 +17,10 @@ from h4wk.analysis.models import (
     VideoVerdict,
 )
 from h4wk.collectors.models import Normalized
-from h4wk.core.config import CONFIG_DIR, REPO_ROOT, data_dir
-from h4wk.core.config_models import AnalysisConfig, SourcesConfig
+from h4wk.core.config import REPO_ROOT, config_dir, data_dir
+from h4wk.core.config_models import AnalysisConfig, SourcesConfig, WatchlistConfig
 from h4wk.core.db import get_engine
-from h4wk.core.entities import Entity, add_entity, load_entities
+from h4wk.core.entities import EntitiesConfig
 from h4wk.evidence.models import Manifest
 from h4wk.evidence.verify import FileStatus
 from h4wk.evidence.verify import verify as verify_capture
@@ -43,7 +42,8 @@ CONTRACTS: dict[str, object] = {
     "c4-review-decision": ReviewDecision,
     "c5-sources": SourcesConfig,
     "c5-analysis": AnalysisConfig,
-    "c5-entities": list[Entity],
+    "c5-entities": EntitiesConfig,
+    "c5-watchlist": WatchlistConfig,
 }
 
 
@@ -60,6 +60,13 @@ def init_workspace(data_dir: Path, config_dir: Path) -> list[Path]:
     """
     data_dir.mkdir(parents=True, exist_ok=True)
     get_engine(data_dir)  # tạo database chỉ mục nếu chưa có
+    # Chuyển đối tượng và watchlist từ chỗ lưu cũ (data/, database) sang config/ trước khi chép
+    # file mẫu, để file mẫu rỗng không đè mất dữ liệu cũ.
+    from h4wk.core.entities import migrate_legacy as migrate_entities
+    from h4wk.watchlist.service import migrate_legacy as migrate_watchlist
+
+    migrate_entities()
+    migrate_watchlist()
     created: list[Path] = []
     for example in sorted(config_dir.glob("*.toml.example")):
         target = example.with_suffix("")  # bỏ đuôi .example
@@ -71,32 +78,12 @@ def init_workspace(data_dir: Path, config_dir: Path) -> list[Path]:
 
 @app.command()
 def init() -> None:
-    """Tạo data/ và config/*.toml từ file mẫu."""
+    """Tạo data/ và config/*.toml từ file mẫu. Không tự thêm đối tượng hay kênh nào."""
     d = data_dir()
-    created = init_workspace(data_dir=d, config_dir=CONFIG_DIR)
+    created = init_workspace(data_dir=d, config_dir=config_dir())
     typer.echo(f"data dir: {d}")
     for path in created:
         typer.echo(f"created: {path}")
-    if not load_entities():
-        with Session(get_engine(d)) as session:
-            add_entity(
-                session,
-                name="Đảng và Nhà nước Việt Nam",
-                aliases=[
-                    "Đảng",
-                    "Đảng Cộng sản",
-                    "Đảng Cộng sản Việt Nam",
-                    "nhà nước",
-                    "chế độ",
-                    "chính quyền",
-                    "chính phủ",
-                ],
-                abbreviations=["ĐCSVN", "ĐCS"],
-            )
-    from h4wk.watchlist.service import seed_defaults
-
-    for item in seed_defaults():
-        typer.echo(f"watchlist: {item.id} {item.handle} ({item.level})")
 
 
 @app.command("analyze")

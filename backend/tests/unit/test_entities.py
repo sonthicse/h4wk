@@ -20,12 +20,14 @@ def _add(client: TestClient, name: str = "Trần Văn Mẫu") -> dict:
     return r.json()
 
 
-def test_add_entity_writes_entities_json_and_audit(client: TestClient, data_dir: Path) -> None:
+def test_add_entity_writes_entities_toml_and_audit(
+    client: TestClient, data_dir: Path, config_dir: Path
+) -> None:
     entity = _add(client)
     assert entity["id"] == "e_01"
     saved = load_entities()
     assert [e.name for e in saved] == ["Trần Văn Mẫu"] and saved[0].aliases == ["Mẫu Ca"]
-    assert (data_dir / "entities.json").is_file()
+    assert (config_dir / "entities.toml").is_file()
     lines = _audit(data_dir / "log" / "audit.jsonl")
     assert lines[-1]["action"] == "entity.create" and lines[-1]["status"] == "ok"
     assert lines[-1]["target"] == "e_01"

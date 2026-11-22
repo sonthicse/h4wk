@@ -1,0 +1,12 @@
+# Kênh YouTube đang theo dõi. Mỗi kênh một bảng [[channels]]; có thể sửa tay hoặc ở trang Watchlist.
+# Trạng thái chạy (đã xử lý video đầu, lần kiểm tra cuối, video đã biết) nằm trong database.
+# Chu kỳ kiểm tra và số video xử lý khi thêm kênh đặt ở [watchlist] trong sources.toml.
+# Khi trang Watchlist ghi lại file này, các comment sẽ mất.
+#
+# [[channels]]
+# id = "w_001"                          # w_ và ít nhất 3 chữ số, không trùng
+# channel_id = "UCxxxxxxxxxxxxxxxxxxxxxx"
+# handle = "@tenkenh"
+# title = "Tên kênh"
+# level = "full"                        # metadata | text | full
+# enabled = true

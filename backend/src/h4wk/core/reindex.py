@@ -46,7 +46,7 @@ def reindex() -> ReindexResult:
         try:
             items = load_entities()
         except (ValidationError, ValueError) as e:
-            skipped.append(f"entities.json: {_short(e)}")
+            skipped.append(f"entities.toml: {_short(e)}")
         else:
             for e in items:
                 s.add(EntityRow(id=e.id, name=e.name))
