@@ -1,6 +1,3 @@
-"""Đối tượng cần bảo vệ. config/entities.toml là nguồn gốc (cùng chỗ với mọi cấu hình khác của
-người dùng); database chỉ mục được cập nhật theo. Ảnh mẫu vẫn nằm trong data/."""
-
 import hashlib
 import json
 import re

@@ -1,5 +1,3 @@
-"""Dòng sự kiện trên dashboard. Nội dung message bằng tiếng Anh vì hiện trên giao diện."""
-
 from datetime import datetime
 from typing import Literal
 

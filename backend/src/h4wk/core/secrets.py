@@ -1,6 +1,3 @@
-"""Secret (API key). Đặt từ Settings thì lưu ở data/secrets.json (quyền 0600) và được ưu tiên
-hơn .env. Không đọc biến môi trường. API chỉ trả bản che."""
-
 import json
 import os
 from typing import Literal
@@ -40,7 +37,6 @@ def _save(values: dict[str, str]) -> None:
 
 
 def all_keys() -> dict[str, str]:
-    """Mọi secret đang có hiệu lực: secrets.json thắng .env."""
     return {**config.dotenv(), **_load()}
 
 
@@ -55,7 +51,6 @@ def put(name: str, value: str) -> None:
 
 
 def delete(name: str) -> bool:
-    """Xoá khỏi secrets.json; trả True nếu thật sự có key để xoá."""
     values = _load()
     if values.pop(name, None) is None:
         return False

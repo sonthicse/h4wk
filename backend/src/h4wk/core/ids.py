@@ -1,6 +1,3 @@
-"""Sinh ULID: 48 bit thời gian (ms) + 80 bit ngẫu nhiên, mã hoá Crockford base32 (26 ký tự).
-Sắp theo chuỗi cũng là sắp theo thời gian tạo."""
-
 import secrets
 import time
 
