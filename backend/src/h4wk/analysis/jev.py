@@ -131,16 +131,79 @@ QUESTIONS = {
         },
     },
 }
+# Vi phạm xét theo nội dung, không cần đối tượng: ai nói hay nhắm vào ai cũng vậy.
+QUESTIONS["violation"] = {
+    "type": "choice",
+    "instructions": (
+        "`text` is a Vietnamese YouTube item (see `source_type`). Regardless of who is targeted,"
+        " does `text` itself do one of the harmful acts below? Judge what the text does, not the"
+        " opinions it holds: news reporting about such acts, criticism, satire without a call to"
+        " act, history and political opinions are `none`."
+    ),
+    "criteria": {
+        "violence": {
+            "what": (
+                "calls for, plans, instructs or glorifies violence, armed attacks, riots, "
+                "terrorism, or sabotage of infrastructure"
+            ),
+            "examples": [
+                "Mọi người mang dao gậy ra đường tối nay, gặp công an là đánh",
+                "Hướng dẫn chế bom xăng để đốt trụ sở",
+                "Vụ đánh bom hôm qua là anh hùng, cần làm thêm nhiều vụ nữa",
+            ],
+        },
+        "hate": {
+            "what": (
+                "incites hatred, discrimination or violence against people because of their "
+                "ethnicity, religion or nationality"
+            ),
+            "examples": [
+                "Bọn người dân tộc đó toàn lũ ăn bám, phải đuổi hết về rừng",
+                "Đạo đó là tà giáo, gặp tín đồ của nó thì cứ đánh",
+            ],
+        },
+        "state_secret": {
+            "what": "publishes classified state or work secrets",
+            "examples": ["Đây là văn bản mật của Bộ Quốc phòng, tôi đăng toàn bộ cho mọi người"],
+        },
+        "forgery": {
+            "what": (
+                "presents a forged website, seal, document or ID of a state agency as real, or a"
+                " fake AI-made video, image or voice of a real official presented as real"
+            ),
+            "examples": [
+                "Quyết định có đóng dấu này do tôi tự làm nhưng cứ đăng như văn bản thật",
+                "Clip giọng ông bộ trưởng tuyên bố đổi tiền, làm bằng AI nhưng đừng nói ra",
+            ],
+        },
+        "none": {
+            "what": (
+                "none of the above: opinions, criticism, news, history, jokes, or reporting "
+                "on such acts without supporting them"
+            ),
+            "examples": [
+                "Hôm qua có bạo loạn ở thành phố X, cảnh sát đã giải tán",
+                "Tôi phản đối chính sách này",
+                "Video hay quá",
+            ],
+        },
+    },
+}
 VIOLATIONS = ("insult", "unsupported_accusation", "fabrication", "incitement", "state_secret")
+CONTENT_VIOLATIONS = ("violence", "hate", "state_secret", "forgery")
 
 
 def _configuration(entities, video_title):
+    """Câu hỏi gửi Jev. Không có đối tượng thì chỉ hỏi vi phạm theo nội dung và mức độ."""
     targets = {
         e.id: ", ".join(
             [e.name, *e.aliases, *e.abbreviations, *([e.description] if e.description else [])]
         )
         for e in entities
     }
+    if not targets:
+        questions = {k: QUESTIONS[k] for k in ("violation", "severity")}
+        return {"video_title": video_title}, questions
     questions = {
         **QUESTIONS,
         "target": {
@@ -152,7 +215,17 @@ def _configuration(entities, video_title):
 
 
 def _keep(answers):
+    if "target" not in answers:  # chưa khai báo đối tượng: không hỏi câu này
+        return False
     return answers["is_attack"]["noul"] >= 0.5 and answers["target"]["choice"] != "none"
+
+
+def _content_violation(answers):
+    """Danh mục vi phạm theo nội dung và xác suất, hoặc None. Trả lời cũ không có câu này."""
+    probs = answers.get("violation", {}).get("probabilities", {})
+    category = max(CONTENT_VIOLATIONS, key=lambda c: probs.get(c, 0.0))
+    p = probs.get(category, 0.0)
+    return (category, p) if p >= 0.5 else None
 
 
 def _encode(path: Path) -> str:
@@ -367,14 +440,20 @@ def classify(
             record["usage"] = reply.get("usage")
             answers = record["answers"] = reply["answers"]
             record["model"] = reply["model"]
-            target = answers["target"]["choice"]
-            probs = answers["category"]["probabilities"]
-            if not _keep(answers):
+            target = answers.get("target", {}).get("choice")
+            probs = answers.get("category", {}).get("probabilities", {})
+            # Ưu tiên nghi vấn nhắm vào đối tượng; không có thì xét vi phạm theo nội dung.
+            by_content = _content_violation(answers)
+            if _keep(answers):
+                if target not in questions["target"]["criteria"]:
+                    raise ValueError("Unknown Jev target")
+                category = max(VIOLATIONS, key=lambda c: probs.get(c, 0.0))
+                p = probs[category]
+            elif by_content is not None:
+                target = None
+                category, p = by_content
+            else:
                 return None, record
-            if target not in questions["target"]["criteria"]:
-                raise ValueError("Unknown Jev target")
-            category = max(VIOLATIONS, key=lambda c: probs.get(c, 0.0))
-            p = probs[category]
             score = answers["severity"]["score"]
             finding = Finding(
                 id=f"f_{new_ulid()}",

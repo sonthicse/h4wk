@@ -73,7 +73,7 @@ function FindingSheet({
   onClose,
 }: {
   finding: Finding | null
-  entityName: (id: string) => string
+  entityName: (id: string | null | undefined) => string
   onClose: () => void
 }) {
   return (
@@ -134,7 +134,8 @@ export default function FindingsPage() {
   const statusOf = (f: Finding): ReviewStatus => findings.data?.find((it) => it.finding.id === f.id)?.status ?? 'unreviewed'
   const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
   // Nghi vấn chỉ ghi id đối tượng (e_01); tên lấy từ danh sách đối tượng.
-  const entityName = (id: string) => entities.data?.find((e) => e.id === id)?.name ?? id
+  // Vi phạm xét theo nội dung (violence, hate, forgery, state_secret) có thể không có đối tượng.
+  const entityName = (id: string | null | undefined) => (id ? (entities.data?.find((e) => e.id === id)?.name ?? id) : '—')
 
   const allFindings = (findings.data ?? []).map((it) => it.finding)
   const q = filters.q.trim().toLowerCase()
@@ -178,7 +179,7 @@ export default function FindingsPage() {
         <FilterSelect
           label="Categories"
           value={filters.category}
-          options={['insult', 'unsupported_accusation', 'fabrication', 'incitement', 'state_secret', 'legitimate_criticism', 'neutral']}
+          options={['insult', 'unsupported_accusation', 'fabrication', 'incitement', 'violence', 'hate', 'forgery', 'state_secret', 'legitimate_criticism', 'neutral']}
           onChange={set('category')}
         />
         <FilterSelect

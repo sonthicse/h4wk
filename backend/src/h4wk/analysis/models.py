@@ -32,13 +32,23 @@ class SourceKind(StrEnum):
 
 
 class Category(StrEnum):
+    # Nhắm vào một đối tượng đã khai báo (cần `entity`).
     INSULT = "insult"
     UNSUPPORTED_ACCUSATION = "unsupported_accusation"
     FABRICATION = "fabrication"
     INCITEMENT = "incitement"
+    # Vi phạm xét theo nội dung, không cần đối tượng (`entity` có thể trống).
     STATE_SECRET = "state_secret"
+    VIOLENCE = "violence"
+    HATE = "hate"
+    FORGERY = "forgery"
+    # Không vi phạm.
     LEGITIMATE_CRITICISM = "legitimate_criticism"
     NEUTRAL = "neutral"
+
+
+# Danh mục vi phạm không cần đối tượng bị nhắm tới.
+CONTENT_VIOLATIONS = {Category.STATE_SECRET, Category.VIOLENCE, Category.HATE, Category.FORGERY}
 
 
 class Severity(StrEnum):
@@ -131,7 +141,7 @@ class Finding(Contract):
     quote: str = ""
     frame: RelPath | None = None
     bbox: BBox | None = None
-    entity: str
+    entity: str | None = None  # trống với vi phạm xét theo nội dung (CONTENT_VIOLATIONS)
     category: Category
     severity: Severity
     confidence: Confidence
@@ -154,6 +164,8 @@ class Finding(Contract):
     def _rules(self) -> Self:
         if self.analyzer == "jev" and self.model is None:
             raise ValueError("a jev finding needs model")
+        if self.entity is None and self.category not in CONTENT_VIOLATIONS:
+            raise ValueError(f"category {self.category} needs entity")
         if self.source_kind == SourceKind.VISUAL and not self.frame:
             raise ValueError("a visual finding needs frame")
         if self.source_kind in _TIMED_KINDS and (not self.segment_id or self.start is None):

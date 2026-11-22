@@ -82,7 +82,7 @@ export type VideoFinding = {
   quote: string
   severity: Severity
   category: Schemas['Finding']['category']
-  entity: string
+  entity: string | null | undefined
   frame: string | null
   commentId: string | null
   triggers: Schemas['Finding']['triggers']

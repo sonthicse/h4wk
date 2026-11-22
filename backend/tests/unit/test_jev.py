@@ -39,7 +39,7 @@ def test_classify(monkeypatch, target, probability, kept):
         payload = json.loads(request.data)
         states.append(payload["state"])
         questions = payload["questions"]
-        assert set(questions) == {"category", "severity", "is_attack", "target"}
+        assert set(questions) == {"category", "severity", "is_attack", "target", "violation"}
         criteria = questions["target"]["criteria"]
         assert set(criteria) == {"e_01", "e_02", "none"}
         assert criteria["e_02"] == "Mẫu hai, Tên khác, MH, Mô tả mẫu"
@@ -97,6 +97,62 @@ def test_classify(monkeypatch, target, probability, kept):
         assert not findings
 
 
+def _reply_with(answers, seen=None):
+    def reply(request, timeout):
+        payload = json.loads(request.data)
+        if seen is not None:
+            seen.append(payload)
+        body = {"model": "jev-test", "answers": answers}
+        return io.BytesIO(json.dumps(body).encode("utf-8"))
+
+    return reply
+
+
+@pytest.mark.parametrize(
+    ("violation", "attack", "expected"),
+    [
+        ({"violence": 0.7, "none": 0.3}, 0.1, ("violence", None)),  # vi phạm theo nội dung
+        ({"hate": 0.4, "none": 0.6}, 0.1, None),  # dưới ngưỡng
+        ({"violence": 0.9}, 0.8, ("insult", "e_01")),  # nhắm vào đối tượng thì ưu tiên
+    ],
+)
+def test_content_violation(monkeypatch, violation, attack, expected):
+    data, timeline = _data()
+    monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
+    answers = {
+        "category": {"probabilities": {"insult": 0.9}},
+        "is_attack": {"noul": attack},
+        "target": {"choice": "e_01" if attack >= 0.5 else "none"},
+        "severity": {"score": 2},
+        "violation": {"probabilities": violation},
+    }
+    monkeypatch.setattr(jev.urllib.request, "urlopen", _reply_with(answers))
+    findings, _, error = jev.classify(data, timeline, [ENTITY], [], "r_x", JevSettings())
+    assert error is None
+    if expected is None:
+        assert findings == []
+    else:
+        assert findings and {(f.category, f.entity) for f in findings} == {expected}
+
+
+def test_no_entities_asks_only_content_violations(monkeypatch, tmp_path):
+    """Chưa khai báo đối tượng vẫn phát hiện vi phạm theo nội dung."""
+    data, timeline = _data()
+    monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
+    seen = []
+    answers = {"severity": {"score": 1}, "violation": {"probabilities": {"forgery": 0.95}}}
+    monkeypatch.setattr(jev.urllib.request, "urlopen", _reply_with(answers, seen))
+    _, findings, error = runner.analyze(
+        data, timeline, [], [], "r_x", tmp_path, jev_settings=JevSettings()
+    )
+    assert error is None and seen
+    assert all(set(p["questions"]) == {"violation", "severity"} for p in seen)
+    assert all("protected_targets" not in p["state"] for p in seen)
+    assert findings and {(f.category, f.entity, f.confidence) for f in findings} == {
+        ("forgery", None, "highly_likely")
+    }
+
+
 def test_retry(monkeypatch):
     calls = []
     delays = []
@@ -129,16 +185,6 @@ def test_failure_keeps_static(monkeypatch, tmp_path, key):
     assert findings and {f.analyzer for f in findings} == {"static"}
     assert error.startswith("jev:")
     assert ("HTTP 500" if key else "TYPESAFE_API_KEY is not set") in error
-
-
-def test_no_entities_skips_jev(monkeypatch, tmp_path):
-    monkeypatch.setattr(jev.secrets, "get", lambda name: "test-key")
-    monkeypatch.setattr(jev, "classify", lambda *a, **k: pytest.fail("Jev must not be called"))
-    data, timeline = _data()
-    _, findings, error = runner.analyze(
-        data, timeline, [], INSULT, "r_x", tmp_path, jev_settings=JevSettings()
-    )
-    assert findings == [] and error is None
 
 
 def test_new_sources(monkeypatch):

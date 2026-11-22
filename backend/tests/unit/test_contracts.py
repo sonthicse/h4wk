@@ -249,6 +249,9 @@ VALID: list[tuple[Any, dict[str, Any]]] = [
     (Finding, FINDING),
     (Finding, _finding(category="incitement")),
     (Finding, _finding(category="state_secret")),
+    (Finding, _finding(category="violence", entity=None)),
+    (Finding, _finding(category="hate", entity=None)),
+    (Finding, _finding(category="forgery", entity=None)),
     (Finding, _finding(occurrences=[OCC_1, OCC_2])),
     (ReviewDecision, REVIEW),
     (SourcesConfig, SOURCES),
@@ -332,6 +335,7 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
         "comment thiếu id",
     ),
     (Finding, _finding(model=None), "jev thiếu model"),
+    (Finding, _finding(category="insult", entity=None), "xúc phạm thiếu đối tượng"),
     (
         Finding,
         _finding(analyzer="llm", model={"provider": "openrouter", "model": "x"}),
@@ -396,6 +400,7 @@ def test_rejected_examples(model: type[BaseModel], data: dict[str, Any], why: st
     ("why", "message"),
     [
         ("jev thiếu model", "a jev finding needs model"),
+        ("xúc phạm thiếu đối tượng", "category insult needs entity"),
         ("nghi vấn của LLM đã bỏ", "removed LLM providers"),
         ("nghi vấn llm cũ thiếu model", "removed LLM providers"),
     ],

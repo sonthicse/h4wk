@@ -76,7 +76,8 @@ export default function FindingReviewPage() {
   const queryClient = useQueryClient()
   const queueQuery = useQuery({ queryKey: ['review-queue'], queryFn: () => listQueue() })
   const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
-  const entityName = (id: string) => entities.data?.find((e) => e.id === id)?.name ?? id
+  // Vi phạm xét theo nội dung (violence, hate, forgery, state_secret) có thể không có đối tượng.
+  const entityName = (id: string | null | undefined) => (id ? (entities.data?.find((e) => e.id === id)?.name ?? id) : '—')
   const entityNames = Object.fromEntries((entities.data ?? []).map((e) => [e.id, e.name]))
   const [view, setView] = useState<View>('unreviewed')
   const [selectedId, setSelectedId] = useState<string | null>(null)

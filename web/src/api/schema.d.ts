@@ -855,7 +855,7 @@ export interface components {
          * Category
          * @enum {string}
          */
-        Category: "insult" | "unsupported_accusation" | "fabrication" | "incitement" | "state_secret" | "legitimate_criticism" | "neutral";
+        Category: "insult" | "unsupported_accusation" | "fabrication" | "incitement" | "state_secret" | "violence" | "hate" | "forgery" | "legitimate_criticism" | "neutral";
         /** Channel */
         Channel: {
             /** Id */
@@ -1170,7 +1170,7 @@ export interface components {
                 number
             ] | null;
             /** Entity */
-            entity: string;
+            entity?: string | null;
             category: components["schemas"]["Category"];
             severity: components["schemas"]["Severity"];
             confidence: components["schemas"]["Confidence"];

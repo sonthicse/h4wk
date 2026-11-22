@@ -114,8 +114,7 @@ def analyze(
         findings = [f for f in findings if f.analyzer != "static" or slot(f) not in replaced]
         findings.extend(part_findings)
 
-    # Chưa khai báo đối tượng thì Jev chỉ có thể trả `none`: không gọi để khỏi tốn token.
-    if jev_settings is not None and entities:
+    if jev_settings is not None:
         limit = (comment_settings or CommentSettings()).max_per_video
         part_findings, part_records, error = jev.classify(
             data,

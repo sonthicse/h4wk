@@ -2451,6 +2451,9 @@
           "fabrication",
           "incitement",
           "state_secret",
+          "violence",
+          "hate",
+          "forgery",
           "legitimate_criticism",
           "neutral"
         ],
@@ -3437,7 +3440,14 @@
             "title": "Bbox"
           },
           "entity": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Entity"
           },
           "category": {
@@ -3472,7 +3482,6 @@
           "analyzer",
           "analyzer_version",
           "source_kind",
-          "entity",
           "category",
           "severity",
           "confidence",

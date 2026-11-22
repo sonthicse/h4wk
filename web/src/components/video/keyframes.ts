@@ -25,7 +25,7 @@ export function buildKeyframes(timeline: Timeline | null | undefined, findings: 
     for (const fr of seg.frames ?? []) get(fr.frame, fr.t)
   }
   for (const f of findings) {
-    const name = entityNames[f.entity] ?? f.entity
+    const name = f.entity ? (entityNames[f.entity] ?? f.entity) : f.category
     for (const tr of f.triggers) {
       if ((tr.via !== 'face' && tr.via !== 'ref_image') || !tr.frame || !tr.bbox) continue
       // Khung đã có trong timeline (frames/ocr) thì dùng đúng t của khung đó; chỉ khung ngoài timeline
