@@ -357,6 +357,8 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (SourcesConfig, _set("priority", {"video.media": ["tiktok"]})(SOURCES), "nguồn lạ"),
     (SourcesConfig, _set("priority", {"video.media": ["ytdlp", "ytdlp"]})(SOURCES), "trùng nguồn"),
     (SourcesConfig, _set("sources.youtube_api.api_key", "AIza…")(SOURCES), "secret trong toml"),
+    (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 0}}, "0 luồng mỗi kênh"),
+    (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 9}}, "quá 8 luồng"),
     # C5: analysis
     (AnalysisConfig, _set("transcript_priority", ["uploaded", "uploaded"])(ANALYSIS), "trùng loại"),
     (AnalysisConfig, _set("comments", {"batch_size": 100})(ANALYSIS), "lô ngoài 20–50"),

@@ -5,10 +5,12 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlmodel import Session, select
 
 from h4wk.collectors import registry
 from h4wk.collectors.base import FetchResult
 from h4wk.collectors.models import Cap, Normalized
+from h4wk.core.db import JobRow, get_engine
 from h4wk.core.types import VN_TZ
 from h4wk.jobs import pipeline
 from h4wk.watchlist import rss, service
@@ -65,6 +67,19 @@ def test_parse_feed() -> None:
     assert entries[0].published_at.isoformat() == "2026-11-19T08:00:00+07:00"
 
 
+def _jobs(item_id: str) -> dict[str, str]:
+    """ID job → trạng thái, của một kênh."""
+    with Session(get_engine()) as s:
+        rows = s.exec(select(JobRow).where(JobRow.trigger == service.trigger_of(item_id)))
+        return {j.id: j.status for j in rows}
+
+
+def _finish(job_id: str) -> None:
+    """Giả lập job xong: pipeline báo cho luồng của kênh."""
+    job = pipeline._update(job_id, status="done")
+    pipeline._next_in_lane(job)
+
+
 def test_add_channel_queues_10_of_15_then_nothing(client: TestClient, fake, data_dir) -> None:
     ids = [_vid(i) for i in range(15)]
     fake["feed"], fake["listed"] = _entries(ids), ids
@@ -73,10 +88,11 @@ def test_add_channel_queues_10_of_15_then_nothing(client: TestClient, fake, data
     item = r.json()
     assert item["channel_id"] == CHANNEL and not item["initialized"]
     service.run_due()  # lần đầu: bước thêm kênh
-    assert len(fake["started"]) == 10
+    assert len(_jobs(item["id"])) == 10
+    assert len(fake["started"]) == 1  # mỗi kênh một luồng: các job còn lại chờ
     assert list((data_dir / "channels" / CHANNEL / "captures").iterdir())
     service.check(item["id"])  # lần sau: không có gì mới
-    assert len(fake["started"]) == 10
+    assert len(_jobs(item["id"])) == 10
     got = client.get("/api/watchlist").json()[0]
     assert got["initialized"] and got["latest_video"]["id"] in ids
     assert got["last_checked_at"].endswith("+07:00")
@@ -86,14 +102,48 @@ def test_one_new_entry_makes_one_job_once(client: TestClient, fake) -> None:
     fake["feed"] = _entries([_vid(0)])
     item = client.post("/api/watchlist", json={"url": "@VietTan"}).json()
     service.check(item["id"])
-    before = len(fake["started"])
+    before = len(_jobs(item["id"]))
     fake["feed"] = _entries([_vid(1), _vid(0)])
     assert service.check(item["id"]) == [_vid(1)]
     assert service.check(item["id"]) == []
-    assert len(fake["started"]) == before + 1
+    assert len(_jobs(item["id"])) == before + 1
     events = client.get("/api/events").json()
     assert events[0]["kind"] == "new_video" and "Việt Tân" in events[0]["message"]
     assert events[0]["video_id"] == _vid(1)
+
+
+@pytest.mark.parametrize("threads", [1, 2])
+def test_each_channel_has_its_own_lane(client: TestClient, fake, config_dir, threads) -> None:
+    """Mỗi kênh tối đa N job đang xử lý; xong một job thì job chờ kế tiếp của kênh đó chạy.
+    Kênh khác không phải chờ."""
+    (config_dir / "sources.toml").write_text(
+        f"[watchlist]\nthreads_per_channel = {threads}\n", encoding="utf-8"
+    )
+    fake["feed"] = _entries([_vid(i) for i in range(4)])
+    a = client.post("/api/watchlist", json={"url": "@VietTan"}).json()
+    service.check(a["id"])
+    b = service.create_item("UCother", "@other", "Kênh khác", "full")
+    fake["feed"] = _entries([_vid(i) for i in range(10, 13)])
+    service.check(b.id)
+
+    def active(item_id):
+        return [j for j, st in _jobs(item_id).items() if st == "queued"]
+
+    assert len(active(a["id"])) == threads and len(active(b.id)) == threads
+    assert len(fake["started"]) == 2 * threads
+    first = active(a["id"])[0]
+    _finish(first)
+    assert len(active(a["id"])) == threads and first not in active(a["id"])
+    assert len(active(b.id)) == threads  # kênh khác không đổi
+
+
+def test_worker_threads_follow_channels(fake, config_dir) -> None:
+    from h4wk.jobs import lanes
+
+    (config_dir / "sources.toml").write_text("[watchlist]\nthreads_per_channel = 3\n", "utf-8")
+    for i in range(3):
+        service.create_item(f"UC{i}", None, f"K{i}", "full")
+    assert lanes.worker_threads() == 3 * 3 + 2
 
 
 def test_check_now_also_uses_channel_listing(client: TestClient, fake) -> None:

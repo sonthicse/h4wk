@@ -51,6 +51,8 @@ class CollectSettings(Contract):
 class WatchlistSettings(Contract):
     check_interval_min: int = Field(default=2, ge=1)
     initial_videos: int = Field(default=10, ge=0)
+    # Mỗi kênh xử lý song song tối đa bấy nhiêu video; các kênh chạy song song với nhau.
+    threads_per_channel: int = Field(default=1, ge=1, le=8)
 
 
 class SourcesConfig(Contract):

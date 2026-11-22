@@ -22,7 +22,7 @@ from h4wk.core.db import JobRow, KnownVideoRow, WatchItemRow, get_engine
 from h4wk.core.events import record as event
 from h4wk.core.types import VN_TZ
 from h4wk.evidence.models import Trigger
-from h4wk.jobs import pipeline
+from h4wk.jobs import lanes, pipeline
 from h4wk.watchlist import rss
 
 # Có thể thay trong test.
@@ -226,9 +226,16 @@ def _mark_known(item_id: str, entries: list[rss.FeedEntry]) -> None:
 
 
 def _start_job(item: WatchItemRow, video_id: str) -> str:
+    """Job chờ trong luồng riêng của kênh; lanes.fill đưa vào hàng đợi khi luồng rảnh."""
     target = parse_target(video_id)
     job = pipeline.create_job(target.url, video_id, item.level, False, trigger_of(item.id))
-    pipeline.start(job.id)
+    with Session(get_engine()) as s:
+        row = s.get(JobRow, job.id)
+        assert row is not None
+        row.status = "waiting"
+        s.add(row)
+        s.commit()
+    lanes.fill(trigger_of(item.id))
     return job.id
 
 
@@ -310,6 +317,7 @@ def check(item_id: str, *, listing: bool = False) -> list[str]:
 def run_due() -> None:
     """Gọi bởi periodic task: kiểm tra các mục đang bật đã tới chu kỳ."""
     interval = timedelta(minutes=_settings().check_interval_min)
+    lanes.fill_all()  # job chờ còn sót (worker khởi động lại, hoặc vừa tăng số luồng)
     now = _now()
     for item in list_items():
         last = item.last_checked_at

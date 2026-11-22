@@ -20,6 +20,7 @@ from h4wk.core.config_models import SourcesConfig
 from h4wk.core.db import SourceStateRow, as_aware, get_engine
 from h4wk.core.secrets import KeyInfo
 from h4wk.core.types import VN_TZ, VnDatetime
+from h4wk.jobs import lanes
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 ActorDep = Annotated[str, Depends(current_actor)]
@@ -216,6 +217,50 @@ class JevSettingsView(BaseModel):
 
 
 _JEV_KEY = "TYPESAFE_API_KEY"
+
+
+# -------------------------------------------------------------------- watchlist
+
+
+class WatchlistSettingsView(BaseModel):
+    check_interval_min: int
+    initial_videos: int
+    threads_per_channel: int
+    # Số luồng worker đang cần theo cấu hình; worker tính lúc khởi động.
+    worker_threads: int
+
+
+class WatchlistSettingsUpdate(BaseModel):
+    check_interval_min: int | None = None
+    initial_videos: int | None = None
+    threads_per_channel: int | None = None
+
+
+def _watchlist_view() -> WatchlistSettingsView:
+    w = settings.load_sources().watchlist
+    return WatchlistSettingsView(**w.model_dump(), worker_threads=lanes.worker_threads())
+
+
+@router.get("/watchlist")
+def get_watchlist_settings() -> WatchlistSettingsView:
+    return _watchlist_view()
+
+
+@router.put("/watchlist")
+def put_watchlist_settings(body: WatchlistSettingsUpdate, actor: ActorDep) -> WatchlistSettingsView:
+    """Chu kỳ kiểm tra, số video xử lý khi thêm kênh, số luồng mỗi kênh ([watchlist] trong
+    sources.toml)."""
+    data = settings.load_sources().model_dump(mode="json", by_alias=True, exclude_none=True)
+    data.setdefault("watchlist", {}).update(body.model_dump(exclude_none=True))
+    try:
+        cfg = SourcesConfig.model_validate(data)
+    except ValidationError as e:
+        audit.log(actor, "settings.watchlist", None, {"error": "invalid"}, status="error")
+        raise _invalid(e) from None
+    settings.save_sources(cfg)
+    audit.log(actor, "settings.watchlist", None, body.model_dump(exclude_none=True))
+    lanes.fill_all()  # tăng số luồng thì job đang chờ chạy ngay
+    return _watchlist_view()
 
 
 @router.get("/jev")

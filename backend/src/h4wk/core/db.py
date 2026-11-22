@@ -59,7 +59,7 @@ class JobRow(SQLModel, table=True):
     level: str
     force: bool = False
     trigger: str  # user:<username> hoặc system:<rule>
-    status: str = "queued"  # queued | running | done | failed
+    status: str = "queued"  # waiting | queued | running | done | failed (waiting: xem lanes.py)
     step: str | None = None  # collect | media | analyze
     progress: int = 0
     capture: str | None = None

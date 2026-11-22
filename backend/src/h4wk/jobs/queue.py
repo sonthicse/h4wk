@@ -1,6 +1,6 @@
 """Hàng đợi Huey lưu bằng SQLite trong thư mục dữ liệu. Hai hàng đợi: default và gpu.
 
-uv run huey_consumer h4wk.jobs.queue.huey -w 2
+uv run python -m h4wk.jobs.worker            # default; số luồng tự tính theo watchlist
 uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1
 
 Khi consumer khởi động, job đang running được đưa lại vào hàng đợi (xem recovery.py).
@@ -46,6 +46,12 @@ def _recover(queue: str) -> None:
 @huey.on_startup()
 def _recover_default() -> None:
     _recover("default")
+    from h4wk.jobs import lanes
+
+    try:
+        lanes.fill_all()
+    except Exception:
+        _log.exception("Không đưa được job chờ của watchlist vào hàng đợi")
 
 
 @huey_gpu.on_startup()

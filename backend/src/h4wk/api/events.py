@@ -14,7 +14,7 @@ from h4wk.review.queue import VideoRef, video_ref
 
 router = APIRouter(tags=["events"])
 
-JobStatus = Literal["queued", "running", "done", "failed"]
+JobStatus = Literal["waiting", "queued", "running", "done", "failed"]
 
 
 class EventJob(BaseModel):

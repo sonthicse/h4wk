@@ -27,6 +27,7 @@ from h4wk.core.ids import new_ulid
 from h4wk.core.types import VN_TZ
 from h4wk.evidence.models import Manifest, Trigger
 from h4wk.evidence.writer import CAPTURE_TS_FORMAT, list_captures
+from h4wk.jobs import lanes
 from h4wk.jobs.queue import huey, huey_gpu
 from h4wk.media import ocr, stt, transcripts
 from h4wk.media.enrich import enrich
@@ -96,10 +97,17 @@ def _trigger(job: JobRow) -> Trigger:
     return Trigger(type="manual")
 
 
+def _next_in_lane(job: JobRow) -> None:
+    """Job của kênh watchlist xong (hay lỗi) thì đưa job chờ kế tiếp của kênh đó vào hàng đợi."""
+    if job.trigger.startswith(_WATCH):
+        lanes.fill(job.trigger)
+
+
 def _fail(job_id: str, step: str, e: Exception) -> None:
     job = _update(job_id, status="failed", error=f"{step}: {e}")
     _event(job, "job_failed", f"Job failed for video {job.video_id} at {step}")
     audit.log(job.trigger, "job.run", job.id, {"step": step, "error": str(e)}, status="error")
+    _next_in_lane(job)
 
 
 def _recent_capture(job: JobRow) -> str | None:
@@ -418,6 +426,7 @@ def _analyze(job_id: str, *, reject_quota: bool) -> None:
         message += f" ({'; '.join(notes)})"
     _event(job, "job_done", message)
     audit.log(job.trigger, "job.run", job.id, detail)
+    _next_in_lane(job)
 
 
 def _latest_runs(root: Path) -> dict[tuple[str, str], str]:

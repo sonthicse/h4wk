@@ -145,3 +145,14 @@ def test_jev_key_lifecycle(client: TestClient, monkeypatch) -> None:
     assert result.json()["origin"] == "settings"
     assert client.get("/api/settings/jev").json() == {"key": result.json()}
     assert client.delete("/api/settings/jev/key").json()["set"] is False
+
+
+def test_watchlist_settings_roundtrip(client, config_dir) -> None:
+    got = client.get("/api/settings/watchlist").json()
+    assert got["threads_per_channel"] == 1 and got["initial_videos"] == 10
+    r = client.put("/api/settings/watchlist", json={"threads_per_channel": 3, "initial_videos": 20})
+    assert r.status_code == 200, r.text
+    assert r.json()["threads_per_channel"] == 3 and r.json()["initial_videos"] == 20
+    text = (config_dir / "sources.toml").read_text(encoding="utf-8")
+    assert "threads_per_channel = 3" in text and "initial_videos = 20" in text
+    assert client.put("/api/settings/watchlist", json={"threads_per_channel": 0}).status_code == 422
