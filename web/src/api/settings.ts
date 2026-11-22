@@ -71,3 +71,14 @@ export function getJevUsage(period: JevUsagePeriod): Promise<JevUsage> {
 export function testJev(): Promise<JevTestResult> {
   return api('/api/settings/jev/test', { method: 'POST' })
 }
+
+// ---- Watchlist ----
+export type WatchlistSettings = Schemas['WatchlistSettingsView']
+
+export function getWatchlistSettings(): Promise<WatchlistSettings> {
+  return api('/api/settings/watchlist')
+}
+
+export function putWatchlistSettings(body: Schemas['WatchlistSettingsUpdate']): Promise<WatchlistSettings> {
+  return api('/api/settings/watchlist', { method: 'PUT', body })
+}

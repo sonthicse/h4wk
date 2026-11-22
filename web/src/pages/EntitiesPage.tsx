@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { listEntities, type Entity } from '@/api/entities'
 import EntityForm from '@/components/entities/EntityForm'
+import ReanalyzeButton from '@/components/ReanalyzeButton'
 import NewEntityDialog from '@/components/entities/NewEntityDialog'
 import RefImageGroup from '@/components/entities/RefImageGroup'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -26,9 +27,11 @@ export default function EntitiesPage() {
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="text-2xl font-semibold">Entities</h1>
         <Badge variant="outline">{plural(all.length, 'entity')}</Badge>
-        <Button className="ml-auto" onClick={() => setCreating(true)}>
-          New entity
-        </Button>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {/* Sửa đối tượng chỉ áp dụng cho lần phân tích sau; nút này áp dụng cho video đã có. */}
+          <ReanalyzeButton label="Re-analyze all videos" />
+          <Button onClick={() => setCreating(true)}>New entity</Button>
+        </div>
       </div>
 
       <Alert>

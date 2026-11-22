@@ -21,7 +21,6 @@ cd h4wk
 # Backend
 cd backend
 uv sync                 # tạo .venv và cài toàn bộ dependency (kể cả torch, thư viện CUDA)
-uv run h4wk init        # tạo data/ và config/*.toml từ config/*.toml.example
 cd ..
 
 # Frontend
@@ -30,7 +29,7 @@ npm install
 cd ..
 ```
 
-`h4wk init` không ghi đè file `config/*.toml` đã có, nên chạy lại lệnh này vẫn an toàn. Lệnh không thêm đối tượng hay kênh nào; máy đang dùng bản cũ thì lệnh chuyển `data/entities.json` và danh sách kênh trong database sang `config/`.
+Không có CLI; mọi thao tác làm trên giao diện web. Lần đầu API khởi động, nó tự tạo `data/` và chép `config/*.toml.example` thành `config/*.toml` (không ghi đè file đã có). Không có đối tượng hay kênh mặc định; máy đang dùng bản cũ thì `data/entities.json` và danh sách kênh trong database được chuyển sang `config/`.
 
 Mọi cấu hình người dùng nằm trong `config/`: `sources.toml` (nguồn thu), `analysis.toml` (phân tích), `entities.toml` (đối tượng cần bảo vệ), `watchlist.toml` (kênh theo dõi). Secret nằm trong `.env` hoặc nhập ở Settings.
 
@@ -45,7 +44,7 @@ Mở bốn terminal:
 cd backend && uv run uvicorn h4wk.api.app:app --reload
 
 # Terminal 2: worker mặc định (thu thập, phân tích, watchlist)
-cd backend && uv run huey_consumer h4wk.jobs.queue.huey -w 2
+cd backend && uv run python -m h4wk.jobs.worker   # số luồng tự tính: mỗi kênh watchlist N luồng (Settings → Watchlist)
 
 # Terminal 3: worker GPU (STT, keyframe, OCR, khớp ảnh)
 cd backend && uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1

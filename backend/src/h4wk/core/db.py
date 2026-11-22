@@ -81,7 +81,7 @@ class FindingRow(SQLModel, table=True):
 
 
 def finding_row(f: "Finding") -> FindingRow:
-    """Dòng chỉ mục của một nghi vấn (dùng khi phân tích và khi reindex)."""
+    """Dòng chỉ mục của một nghi vấn (dùng khi phân tích)."""
     return FindingRow(
         id=f.id,
         video_id=f.video_id,

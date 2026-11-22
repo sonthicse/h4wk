@@ -18,7 +18,9 @@ import { formatVnDateTime } from '@/lib/format'
 type StepStatus = 'pending' | 'running' | 'done' | 'failed'
 
 // Theo bản phác: done nền đậm, running viền đậm, failed đỏ, queued viền nhạt.
+// waiting: job của kênh watchlist đang chờ tới lượt trong luồng riêng của kênh.
 const statusVariant: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
+  waiting: 'secondary',
   queued: 'outline',
   running: 'outline',
   done: 'default',
@@ -48,7 +50,7 @@ function stepsOf(job: Job) {
 
 function stepStatus(job: Job, steps: string[], i: number): StepStatus {
   if (job.status === 'done') return 'done'
-  if (job.status === 'queued' && !job.step) return 'pending'
+  if ((job.status === 'queued' || job.status === 'waiting') && !job.step) return 'pending'
   const current = job.step === 'media' ? 1 : steps.indexOf(job.step ?? '')
   // Job đang chờ ở hàng đợi kế tiếp: `step` là bước sắp chạy, các bước trước đã xong.
   if (job.status === 'queued') return i < current ? 'done' : 'pending'

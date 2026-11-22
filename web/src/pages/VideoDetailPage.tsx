@@ -14,6 +14,7 @@ import {
   type VideoDetail,
   type VideoFinding,
 } from '@/api/videos'
+import ReanalyzeButton from '@/components/ReanalyzeButton'
 import CapturesTab from '@/components/video/CapturesTab'
 import CommentsTab from '@/components/video/CommentsTab'
 import FindingTimeline from '@/components/video/FindingTimeline'
@@ -116,6 +117,7 @@ function VideoView({
           {video.like_count != null && <Badge variant="outline">{count(video.like_count)} likes</Badge>}
           {video.comment_count != null && <Badge variant="outline">{count(video.comment_count)} comments</Badge>}
           <Badge variant={findings.length > 0 ? 'destructive' : 'outline'}>{findings.length} findings</Badge>
+          <ReanalyzeButton videoIds={[video.id]} label="Re-analyze" />
           <a
             href={`https://www.youtube.com/watch?v=${encodeURIComponent(video.id)}`}
             target="_blank"

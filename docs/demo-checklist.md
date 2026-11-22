@@ -9,13 +9,13 @@ Tên trang, nút và nhãn trong các bước là chữ tiếng Anh đang hiện
 - [ ] **GPU.** `nvidia-smi` liệt kê GPU và phiên bản CUDA, không báo lỗi.
 - [ ] **Khóa Jev.** `TYPESAFE_API_KEY` có trong `.env` hoặc nhập ở Settings → Jev.
 - [ ] **Key nguồn thu.** `YOUTUBE_API_KEY`, `SUPADATA_API_KEY` có trong `.env` hoặc nhập ở Settings → Sources (key nhập ở Settings được ưu tiên). Giao diện chỉ hiện bản che của key.
-- [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync && uv run h4wk init`, rồi `cd ../web && npm install` (từ thư mục `backend/`).
+- [ ] **Cài lần đầu** (đã cài rồi thì bỏ qua): `cd backend && uv sync`, rồi `cd ../web && npm install` (từ thư mục `backend/`).
 
 
 Mở 4 terminal:
 
 - [ ] **API** (port 8000): `cd backend && uv run uvicorn h4wk.api.app:app --port 8000`
-- [ ] **Worker mặc định:** `cd backend && uv run huey_consumer h4wk.jobs.queue.huey -w 2`
+- [ ] **Worker mặc định:** `cd backend && uv run python -m h4wk.jobs.worker`
 - [ ] **Worker GPU:** `cd backend && uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1`
 - [ ] **Frontend:** `cd web && npm run dev`
 
@@ -78,25 +78,6 @@ Kết quả mong đợi: sự kiện `New video detected on <kênh>` ở Dashboa
 Bản thu nằm ở `data/videos/<video_id>/captures/<YYYYMMDDTHHMMSS>/`.
 
 - [ ] **Trên giao diện:** mở một video ở **Videos**, tab **Captures**, mở một bản thu, bấm **Verify integrity**. Mọi file báo OK.
-- [ ] **CLI trên bản thu thật:** `cd backend && uv run h4wk verify ../data/videos/<video_id>/captures/<ts>` in `OK <đường dẫn>` cho từng file, thoát mã 0.
-
-**Chỉ thử phá trên bản sao**, không sửa `data/` thật:
-
-```bash
-T=$(mktemp -d)
-cp -r data/videos/<video_id> "$T/"
-chmod -R u+w "$T"                                 # bản thu gốc chỉ đọc, bản sao cần ghi được
-C="$T/<video_id>/captures/<ts>"
-cd backend
-uv run h4wk verify "$C"                 # tất cả OK
-```
-
-- [ ] Thêm 1 byte vào một file: `printf 'x' >> "$C/normalized.json"`, chạy lại `verify` → file đó báo `FAIL`, các file khác OK, mã thoát 1.
-- [ ] Xoá một file (khác file vừa sửa, vd `$C/sources/ytdlp/0.jpg`): báo `missing` đúng file đó.
-- [ ] Thêm file lạ: `echo hi > "$C/lạ.txt"` → báo `unexpected` đúng file đó.
-- [ ] Dọn: `rm -rf "$T"`.
-
-Kết quả mong đợi: OK với bản thu nguyên vẹn; FAIL, `missing`, `unexpected` đúng file bị đụng tới.
 
 ## 6. Xử lý sự cố thường gặp
 

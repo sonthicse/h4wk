@@ -110,3 +110,5 @@ Ngày 2026-11-22:
 - Gỡ câu "The Party, State or regime counts as attacked even when not named" khỏi prompt Jev; lưu ở `docs/notes/jev-prompt.md`.
 - Bỏ lệnh `h4wk schema export` và thư mục `docs/contracts/`: không còn nơi nào dùng các file JSON Schema này.
 - Đổi cách gọi "hợp đồng" C1–C5 thành "quy ước".
+- Bỏ CLI `h4wk`: API tự khởi tạo `data/` và `config/` khi khởi động; phân tích lại bằng nút Re-analyze trên web; bỏ `reindex` và `verdict`.
+- Mỗi kênh watchlist có luồng xử lý riêng, số luồng mỗi kênh đặt ở Settings → Watchlist.

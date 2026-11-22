@@ -165,6 +165,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reanalyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reanalyze
+         * @description Phân tích lại bản thu mới nhất đã có timeline, không thu lại hay chạy media. Dùng sau
+         *     khi sửa đối tượng hoặc từ điển.
+         */
+        post: operations["reanalyze_api_reanalyze_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/jobs": {
         parameters: {
             query?: never;
@@ -675,6 +696,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/settings/watchlist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Watchlist Settings */
+        get: operations["get_watchlist_settings_api_settings_watchlist_get"];
+        /**
+         * Put Watchlist Settings
+         * @description Chu kỳ kiểm tra, số video xử lý khi thêm kênh, số luồng mỗi kênh ([watchlist] trong
+         *     sources.toml).
+         */
+        put: operations["put_watchlist_settings_api_settings_watchlist_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings/jev": {
         parameters: {
             query?: never;
@@ -1049,7 +1092,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "queued" | "running" | "done" | "failed";
+            status: "waiting" | "queued" | "running" | "done" | "failed";
         };
         /** FileEntry */
         FileEntry: {
@@ -1411,6 +1454,11 @@ export interface components {
             video: components["schemas"]["VideoRef"];
             /** Decisions */
             decisions: components["schemas"]["ReviewDecision"][];
+        };
+        /** ReanalyzeBody */
+        ReanalyzeBody: {
+            /** Video Ids */
+            video_ids?: string[] | null;
         };
         /** RefCounts */
         RefCounts: {
@@ -1963,6 +2011,26 @@ export interface components {
             enabled?: boolean | null;
             level?: components["schemas"]["CollectLevel"] | null;
         };
+        /** WatchlistSettingsUpdate */
+        WatchlistSettingsUpdate: {
+            /** Check Interval Min */
+            check_interval_min?: number | null;
+            /** Initial Videos */
+            initial_videos?: number | null;
+            /** Threads Per Channel */
+            threads_per_channel?: number | null;
+        };
+        /** WatchlistSettingsView */
+        WatchlistSettingsView: {
+            /** Check Interval Min */
+            check_interval_min: number;
+            /** Initial Videos */
+            initial_videos: number;
+            /** Threads Per Channel */
+            threads_per_channel: number;
+            /** Worker Threads */
+            worker_threads: number;
+        };
         /**
          * Trigger
          * @description Dấu hiệu đã kéo một đoạn vào phân tích.
@@ -2306,6 +2374,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["CollectBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Job"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reanalyze_api_reanalyze_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReanalyzeBody"];
             };
         };
         responses: {
@@ -3327,6 +3428,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SourceInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_watchlist_settings_api_settings_watchlist_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WatchlistSettingsView"];
+                };
+            };
+        };
+    };
+    put_watchlist_settings_api_settings_watchlist_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WatchlistSettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WatchlistSettingsView"];
                 };
             };
             /** @description Validation Error */

@@ -5,9 +5,6 @@ export type WatchItem = Schemas['WatchItem']
 export type WatchEvent = Schemas['Event']
 export type CheckResult = Schemas['CheckResult']
 
-// Khớp [watchlist] trong config/sources.toml.example; backend chưa trả các số này qua API.
-export const CHECK_INTERVAL_MIN = 2
-export const INITIAL_VIDEOS = 10
 export const levels: CollectLevel[] = ['metadata', 'text', 'full']
 
 const item = (id: string) => `/api/watchlist/${encodeURIComponent(id)}`

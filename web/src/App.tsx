@@ -14,6 +14,7 @@ import ReviewQueuePage from '@/pages/ReviewQueuePage'
 import JevPage from '@/pages/settings/JevPage'
 import SettingsLayout from '@/pages/settings/SettingsLayout'
 import SourcesPage from '@/pages/settings/SourcesPage'
+import WatchlistSettingsPage from '@/pages/settings/WatchlistSettingsPage'
 import VideoDetailPage from '@/pages/VideoDetailPage'
 import VideosPage from '@/pages/VideosPage'
 import WatchlistPage from '@/pages/WatchlistPage'
@@ -54,6 +55,7 @@ export default function App() {
                 <Route index element={<Navigate to="sources" replace />} />
                 <Route path="sources" element={<SourcesPage />} />
                 <Route path="jev" element={<JevPage />} />
+                <Route path="watchlist" element={<WatchlistSettingsPage />} />
                 <Route path="ai" element={<Navigate to="/settings/jev" replace />} />
               </Route>
             </Route>

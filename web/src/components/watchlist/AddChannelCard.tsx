@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { CollectLevel } from '@/api/jobs'
-import { addWatchItem, CHECK_INTERVAL_MIN, INITIAL_VIDEOS, levels } from '@/api/watchlist'
+import { addWatchItem, levels } from '@/api/watchlist'
+import { useWatchlistSettings } from '@/hooks/use-watchlist-settings'
 
 // Form thêm kênh vào watchlist (SPEC 10.9). Mức thu mặc định là `full` (SPEC 10.7).
 export default function AddChannelCard() {
@@ -14,11 +15,12 @@ export default function AddChannelCard() {
   const [input, setInput] = useState('')
   const [level, setLevel] = useState<CollectLevel>('full')
   const [added, setAdded] = useState<string | null>(null)
+  const { initial_videos, check_interval_min } = useWatchlistSettings()
 
   const add = useMutation({
     mutationFn: () => addWatchItem(input, level),
     onSuccess: (item) => {
-      setAdded(`${item.title} added. Its ${INITIAL_VIDEOS} latest videos are being collected at ${item.level} level.`)
+      setAdded(`${item.title} added. Its ${initial_videos} latest videos are being collected at ${item.level} level.`)
       setInput('')
       queryClient.invalidateQueries({ queryKey: ['watchlist'] })
     },
@@ -29,8 +31,8 @@ export default function AddChannelCard() {
       <CardHeader>
         <CardTitle>Add channel</CardTitle>
         <CardDescription>
-          When a channel is added, its {INITIAL_VIDEOS} latest videos are collected and processed right away. After
-          that, enabled channels are checked by RSS every {CHECK_INTERVAL_MIN} minutes and each new video is collected
+          When a channel is added, its {initial_videos} latest videos are collected and processed right away. After
+          that, enabled channels are checked by RSS every {check_interval_min} minutes and each new video is collected
           automatically.
         </CardDescription>
       </CardHeader>

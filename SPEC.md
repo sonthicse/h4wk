@@ -71,12 +71,9 @@ Lệnh backend chạy trong thư mục `backend/`. Thư mục dữ liệu lấy 
 ```bash
 # Backend (trong backend/)
 uv sync                                             # cài dependency
-uv run h4wk init                                    # tạo data/, database chỉ mục, file cấu hình mẫu; không thêm đối tượng hay kênh
 uv run uvicorn h4wk.api.app:app --reload            # chạy API ở :8000
-uv run huey_consumer h4wk.jobs.queue.huey -w 2      # worker cho hàng đợi default
+uv run python -m h4wk.jobs.worker                   # worker hàng đợi default, số luồng tự tính theo watchlist
 uv run huey_consumer h4wk.jobs.queue.huey_gpu -w 1  # worker cho hàng đợi gpu
-uv run h4wk verify <capture_dir>                    # kiểm tra toàn vẹn một bản thu
-uv run h4wk reindex                                 # dựng lại database chỉ mục từ data/
 uv run pytest                                       # test, không gọi mạng
 uv run pytest -m live                               # test có gọi mạng/API thật, chạy tay
 uv run ruff check . --fix && uv run ruff format .
@@ -177,7 +174,7 @@ Các mốc thời gian dưới đây là mục tiêu nên đạt, không phải 
 
 ### Bằng chứng
 
-- [ ] `h4wk verify` và nút Verify integrity tính lại SHA-256 và báo OK. Sửa 1 byte trong một file thì báo FAIL đúng file đó; thiếu file thì báo `missing`; có file lạ thì báo `unexpected`.
+- [ ] Nút Verify integrity tính lại SHA-256 và báo OK. Sửa 1 byte trong một file thì báo FAIL đúng file đó; thiếu file thì báo `missing`; có file lạ thì báo `unexpected`.
 
 ### Nguồn thu và AI
 
@@ -212,13 +209,12 @@ Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh m
 
 Quy ước C5 là định dạng của các file cấu hình người dùng trong `config/`: `sources.toml`, `analysis.toml`, `entities.toml` (đối tượng) và `watchlist.toml` (kênh theo dõi), viết bằng Pydantic. Mọi cấu hình người dùng nằm ở đây, sửa tay được; giao diện ghi lại file thì comment mất. Secret không nằm ở đây. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
 
-Hạn chế được chấp nhận: phiên đăng nhập, trạng thái chạy của watchlist (đã khởi tạo, lần kiểm tra cuối, danh sách video đã biết) và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên; danh sách kênh còn nguyên trong `config/watchlist.toml`, nhưng mỗi kênh sẽ chạy lại bước thêm kênh.
+Không có CLI: API tự tạo `data/` và `config/*.toml` từ file mẫu khi khởi động; mọi thao tác làm trên giao diện web. Hạn chế được chấp nhận: phiên đăng nhập, trạng thái chạy của watchlist (đã khởi tạo, lần kiểm tra cuối, danh sách video đã biết), quota đã dùng và lịch sử job chỉ nằm trong database; mất database thì mất các dữ liệu này.
 
 Nghiệm thu:
 
 - Một tài khoản duy nhất: tên và mật khẩu đặt ở `H4WK_USERNAME`, `H4WK_PASSWORD` trong `.env` (thiếu thì API không khởi động). Đăng nhập bằng session cookie; database chỉ lưu SHA-256 của token phiên, không lưu mật khẩu.
 - Mọi API ghi dữ liệu đều để lại một dòng nhật ký, kể cả khi thao tác thất bại.
-- `h4wk reindex` dựng lại được danh sách đối tượng, video, nghi vấn và quyết định rà soát từ `data/`.
 
 ### 10.2 `evidence-store`
 
@@ -381,7 +377,7 @@ Bước 4 là kết luận theo video bằng quy tắc, không gọi AI (`verdic
 - Không có nghi vấn vi phạm (danh mục khác `legitimate_criticism`, `neutral`) của đúng run: `violation: no`, `confidence: highly_likely`, tóm tắt "Không có nghi vấn vi phạm."
 - Có ít nhất một nghi vấn vi phạm `highly_likely`: `violation: yes`; còn lại `uncertain`. Nghi vấn tầng tĩnh (`unverified`) không tự đẩy kết luận lên `yes`. Thi chốt quy tắc này ngày 2026-11-21, chấp nhận nhiều video ra `yes` do precision của Jev thấp (T47: 18% trên mẫu không khớp tên); người duyệt vẫn xác nhận từng video (10.8).
 - `categories` xếp theo số nghi vấn giảm dần; `severity` là mức cao nhất; `confidence` là của nghi vấn xếp đầu; `finding_ids` là 10 nghi vấn đầu khi xếp theo `severity` rồi xác suất Jev. `summary` sinh theo mẫu, ví dụ "12 nghi vấn vi phạm; danh mục: insult (8), incitement (4); mức cao nhất: high."
-- `h4wk verdict` bỏ qua run đã có `verdict.json`, trừ khi có `--force`.
+- Nút Re-analyze (Video detail cho một video, Entities cho mọi video) phân tích lại bản thu mới nhất đã có timeline thành một job, không thu lại hay chạy media; hết quota Jev thì job lỗi và run cũ giữ nguyên.
 
 Quy ước C4 gồm ba cấu trúc. Dấu hiệu (`hits.json`):
 
@@ -487,6 +483,8 @@ Khi một kênh được thêm vào watchlist (từ trang Watchlist hoặc bằn
 2. 10 video mới nhất (cấu hình được) được xử lý ngay ở mức thu của mục.
 3. Mọi video đang có trong RSS được đánh dấu là đã biết, để lần kiểm tra sau không xử lý lại.
 
+Mỗi kênh có luồng xử lý riêng: job của kênh chờ ở trạng thái `waiting`, mỗi kênh tối đa `threads_per_channel` job đang xử lý (mặc định 1, tối đa 8, đặt ở Settings → Watchlist), xong một job thì job kế tiếp của kênh đó mới vào hàng đợi. Các kênh chạy song song nên kênh nhiều video không chặn kênh khác; bước GPU vẫn dùng chung một hàng đợi. Worker hàng đợi default tự tính số luồng khi khởi động (số kênh đang bật × luồng mỗi kênh + 2).
+
 Một periodic task đọc RSS của từng kênh đang bật, mặc định mỗi 2 phút. Có video mới thì hệ thống tạo job theo mức thu của mục đó. Nút Check now kiểm tra ngay, dùng cả RSS lẫn uploads playlist của YouTube API. Mỗi sự kiện được ghi vào nhật ký và hiện trên dòng sự kiện ở dashboard.
 
 Nghiệm thu: như màn 3 ở [phần 8](#8-tiêu-chí-thành-công).
@@ -495,7 +493,7 @@ Nghiệm thu: như màn 3 ở [phần 8](#8-tiêu-chí-thành-công).
 
 Các màn hình: Login, Dashboard (kèm dòng sự kiện), Collect, Watchlist, Entities (đối tượng và ảnh mẫu), Video detail, Review queue, Capture/Evidence, Settings. Toàn bộ giao diện viết bằng tiếng Anh; nội dung tiếng Việt lấy từ YouTube giữ nguyên.
 
-Settings gồm 7 mục:
+Settings gồm 8 mục:
 
 1. Bật/tắt từng nguồn thu.
 2. Nhập API key của nguồn thu (giá trị bị che).
@@ -504,6 +502,7 @@ Settings gồm 7 mục:
 5. Trạng thái từng nguồn (đang chạy, tạm ngưng) và quota, credit đã dùng.
 6. Jev (`/settings/jev`): API key (đã che, nhập, xoá), nút Test connection.
 7. Usage của Jev: lượt gọi, token vào/ra do TypeSafe báo, theo kỳ (hôm nay, 7 ngày, 30 ngày theo giờ Việt Nam) và theo nguồn, 5 lỗi gần nhất; không có hạn mức hay số dư.
+8. Watchlist (`/settings/watchlist`): số luồng mỗi kênh, số video xử lý khi thêm kênh, chu kỳ kiểm tra.
 
 Nghiệm thu: chạy được trên Chrome bản mới nhất ở độ rộng từ 1280 px trở lên. Không cần hỗ trợ màn hình điện thoại.
 

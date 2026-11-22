@@ -1,10 +1,11 @@
 import { NavLink, Outlet } from 'react-router'
 import { cn } from '@/lib/utils'
 
-// Khung trang Settings (SPEC 10.10): mục 1–5 ở Sources, phần Jev ở tab Jev.
+// Khung trang Settings (SPEC 10.10): mục 1–5 ở Sources, phần Jev ở tab Jev, luồng và chu kỳ watchlist ở tab Watchlist.
 const tabs = [
   { to: '/settings/sources', label: 'Sources' },
   { to: '/settings/jev', label: 'Jev' },
+  { to: '/settings/watchlist', label: 'Watchlist' },
 ]
 
 export default function SettingsLayout() {

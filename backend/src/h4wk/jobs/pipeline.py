@@ -442,11 +442,10 @@ def _latest_runs(root: Path) -> dict[tuple[str, str], str]:
 def latest_findings(latest_only: bool = False) -> list[Finding]:
     """Nghi vấn của lần chạy mới nhất cho mỗi bản thu. latest_only=True: chỉ giữ bản thu
     mới nhất đã phân tích của mỗi video, để thu lại cùng video không làm lặp nghi vấn.
-    "Mới nhất" xác định từ findings.json trong data/ (nguồn gốc), không từ bảng jobs, nên kết
-    quả trước và sau reindex giống nhau. Run mới nhất không có nghi vấn thì bản thu đó
-    không hiện nghi vấn nào, run cũ không hiện lại.
+    "Mới nhất" xác định từ findings.json trong data/ (nguồn gốc), không từ bảng jobs. Run mới
+    nhất không có nghi vấn thì bản thu đó không hiện nghi vấn nào, run cũ không hiện lại.
     Hạn chế: findings.json được ghi trước khi commit FindingRow. Commit DB lỗi thì bản thu
-    hiện 0 nghi vấn cho tới khi chạy `h4wk reindex`. findings.json hỏng thì run đó vẫn được
+    hiện 0 nghi vấn cho tới khi phân tích lại. findings.json hỏng thì run đó vẫn được
     coi là mới nhất (chỉ xét tên file), phải sửa hoặc xoá file."""
     latest = _latest_runs(data_dir())
     newest: dict[str, str] = {}

@@ -482,6 +482,52 @@
         }
       }
     },
+    "/api/reanalyze": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Reanalyze",
+        "description": "Ph\u00e2n t\u00edch l\u1ea1i b\u1ea3n thu m\u1edbi nh\u1ea5t \u0111\u00e3 c\u00f3 timeline, kh\u00f4ng thu l\u1ea1i hay ch\u1ea1y media. D\u00f9ng sau\nkhi s\u1eeda \u0111\u1ed1i t\u01b0\u1ee3ng ho\u1eb7c t\u1eeb \u0111i\u1ec3n.",
+        "operationId": "reanalyze_api_reanalyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReanalyzeBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Job"
+                  },
+                  "type": "array",
+                  "title": "Response Reanalyze Api Reanalyze Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/jobs": {
       "get": {
         "tags": [
@@ -2051,6 +2097,67 @@
         }
       }
     },
+    "/api/settings/watchlist": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Get Watchlist Settings",
+        "operationId": "get_watchlist_settings_api_settings_watchlist_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchlistSettingsView"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Put Watchlist Settings",
+        "description": "Chu k\u1ef3 ki\u1ec3m tra, s\u1ed1 video x\u1eed l\u00fd khi th\u00eam k\u00eanh, s\u1ed1 lu\u1ed3ng m\u1ed7i k\u00eanh ([watchlist] trong\nsources.toml).",
+        "operationId": "put_watchlist_settings_api_settings_watchlist_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WatchlistSettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WatchlistSettingsView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/jev": {
       "get": {
         "tags": [
@@ -3101,6 +3208,7 @@
           "status": {
             "type": "string",
             "enum": [
+              "waiting",
               "queued",
               "running",
               "done",
@@ -4152,6 +4260,26 @@
           "decisions"
         ],
         "title": "QueueItem"
+      },
+      "ReanalyzeBody": {
+        "properties": {
+          "video_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Video Ids"
+          }
+        },
+        "type": "object",
+        "title": "ReanalyzeBody"
       },
       "RefCounts": {
         "properties": {
@@ -5701,6 +5829,73 @@
         },
         "type": "object",
         "title": "WatchUpdate"
+      },
+      "WatchlistSettingsUpdate": {
+        "properties": {
+          "check_interval_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Check Interval Min"
+          },
+          "initial_videos": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Videos"
+          },
+          "threads_per_channel": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threads Per Channel"
+          }
+        },
+        "type": "object",
+        "title": "WatchlistSettingsUpdate"
+      },
+      "WatchlistSettingsView": {
+        "properties": {
+          "check_interval_min": {
+            "type": "integer",
+            "title": "Check Interval Min"
+          },
+          "initial_videos": {
+            "type": "integer",
+            "title": "Initial Videos"
+          },
+          "threads_per_channel": {
+            "type": "integer",
+            "title": "Threads Per Channel"
+          },
+          "worker_threads": {
+            "type": "integer",
+            "title": "Worker Threads"
+          }
+        },
+        "type": "object",
+        "required": [
+          "check_interval_min",
+          "initial_videos",
+          "threads_per_channel",
+          "worker_threads"
+        ],
+        "title": "WatchlistSettingsView"
       },
       "h4wk__analysis__models__Trigger": {
         "properties": {

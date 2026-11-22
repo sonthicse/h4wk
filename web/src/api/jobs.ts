@@ -12,3 +12,8 @@ export function collect(url: string, level: CollectLevel, force = false): Promis
 export function listJobs(): Promise<Job[]> {
   return api('/api/jobs')
 }
+
+// Phân tích lại bản thu đã xử lý, không thu lại; bỏ trống videoIds là mọi video.
+export function reanalyze(videoIds?: string[]): Promise<Job[]> {
+  return api('/api/reanalyze', { method: 'POST', body: { video_ids: videoIds ?? null } })
+}

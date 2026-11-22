@@ -5,10 +5,12 @@ import WatchlistRow from '@/components/watchlist/WatchlistRow'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { CHECK_INTERVAL_MIN, listWatchItems } from '@/api/watchlist'
+import { listWatchItems } from '@/api/watchlist'
+import { useWatchlistSettings } from '@/hooks/use-watchlist-settings'
 
 // Trang Watchlist (T31, SPEC 10.9): các kênh được kiểm tra video mới bằng RSS.
 export default function WatchlistPage() {
+  const { check_interval_min } = useWatchlistSettings()
   const items = useQuery({ queryKey: ['watchlist'], queryFn: listWatchItems,
     // Còn kênh đang khởi tạo nền thì hỏi lại mỗi 5 giây.
     refetchInterval: (q) => (q.state.data?.some((w) => !w.initialized) ? 5000 : false),
@@ -35,7 +37,7 @@ export default function WatchlistPage() {
         <Alert>
           <InfoIcon />
           <AlertDescription>
-            Enabled channels are checked by RSS every {CHECK_INTERVAL_MIN} minutes. YouTube caches RSS feeds for up to
+            Enabled channels are checked by RSS every {check_interval_min} minutes. YouTube caches RSS feeds for up to
             15 minutes, so a new video can appear late. Check now checks a channel immediately using RSS and the
             channel's uploads playlist from the YouTube API.
           </AlertDescription>

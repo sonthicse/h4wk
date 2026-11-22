@@ -1,6 +1,6 @@
 """Quota YouTube Data API đếm theo ngày, reset lúc nửa đêm giờ Pacific (SPEC 10.3).
 
-Bộ đếm lưu trong database chỉ mục nên `reindex` sẽ đưa về 0 (Google vẫn tự chặn khi hết thật).
+Bộ đếm lưu trong database chỉ mục nên mất database thì đưa về 0 (Google vẫn tự chặn khi hết thật).
 """
 
 from dataclasses import dataclass
