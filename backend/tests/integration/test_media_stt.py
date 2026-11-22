@@ -10,7 +10,6 @@ from unittest.mock import Mock
 import pytest
 
 from h4wk.collectors.models import Normalized, Transcript
-from h4wk.core.config_models import AnalysisConfig
 from h4wk.media import stt
 from h4wk.media.proxy import prepare_media
 from h4wk.media.stt import SttWorker, process_full_capture
@@ -113,13 +112,13 @@ def test_full_capture_runs_stt_even_with_uploaded_captions(clip, tmp_path, monke
         original = Normalized.model_validate(data).model_dump_json(by_alias=True)
         (capture / "normalized.json").write_text(original, encoding="utf-8")
         output = tmp_path / "derived" / capture.name
-        result = process_full_capture(capture, output, AnalysisConfig(), worker)
+        result = process_full_capture(capture, output, worker)
         assert result.transcript_kind == expected
         path = output / "transcripts" / "stt.vi.json"
         transcript = Transcript.model_validate_json(path.read_bytes())
         assert transcript.segments[0].model_dump() == {"start": 0, "end": 0.8, "text": "Xin chào"}
         stamp = path.stat().st_mtime_ns
-        assert process_full_capture(capture, output, AnalysisConfig(), worker) == result
+        assert process_full_capture(capture, output, worker) == result
         assert path.stat().st_mtime_ns == stamp
         assert (capture / "normalized.json").read_text(encoding="utf-8") == original
     assert model.transcribe.call_count == 2
@@ -188,7 +187,7 @@ def test_stt_retry_preserves_ocr(clip, tmp_path, monkeypatch):
     monkeypatch.setattr(stt, "_load_model", lambda name: model)
     worker = SttWorker("test")
     output = tmp_path / "derived"
-    process_full_capture(capture, output, AnalysisConfig(), worker)
+    process_full_capture(capture, output, worker)
     path = output / "timeline.json"
     data = json.loads(path.read_bytes())
     data["segments"][0]["ocr"] = [
@@ -196,7 +195,7 @@ def test_stt_retry_preserves_ocr(clip, tmp_path, monkeypatch):
     ]
     path.write_text(json.dumps(data), encoding="utf-8")
     stamp = path.stat().st_mtime_ns
-    timeline = process_full_capture(capture, output, AnalysisConfig(), worker)
+    timeline = process_full_capture(capture, output, worker)
     assert timeline.segments[0].ocr[0].text == "xin"
     assert path.stat().st_mtime_ns == stamp
 
@@ -210,7 +209,7 @@ def test_real_stt_on_sample_capture(tmp_path, caplog):
     caplog.set_level("INFO", logger=stt.__name__)
     for i in range(2):
         output = tmp_path / str(i)
-        process_full_capture(Path(capture), output, AnalysisConfig(), worker)
+        process_full_capture(Path(capture), output, worker)
         transcript = Transcript.model_validate_json(
             (output / "transcripts/stt.vi.json").read_bytes()
         )

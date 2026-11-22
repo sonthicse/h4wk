@@ -5,7 +5,7 @@ from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, Field
 
-from h4wk.core.types import Cap, CollectLevel, Contract, TranscriptKind
+from h4wk.core.types import Cap, CollectLevel, Contract
 
 
 def _no_duplicates[T](items: list[T]) -> list[T]:
@@ -55,39 +55,6 @@ class SourcesConfig(Contract):
     priority: dict[Cap, Annotated[list[SourceName], AfterValidator(_no_duplicates)]] = {}
     collect: CollectSettings = CollectSettings()
     watchlist: WatchlistSettings = WatchlistSettings()
-
-
-# --------------------------------------------------------------- analysis.toml
-
-
-class FaceSettings(Contract):
-    enabled: bool = True
-
-
-class RefImageSettings(Contract):
-    enabled: bool = True
-    threshold: float | None = Field(default=None, ge=0, le=1)  # None: dùng mặc định của model
-
-
-class CommentSettings(Contract):
-    max_per_video: int | None = Field(default=None, ge=1)  # None: không giới hạn
-
-
-class JevSettings(Contract):
-    concurrency: int = Field(default=4, ge=1, le=16)
-
-
-class AnalysisConfig(Contract):
-    transcript_priority: Annotated[list[TranscriptKind], AfterValidator(_no_duplicates)] = [
-        TranscriptKind.UPLOADED,
-        TranscriptKind.STT,
-        TranscriptKind.AUTO,
-        TranscriptKind.SUPADATA_AI,
-    ]
-    face: FaceSettings = FaceSettings()
-    ref_image: RefImageSettings = RefImageSettings()
-    comments: CommentSettings = CommentSettings()
-    jev: JevSettings = JevSettings()
 
 
 # -------------------------------------------------------------- watchlist.toml

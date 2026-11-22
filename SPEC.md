@@ -111,7 +111,7 @@ h4wk/
 │       └── fixtures/           ← bản thu mẫu, raw response đã ghi sẵn, video ngắn tự quay
 ├── web/                        ← React app
 │   └── src/{pages,components,api,lib}/
-├── config/                     ← mọi cấu hình người dùng: sources.toml, analysis.toml, entities.toml, watchlist.toml (không chứa secret; có bản *.example)
+├── config/                     ← mọi cấu hình người dùng: sources.toml, entities.toml, watchlist.toml (không chứa secret; có bản *.example)
 └── data/                       ← đã .gitignore; xem C1
 ```
 
@@ -208,7 +208,7 @@ Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh m
 
 `audit.log(actor, action, target, detail, status)` ghi thêm một dòng vào `data/log/audit.jsonl`, kể cả đăng nhập và đổi Settings. Secret nằm trong `data/secrets.json` (quyền 0600) hoặc trong `.env`, và API chỉ trả về giá trị đã che.
 
-Quy ước C5 là định dạng của các file cấu hình người dùng trong `config/`: `sources.toml`, `analysis.toml`, `entities.toml` (đối tượng) và `watchlist.toml` (kênh theo dõi), viết bằng Pydantic. Mọi cấu hình người dùng nằm ở đây, sửa tay được; giao diện ghi lại file thì comment mất. Secret không nằm ở đây. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
+Quy ước C5 là định dạng của các file cấu hình người dùng trong `config/`: `sources.toml`, `entities.toml` (đối tượng) và `watchlist.toml` (kênh theo dõi), viết bằng Pydantic. Mọi cấu hình người dùng nằm ở đây, sửa tay được; giao diện ghi lại file thì comment mất. Secret không nằm ở đây. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
 
 Không có CLI: API tự tạo `data/` và `config/*.toml` từ file mẫu khi khởi động; mọi thao tác làm trên giao diện web. Hạn chế được chấp nhận: phiên đăng nhập, trạng thái chạy của watchlist (đã khởi tạo, lần kiểm tra cuối, danh sách video đã biết), quota đã dùng và lịch sử job chỉ nằm trong database; mất database thì mất các dữ liệu này.
 
@@ -339,7 +339,7 @@ Quy tắc ghép timeline:
 
 - Mỗi đoạn dài từ 8 giây, gom từ các mẩu phụ đề trong transcript chính và chỉ cắt ở ranh giới câu (mẩu trước kết thúc bằng dấu câu, hoặc mẩu sau viết hoa chữ đầu), để một câu không bị chia sang hai đoạn. Câu quá dài thì cắt khi đoạn vượt 30 giây. Trên 21 transcript thật (đo ngày 2026-11-20), tỉ lệ ranh giới đoạn rơi vào giữa câu giảm từ 66% xuống 4%.
 - Keyframe nằm trong khoảng thời gian của đoạn nào thì gắn vào đoạn đó.
-- Transcript chính được chọn theo thứ tự `uploaded > stt > auto > supadata_ai` (cấu hình được). Các transcript khác vẫn được lưu và xem được trên giao diện, nhưng không dùng để phân tích.
+- Transcript chính được chọn theo thứ tự cố định `uploaded > stt > auto > supadata_ai`. Các transcript khác vẫn được lưu và xem được trên giao diện, nhưng không dùng để phân tích.
 
 Nghiệm thu:
 
@@ -354,7 +354,7 @@ V1 chỉ có bộ phân tích cho K1 (bôi nhọ đối tượng). Đầu vào g
 Bước 1 tìm dấu hiệu đối tượng (`hits`). Mỗi dấu hiệu ghi đối tượng, nơi tìm thấy (`via`), vị trí (đoạn, khung hình, comment), bbox và điểm số nếu có.
 
 - Tên (`via`: `speech`, `ocr`, `title`, `description`, `comment`, `thumbnail`). Văn bản được chuẩn hoá NFC, bỏ dấu, chuyển chữ thường. Tên đầy đủ và biệt danh được so theo ranh giới từ; mỗi từ dài từ 4 ký tự trở lên được sai tối đa 1 ký tự, từ ngắn hơn phải khớp chính xác. Viết tắt phải khớp đủ ký tự theo ranh giới từ, không phân biệt hoa thường. Bỏ dấu làm một số tên trùng nhau (An và Ân); Jev xử lý các trường hợp này.
-- Khuôn mặt (`via: face`). Model chạy trên máy phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng. Giới hạn bắt buộc: chỉ so với các đối tượng đã khai báo; không đặt tên hay xác định danh tính bất kỳ người nào khác; đặc trưng của khuôn mặt không khớp không được lưu. Có thể tắt bằng `analysis.toml`.
+- Khuôn mặt (`via: face`). Model chạy trên máy phát hiện khuôn mặt trong keyframe và thumbnail rồi so với ảnh khuôn mặt mẫu của các đối tượng. Giới hạn bắt buộc: chỉ so với các đối tượng đã khai báo; không đặt tên hay xác định danh tính bất kỳ người nào khác; đặc trưng của khuôn mặt không khớp không được lưu. Không tải ảnh khuôn mặt mẫu (hoặc xoá đi) thì bước này không chạy; khớp ảnh mẫu cũng vậy.
 - Ảnh mẫu (`via: ref_image`). Embedding của keyframe, thumbnail và các ô cắt theo lưới được so với embedding của ảnh mẫu, để bắt trường hợp ảnh gốc bị cắt, ghép hay đổi màu.
 
 Một video được coi là liên quan tới đối tượng khi có ít nhất một dấu hiệu ở bất kỳ đâu.
@@ -368,7 +368,7 @@ Bước 3 phân loại nội dung bằng Jev cho mọi nguồn (quyết định 
 - Vi phạm theo nội dung xét việc văn bản làm, không xét quan điểm, và không cần đối tượng: `violence` (kêu gọi, hướng dẫn, cổ vũ bạo lực, vũ trang, bạo loạn, khủng bố, phá hoại cơ sở vật chất), `hate` (kích động thù hận, kỳ thị, bạo lực vì dân tộc, tôn giáo, quốc tịch), `state_secret` (đăng bí mật nhà nước, bí mật công tác), `forgery` (trang web, con dấu, giấy tờ giả của cơ quan nhà nước, hoặc video, ảnh, giọng nói giả bằng AI của người thật được đưa ra như thật). Tin tức về các hành vi này, chỉ trích, châm biếm, lịch sử và quan điểm chính trị là `none`. Không có danh mục cho phát ngôn chính trị (chỉ trích chính quyền, quan điểm lịch sử, biểu tượng, tổ chức đối lập). `severity` lấy từ điểm Jev: dưới 0,5 là `low`, dưới 1,5 là `medium`, còn lại `high`. `category` là danh mục có xác suất cao nhất; `confidence` theo xác suất đó: từ 0,85 là `highly_likely`, từ 0,6 là `likely`, còn lại `unverified`. Jev không viết lý do nên `reason` ghi danh mục và xác suất; giao diện không hiện `reason` của nghi vấn Jev. Nghi vấn tầng tĩnh luôn `medium` và `unverified`.
 - Ảnh gửi thẳng cho Jev. Mỗi đoạn timeline có keyframe hoặc OCR là một request: `text` là các dòng OCR chưa gửi ở đoạn trước, ghép bằng ` | ` (có thể rỗng); ảnh là tối đa 4 keyframe của đoạn, lấy cách đều. `source_kind` là `ocr` khi có chữ, `visual` khi chỉ có ảnh; `frame` là khung có chữ đầu tiên, hoặc keyframe đầu tiên. Mỗi thumbnail là một request gồm ảnh thumbnail và chữ OCR của nó (`source_kind: thumbnail`). Chỉ gửi keyframe và thumbnail của video; ảnh khuôn mặt mẫu và ảnh mẫu của đối tượng không bao giờ gửi cho Jev.
 - Ảnh gửi dạng JPEG chất lượng 85, thu nhỏ để cạnh dài không quá 1024 px rồi phóng to nếu cạnh ngắn dưới 320 px (API từ chối kích thước như 270×480 hoặc 640×200). Chỉ request có ảnh mới gửi header `TypeSafe-Danger-Zone-Images: true`. Ảnh quá dài vẫn có thể bị từ chối; khi đó request lỗi được ghi như lỗi Jev khác.
-- Các request chạy song song với số luồng giới hạn (`jev.concurrency` trong `analysis.toml`), thử lại khi 429. Jev không tất định; không cache theo hash ảnh. Không có nhà cung cấp dự phòng: Jev lỗi hoặc thiếu key thì job vẫn xong, lỗi ghi vào `jev_error` của job, và tầng tĩnh, khớp tên, ảnh mẫu, khuôn mặt vẫn chạy.
+- Các request chạy song song với số luồng giới hạn (cố định 4), thử lại khi 429. Jev không tất định; không cache theo hash ảnh. Không có nhà cung cấp dự phòng: Jev lỗi hoặc thiếu key thì job vẫn xong, lỗi ghi vào `jev_error` của job, và tầng tĩnh, khớp tên, ảnh mẫu, khuôn mặt vẫn chạy.
 - Nghi vấn của Jev ghi `analyzer: "jev"` và `model` là `{"provider": "typesafe", "model": <phiên bản Jev>}`. Nghi vấn cũ ghi `analyzer: "llm"` với provider `typesafe` được đọc thành `"jev"`; nghi vấn của các LLM đã bỏ bị từ chối. Trường `model` trong `verdict.json` cũ bị bỏ khi đọc.
 - Theo dõi usage: mỗi request đã gửi ghi đúng một dòng vào `data/jev_calls.jsonl` (kể cả thử kết nối, retry 429 gộp trong một dòng): thời điểm, video/bản thu/run (null khi thử kết nối), nguồn, số ảnh, token vào/ra, có giữ nghi vấn không, trạng thái, số retry. Không ghi nội dung, ảnh hay key. Chỉ cộng token hợp lệ do TypeSafe báo trong `usage`; thiếu thì null, vẫn đếm lượt gọi. Không ước tính token, USD hay credit; không hiển thị hạn mức hoặc số dư.
 

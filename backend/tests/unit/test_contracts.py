@@ -13,7 +13,7 @@ from pydantic import BaseModel, TypeAdapter, ValidationError
 from h4wk.analysis.models import EntityHit, Finding, ReviewDecision
 from h4wk.collectors.models import Cap, CollectLevel, Normalized
 from h4wk.core.config import REPO_ROOT
-from h4wk.core.config_models import AnalysisConfig, SourcesConfig, WatchlistConfig, load_toml
+from h4wk.core.config_models import SourcesConfig, WatchlistConfig, load_toml
 from h4wk.core.entities import EntitiesConfig, Entity
 from h4wk.evidence.models import Manifest
 from h4wk.media.timeline import Timeline
@@ -198,13 +198,6 @@ SOURCES: dict[str, Any] = {
     },
 }
 
-ANALYSIS: dict[str, Any] = {
-    "transcript_priority": ["uploaded", "stt", "auto", "supadata_ai"],
-    "face": {"enabled": True},
-    "ref_image": {"enabled": True, "threshold": 0.85},
-    "comments": {"max_per_video": None},
-}
-
 
 # ------------------------------------------------------------ bảng ví dụ hợp lệ
 
@@ -255,7 +248,6 @@ VALID: list[tuple[Any, dict[str, Any]]] = [
     (Finding, _finding(occurrences=[OCC_1, OCC_2])),
     (ReviewDecision, REVIEW),
     (SourcesConfig, SOURCES),
-    (AnalysisConfig, ANALYSIS),
     (EntitiesConfig, ENTITIES),
     (EntitiesConfig, {}),
     (WatchlistConfig, WATCHLIST),
@@ -363,14 +355,6 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (SourcesConfig, _set("sources.youtube_api.api_key", "AIza…")(SOURCES), "secret trong toml"),
     (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 0}}, "0 luồng mỗi kênh"),
     (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 9}}, "quá 8 luồng"),
-    # C5: analysis
-    (AnalysisConfig, _set("transcript_priority", ["uploaded", "uploaded"])(ANALYSIS), "trùng loại"),
-    (AnalysisConfig, _set("comments", {"batch_size": 30})(ANALYSIS), "batch_size đã bỏ"),
-    (
-        AnalysisConfig,
-        _set("ref_image", {"enabled": True, "threshold": 1.5})(ANALYSIS),
-        "ngưỡng > 1",
-    ),
     # C5: entities
     (EntitiesConfig, _set("entities.1.id", "e_01")(ENTITIES), "trùng id đối tượng"),
     (EntitiesConfig, _set("entities.0.id", "nva")(ENTITIES), "id đối tượng sai dạng"),
@@ -540,7 +524,6 @@ def test_hits_and_findings_files_are_lists() -> None:
     ("name", "model"),
     [
         ("sources", SourcesConfig),
-        ("analysis", AnalysisConfig),
         ("entities", EntitiesConfig),
         ("watchlist", WatchlistConfig),
     ],
@@ -548,14 +531,6 @@ def test_hits_and_findings_files_are_lists() -> None:
 def test_config_examples_load(name: str, model: type[BaseModel]) -> None:
     path = REPO_ROOT / "config" / f"{name}.toml.example"
     model.model_validate(tomllib.loads(path.read_text(encoding="utf-8")))
-
-
-@pytest.mark.parametrize("concurrency", [0, 17])
-def test_jev_concurrency_rejected(concurrency) -> None:
-    with pytest.raises(ValidationError) as exc:
-        AnalysisConfig.model_validate({"jev": {"concurrency": concurrency}})
-    assert exc.value.errors()[0]["loc"] == ("jev", "concurrency")
-    assert exc.value.errors()[0]["type"] in {"greater_than_equal", "less_than_equal"}
 
 
 def test_load_toml_reads_vietnamese_as_utf8(tmp_path: Path) -> None:

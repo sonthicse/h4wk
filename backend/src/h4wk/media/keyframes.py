@@ -21,7 +21,7 @@ from h4wk.media.files import atomic_output
 
 
 class KeyframeSettings(Contract):
-    """Ngưỡng giữ khung. Không nằm trong analysis.toml (quy ước C5 không có mục này)."""
+    """Ngưỡng giữ khung (cố định trong code)."""
 
     phash_threshold: int = Field(default=6, ge=0, le=64)  # số bit khác nhau trong pHash 64 bit
     tile_threshold: float = Field(default=2.0, ge=0, le=255)  # lệch trung bình mỗi ô, 0–255

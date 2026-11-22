@@ -19,7 +19,7 @@ from h4wk.collectors.orchestrator import Orchestrator
 from h4wk.collectors.targets import Target, TargetKind, parse_target
 from h4wk.core import audit, events
 from h4wk.core.config import config_dir, data_dir
-from h4wk.core.config_models import AnalysisConfig, SourcesConfig, load_toml
+from h4wk.core.config_models import SourcesConfig, load_toml
 from h4wk.core.db import FindingRow, JobRow, finding_row, get_engine
 from h4wk.core.entities import REF_FILE, load_entities, refs_dir
 from h4wk.core.ids import new_ulid
@@ -132,11 +132,6 @@ def playlist_video_ids(playlist_id: str) -> list[str]:
     return ids[: cfg.collect.playlist_max_videos]
 
 
-def _analysis_config() -> AnalysisConfig:
-    path = config_dir() / "analysis.toml"
-    return load_toml(path, AnalysisConfig) if path.exists() else AnalysisConfig()
-
-
 def start(job_id: str) -> None:
     collect(job_id)
 
@@ -204,8 +199,6 @@ def _match(
     """Khớp keyframe và thumbnail cục bộ với ảnh mẫu; ghi ref_hits.json."""
     # Xoá kết quả cũ để lần chạy lại (thu lại cùng bản thu, recovery) không dùng dấu hiệu lỗi thời.
     (out / "ref_hits.json").unlink(missing_ok=True)
-    if not _analysis_config().ref_image.enabled:
-        return
     refs = {}
     for entity in load_entities():
         folder = refs_dir(entity.id, "image")
@@ -224,7 +217,7 @@ def _match(
             images,
             refs,
             _ref_embedder,
-            _analysis_config().ref_image.threshold,
+            None,  # ngưỡng mặc định chốt ở T40
             out / "embeddings.npz",
         )
     except Exception as e:
@@ -242,8 +235,6 @@ def _match(
 def _faces(job, cap_dir, out, frames, thumbnails, timeline):
     target = out / "face_hits.json"
     target.unlink(missing_ok=True)
-    if not _analysis_config().face.enabled:
-        return
     try:
         refs = {
             entity.id: sorted(
@@ -288,7 +279,7 @@ def media(job_id: str) -> None:
             source_hash = manifest.files[video_file].sha256
             job = _update(job_id, step="frames", progress=55)
             frames = extract_keyframes(out)
-        timeline = transcripts.read_capture_timeline(cap_dir, out, _analysis_config())
+        timeline = transcripts.read_capture_timeline(cap_dir, out)
         timeline.source_video_sha256 = source_hash
         if job.level == CollectLevel.METADATA:
             transcripts.write_timeline(out / "timeline.json", timeline)
@@ -330,7 +321,6 @@ def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
         if path.is_file():
             ref_hits.extend(TypeAdapter(list[EntityHit]).validate_json(path.read_bytes()))
     # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
-    settings = _analysis_config()
     out = derived / "analysis" / run_id
 
     def check_quota(error: str | None) -> None:
@@ -349,8 +339,7 @@ def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
             None,
             run_id,
             target,
-            comment_settings=settings.comments,
-            jev_settings=settings.jev,
+            use_jev=True,
             extra_hits=ref_hits,
             derived_dir=derived,
             capture_dir=video_dir / "captures" / cap,

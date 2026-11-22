@@ -10,7 +10,6 @@ from _analysis_sample import ENTITY, _data
 from fastapi.testclient import TestClient
 
 from h4wk.analysis import jev, jev_log
-from h4wk.core.config_models import JevSettings
 from h4wk.core.types import VN_TZ
 from h4wk.media.timeline import FrameOcr, Segment
 
@@ -56,9 +55,8 @@ def _run(monkeypatch, replies):
     monkeypatch.setattr(jev.secrets, "get", lambda name: SECRET)
     monkeypatch.setattr(jev.urllib.request, "urlopen", urlopen)
     monkeypatch.setattr(jev.time, "sleep", lambda s: None)
-    return jev.classify(
-        data, timeline, [ENTITY], [], "r_x", JevSettings(concurrency=1), max_comments=0
-    )
+    monkeypatch.setattr(jev, "CONCURRENCY", 1)  # trả lời theo đúng thứ tự request
+    return jev.classify(data.model_copy(update={"comments": []}), timeline, [ENTITY], [], "r_x")
 
 
 def test_one_line_per_logical_request(data_dir, monkeypatch):

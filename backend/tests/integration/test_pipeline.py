@@ -264,10 +264,9 @@ def test_ref_image_hits_reach_hits_json(
     assert {h["frame"] for h in hits if h["via"] == "ref_image"} == {h["frame"] for h in ref_hits}
 
 
-def test_ref_image_disabled_skips_matching(
+def test_no_ref_images_skips_matching(
     client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from h4wk.core.config import config_dir
     from h4wk.jobs import pipeline
 
     class Boom:
@@ -277,9 +276,7 @@ def test_ref_image_disabled_skips_matching(
             raise AssertionError("không được gọi")
 
     monkeypatch.setattr(pipeline, "_ref_embedder", Boom())
-    (config_dir() / "analysis.toml").write_text("[ref_image]\nenabled = false\n", encoding="utf-8")
-    _entity(client)
-    _add_ref_image(data_dir)
+    _entity(client)  # đối tượng không có ảnh mẫu: không chạy khớp ảnh
     r = client.post("/api/collect", json={"url": VIDEO})
     job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
     assert job["status"] == "done", job["error"]
@@ -290,7 +287,8 @@ def test_ref_image_disabled_skips_matching(
 def test_stale_ref_hits_are_removed_when_matching_is_skipped(
     client: TestClient, fake_source: dict, data_dir: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from h4wk.core.config import config_dir
+    import shutil
+
     from h4wk.jobs import pipeline
 
     monkeypatch.setattr(pipeline, "_ref_embedder", _SameVectorEmbedder())
@@ -300,7 +298,7 @@ def test_stale_ref_hits_are_removed_when_matching_is_skipped(
     j1 = client.get(f"/api/jobs/{first['id']}").json()
     derived = data_dir / "videos" / j1["video_id"] / "derived" / j1["capture"]
     assert (derived / "ref_hits.json").exists()
-    (config_dir() / "analysis.toml").write_text("[ref_image]\nenabled = false\n", encoding="utf-8")
+    shutil.rmtree(data_dir / "entities" / "e_01" / "refs" / "image")  # bỏ ảnh mẫu: không khớp
     second = client.post("/api/collect", json={"url": VIDEO}).json()[0]  # cùng bản thu
     j2 = client.get(f"/api/jobs/{second['id']}").json()
     assert j2["status"] == "done" and j2["capture"] == j1["capture"]

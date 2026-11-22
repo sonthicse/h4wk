@@ -4,7 +4,6 @@ from unittest.mock import Mock
 import pytest
 
 from h4wk.analysis import faces
-from h4wk.core.config_models import AnalysisConfig, FaceSettings
 from h4wk.jobs import pipeline
 from h4wk.media.timeline import Segment, Timeline
 
@@ -24,10 +23,10 @@ def test_match_faces_does_not_store_features(monkeypatch, tmp_path):
     assert set(tmp_path.iterdir()) == before
 
 
-def test_pipeline_disabled(monkeypatch, tmp_path):
-    monkeypatch.setattr(
-        pipeline, "_analysis_config", lambda: AnalysisConfig(face=FaceSettings(enabled=False))
-    )
+def test_pipeline_without_face_refs_does_nothing(monkeypatch, tmp_path):
+    """Không có ảnh khuôn mặt mẫu thì không chạy khớp khuôn mặt (cách để tắt bước này)."""
+    monkeypatch.setattr(pipeline, "load_entities", lambda: [Mock(id="ref")])
+    monkeypatch.setattr(pipeline, "refs_dir", lambda *_: tmp_path)  # thư mục trống
     matcher = Mock()
     monkeypatch.setattr(faces, "match_faces", matcher)
     pipeline._faces(None, tmp_path, tmp_path, [], [], None)
@@ -43,7 +42,6 @@ def test_pipeline_face_error_is_audited(monkeypatch, tmp_path):
     job = Mock(id="job_test", trigger="manual")
     log = Mock()
     matcher = Mock(side_effect=OSError("Model download failed"))
-    monkeypatch.setattr(pipeline, "_analysis_config", AnalysisConfig)
     monkeypatch.setattr(pipeline, "load_entities", lambda: [Mock(id="ref")])
     monkeypatch.setattr(pipeline, "refs_dir", lambda *_: tmp_path)
     monkeypatch.setattr(faces, "match_faces", matcher)

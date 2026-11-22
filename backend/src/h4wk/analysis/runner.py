@@ -19,7 +19,6 @@ from h4wk.analysis.models import (
 from h4wk.analysis.normalize import matches_name, normalize
 from h4wk.analysis.static import LexiconEntry, find_insult, load_lexicon
 from h4wk.collectors.models import Normalized
-from h4wk.core.config_models import CommentSettings, JevSettings
 from h4wk.core.entities import Entity
 from h4wk.core.ids import new_ulid
 from h4wk.media.timeline import Timeline
@@ -32,9 +31,8 @@ def analyze(
     lexicon: list[LexiconEntry] | None,
     run_id: str,
     output_dir: Path,
-    comment_settings: CommentSettings | None = None,
     extra_hits: list[EntityHit] | None = None,
-    jev_settings: JevSettings | None = None,
+    use_jev: bool = False,
     derived_dir: Path | None = None,
     capture_dir: Path | None = None,
 ) -> tuple[list[EntityHit], list[Finding], str | None]:
@@ -114,16 +112,13 @@ def analyze(
         findings = [f for f in findings if f.analyzer != "static" or slot(f) not in replaced]
         findings.extend(part_findings)
 
-    if jev_settings is not None:
-        limit = (comment_settings or CommentSettings()).max_per_video
+    if use_jev:
         part_findings, part_records, error = jev.classify(
             data,
             timeline,
             entities,
             hits,
             run_id,
-            jev_settings,
-            max_comments=limit,
             derived_dir=derived_dir,
             capture_dir=capture_dir,
         )

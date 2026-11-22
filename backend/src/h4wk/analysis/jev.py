@@ -19,6 +19,7 @@ from h4wk.core.ids import new_ulid
 URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-latest"
 MAX_IMAGES = 4  # keyframe tối đa trong một request
+CONCURRENCY = 4  # số request Jev chạy song song
 QUESTIONS = {
     "category": {
         "type": "choice",
@@ -355,9 +356,7 @@ def classify(
     entities,
     hits,
     run_id,
-    settings,
     *,
-    max_comments=None,
     derived_dir: Path | None = None,
     capture_dir: Path | None = None,
 ) -> tuple[list[Finding], list[dict], str | None]:
@@ -423,7 +422,7 @@ def classify(
             images=[capture_dir / thumb.file] if capture_dir else [],
         )
     texts = {c.id: c.text for c in data.comments}
-    for comment in data.comments[:max_comments]:
+    for comment in data.comments:  # mọi comment, mỗi comment một request
         parent = texts.get(comment.parent_id)
         add(
             "comment",
@@ -505,7 +504,7 @@ def classify(
         return finding, record
 
     findings, records = [], []
-    with ThreadPoolExecutor(max_workers=settings.concurrency) as pool:
+    with ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
         for finding, record in pool.map(request, items):
             if finding is not None:
                 findings.append(finding)

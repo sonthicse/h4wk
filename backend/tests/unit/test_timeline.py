@@ -61,7 +61,6 @@ def test_choose_transcript_respects_priority_and_ignores_empty():
 
 def test_build_timeline_uses_c3():
     from h4wk.collectors.models import Transcript
-    from h4wk.core.config_models import AnalysisConfig
     from h4wk.media.transcripts import build_timeline
 
     transcript = Transcript(
@@ -71,7 +70,7 @@ def test_build_timeline_uses_c3():
             TranscriptSegment(start=0, end=3, text="xin chào"),
         ],
     )
-    result = build_timeline("video", "20261118T154530", [transcript], AnalysisConfig())
+    result = build_timeline("video", "20261118T154530", [transcript])
     assert result.model_dump(mode="json", by_alias=True)["schema"] == "h4wk.timeline/1"
     assert result.transcript_kind == "uploaded"
     assert result.segments[0].speech == "xin chào"
@@ -79,10 +78,9 @@ def test_build_timeline_uses_c3():
 
 
 def test_write_timeline_is_idempotent(tmp_path):
-    from h4wk.core.config_models import AnalysisConfig
     from h4wk.media.transcripts import build_timeline, write_timeline
 
-    timeline = build_timeline("video", "20261118T154530", [], AnalysisConfig())
+    timeline = build_timeline("video", "20261118T154530", [])
     path = tmp_path / "derived" / "timeline.json"
     write_timeline(path, timeline)
     before = path.stat().st_mtime_ns
@@ -94,7 +92,6 @@ def test_write_timeline_is_idempotent(tmp_path):
 def test_process_capture_reads_contracts_and_writes_derived(tmp_path):
     import json
 
-    from h4wk.core.config_models import AnalysisConfig
     from h4wk.media.transcripts import process_capture
 
     capture = tmp_path / "captures" / "20261118T154530"
@@ -118,10 +115,10 @@ def test_process_capture_reads_contracts_and_writes_derived(tmp_path):
         encoding="utf-8",
     )
     output = tmp_path / "derived" / capture.name
-    result = process_capture(capture, output, AnalysisConfig())
+    result = process_capture(capture, output)
     assert result.segments[0].speech == "Xin chào"
     assert (output / "timeline.json").is_file()
-    assert process_capture(capture, output, AnalysisConfig()) == result
+    assert process_capture(capture, output) == result
 
 
 def test_choose_only_vietnamese_transcripts():

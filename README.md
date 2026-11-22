@@ -31,7 +31,7 @@ cd ..
 
 Không có CLI; mọi thao tác làm trên giao diện web. Lần đầu API khởi động, nó tự tạo `data/` và chép `config/*.toml.example` thành `config/*.toml` (không ghi đè file đã có). Không có đối tượng hay kênh mặc định; máy đang dùng bản cũ thì `data/entities.json` và danh sách kênh trong database được chuyển sang `config/`.
 
-Mọi cấu hình người dùng nằm trong `config/`: `sources.toml` (nguồn thu), `analysis.toml` (phân tích), `entities.toml` (đối tượng cần bảo vệ), `watchlist.toml` (kênh theo dõi). Secret nằm trong `.env` hoặc nhập ở Settings.
+Mọi cấu hình người dùng nằm trong `config/`: `sources.toml` (nguồn thu), `entities.toml` (đối tượng cần bảo vệ), `watchlist.toml` (kênh theo dõi). Secret nằm trong `.env` hoặc nhập ở Settings.
 
 Dữ liệu luôn nằm ở `data/` của gốc repo. Tài khoản và API key chỉ đọc từ file `.env` ở gốc repo, không đọc biến môi trường; mẫu ở `.env.example`.
 

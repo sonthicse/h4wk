@@ -5,13 +5,21 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from h4wk.collectors.models import Normalized, Transcript, TranscriptSegment
-from h4wk.core.config_models import AnalysisConfig
 from h4wk.core.types import TranscriptKind
 from h4wk.media.files import atomic_output
 from h4wk.media.timeline import Segment, Timeline
 
 SEGMENT_MIN_S = 8
 SEGMENT_MAX_S = 30
+
+# Thứ tự chọn transcript chính: phụ đề người đăng tải > speech-to-text trên máy > phụ đề tự động
+# của YouTube > phụ đề lấy qua Supadata.
+TRANSCRIPT_PRIORITY = [
+    TranscriptKind.UPLOADED,
+    TranscriptKind.STT,
+    TranscriptKind.AUTO,
+    TranscriptKind.SUPADATA_AI,
+]
 
 
 def _starts_sentence(previous: TranscriptSegment, sentence: TranscriptSegment) -> bool:
@@ -65,10 +73,9 @@ def build_timeline(
     video_id: str,
     capture: str,
     transcripts: list[Transcript],
-    config: AnalysisConfig,
     source_video_sha256: str | None = None,
 ) -> Timeline:
-    transcript = choose_transcript(transcripts, config.transcript_priority)
+    transcript = choose_transcript(transcripts, TRANSCRIPT_PRIORITY)
     return Timeline(
         schema="h4wk.timeline/1",
         video_id=video_id,
@@ -87,7 +94,7 @@ def write_timeline(path: Path, timeline: Timeline) -> None:
         temporary.write_text(content, encoding="utf-8")
 
 
-def read_capture_timeline(capture_dir: Path, output_dir: Path, config: AnalysisConfig) -> Timeline:
+def read_capture_timeline(capture_dir: Path, output_dir: Path) -> Timeline:
     normalized = Normalized.model_validate_json(
         (capture_dir / "normalized.json").read_text(encoding="utf-8")
     )
@@ -97,11 +104,11 @@ def read_capture_timeline(capture_dir: Path, output_dir: Path, config: AnalysisC
     stt_path = output_dir / "transcripts" / "stt.vi.json"
     if stt_path.is_file():
         transcripts = [Transcript.model_validate_json(stt_path.read_bytes()), *transcripts]
-    return build_timeline(normalized.video.id, capture_dir.name, transcripts, config)
+    return build_timeline(normalized.video.id, capture_dir.name, transcripts)
 
 
-def process_capture(capture_dir: Path, output_dir: Path, config: AnalysisConfig) -> Timeline:
-    timeline = read_capture_timeline(capture_dir, output_dir, config)
+def process_capture(capture_dir: Path, output_dir: Path) -> Timeline:
+    timeline = read_capture_timeline(capture_dir, output_dir)
     path = output_dir / "timeline.json"
     if path.is_file():
         try:

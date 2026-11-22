@@ -10,7 +10,6 @@ from _analysis_sample import ENTITY, INSULT, _data
 
 from h4wk.analysis import jev, runner
 from h4wk.analysis.models import EntityHit
-from h4wk.core.config_models import JevSettings
 from h4wk.media.timeline import Frame, FrameOcr, Segment
 
 
@@ -59,9 +58,7 @@ def test_classify(monkeypatch, target, probability, kept):
         )
 
     monkeypatch.setattr(jev.urllib.request, "urlopen", reply)
-    findings, records, error = jev.classify(
-        data, timeline, [ENTITY, second], [], "r_x", JevSettings()
-    )
+    findings, records, error = jev.classify(data, timeline, [ENTITY, second], [], "r_x")
     assert error is None
     assert records and all(r["kept"] == kept for r in records)
     assert any(s.get("parent_comment") for s in states)
@@ -129,7 +126,7 @@ def test_content_violation(monkeypatch, violation, attack, expected):
         "violation": {"probabilities": violation},
     }
     monkeypatch.setattr(jev.urllib.request, "urlopen", _reply_with(answers))
-    findings, _, error = jev.classify(data, timeline, [ENTITY], [], "r_x", JevSettings())
+    findings, _, error = jev.classify(data, timeline, [ENTITY], [], "r_x")
     assert error is None
     if expected is None:
         assert findings == []
@@ -144,9 +141,7 @@ def test_no_entities_asks_only_content_violations(monkeypatch, tmp_path):
     seen = []
     answers = {"severity": {"score": 1}, "violation": {"probabilities": {"forgery": 0.95}}}
     monkeypatch.setattr(jev.urllib.request, "urlopen", _reply_with(answers, seen))
-    _, findings, error = runner.analyze(
-        data, timeline, [], [], "r_x", tmp_path, jev_settings=JevSettings()
-    )
+    _, findings, error = runner.analyze(data, timeline, [], [], "r_x", tmp_path, use_jev=True)
     assert error is None and seen
     assert all(set(p["questions"]) == {"violation", "severity"} for p in seen)
     assert all("protected_targets" not in p["state"] for p in seen)
@@ -182,7 +177,7 @@ def test_failure_keeps_static(monkeypatch, tmp_path, key):
     monkeypatch.setattr(jev.urllib.request, "urlopen", fail)
     data, timeline = _data()
     _, findings, error = runner.analyze(
-        data, timeline, [ENTITY], INSULT, "r_x", tmp_path, jev_settings=JevSettings()
+        data, timeline, [ENTITY], INSULT, "r_x", tmp_path, use_jev=True
     )
     assert findings and {f.analyzer for f in findings} == {"static"}
     assert error.startswith("jev:")
@@ -222,7 +217,7 @@ def test_new_sources(monkeypatch):
         hit.model_copy(update={"frame": "frames/other.jpg"}),
     ]
     findings, records, error = jev.classify(
-        data, timeline, [ENTITY], hits, "r_x", JevSettings(), max_comments=0
+        data.model_copy(update={"comments": []}), timeline, [ENTITY], hits, "r_x"
     )
     assert error is None
     by_kind = {f.source_kind: f for f in findings}
@@ -326,13 +321,11 @@ def test_classify_sends_keyframes_and_thumbnail_images(monkeypatch, tmp_path):
     monkeypatch.setattr(jev.secrets, "get", lambda name: "k")
     monkeypatch.setattr(jev, "_call", reply)
     findings, _, error = jev.classify(
-        data,
+        data.model_copy(update={"comments": []}),
         timeline,
         [ENTITY],
         [],
         "r_x",
-        JevSettings(),
-        max_comments=0,
         derived_dir=derived,
         capture_dir=capture,
     )
@@ -372,5 +365,5 @@ def test_classify_without_dirs_sends_text_only(monkeypatch):
 
     monkeypatch.setattr(jev.secrets, "get", lambda name: "k")
     monkeypatch.setattr(jev, "_call", reply)
-    jev.classify(data, timeline, [ENTITY], [], "r_x", JevSettings(), max_comments=0)
+    jev.classify(data.model_copy(update={"comments": []}), timeline, [ENTITY], [], "r_x")
     assert calls and all(images == [] for images in calls)

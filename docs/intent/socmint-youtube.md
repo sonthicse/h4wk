@@ -115,3 +115,4 @@ Ngày 2026-11-22:
 - Thêm vi phạm xét theo nội dung, không cần đối tượng: `violence`, `hate`, `forgery` (thêm vào C4) và `state_secret`. Chỉ lấy các mục trong danh sách thông tin xâm phạm an ninh quốc gia mà nội dung tự gây hại (kích động bạo lực, khủng bố, thù hận dân tộc và tôn giáo, lộ bí mật, giả mạo giấy tờ và deepfake); không làm các mục nhắm vào phát ngôn chính trị. Nghi vấn loại này có `entity` trống.
 - Cố định thư mục `data/`, `config/` và model STT `large-v3`; `.env` chỉ còn tài khoản và API key.
 - Supadata không còn nhờ AI tạo transcript (đã tốn 140 credit, vượt gói 100/tháng); chỉ lấy phụ đề YouTube có sẵn. Video không có phụ đề dùng speech-to-text trên máy.
+- Bỏ `config/analysis.toml`: thứ tự transcript, số request Jev song song cố định trong code; Jev luôn xét mọi comment, mỗi comment một request; khớp khuôn mặt và ảnh mẫu chỉ chạy khi đối tượng có ảnh mẫu (bỏ ảnh là tắt).

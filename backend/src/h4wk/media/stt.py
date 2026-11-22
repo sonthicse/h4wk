@@ -6,7 +6,6 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from h4wk.collectors.models import Normalized, Transcript, TranscriptSegment
-from h4wk.core.config_models import AnalysisConfig
 from h4wk.core.types import TranscriptKind
 from h4wk.media.files import atomic_output
 from h4wk.media.proxy import prepare_media
@@ -77,8 +76,6 @@ def transcribe_capture(capture_dir: Path, output_dir: Path, worker: SttWorker) -
     return video.file
 
 
-def process_full_capture(
-    capture_dir: Path, output_dir: Path, config: AnalysisConfig, worker: SttWorker
-) -> Timeline:
+def process_full_capture(capture_dir: Path, output_dir: Path, worker: SttWorker) -> Timeline:
     transcribe_capture(capture_dir, output_dir, worker)
-    return process_capture(capture_dir, output_dir, config)
+    return process_capture(capture_dir, output_dir)
