@@ -1,8 +1,9 @@
 """Adapter Supadata (T15): transcript và metadata video, dùng khi yt-dlp bị chặn.
 
-Transcript lấy phụ đề tiếng Việt có sẵn trước (mode native); không có thì nhờ AI của Supadata
-tạo (mode generate, có thể phải chờ job). Supadata không cho biết phụ đề YouTube là `uploaded`
-hay `auto`, nên mọi transcript từ Supadata đều gắn `supadata_ai`.
+Transcript chỉ lấy phụ đề tiếng Việt có sẵn của YouTube (mode native, kể cả phụ đề tự động).
+Không nhờ AI của Supadata tạo (mode generate, 2 credit/phút): video không có phụ đề thì bản thu
+full đã có speech-to-text chạy trên máy. Supadata không cho biết phụ đề là `uploaded` hay
+`auto`, nên transcript từ Supadata gắn `supadata_ai`.
 Credit trong kỳ thanh toán hỏi Supadata qua GET /me (nhớ 5 phút), không tự đếm; credit của từng
 lần gọi lấy từ header `x-billable-requests` và ghi vào manifest. Key gửi qua header `x-api-key`.
 """
@@ -42,12 +43,7 @@ from h4wk.evidence.models import Cost
 
 API = "https://api.supadata.ai/v1"
 KEY_NAME = "SUPADATA_API_KEY"
-POLL_INTERVAL = 1.0
-JOB_TIMEOUT = 600.0  # giây
 ME_TTL = 300.0
-# Mode generate trả kết quả đồng bộ và thời gian tăng theo độ dài video (đo thật: video 19 giây
-# mất ~25 s), nên chờ tới JOB_TIMEOUT.
-GENERATE_TIMEOUT = JOB_TIMEOUT
 
 
 def _ts(v: str | None) -> datetime | None:
@@ -122,13 +118,9 @@ class SupadataCollector:
         self,
         client: httpx2.Client | None = None,
         key: Callable[[], str | None] = lambda: secrets.get(KEY_NAME),
-        sleep: Callable[[float], None] = time.sleep,
-        monotonic: Callable[[], float] = time.monotonic,
     ) -> None:
         self.client = client or httpx2.Client(follow_redirects=True)
         self.key = key
-        self.sleep = sleep
-        self.monotonic = monotonic
         self._credits = 0
 
     def _write_json(self, path: Path, data: Any) -> None:
@@ -181,50 +173,13 @@ class SupadataCollector:
         return Normalized.model_validate(n)
 
     def _transcript(self, target: Target, workdir: Path) -> dict[str, Any]:
-        base = {"url": target.url, "text": "false"}
-        try:
-            _, d = self._get("transcript", {**base, "lang": "vi", "mode": "native"})
-            self._write_json(workdir / f"{target.id}.transcript.native.json", d)
-            if str(d.get("lang", "")).startswith("vi") and d.get("content"):
-                return d
-        except Unsupported:
-            pass  # không có phụ đề: nhờ AI tạo
-        try:
-            status, d = self._get(
-                "transcript", {**base, "mode": "generate"}, timeout=GENERATE_TIMEOUT
-            )
-        except Transient as e:
-            # Gửi lại generate tốn thêm credit (2 credit/phút, gói free chỉ 100/tháng): không retry.
-            raise Blocked(
-                f"Supadata generate failed, not retried to avoid extra credits: {e}"
-            ) from e
-        if status == 202:
-            job_id = d.get("jobId")
-            if not job_id:
-                raise Blocked("Supadata returned 202 without jobId")
-            d = self._wait_job(job_id)
-        self._write_json(workdir / f"{target.id}.transcript.generate.json", d)
-        if not d.get("content"):
-            raise Unsupported("Supadata detected no speech")
+        _, d = self._get(
+            "transcript", {"url": target.url, "text": "false", "lang": "vi", "mode": "native"}
+        )
+        self._write_json(workdir / f"{target.id}.transcript.native.json", d)
+        if not (str(d.get("lang", "")).startswith("vi") and d.get("content")):
+            raise Unsupported("video has no Vietnamese subtitles")
         return d
-
-    def _wait_job(self, job_id: str) -> dict[str, Any]:
-        # Hết hạn là Blocked, không phải Transient: tránh gửi lại job generate tốn credit.
-        start = self.monotonic()
-        while True:
-            self.sleep(POLL_INTERVAL)
-            try:
-                _, d = self._get(f"transcript/{job_id}")
-            except Transient:
-                # Lỗi mạng thoáng qua khi poll: thử lại ở vòng sau. Ném ra thì orchestrator gửi
-                # lại cả fetch và tạo thêm một job generate tốn credit.
-                d = {}
-            if d.get("status") == "completed":
-                return d
-            if d.get("status") == "failed":
-                raise Blocked(f"Supadata job failed: {d.get('error')}")
-            if self.monotonic() - start > JOB_TIMEOUT:
-                raise Blocked(f"Supadata job did not finish within {int(JOB_TIMEOUT)} s")
 
     def me(self) -> CreditUsage:
         _, d = self._get("me", timeout=5)

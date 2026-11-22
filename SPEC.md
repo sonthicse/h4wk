@@ -292,7 +292,7 @@ Với mỗi loại dữ liệu, orchestrator lấy từ một nguồn: thử cá
 - Gặp `Transient` thì thử lại tối đa 3 lần rồi mới chuyển nguồn.
 - Gặp `Blocked` hoặc `QuotaExceeded` thì chuyển nguồn ngay.
 - Nguồn lỗi 5 lần liên tiếp (tính cả `Blocked`) bị tạm ngưng 30 phút.
-- Quota YouTube API được đếm theo ngày, reset lúc nửa đêm giờ Thái Bình Dương (Pacific Time). Credit Supadata đếm theo tháng.
+- Quota YouTube API được đếm theo ngày, reset lúc nửa đêm giờ Thái Bình Dương (Pacific Time). Credit Supadata đếm theo tháng. Supadata chỉ lấy phụ đề có sẵn của YouTube (mode native, 1 credit), không nhờ AI của Supadata tạo transcript (mode generate, 2 credit/phút): video không có phụ đề thì bản thu full dùng speech-to-text trên máy.
 - Cờ `fault_injection` trong `sources.toml` cho phép giả lập một nguồn bị chặn, dùng cho test và cho demo.
 
 Ở mức thu `full`, dữ liệu cần thu gồm metadata, phụ đề tiếng Việt (bản người đăng tải lên và bản tự động gốc, không lấy bản dịch máy), toàn bộ comment và reply, thumbnail (bản lớn nhất và `0–3.jpg`), video 720p và audio.

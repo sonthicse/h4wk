@@ -140,13 +140,10 @@ class FakeSupadata:
     """Supadata giả: trả response ghi sẵn ở tests/fixtures/raw/supadata/ theo đường dẫn và mode."""
 
     RAW = Path(__file__).parent / "fixtures" / "raw" / "supadata"
-    CREDITS = {"native": 1, "generate": 2}
 
     def __init__(self) -> None:
         self.requests: list = []
-        self.sleeps: list[float] = []
-        self.clock = 0.0
-        # khoá: "native", "generate", "job", "video", "me" → danh sách (status, body)
+        # khoá: "native", "video", "me" → danh sách (status, body)
         self.override: dict[str, list[tuple[int, dict]]] = {}
 
     def _raw(self, name: str) -> dict:
@@ -161,14 +158,10 @@ class FakeSupadata:
         path = request.url.path.removeprefix("/v1/")
         if path == "transcript":
             kind = request.url.params["mode"]
-        elif path.startswith("transcript/"):
-            kind = "job"
         else:
             kind = {"youtube/video": "video", "me": "me"}[path]
         defaults = {
             "native": (200, "transcript_native_vi.json"),
-            "generate": (200, "job_completed.json"),
-            "job": (200, "job_completed.json"),
             "video": (200, "video.json"),
             "me": (200, "me.json"),
         }
@@ -177,12 +170,8 @@ class FakeSupadata:
             status, body = queue.pop(0) if len(queue) > 1 else queue[0]
         else:
             status, body = defaults[kind][0], self._raw(defaults[kind][1])
-        credits = {"native": 1, "generate": 2}.get(kind, 0)
+        credits = 1 if kind == "native" else 0
         return httpx2.Response(status, json=body, headers={"x-billable-requests": str(credits)})
-
-    def sleep(self, seconds: float) -> None:
-        self.sleeps.append(seconds)
-        self.clock += seconds
 
     def collector(self, key=lambda: "test-key"):  # noqa: ANN001, ANN201
         import httpx2
@@ -190,9 +179,7 @@ class FakeSupadata:
         from h4wk.collectors.providers.supadata import SupadataCollector
 
         client = httpx2.Client(transport=httpx2.MockTransport(self.handler))
-        return SupadataCollector(
-            client=client, key=key, sleep=self.sleep, monotonic=lambda: self.clock
-        )
+        return SupadataCollector(client=client, key=key)
 
 
 @pytest.fixture

@@ -113,3 +113,5 @@ Ngày 2026-11-22:
 - Bỏ CLI `h4wk`: API tự khởi tạo `data/` và `config/` khi khởi động; phân tích lại bằng nút Re-analyze trên web; bỏ `reindex` và `verdict`.
 - Mỗi kênh watchlist có luồng xử lý riêng, số luồng mỗi kênh đặt ở Settings → Watchlist.
 - Thêm vi phạm xét theo nội dung, không cần đối tượng: `violence`, `hate`, `forgery` (thêm vào C4) và `state_secret`. Chỉ lấy các mục trong danh sách thông tin xâm phạm an ninh quốc gia mà nội dung tự gây hại (kích động bạo lực, khủng bố, thù hận dân tộc và tôn giáo, lộ bí mật, giả mạo giấy tờ và deepfake); không làm các mục nhắm vào phát ngôn chính trị. Nghi vấn loại này có `entity` trống.
+- Cố định thư mục `data/`, `config/` và model STT `large-v3`; `.env` chỉ còn tài khoản và API key.
+- Supadata không còn nhờ AI tạo transcript (đã tốn 140 credit, vượt gói 100/tháng); chỉ lấy phụ đề YouTube có sẵn. Video không có phụ đề dùng speech-to-text trên máy.

@@ -49,6 +49,16 @@ def test_transcript_conversion() -> None:
     ]
 
 
+def test_no_vietnamese_subtitles_never_generates(supadata_api, tmp_path: Path) -> None:
+    """Không có phụ đề tiếng Việt thì báo Unsupported, không gọi AI của Supadata (tốn credit)."""
+    for native in [(200, raw("transcript_native_en.json")), (206, raw("error_unavailable.json"))]:
+        supadata_api.requests.clear()
+        supadata_api.override["native"] = [native]
+        with pytest.raises(Unsupported):
+            supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
+        assert [r.url.params.get("mode") for r in supadata_api.requests] == ["native"]
+
+
 @pytest.mark.parametrize(
     ("status", "body", "kind"),
     [
@@ -81,49 +91,6 @@ def test_transcript_native(supadata_api, tmp_path: Path) -> None:
     assert res.cost.credits == 1
     assert res.normalized.transcripts[0].kind == TranscriptKind.SUPADATA_AI
     assert (tmp_path / "h4wkDemo001.transcript.native.json").exists()
-
-
-def test_native_other_language_falls_back_to_generate_job(supadata_api, tmp_path: Path) -> None:
-    supadata_api.override["native"] = [(200, raw("transcript_native_en.json"))]
-    supadata_api.override["generate"] = [(202, raw("transcript_job.json"))]
-    supadata_api.override["job"] = [(200, raw("job_active.json")), (200, raw("job_completed.json"))]
-    res = supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
-    assert supadata_api.sleeps == [1.0, 1.0]
-    t = res.normalized.transcripts[0]
-    assert t.lang == "vi" and t.segments[0].text == "Đây là bản AI tạo"
-    assert res.cost.credits == 3
-    assert (tmp_path / "h4wkDemo001.transcript.generate.json").exists()
-
-
-def test_native_unavailable_then_generate_immediately(supadata_api, tmp_path: Path) -> None:
-    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
-    supadata_api.override["generate"] = [(200, raw("job_completed.json"))]
-    res = supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
-    assert res.cost.credits == 3 and supadata_api.sleeps == []
-
-
-def test_job_failed_is_blocked(supadata_api, tmp_path: Path) -> None:
-    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
-    supadata_api.override["generate"] = [(202, raw("transcript_job.json"))]
-    supadata_api.override["job"] = [(200, raw("job_failed.json"))]
-    with pytest.raises(Blocked, match="upstream down"):
-        supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
-
-
-def test_job_timeout_is_blocked(supadata_api, tmp_path: Path) -> None:
-    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
-    supadata_api.override["generate"] = [(202, raw("transcript_job.json"))]
-    supadata_api.override["job"] = [(200, raw("job_active.json"))]
-    with pytest.raises(Blocked, match="did not finish within 600 s"):
-        supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
-    assert len(supadata_api.sleeps) == 601
-
-
-def test_generate_without_speech_is_unsupported(supadata_api, tmp_path: Path) -> None:
-    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
-    supadata_api.override["generate"] = [(200, {"content": [], "lang": "vi"})]
-    with pytest.raises(Unsupported, match="no speech"):
-        supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
 
 
 def test_errors(supadata_api, tmp_path: Path) -> None:
@@ -159,50 +126,6 @@ def test_health_check(supadata_api) -> None:
     h = supadata_api.collector().health_check()
     assert h.ok and "37/100" in h.detail
     assert supadata_api.collector(key=lambda: None).health_check().ok is False
-
-
-def test_202_without_job_id_is_blocked(supadata_api, tmp_path: Path) -> None:
-    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
-    supadata_api.override["generate"] = [(202, {})]
-    with pytest.raises(Blocked, match="without jobId"):
-        supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
-
-
-def test_poll_survives_transient_error_without_new_job(supadata_api, tmp_path: Path) -> None:
-    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
-    supadata_api.override["generate"] = [(202, raw("transcript_job.json"))]
-    supadata_api.override["job"] = [
-        (503, {"error": "upstream-error", "message": "x"}),
-        (200, raw("job_completed.json")),
-    ]
-    res = supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
-    assert res.normalized.transcripts[0].segments
-    modes = [r.url.params.get("mode") for r in supadata_api.requests]
-    assert modes.count("generate") == 1
-
-
-def test_generate_server_error_is_blocked_and_not_retried(supadata_api, tmp_path: Path) -> None:
-    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
-    supadata_api.override["generate"] = [(503, {"error": "upstream-error", "message": "x"})]
-    with pytest.raises(Blocked, match="not retried"):
-        supadata_api.collector().fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
-    modes = [r.url.params.get("mode") for r in supadata_api.requests]
-    assert modes.count("generate") == 1
-
-
-def test_generate_timeout_is_blocked(supadata_api, tmp_path: Path) -> None:
-    import httpx2
-
-    def handler(request):  # noqa: ANN001, ANN202
-        if request.url.params.get("mode") == "generate":
-            raise httpx2.ReadTimeout("slow", request=request)
-        return supadata_api.handler(request)
-
-    supadata_api.override["native"] = [(206, raw("error_unavailable.json"))]
-    c = supadata_api.collector()
-    c.client = httpx2.Client(transport=httpx2.MockTransport(handler))
-    with pytest.raises(Blocked, match="not retried"):
-        c.fetch(Cap.TRANSCRIPTS, VIDEO, tmp_path)
 
 
 def test_transcript_out_of_order_is_sorted() -> None:
