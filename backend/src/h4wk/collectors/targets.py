@@ -58,7 +58,7 @@ def parse_target(text: str) -> Target:
     candidates: list[tuple[str, TargetKind]] = []
     if url.hostname == "youtu.be" and parts:
         candidates.append((parts[0], TargetKind.VIDEO))
-    if "v" in query:  # watch?v=…&list=… vẫn là một video
+    if "v" in query:
         candidates.append((query["v"][0], TargetKind.VIDEO))
     if parts and parts[0] in {"shorts", "live", "embed"} and len(parts) > 1:
         candidates.append((parts[1], TargetKind.VIDEO))

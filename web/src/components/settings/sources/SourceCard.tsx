@@ -15,18 +15,16 @@ type Props = {
   source: SourceInfo
   enabled: boolean
   onEnabledChange: (value: boolean) => void
-  // Key mới đang nhập dở ('' nếu chưa nhập); chỉ gửi đi khi bấm Save.
+
   newKey: string
   onNewKeyChange: (value: string) => void
 }
 
-// Một nguồn thu: bật/tắt, key, trạng thái, quota và nút Test connection.
 export default function SourceCard({ source, enabled, onEnabledChange, newKey, onNewKeyChange }: Props) {
   const queryClient = useQueryClient()
   const [editingKey, setEditingKey] = useState(false)
   const name = sourceLabel[source.name]
 
-  // API không trả thời điểm test nên lấy giờ máy lúc nhận kết quả.
   const test = useMutation({
     mutationFn: async () => ({ result: await testSource(source.name), testedAt: new Date().toISOString() }),
   })

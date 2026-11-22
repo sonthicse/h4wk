@@ -12,7 +12,7 @@ export default function CapturePage() {
     queryKey: ['capture', videoId, captureId],
     queryFn: () => getCapture(videoId, captureId),
   })
-  // Chỉ để lấy tiêu đề; lỗi hay không có thì hiện mã video.
+
   const video = useQuery({ queryKey: ['video', videoId], queryFn: () => getVideo(videoId) })
   const videoUrl = `/videos/${videoId}`
 

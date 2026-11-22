@@ -28,8 +28,6 @@ function SelectValue({
   return <SelectPrimitive.Value data-slot="select-value" {...props} />
 }
 
-// mb-0!: Radix đặt thẻ <select> ẩn ngay sau nút, nên `space-y-*` của khung chứa sẽ cộng lề dưới
-// vào nút và đẩy nút lệch lên so với ô nhập bên cạnh.
 function SelectTrigger({
   className,
   size = "default",
@@ -56,8 +54,6 @@ function SelectTrigger({
   )
 }
 
-// Danh sách luôn mở xuống dưới nút (popper), bám mép trái và rộng ít nhất bằng nút, cách 4px;
-// không dùng "item-aligned" vì kiểu đó phủ lên nút và có thể mở lên trên.
 function SelectContent({
   className,
   children,

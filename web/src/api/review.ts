@@ -5,8 +5,6 @@ export type ReviewDecision = Schemas['ReviewDecision']
 export type ReviewStatus = QueueItem['status']
 export type DecisionStatus = ReviewDecision['status']
 
-// Hàng đợi rà soát, sắp theo mức độ rồi thời gian. Mặc định latest_only: chỉ bản thu mới nhất đã phân tích của
-// mỗi video, để thu lại một video không làm nghi vấn bị lặp. Video detail truyền latestOnly: false để xem cả bản cũ.
 export function listQueue(
   filters: { video?: string; source_kind?: string; status?: string; latestOnly?: boolean } = {},
 ): Promise<QueueItem[]> {
@@ -16,12 +14,10 @@ export function listQueue(
   return api(`/api/review/queue${q.size ? `?${q}` : ''}`)
 }
 
-// Reject bắt buộc có note (backend trả 422 nếu thiếu).
 export function decide(findingId: string, status: DecisionStatus, note = ''): Promise<ReviewDecision> {
   return api(`/api/findings/${encodeURIComponent(findingId)}/decision`, { method: 'POST', body: { status, note } })
 }
 
-// ---- Rà soát theo video (T48/T49). Kiểu viết tay theo quy ước, chưa có trong schema.d.ts. ----
 type Category = Schemas['Category']
 export type VideoVerdict = {
   run_id: string
@@ -67,7 +63,6 @@ export async function listVideoQueue(status?: string): Promise<VideoQueueItem[]>
   return api(`/api/review/videos?${q}`)
 }
 
-// 404 nghĩa là video chưa có kết luận: trả null để trang giữ như cũ.
 export async function getVerdict(videoId: string): Promise<VideoVerdictDetail | null> {
   try {
     return await api(`/api/videos/${encodeURIComponent(videoId)}/verdict`)
@@ -77,7 +72,6 @@ export async function getVerdict(videoId: string): Promise<VideoVerdictDetail | 
   }
 }
 
-// run_id đổi so với kết luận mới nhất thì backend trả 409 "verdict changed, reload".
 export async function decideVideo(
   videoId: string,
   runId: string,

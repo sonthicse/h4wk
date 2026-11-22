@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { severityVariant, statusVariant } from '@/lib/findings'
 
-// Hàng đợi theo video (T50): mỗi dòng là kết luận của một video; quyết định ghi ở trang video.
 type View = VideoReviewStatus | 'all'
 
 const views: { id: View; label: string }[] = [
@@ -19,7 +18,7 @@ const views: { id: View; label: string }[] = [
 
 export default function ReviewQueuePage() {
   const [view, setView] = useState<View>('unreviewed')
-  // Lấy cả danh sách một lần để đếm theo trạng thái; lọc ở client.
+
   const queue = useQuery({ queryKey: ['review-videos'], queryFn: () => listVideoQueue() })
   const all = queue.data ?? []
   const rows = all.filter((it) => view === 'all' || it.status === view)

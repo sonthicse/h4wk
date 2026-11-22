@@ -94,7 +94,6 @@ def analyze(
     for comment in data.comments:
         scan(comment.text, "comment", comment_id=comment.id)
 
-    # Dấu hiệu ảnh mẫu (T40) không có văn bản nên không qua tầng tĩnh; gộp trước khi chọn mục.
     hits.extend(extra_hits or [])
 
     errors: list[str] = []
@@ -105,7 +104,6 @@ def analyze(
         records = (records or []) + part_records
 
         def slot(f):
-            # Giữ riêng nghi vấn lời nói và hình trong cùng đoạn.
             return _slot(f), f.source_kind == SourceKind.SPEECH
 
         replaced = {slot(f) for f in part_findings}
@@ -163,9 +161,8 @@ def slots(finding: Finding) -> list[tuple[str, str]]:
     return [_slot(finding)]
 
 
-# Chữ OCR lặp lại ở nhiều đoạn (băng rôn, logo kênh) chỉ thành một nghi vấn.
 REPEAT_KINDS = {SourceKind.OCR}
-SAME_QUOTE_RATIO = 0.8  # OCR đọc lệch vài ký tự giữa các khung vẫn coi là cùng một dòng chữ
+SAME_QUOTE_RATIO = 0.8
 _SEVERITY = list(Severity)
 _CONFIDENCE = list(Confidence)
 
@@ -185,7 +182,6 @@ def group_repeats(findings: list[Finding], references: list[str] = ()) -> list[F
     `references` là văn bản đáng tin hơn OCR (tiêu đề, mô tả, lời nói) để sửa trích dẫn."""
     groups: list[tuple[list[str], list[Finding]]] = []
     for finding in findings:
-        # Jev đã bỏ OCR trùng trước khi gửi; giữ nguyên văn bản đã gửi làm quote.
         if (
             finding.source_kind not in REPEAT_KINDS
             or finding.start is None
@@ -200,7 +196,6 @@ def group_repeats(findings: list[Finding], references: list[str] = ()) -> list[F
                 finding.entity,
                 finding.category,
             )
-            # So với mọi bản đã gộp: các bản đọc lệch nối nhau thành chuỗi vẫn về một nhóm.
             if same and any(_ratio(seen, text) >= SAME_QUOTE_RATIO for seen in texts):
                 members.append(finding)
                 if text not in texts:
@@ -222,7 +217,7 @@ def _reading(quotes: list[str], references: list[str]) -> str:
     voted = "".join(Counter(chars).most_common(1)[0][0] for chars in zip(*same, strict=True))
     target = _fold(voted)
     size = len(target.split())
-    best, best_ratio = voted, 0.9  # chỉ thay khi gần như trùng chữ cái
+    best, best_ratio = voted, 0.9
     for text in references:
         words = text.split()
         for n in (size - 1, size, size + 1):
@@ -237,7 +232,6 @@ def _reading(quotes: list[str], references: list[str]) -> str:
 def _merge(members: list[Finding], references: list[str]) -> Finding:
     if len(members) == 1:
         return members[0]
-    # Nghi vấn OCR luôn có segment_id và start.
     members = sorted(members, key=lambda f: f.start or 0.0)
     head = members[0]
     occurrences: dict[str, Occurrence] = {}

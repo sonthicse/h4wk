@@ -3,8 +3,6 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 
-// `id` gắn với <Label htmlFor> ở form cha.
-// Danh sách chuỗi thêm/xoá được (biệt danh, viết tắt). Bỏ qua chuỗi rỗng và chuỗi trùng (không phân biệt hoa thường).
 export default function TermListInput({
   id,
   values,
@@ -26,7 +24,6 @@ export default function TermListInput({
     setDraft('')
   }
 
-  // Theo bản phác chỉ có ô nhập: Enter hoặc rời ô thì thêm mục; các mục đã có hiện thành chip bên dưới.
   return (
     <div className="space-y-2">
       <Input
@@ -36,7 +33,7 @@ export default function TermListInput({
         onChange={(e) => setDraft(e.target.value)}
         onBlur={add}
         onKeyDown={(e) => {
-          // Enter thêm mục, không gửi form.
+
           if (e.key === 'Enter') {
             e.preventDefault()
             add()

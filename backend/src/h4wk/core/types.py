@@ -25,7 +25,6 @@ class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_by_name=True, serialize_by_alias=True)
 
 
-# Giờ Việt Nam. Việt Nam không đổi giờ theo mùa nên dùng độ lệch cố định.
 VN_TZ = timezone(timedelta(hours=7))
 
 
@@ -33,17 +32,14 @@ def _to_vn(d: datetime) -> datetime:
     return d.astimezone(VN_TZ)
 
 
-# Thời gian luôn có múi giờ, được đổi sang giờ Việt Nam, ghi ra ISO-8601 kèm +07:00.
 VnDatetime = Annotated[
     AwareDatetime, AfterValidator(_to_vn), PlainSerializer(datetime.isoformat, return_type=str)
 ]
 
-# Người thực hiện: `user:<username>` hoặc `system:<rule>`.
 Actor = Annotated[str, StringConstraints(pattern=r"^(user|system):\S+$")]
 
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
 
-# Tên thư mục bản thu theo giờ Việt Nam, ví dụ 20261118T154530.
 CaptureTs = Annotated[str, StringConstraints(pattern=r"^\d{8}T\d{6}$")]
 
 NonNegInt = Annotated[int, Field(ge=0)]
@@ -56,7 +52,6 @@ def _check_bbox(b: tuple[float, float, float, float]) -> tuple[float, float, flo
     return b
 
 
-# Khung bao [x, y, w, h] theo pixel.
 BBox = Annotated[tuple[float, float, float, float], AfterValidator(_check_bbox)]
 
 
@@ -67,7 +62,6 @@ def _check_rel_path(p: str) -> str:
     return p
 
 
-# Đường dẫn tương đối bên trong một thư mục bản thu hoặc thư mục phái sinh.
 RelPath = Annotated[str, AfterValidator(_check_rel_path)]
 
 

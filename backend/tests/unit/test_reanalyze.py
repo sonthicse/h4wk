@@ -13,7 +13,7 @@ from h4wk.jobs.queue import huey
 @pytest.fixture
 def video(data_dir, monkeypatch):
     shutil.copytree(SAMPLE, data_dir / "videos" / "h4wkDemo001")
-    (data_dir / "videos" / "noTimeline1").mkdir()  # bản thu chưa xử lý xong: bỏ qua
+    (data_dir / "videos" / "noTimeline1").mkdir()
     monkeypatch.setattr(huey, "immediate", True)
     return data_dir / "videos" / "h4wkDemo001"
 

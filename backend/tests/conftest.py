@@ -89,7 +89,6 @@ class FakeYtApi:
 
     def __init__(self) -> None:
         self.requests: list = []
-        # tên endpoint → (status, body); đặt để thay response mặc định
         self.override: dict[str, tuple[int, dict]] = {}
 
     def _raw(self, name: str) -> dict:
@@ -143,7 +142,6 @@ class FakeSupadata:
 
     def __init__(self) -> None:
         self.requests: list = []
-        # khoá: "native", "video", "me" → danh sách (status, body)
         self.override: dict[str, list[tuple[int, dict]]] = {}
 
     def _raw(self, name: str) -> dict:
@@ -166,7 +164,7 @@ class FakeSupadata:
             "me": (200, "me.json"),
         }
         queue = self.override.get(kind)
-        if queue:  # danh sách: dùng lần lượt, phần tử cuối lặp lại mãi
+        if queue:
             status, body = queue.pop(0) if len(queue) > 1 else queue[0]
         else:
             status, body = defaults[kind][0], self._raw(defaults[kind][1])

@@ -5,7 +5,6 @@ import { getMe, logout } from '@/api/auth'
 import ThemeToggle from '@/components/ThemeToggle'
 import { Button } from '@/components/ui/button'
 
-// Tên người đang đăng nhập, nút đổi theme và nút đăng xuất, đặt ở thanh trên cùng.
 export default function UserMenu() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()

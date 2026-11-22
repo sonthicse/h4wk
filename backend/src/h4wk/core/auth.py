@@ -36,7 +36,6 @@ def account() -> tuple[str, str]:
 
 def authenticate(username: str, password: str) -> bool:
     expected_user, expected_password = account()
-    # So sánh thời gian cố định, kiểm cả hai vế để thời gian không lộ vế nào sai.
     user_ok = hmac.compare_digest(username.encode(), expected_user.encode())
     password_ok = hmac.compare_digest(password.encode(), expected_password.encode())
     return user_ok and password_ok

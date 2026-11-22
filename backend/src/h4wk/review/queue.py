@@ -25,7 +25,7 @@ class QueueItem(BaseModel):
     finding: Finding
     status: ReviewStatus
     video: VideoRef
-    decisions: list[ReviewDecision]  # mới nhất trước
+    decisions: list[ReviewDecision]
 
 
 def _video(video_id: str, capture: str) -> VideoRef:

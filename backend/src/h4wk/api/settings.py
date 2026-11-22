@@ -37,22 +37,22 @@ class SourceUsage(BaseModel):
 class SourceInfo(BaseModel):
     name: SourceName
     enabled: bool
-    fault_injection: bool  # bật thì nguồn bị coi như bị chặn (giả lập cho demo)
+    fault_injection: bool
     needs_key: bool
     key: KeyInfo | None
-    implemented: bool  # đã có adapter
+    implemented: bool
     status: Literal["active", "paused"]
     paused_until: VnDatetime | None
     consecutive_failures: int
     last_error: str | None
     last_error_at: VnDatetime | None
-    usage: SourceUsage | None  # youtube_api (theo ngày), supadata (theo kỳ thanh toán)
+    usage: SourceUsage | None
 
 
 class SourcesSettings(BaseModel):
     sources: list[SourceInfo]
     priority: dict[Cap, list[SourceName]]
-    uncovered: list[Cap]  # loại dữ liệu không còn nguồn nào đang bật và đã có adapter
+    uncovered: list[Cap]
 
 
 class SourcePatch(BaseModel):
@@ -62,7 +62,7 @@ class SourcePatch(BaseModel):
 
 class SourcesUpdate(BaseModel):
     sources: dict[SourceName, SourcePatch] = {}
-    priority: dict[Cap, list[SourceName]] | None = None  # có thì thay toàn bộ
+    priority: dict[Cap, list[SourceName]] | None = None
 
 
 class KeyBody(BaseModel):
@@ -78,9 +78,6 @@ class TestResult(BaseModel):
 def _invalid(e: ValidationError) -> HTTPException:
     errors = [{"loc": list(err["loc"]), "msg": err["msg"]} for err in e.errors()]
     return HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, errors)
-
-
-# ------------------------------------------------------------------- nguồn thu
 
 
 def _usage(name: str, now: datetime) -> SourceUsage | None:
@@ -219,14 +216,10 @@ class JevSettingsView(BaseModel):
 _JEV_KEY = "TYPESAFE_API_KEY"
 
 
-# -------------------------------------------------------------------- watchlist
-
-
 class WatchlistSettingsView(BaseModel):
     check_interval_min: int
     initial_videos: int
     threads_per_channel: int
-    # Số luồng worker đang cần theo cấu hình; worker tính lúc khởi động.
     worker_threads: int
 
 
@@ -259,7 +252,7 @@ def put_watchlist_settings(body: WatchlistSettingsUpdate, actor: ActorDep) -> Wa
         raise _invalid(e) from None
     settings.save_sources(cfg)
     audit.log(actor, "settings.watchlist", None, body.model_dump(exclude_none=True))
-    lanes.fill_all()  # tăng số luồng thì job đang chờ chạy ngay
+    lanes.fill_all()
     return _watchlist_view()
 
 
@@ -316,8 +309,8 @@ class JevUsage(BaseModel):
     kept: int
     errors: int
     retries_429: int
-    by_source: list[JevSourceUsage]  # luôn đủ 6 nguồn nội dung
-    recent_errors: list[JevError]  # tối đa 5, mới trước
+    by_source: list[JevSourceUsage]
+    recent_errors: list[JevError]
 
 
 class JevTestResult(BaseModel):

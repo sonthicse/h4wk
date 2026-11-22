@@ -3,7 +3,6 @@ import { Navigate, Outlet, useLocation } from 'react-router'
 import { getMe } from '@/api/auth'
 import { UnauthorizedError } from '@/api/client'
 
-// Chặn các trang cần đăng nhập: chưa có phiên thì chuyển sang /login, kèm trang đang định vào.
 export default function RequireLogin() {
   const location = useLocation()
   const me = useQuery({ queryKey: ['me'], queryFn: getMe, retry: false })

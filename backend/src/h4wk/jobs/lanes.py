@@ -48,7 +48,6 @@ def fill(trigger: str) -> list[str]:
             ).first()
             if nxt is None:
                 return started
-            # Giành job bằng update có điều kiện: API và worker có thể cùng gọi fill.
             res = s.execute(
                 update(JobRow)  # type: ignore[arg-type]
                 .where(JobRow.id == nxt, JobRow.status == "waiting")  # type: ignore[arg-type]

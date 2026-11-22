@@ -5,7 +5,6 @@ from collections.abc import Callable
 from h4wk.collectors.base import Collector
 from h4wk.collectors.providers import supadata, youtube_api, ytdlp
 
-# tên nguồn → hàm tạo adapter
 COLLECTORS: dict[str, Callable[[], Collector]] = {
     "ytdlp": ytdlp.from_config,
     "youtube_api": youtube_api.from_config,

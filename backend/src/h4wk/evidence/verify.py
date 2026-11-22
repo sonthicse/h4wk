@@ -10,9 +10,9 @@ from h4wk.evidence.writer import sha256_file
 
 class FileStatus(StrEnum):
     OK = "OK"
-    FAIL = "FAIL"  # SHA-256 hoặc kích thước khác manifest
+    FAIL = "FAIL"
     MISSING = "missing"
-    UNEXPECTED = "unexpected"  # có trên đĩa nhưng không có trong manifest
+    UNEXPECTED = "unexpected"
 
 
 @dataclass(frozen=True)

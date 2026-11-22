@@ -24,7 +24,7 @@ class EntityRow(SQLModel, table=True):
 
 class SessionRow(SQLModel, table=True):
     __tablename__ = "sessions"
-    token_hash: str = Field(primary_key=True)  # SHA-256 của token trong cookie
+    token_hash: str = Field(primary_key=True)
     username: str
     expires_at: datetime
 
@@ -45,7 +45,7 @@ class QuotaRow(SQLModel, table=True):
 
     __tablename__ = "source_quota"
     provider: str = Field(primary_key=True)
-    period: str  # "2026-11-19": ngày theo giờ Pacific
+    period: str
     used: int = 0
 
 
@@ -58,9 +58,9 @@ class JobRow(SQLModel, table=True):
     video_id: str
     level: str
     force: bool = False
-    trigger: str  # user:<username> hoặc system:<rule>
-    status: str = "queued"  # waiting | queued | running | done | failed (waiting: xem lanes.py)
-    step: str | None = None  # collect | media | analyze
+    trigger: str
+    status: str = "queued"
+    step: str | None = None
     progress: int = 0
     capture: str | None = None
     run_id: str | None = None
@@ -112,7 +112,7 @@ class WatchItemRow(SQLModel, table=True):
     """Một kênh trong watchlist. initialized=False: chưa chạy bước thêm kênh."""
 
     __tablename__ = "watch_items"
-    id: str = Field(primary_key=True)  # w_001
+    id: str = Field(primary_key=True)
     channel_id: str = Field(index=True)
     handle: str | None = None
     title: str = ""

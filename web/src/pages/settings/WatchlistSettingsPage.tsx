@@ -96,11 +96,10 @@ function Form({ data }: { data: WatchlistSettings }) {
   )
 }
 
-// Settings → Watchlist: số luồng mỗi kênh, số video khi thêm kênh, chu kỳ kiểm tra.
 export default function WatchlistSettingsPage() {
   const q = useQuery({ queryKey: ['watchlist-settings'], queryFn: getWatchlistSettings })
   if (q.error) return <p className="text-sm text-destructive">Could not load watchlist settings.</p>
   if (!q.data) return <Skeleton className="h-64 w-full" />
-  // key: tải lại dữ liệu sau khi lưu thì form bắt đầu từ giá trị mới.
+
   return <Form key={JSON.stringify(q.data)} data={q.data} />
 }

@@ -75,7 +75,6 @@ def add_entity(body: EntityCreate, session: SessionDep, actor: ActorDep) -> enti
 def update_entity(
     entity_id: str, body: EntityUpdate, session: SessionDep, actor: ActorDep
 ) -> entities.Entity:
-    # exclude_unset: trường không gửi thì giữ nguyên; null chỉ có nghĩa với description.
     fields = {
         k: v
         for k, v in body.model_dump(exclude_unset=True).items()

@@ -172,7 +172,6 @@ def test_unsupported_and_not_found(clock: Clock, root: Path) -> None:
     b = FakeCollector("b", ALL)
     m = _collect(_orch([a, b], clock, root=root))
     assert _calls(m, Cap.VIDEO_METADATA) == [("a", "unsupported"), ("b", "ok")]
-    # Video không tồn tại thì không thử nguồn khác.
     assert _calls(m, Cap.COMMENTS) == [("a", "not_found")]
 
 
@@ -218,8 +217,8 @@ def test_source_suspended_after_five_consecutive_failures(clock: Clock, root: Pa
     )
     b = FakeCollector("b", ALL)
     orch = _orch([a, b], clock, root=root)
-    _collect(orch)  # a lỗi 4 lần liên tiếp (mức text có 4 loại dữ liệu)
-    m2 = _collect(orch)  # lần lỗi thứ 5 ở metadata, sau đó a bị tạm ngưng
+    _collect(orch)
+    m2 = _collect(orch)
     assert _calls(m2, Cap.VIDEO_METADATA) == [("a", "blocked"), ("b", "ok")]
     assert _calls(m2, Cap.COMMENTS) == [("a", "suspended"), ("b", "ok")]
     clock.t += timedelta(minutes=31)
@@ -232,7 +231,7 @@ def test_success_resets_failure_count(clock: Clock, root: Path) -> None:
     b = FakeCollector("b", ALL)
     orch = _orch([a, b], clock, root=root)
     for _ in range(4):
-        _collect(orch)  # mỗi lần: metadata lỗi, comments thành công
+        _collect(orch)
     m = _collect(orch)
     assert _calls(m, Cap.VIDEO_METADATA)[0] == ("a", "ok")
 
@@ -240,7 +239,6 @@ def test_success_resets_failure_count(clock: Clock, root: Path) -> None:
 def test_new_adapter_needs_one_file_and_one_registry_line(
     clock: Clock, root: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # "Một file" là lớp FakeCollector ở trên; "một dòng" là mục trong registry.COLLECTORS.
     monkeypatch.setattr(registry, "COLLECTORS", {"fake": lambda: FakeCollector("fake", ALL)})
     orch = Orchestrator.from_config(
         root=root, sources=SourcesConfig(), now=clock, sleep=lambda _s: None

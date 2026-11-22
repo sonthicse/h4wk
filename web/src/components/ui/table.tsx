@@ -2,8 +2,6 @@ import * as React from "react"
 import { cn } from "cn"
 import { Highlight, HighlightItem } from "@animate-ui/react/primitives/effects/highlight"
 
-// Hàng trong TableBody được highlight khi hover (mode "parent": nền là một div đặt NGOÀI <table>, trong vùng chứa,
-// nên không chèn div vào tbody/tr). Hàng ở thead không bọc nên không có hiệu ứng.
 const InTableBody = React.createContext(false)
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
@@ -58,7 +56,6 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   )
 }
 
-// highlight={false}: hàng trạng thái (Loading…, No items, lỗi) không cần nền hover.
 function TableRow({
   className,
   highlight = true,
@@ -70,7 +67,7 @@ function TableRow({
       data-slot="table-row"
       className={cn(
         "border-b transition-colors has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
-        // relative: tr phải được định vị thì chữ mới vẽ TRÊN nền highlight (absolute, z-index 0).
+
         inBody ? highlight && "relative" : "hover:bg-muted/50",
         className
       )}

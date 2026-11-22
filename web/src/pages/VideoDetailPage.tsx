@@ -31,7 +31,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatVnDateTime } from '@/lib/format'
 import { timedSources } from '@/lib/findings'
 
-// Nhảy tới start − 2s, không âm.
 const LEAD_S = 2
 
 type Tab = 'comments' | 'captures'
@@ -55,7 +54,6 @@ function VideoView({
   const [, setSearchParams] = useSearchParams()
   const [tab, setTab] = useState<Tab>('comments')
 
-  // Không truyền ?capture=: backend tự lấy bản thu mới nhất có loại dữ liệu đó. has_media cho biết có file video không.
   const hasMedia = captures.some((c) => c.has_media)
 
   const timeline = useQuery({ queryKey: ['timeline', video.id], queryFn: () => getTimeline(video.id) })
@@ -77,12 +75,10 @@ function VideoView({
   )
   const commentList = comments.data ?? []
 
-  // Độ dài lấy từ metadata; thiếu thì suy từ timeline/nghi vấn để thanh thời gian vẫn vẽ được.
   const durationHint =
     video.duration_s ??
     Math.max(0, ...(timeline.data?.segments ?? []).map((s) => s.end), ...findings.map((f) => f.end ?? 0))
 
-  // ?t= (bấm một đoạn cụ thể của nghi vấn nhiều chỗ) được ưu tiên hơn start của nghi vấn.
   const startAt = t ?? (finding && timedSources.has(finding.sourceKind) && finding.start !== null ? finding.start - LEAD_S : null)
   const hasTarget = startAt !== null
   const { controls: player, videoProps, failed } = usePlayer(durationHint, Math.max(startAt ?? 0, 0), hasTarget)
@@ -90,11 +86,9 @@ function VideoView({
   const ownHref = `/videos/${video.id}`
   const findingHref = (id: string) => `${ownHref}?finding=${id}`
 
-  // Bấm một nghi vấn: đổi ?finding=, trang dựng lại trình phát (xem key bên dưới) và nhảy tới đúng chỗ.
   const openFinding = (f: VideoFinding, at?: number) =>
     setSearchParams(at === undefined ? { finding: f.id } : { finding: f.id, t: String(Math.max(0, at - LEAD_S)) })
 
-  // Bấm bằng chứng: comment thì mở tab Comments và đánh dấu nghi vấn; còn lại tua tới start như openFinding.
   const openEvidence = (it: QueueItem) => {
     const vf = toVideoFinding(it)
     if (vf.sourceKind === 'comment') setTab('comments')
@@ -112,7 +106,6 @@ function VideoView({
           </p>
         </div>
         <div className="flex flex-wrap justify-end gap-2 text-sm">
-          {/* YouTube có thể ẩn số liệu (null): khi đó bỏ hẳn badge thay vì hiện "—". */}
           {video.view_count != null && <Badge variant="outline">{count(video.view_count)} views</Badge>}
           {video.like_count != null && <Badge variant="outline">{count(video.like_count)} likes</Badge>}
           {video.comment_count != null && <Badge variant="outline">{count(video.comment_count)} comments</Badge>}
@@ -222,7 +215,6 @@ export default function VideoDetailPage() {
   if (queue.isPending) return <Skeleton className="h-96 w-full" />
   if (queue.error) return <p className="text-sm text-destructive">Could not load findings for this video.</p>
 
-  // Hàng đợi gồm nghi vấn của mọi bản thu; chỉ hiện bản thu của nghi vấn đang mở, không có thì bản thu mới nhất có nghi vấn.
   const all = queue.data.map(toVideoFinding)
   const active = all.find((f) => f.id === params.get('finding')) ?? null
   const capture = active?.capture ?? all.reduce((max, f) => (f.capture > max ? f.capture : max), '')
@@ -232,6 +224,5 @@ export default function VideoDetailPage() {
   const tParam = Number(params.get('t'))
   const t = params.get('t') !== null && Number.isFinite(tParam) ? tParam : null
 
-  // key: đổi ?t= hoặc ?finding= thì dựng lại trình phát để nó nhảy tới vị trí mới.
   return <VideoView key={`${videoId}:${t}:${finding?.id}`} detail={video.data} findings={findings} items={items} finding={finding} t={t} />
 }

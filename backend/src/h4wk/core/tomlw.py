@@ -45,7 +45,6 @@ def dumps(data: dict[str, Any]) -> str:
     def is_tables(v: Any) -> bool:
         return isinstance(v, list) and bool(v) and all(isinstance(x, dict) for x in v)
 
-    # Mảng bảng ở cấp gốc (entities.toml, watchlist.toml) ghi dạng [[tên]] cho dễ sửa tay.
     arrays = {k: v for k, v in data.items() if is_tables(v)}
     table([], {k: v for k, v in data.items() if k not in arrays})
     for k, items in arrays.items():

@@ -16,7 +16,7 @@ class ColorEmbedder:
     name = "fake-color"
 
     def __init__(self):
-        self.calls = 0  # số ảnh đã embed
+        self.calls = 0
 
     def embed(self, images):
         self.calls += len(images)
@@ -32,10 +32,10 @@ def _write(path: Path, rgb: np.ndarray) -> Path:
 @pytest.fixture
 def scene(tmp_path):
     ref = np.zeros((64, 64, 3), np.uint8)
-    ref[...] = (255, 0, 0)  # ảnh mẫu toàn đỏ
+    ref[...] = (255, 0, 0)
     frame = np.zeros((360, 640, 3), np.uint8)
-    frame[...] = (0, 0, 255)  # nền xanh
-    frame[0:180, 320:640] = (255, 0, 0)  # ô trên phải của lưới 2×2 là đỏ
+    frame[...] = (0, 0, 255)
+    frame[0:180, 320:640] = (255, 0, 0)
     blank = np.zeros((360, 640, 3), np.uint8)
     blank[...] = (0, 0, 255)
     return {
@@ -67,7 +67,7 @@ def test_keeps_only_best_crop_per_image_and_entity(scene):
 def test_threshold_comes_from_argument_else_default(scene):
     assert refimages.match_refs(scene["images"], scene["refs"], ColorEmbedder(), 1.01) == []
     default = refimages.match_refs(scene["images"], scene["refs"], ColorEmbedder())
-    assert [h[1] for h in default] == ["frames/000001.jpg"]  # blank có cosine 0 < mặc định
+    assert [h[1] for h in default] == ["frames/000001.jpg"]
 
 
 def test_embeddings_cache_is_reused(scene, tmp_path):
@@ -77,18 +77,18 @@ def test_embeddings_cache_is_reused(scene, tmp_path):
     assert first.calls == 1 + 2 * 14 and cache.is_file()
     second = ColorEmbedder()
     refimages.match_refs(scene["images"], scene["refs"], second, 0.9, cache)
-    assert second.calls == 1  # chỉ embed lại ảnh mẫu
+    assert second.calls == 1
     other = ColorEmbedder()
     other.name = "other-model"
     refimages.match_refs(scene["images"], scene["refs"], other, 0.9, cache)
-    assert other.calls == 1 + 2 * 14  # đổi model thì bỏ cache
+    assert other.calls == 1 + 2 * 14
 
 
 def test_missing_refs_or_unreadable_images_are_skipped(scene, tmp_path):
     assert refimages.match_refs(scene["images"], {}, ColorEmbedder(), 0.5) == []
     images = [*scene["images"], ("frames/missing.jpg", tmp_path / "missing.jpg")]
     hits = refimages.match_refs(images, scene["refs"], ColorEmbedder(), 0.9)
-    assert [h[1] for h in hits] == ["frames/000001.jpg"]  # ảnh không đọc được bị bỏ qua
+    assert [h[1] for h in hits] == ["frames/000001.jpg"]
 
 
 def test_to_hits_assigns_segment_by_timeline():

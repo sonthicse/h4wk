@@ -41,7 +41,7 @@ def test_wrong_password_is_rejected_and_audited(anon_client: TestClient, data_di
     assert r.status_code == 401
     lines = [x for x in _lines(data_dir / "log" / "audit.jsonl") if x["action"] == "auth.login"]
     assert [x["status"] for x in lines] == ["error", "error"]
-    assert "sai" not in json.dumps(lines)  # không ghi mật khẩu vào audit
+    assert "sai" not in json.dumps(lines)
 
 
 def test_logout_ends_session(client: TestClient) -> None:
@@ -58,7 +58,7 @@ def test_expired_session_is_rejected(client: TestClient, monkeypatch: pytest.Mon
     assert client.get("/api/entities").status_code == 200
     later = datetime.now(VN_TZ) + auth.SESSION_TTL - timedelta(minutes=1)
     monkeypatch.setattr(auth, "_now", lambda: later)
-    assert client.get("/api/entities").status_code == 200  # còn 1 phút
+    assert client.get("/api/entities").status_code == 200
     monkeypatch.setattr(auth, "_now", lambda: later + timedelta(minutes=2))
     assert client.get("/api/entities").status_code == 401
 
@@ -71,13 +71,13 @@ def test_only_the_env_account_logs_in() -> None:
 
 def test_missing_account_fails_clearly(monkeypatch: pytest.MonkeyPatch, dotenv) -> None:
     del dotenv["PASSWORD"]
-    monkeypatch.setenv("PASSWORD", PASSWORD)  # biến môi trường không được tính
+    monkeypatch.setenv("PASSWORD", PASSWORD)
     with pytest.raises(RuntimeError, match="USERNAME and PASSWORD"):
         auth.account()
     from h4wk.api.app import app
 
     with pytest.raises(RuntimeError, match="PASSWORD"), TestClient(app):
-        pass  # API không khởi động khi thiếu tài khoản
+        pass
 
 
 def test_os_username_is_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -87,7 +87,6 @@ def test_os_username_is_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_password_is_not_stored(client: TestClient, data_dir: Path) -> None:
-    # Chế độ WAL: dữ liệu mới có thể còn nằm trong file -wal.
     db = b"".join(p.read_bytes() for p in data_dir.glob("index.db*"))
     assert PASSWORD.encode() not in db
 

@@ -13,7 +13,6 @@ export function listWatchItems(): Promise<WatchItem[]> {
   return api('/api/watchlist')
 }
 
-// `url` là link kênh, id UC… hoặc @handle. Việc khởi tạo chạy nền: item.initialized=false tới khi xong.
 export function addWatchItem(url: string, level: CollectLevel): Promise<WatchItem> {
   return api('/api/watchlist', { method: 'POST', body: { url: url.trim(), level } })
 }
@@ -30,12 +29,10 @@ export function checkNow(id: string): Promise<CheckResult> {
   return api(`${item(id)}/check`, { method: 'POST' })
 }
 
-// Mới nhất trước.
 export function listEvents(limit = 50): Promise<WatchEvent[]> {
   return api(`/api/events?limit=${limit}`)
 }
 
-// Ô nhập ở trang Collect là link kênh hay link video?
 export function isChannelInput(input: string): boolean {
   const s = input.trim()
   return /\/(@|channel\/|c\/|user\/)/.test(s) || s.startsWith('@') || /^UC[\w-]{22}$/.test(s)

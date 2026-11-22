@@ -43,9 +43,9 @@ def test_transcript_conversion() -> None:
     t = s.transcript_from_supadata(raw("transcript_native_vi.json"))
     assert t.kind == TranscriptKind.SUPADATA_AI and t.lang == "vi"
     assert [(g.start, g.end, g.text) for g in t.segments] == [
-        (0.0, 2.0, "Xin chào các bạn"),  # end bị kẹp theo đoạn kế (chồng thời gian)
+        (0.0, 2.0, "Xin chào các bạn"),
         (2.0, 5.0, "đây là video thử nghiệm"),
-        (8.0, 10.0, "Cảm ơn đã xem"),  # đoạn rỗng bị bỏ
+        (8.0, 10.0, "Cảm ơn đã xem"),
     ]
 
 
@@ -116,7 +116,7 @@ def test_credits_usage_cached(supadata_api) -> None:
 def test_credits_usage_none_on_error_or_no_key(supadata_api) -> None:
     supadata_api.override["me"] = [(500, {"error": "internal-error", "message": "x"})]
     assert s.credits_usage(supadata_api.collector()) is None
-    assert s.credits_usage(supadata_api.collector()) is None  # lỗi cũng được nhớ
+    assert s.credits_usage(supadata_api.collector()) is None
     assert len(supadata_api.requests) == 1
     s._me_cache.clear()
     assert s.credits_usage(supadata_api.collector(key=lambda: None)) is None

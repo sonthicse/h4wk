@@ -19,11 +19,9 @@ import type { ReviewStatus } from '@/api/review'
 const severities: Finding['severity'][] = ['high', 'medium', 'low']
 const statuses: ReviewStatus[] = ['unreviewed', 'confirmed', 'rejected', 'needs_info']
 
-// Thẻ cả khối là link; dùng chung cho thẻ số liệu và thẻ đếm theo nhóm.
 const cardLink =
   'block rounded-xl transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none [&>*]:hover:bg-muted/40'
 
-// Một con số; bấm sang trang chi tiết.
 function StatCard({ label, value, to }: { label: string; value: number; to: string }) {
   return (
     <Link to={to} aria-label={`${label}: ${value}`} className={cardLink}>
@@ -39,9 +37,6 @@ function StatCard({ label, value, to }: { label: string; value: number; to: stri
   )
 }
 
-// Thẻ đếm theo nhóm; cả thẻ là link sang trang tương ứng.
-// Màu cung trên vòng tròn theo bản phác, khớp màu badge mức độ: high đỏ, medium hổ phách, low xám nhạt.
-// Trạng thái rà soát mỗi trạng thái một màu: chưa rà soát hổ phách, xác nhận đỏ, bác bỏ xám, cần thêm thông tin xanh.
 const sliceColor: Record<string, string> = {
   high: '#dc2626',
   medium: '#f59e0b',
@@ -54,7 +49,6 @@ const sliceColor: Record<string, string> = {
 
 type BadgeVariant = 'severe' | 'warning' | 'outline' | 'info' | 'neutral'
 
-// Badge cùng màu với cung trên vòng tròn.
 const reviewVariant: Record<ReviewStatus, BadgeVariant> = {
   unreviewed: 'warning',
   confirmed: 'severe',
@@ -107,7 +101,7 @@ function Breakdown<K extends string>({
 }
 
 export default function DashboardPage() {
-  // Làm mới mỗi 5 giây để khớp với dòng sự kiện (video watchlist xử lý xong thì số tăng).
+
   const stats = useQuery({ queryKey: ['dashboard'], queryFn: getDashboard, refetchInterval: 5000 })
 
   if (stats.isPending) {
@@ -130,9 +124,6 @@ export default function DashboardPage() {
 
   const d = stats.data
 
-  // Bố cục kiểu bảng điều khiển: cột trái (video + 3 thẻ số liệu + activity) đứng yên, không cuộn;
-  // chỉ cột phải tự cuộn. Cột trái 9 phần, cột phải 11 phần để Events và Review đủ rộng.
-  // Chiều cao = màn hình trừ thanh trên (3rem) và lề của <main> (2 × 1.5rem).
   return (
     <div className="flex h-[calc(100svh-6rem)] flex-col gap-4">
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,9fr)_minmax(0,11fr)] gap-4">

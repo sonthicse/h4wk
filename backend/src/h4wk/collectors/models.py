@@ -42,7 +42,7 @@ class Video(Contract):
     view_count: NonNegInt | None = None
     like_count: NonNegInt | None = None
     comment_count: NonNegInt | None = None
-    availability: str | None = None  # public, unlisted, private… theo nguồn trả về
+    availability: str | None = None
     is_live: bool = False
 
 
@@ -81,9 +81,9 @@ class Transcript(Contract):
 
 class Comment(Contract):
     id: str
-    parent_id: str | None = None  # None là comment gốc; có giá trị là reply
+    parent_id: str | None = None
     author_channel_id: str | None = None
-    author_name: str | None = None  # tên hiển thị (thường là @handle) lúc thu
+    author_name: str | None = None
     text: str
     published_at: VnDatetime | None = None
     like_count: NonNegInt | None = None
@@ -96,15 +96,15 @@ class Comment(Contract):
 
 
 class Thumbnail(Contract):
-    name: str  # maxres, 0, 1, 2, 3…
+    name: str
     url: str | None = None
-    file: RelPath | None = None  # đường dẫn trong bản thu, nếu đã tải
+    file: RelPath | None = None
     width: NonNegInt | None = None
     height: NonNegInt | None = None
 
 
 class MediaFile(Contract):
-    kind: Literal["video", "audio"]  # video có thể kèm cả audio
+    kind: Literal["video", "audio"]
     file: RelPath
     height: NonNegInt | None = None
     vcodec: str | None = None
@@ -116,11 +116,9 @@ class Normalized(Contract):
     schema_: Literal["h4wk.normalized/1"] = Field(alias="schema")
     video: Video | None = None
     channel: Channel | None = None
-    # ID video lấy được từ CHANNEL_VIDEOS hoặc PLAYLIST_VIDEOS.
     video_ids: list[str] = []
     transcripts: list[Transcript] = []
     comments: list[Comment] = []
     thumbnails: list[Thumbnail] = []
     media: list[MediaFile] = []
-    # Loại dữ liệu → nguồn đã cung cấp nó.
     provenance: dict[Cap, str] = {}

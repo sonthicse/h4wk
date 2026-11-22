@@ -1,4 +1,4 @@
-// Logo meme-generator vẽ bằng nét theo màu chữ (currentColor): nền sáng nét đen, dark mode tự đảo thành nét trắng.
+
 
 export default function Logo({ className }: { className?: string }) {
   return (

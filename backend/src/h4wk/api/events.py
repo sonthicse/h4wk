@@ -31,8 +31,8 @@ class Event(BaseModel):
     video_id: str | None
     video_title: str | None
     channel_title: str | None
-    findings: int | None  # job_done: số nghi vấn của lần chạy
-    error: str | None  # job_failed
+    findings: int | None
+    error: str | None
     job: EventJob | None
 
 

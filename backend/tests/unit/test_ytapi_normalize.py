@@ -136,9 +136,6 @@ def test_classify_error(status: int, body: dict | None, kind: type) -> None:
     assert f"YouTube API {status}" in str(err)
 
 
-# ------------------------------------------------------------- collector qua MockTransport
-
-
 def test_video_metadata(ytapi, tmp_path: Path) -> None:
     c = ytapi.collector()
     res = c.fetch(Cap.VIDEO_METADATA, VIDEO, tmp_path)
@@ -160,12 +157,12 @@ def test_thumbnails_reuse_cached_video_and_send_no_key(ytapi, tmp_path: Path) ->
     c.fetch(Cap.VIDEO_METADATA, VIDEO, tmp_path)
     before = len(ytapi.api_requests())
     res = c.fetch(Cap.THUMBNAILS, VIDEO, tmp_path)
-    assert len(ytapi.api_requests()) == before  # không gọi lại videos.list
+    assert len(ytapi.api_requests()) == before
     assert res.cost.quota_units == 0
     images = [r for r in ytapi.requests if r.url.host == "i.ytimg.com"]
     assert len(images) == 5 and all("x-goog-api-key" not in r.headers for r in images)
     names = [t.name for t in res.normalized.thumbnails]
-    assert names == ["maxres", "0", "1", "3"]  # ảnh "2" trả 404 nên bị bỏ qua
+    assert names == ["maxres", "0", "1", "3"]
     assert (tmp_path / "maxres.jpg").exists() and (tmp_path / "3.jpg").exists()
     assert res.normalized.thumbnails[0].file == f"sources/{tmp_path.name}/maxres.jpg"
 
@@ -247,7 +244,7 @@ def test_quota_exceeded_stops_following_calls(ytapi, tmp_path: Path) -> None:
     seen = len(ytapi.requests)
     with pytest.raises(QuotaExceeded):
         c.fetch(Cap.VIDEO_METADATA, VIDEO, tmp_path)
-    assert len(ytapi.requests) == seen  # lần sau bị chặn tại chỗ, không gọi mạng
+    assert len(ytapi.requests) == seen
 
 
 def test_transport_error_is_transient(tmp_path: Path, data_dir: Path) -> None:
@@ -276,7 +273,6 @@ def test_health_check(ytapi, data_dir: Path) -> None:
 def test_maxres_falls_back_when_largest_listed_thumbnail_is_missing(
     ytapi, video_item: dict, tmp_path: Path
 ) -> None:
-    # Thực tế: API liệt kê "fhd" 1920x1080 nhưng ảnh đó trả 404.
     item = copy.deepcopy(video_item)
     item["snippet"]["thumbnails"]["fhd"] = {
         "url": "https://i.ytimg.com/vi/h4wkDemo001/fhddefault.jpg",

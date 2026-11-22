@@ -13,7 +13,6 @@ from h4wk.core import secrets
 from h4wk.evidence.models import Manifest, SourceStatus, Trigger
 from h4wk.evidence.verify import FileStatus, verify
 
-# Video tiếng Việt công khai, đã dùng ở spike T2 và test live của yt-dlp.
 VIDEO = "https://www.youtube.com/watch?v=oAFNS8b7br0"
 
 

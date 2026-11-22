@@ -8,11 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { listWatchItems } from '@/api/watchlist'
 import { useWatchlistSettings } from '@/hooks/use-watchlist-settings'
 
-// Trang Watchlist (T31): các kênh được kiểm tra video mới bằng RSS.
 export default function WatchlistPage() {
   const { check_interval_min } = useWatchlistSettings()
   const items = useQuery({ queryKey: ['watchlist'], queryFn: listWatchItems,
-    // Còn kênh đang khởi tạo nền thì hỏi lại mỗi 5 giây.
+
     refetchInterval: (q) => (q.state.data?.some((w) => !w.initialized) ? 5000 : false),
   })
 
@@ -33,7 +32,6 @@ export default function WatchlistPage() {
 
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Channels</h2>
-        {/* Spike T2: RSS của YouTube bị cache tới 15 phút, nên cần nút Check now. */}
         <Alert>
           <InfoIcon />
           <AlertDescription>

@@ -27,8 +27,8 @@ from h4wk.core.workspace import init_workspace
 
 @asynccontextmanager
 async def _lifespan(_: FastAPI) -> AsyncIterator[None]:
-    auth.account()  # .env thiếu USERNAME hoặc PASSWORD thì API không khởi động
-    init_workspace(data_dir(), config_dir())  # tạo data/, config/*.toml từ file mẫu
+    auth.account()
+    init_workspace(data_dir(), config_dir())
     yield
 
 
@@ -44,7 +44,6 @@ app.include_router(events.router)
 app.include_router(dashboard.router)
 app.include_router(settings.router)
 
-# Mọi API đều cần đăng nhập, trừ các đường dẫn này (mặc định là chặn).
 PUBLIC_PATHS = {"/api/health"}
 PUBLIC_PREFIXES = ("/api/auth/",)
 

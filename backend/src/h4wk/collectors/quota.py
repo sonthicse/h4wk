@@ -16,7 +16,7 @@ from h4wk.core.types import VN_TZ
 
 PROVIDER = "youtube_api"
 DAILY_LIMIT = 10_000
-STOP_RATIO = 0.9  # dùng tới 90% thì ngừng
+STOP_RATIO = 0.9
 PACIFIC = ZoneInfo("America/Los_Angeles")
 
 
@@ -24,7 +24,7 @@ PACIFIC = ZoneInfo("America/Los_Angeles")
 class QuotaUsage:
     used: int
     limit: int
-    resets_at: datetime  # giờ Việt Nam
+    resets_at: datetime
 
 
 def period(now: datetime) -> str:

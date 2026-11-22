@@ -15,7 +15,6 @@ import RefThumb from '@/components/entities/RefThumb'
 import { formatVnDateTime } from '@/lib/format'
 import { deleteRef, listRefs, uploadRef, type Entity, type RefImage, type RefKind } from '@/api/entities'
 
-// Một nhóm ảnh mẫu (khuôn mặt hoặc ảnh hay bị dùng lại) của một đối tượng: tải lên, xem lớn, xoá.
 export default function RefImageGroup({
   entity,
   kind,
@@ -32,7 +31,7 @@ export default function RefImageGroup({
 
   const refs = useQuery({ queryKey: ['refs', entity.id], queryFn: () => listRefs(entity.id) })
   const images = refs.data?.[kind] ?? []
-  // Đổi ảnh thì số ảnh trong danh sách đối tượng cũng đổi.
+
   const refresh = () =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: ['refs', entity.id] }),
@@ -68,10 +67,9 @@ export default function RefImageGroup({
         onChange={(e) => {
           const files = Array.from(e.target.files ?? [])
           if (files.length > 0) upload.mutate(files)
-          e.target.value = '' // cho phép chọn lại cùng file
+          e.target.value = ''
         }}
       />
-      {/* Ảnh mẫu 88px xếp hàng, ô Upload ở cuối như bản phác. */}
       <ul className="flex flex-wrap gap-2">
         {images.map((img) => (
           <li key={img.file} className="group relative">
@@ -111,7 +109,6 @@ export default function RefImageGroup({
       {upload.error && <p className="text-sm text-destructive">Could not upload: {upload.error.message}</p>}
       {refs.error && <p className="text-sm text-destructive">Could not load images: {refs.error.message}</p>}
 
-      {/* Xem ảnh lớn */}
       <Dialog open={viewing !== null} onOpenChange={(open) => !open && setViewing(null)}>
         <DialogContent className="sm:max-w-2xl">
           {viewing && (
@@ -137,7 +134,6 @@ export default function RefImageGroup({
         </DialogContent>
       </Dialog>
 
-      {/* Xác nhận trước khi xoá */}
       <Dialog open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>
         <DialogContent>
           {deleting && (

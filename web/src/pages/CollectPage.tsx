@@ -17,8 +17,6 @@ import { formatVnDateTime } from '@/lib/format'
 
 type StepStatus = 'pending' | 'running' | 'done' | 'failed'
 
-// Theo bản phác: done nền đậm, running viền đậm, failed đỏ, queued viền nhạt.
-// waiting: job của kênh watchlist đang chờ tới lượt trong luồng riêng của kênh.
 const statusVariant: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
   waiting: 'secondary',
   queued: 'outline',
@@ -27,7 +25,6 @@ const statusVariant: Record<string, 'secondary' | 'default' | 'outline' | 'destr
   failed: 'destructive',
 }
 
-// Mỗi bước là một chip: xong nền nhạt, đang chạy nền đậm, lỗi đỏ, chưa chạy viền đứt.
 const stepClass: Record<StepStatus, string> = {
   pending: 'border border-dashed text-muted-foreground',
   running: 'bg-primary text-primary-foreground',
@@ -35,9 +32,6 @@ const stepClass: Record<StepStatus, string> = {
   failed: 'bg-destructive/10 text-destructive',
 }
 
-// Các bước con của job theo mức thu (backend jobs/pipeline.py). API cho biết bước đang chạy (`step`)
-// và trạng thái chung. Bước "media" là lúc chuẩn bị, ngay trước bước con đầu tiên sau collect.
-// Bước match có từ T40; job cũ hoặc job bị bỏ qua bước match vẫn hiện done.
 const STEPS_BY_LEVEL: Record<string, string[]> = {
   full: ['collect', 'transcribe', 'frames', 'ocr', 'match', 'analyze'],
   text: ['collect', 'ocr', 'match', 'analyze'],
@@ -52,7 +46,7 @@ function stepStatus(job: Job, steps: string[], i: number): StepStatus {
   if (job.status === 'done') return 'done'
   if ((job.status === 'queued' || job.status === 'waiting') && !job.step) return 'pending'
   const current = job.step === 'media' ? 1 : steps.indexOf(job.step ?? '')
-  // Job đang chờ ở hàng đợi kế tiếp: `step` là bước sắp chạy, các bước trước đã xong.
+
   if (job.status === 'queued') return i < current ? 'done' : 'pending'
   if (i < current) return 'done'
   if (i > current) return 'pending'
@@ -86,9 +80,8 @@ export default function CollectPage() {
   })
 
   const [channelAdded, setChannelAdded] = useState(false)
-  const [queuedCount, setQueuedCount] = useState(0) // số job vừa tạo từ link playlist
+  const [queuedCount, setQueuedCount] = useState(0)
 
-  // Link kênh đi vào watchlist (kênh tự thu 10 video mới nhất); link video tạo job collect như cũ.
   const create = useMutation({
     mutationFn: async () => {
       const channel = isChannelInput(input)

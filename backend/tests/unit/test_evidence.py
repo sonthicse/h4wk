@@ -81,9 +81,8 @@ def test_finalize_writes_locked_capture(captures_dir: Path) -> None:
         "sources/ytdlp/video.mp4",
     }
     assert m.collected_at == T1 and m.previous_capture is None
-    assert [c.status for c in m.sources] == ["ok", "blocked"]  # có cả lần gọi thất bại
+    assert [c.status for c in m.sources] == ["ok", "blocked"]
     assert m.tool_version.startswith("h4wk ")
-    # Không còn thư mục tạm, và cả file lẫn thư mục đều chỉ đọc.
     assert [p.name for p in captures_dir.iterdir()] == ["20261119T090000"]
     for p in [cap, *cap.rglob("*")]:
         assert not p.stat().st_mode & (stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH), p
@@ -123,7 +122,7 @@ def test_recapture_points_to_previous(captures_dir: Path) -> None:
 def test_failed_finalize_leaves_no_capture(captures_dir: Path) -> None:
     _capture(captures_dir, T1)
     with pytest.raises(FileExistsError):
-        _capture(captures_dir, T1)  # trùng mốc giờ
+        _capture(captures_dir, T1)
     assert [p.name for p in captures_dir.iterdir()] == ["20261119T090000"]
 
 

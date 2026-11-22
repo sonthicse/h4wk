@@ -4,8 +4,6 @@ import { reanalyze } from '@/api/jobs'
 import { LoaderCircleIcon } from '@/components/animate-ui/icons/loader-circle'
 import { Button } from '@/components/ui/button'
 
-// Phân tích lại bản thu đã xử lý (không thu lại), ví dụ sau khi sửa đối tượng.
-// Bỏ trống videoIds là mọi video. Job hiện ở trang Collect.
 export default function ReanalyzeButton({ videoIds, label }: { videoIds?: string[]; label: string }) {
   const queryClient = useQueryClient()
   const run = useMutation({

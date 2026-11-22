@@ -1,7 +1,3 @@
-# /// script
-# requires-python = ">=3.12,<3.13"
-# dependencies = ["paddleocr==3.4.1", "paddlepaddle==3.3.1", "huggingface-hub==2.4.0"]
-# ///
 """Worker OCR CPU cô lập vì PaddleX và T19 cần hai bản OpenCV khác nhau."""
 
 import json

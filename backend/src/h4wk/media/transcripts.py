@@ -12,8 +12,6 @@ from h4wk.media.timeline import Segment, Timeline
 SEGMENT_MIN_S = 8
 SEGMENT_MAX_S = 30
 
-# Thứ tự chọn transcript chính: phụ đề người đăng tải > speech-to-text trên máy > phụ đề tự động
-# của YouTube > phụ đề lấy qua Supadata.
 TRANSCRIPT_PRIORITY = [
     TranscriptKind.UPLOADED,
     TranscriptKind.STT,
@@ -116,7 +114,6 @@ def process_capture(capture_dir: Path, output_dir: Path) -> Timeline:
         except ValidationError:
             pass
         else:
-            # OCR, keyframe và hash do bước sau bổ sung; chỉ so phần do bước phụ đề tạo.
             speech_fields = {
                 "video_id": True,
                 "capture": True,

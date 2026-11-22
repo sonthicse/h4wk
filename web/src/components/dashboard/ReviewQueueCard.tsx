@@ -9,13 +9,11 @@ import { formatTime, severityVariant } from '@/lib/findings'
 const POLL_MS = 5000
 const MAX_ITEMS = 15
 
-// Mở trang Video detail tại đúng nghi vấn, giống danh sách ở trang Review queue.
 function reviewLink(item: QueueItem) {
   const f = item.finding
   return `/videos/${encodeURIComponent(f.video_id)}?finding=${encodeURIComponent(f.id)}`
 }
 
-// Một dòng như bản phác: mức độ rồi trích dẫn, cắt bớt nếu dài; chi tiết trong tooltip.
 function QueueItemRow({ item }: { item: QueueItem }) {
   const f = item.finding
   const detail = `${item.video.title ?? item.video.id} · ${f.source_kind}${f.start != null ? ` · ${formatTime(f.start)}` : ''} · ${f.category}`
@@ -33,7 +31,6 @@ function QueueItemRow({ item }: { item: QueueItem }) {
   )
 }
 
-// Hàng đợi cần rà soát: chỉ lấy nghi vấn chưa xử lý, poll mỗi 5 giây như dòng sự kiện.
 export default function ReviewQueueCard() {
   const queue = useQuery({
     queryKey: ['review-queue', 'dashboard'],

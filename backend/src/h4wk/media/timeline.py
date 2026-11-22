@@ -59,8 +59,8 @@ class Timeline(Contract):
     schema_: Literal["h4wk.timeline/1"] = Field(alias="schema")
     video_id: str
     capture: CaptureTs
-    source_video_sha256: Sha256 | None = None  # None khi mức thu không có video
-    transcript_kind: TranscriptKind | None = None  # None khi không có transcript nào
+    source_video_sha256: Sha256 | None = None
+    transcript_kind: TranscriptKind | None = None
     thumbnails: list[ThumbnailAnalysis] = []
     segments: list[Segment] = []
 
@@ -78,7 +78,6 @@ class Timeline(Contract):
                     seg = dict(seg)
                     old = seg.pop("visual")
                     if "frames" not in seg and isinstance(old, list):
-                        # Chỉ giữ frame, t; khóa thiếu hoặc sai kiểu để mô hình Frame báo lỗi.
                         seg["frames"] = [
                             {k: v[k] for k in ("frame", "t") if k in v}
                             if isinstance(v, dict)
@@ -86,7 +85,7 @@ class Timeline(Contract):
                             for v in old
                         ]
                     elif "frames" not in seg:
-                        seg["frames"] = old  # sai kiểu: để Pydantic từ chối
+                        seg["frames"] = old
                 segments.append(seg)
             data["segments"] = segments
         if isinstance(data.get("thumbnails"), list):

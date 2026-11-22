@@ -22,7 +22,6 @@ function CommentItem({
   const ref = useRef<HTMLDivElement>(null)
   const highlighted = findingId !== undefined && findingId === highlightId
 
-  // Mở bằng ?finding= của một comment thì cuộn tới comment đó.
   useEffect(() => {
     if (highlighted) ref.current?.scrollIntoView({ block: 'center' })
   }, [highlighted])
@@ -52,7 +51,6 @@ function CommentItem({
   )
 }
 
-// Comment và reply lồng một cấp (YouTube chỉ có hai cấp).
 export default function CommentsTab({
   comments,
   findingByComment,
@@ -60,13 +58,12 @@ export default function CommentsTab({
   findingHref,
 }: {
   comments: VideoComment[]
-  findingByComment: Map<string, string> // comment_id -> id nghi vấn
+  findingByComment: Map<string, string>
   highlightId: string | null
   findingHref: (findingId: string) => string
 }) {
   if (comments.length === 0) return <p className="py-4 text-sm text-muted-foreground">No comments were collected.</p>
 
-  // Reply mà không thấy comment cha trong danh sách thì coi như comment gốc để không bị mất.
   const ids = new Set(comments.map((c) => c.id))
   const topLevel = comments.filter((c) => !c.parent_id || !ids.has(c.parent_id))
   return (

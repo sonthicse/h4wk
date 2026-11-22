@@ -19,7 +19,7 @@ class PlaylistCollector:
     name = "fake"
     capabilities = {Cap.PLAYLIST_VIDEOS}
     version = "fake-1"
-    ids = IDS + [IDS[0]]  # có một ID trùng
+    ids = IDS + [IDS[0]]
     error: Exception | None = None
 
     def fetch(self, cap, target, workdir: Path) -> FetchResult:  # noqa: ANN001

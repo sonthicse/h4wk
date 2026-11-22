@@ -24,7 +24,6 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar'
 
-// Trang con (ví dụ /videos/:id, /videos/:id/captures/:capture) vẫn chọn mục cha, xem useActivePath.
 const nav = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { path: '/collect', label: 'Collect', icon: DownloadIcon },
@@ -37,15 +36,11 @@ const nav = [
 
 const settingsNav = { path: '/settings', label: 'Settings', icon: SettingsIcon }
 
-// Mục đang chọn: khớp đúng path hoặc path con; không khớp mục nào (vd /login) thì không có chỉ báo.
 function useActivePath() {
   const { pathname } = useLocation()
   return [...nav, settingsNav].find((i) => pathname === i.path || pathname.startsWith(`${i.path}/`))?.path ?? null
 }
 
-// Nền chỉ báo do Highlight vẽ và trượt giữa các mục, nên nền active tĩnh của nút được tắt; hover giữ nền nhạt cho mục chưa chọn.
-// data-slot truyền lại vì thư viện ghi đè data-slot của vỏ và của nút bằng giá trị của nó.
-// HighlightItem thay cho SidebarMenuItem: vỏ <li> có đúng một con là nút (thư viện clone con để đặt z-index).
 function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: typeof FlagIcon }) {
   return (
     <HighlightItem as="li" value={to} className="group/menu-item" data-slot="sidebar-menu-item" data-sidebar="menu-item">
@@ -66,7 +61,7 @@ function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: t
 }
 
 function ApiStatus() {
-  // Kiểm lại định kỳ để chấm trạng thái đổi khi API tắt hoặc bật lại.
+
   const { error, isPending } = useQuery({ queryKey: ['health'], queryFn: getHealth, refetchInterval: 15000 })
 
   let label = 'Connecting to API…'
@@ -91,13 +86,10 @@ export default function AppSidebar() {
   const active = useActivePath()
   return (
     <Sidebar collapsible="icon">
-      {/* Một Highlight bọc cả menu chính và Settings ở footer để chỉ báo trượt qua cả hai. */}
       <Highlight controlledItems value={active} hover={false} click={false} className="inset-0 rounded-md bg-sidebar-accent">
         <SidebarHeader>
-          {/* Ô logo giữ kích thước cố định để menu không nhảy khi thu gọn sidebar. */}
           <div className="flex items-center gap-2">
             <Logo className="size-8 shrink-0" />
-            {/* Ẩn chữ khi thu gọn; ô logo giữ nguyên kích thước nên menu không nhảy. */}
             <span className="text-lg font-semibold group-data-[collapsible=icon]:hidden">h4wk</span>
           </div>
         </SidebarHeader>

@@ -45,11 +45,9 @@ LEVEL_CAPS: dict[CollectLevel, list[Cap]] = {
         Cap.MEDIA,
     ],
 }
-# Loại dữ liệu → các trường của Normalized do nó cung cấp.
 CHANNEL_CAPS = [Cap.CHANNEL_METADATA, Cap.CHANNEL_VIDEOS]
 
 CAP_FIELDS: dict[Cap, list[str]] = {
-    # Metadata video kèm thông tin cơ bản của kênh (tên, handle), nếu nguồn trả về.
     Cap.VIDEO_METADATA: ["video", "channel"],
     Cap.CHANNEL_METADATA: ["channel"],
     Cap.CHANNEL_VIDEOS: ["video_ids"],
@@ -66,14 +64,13 @@ _ERROR_STATUS: list[tuple[type[CollectorError], SourceStatus]] = [
     (NotFound, SourceStatus.NOT_FOUND),
     (Unsupported, SourceStatus.UNSUPPORTED),
 ]
-# Các lỗi tính vào số lần lỗi liên tiếp của nguồn.
 _COUNTED = (Transient, Blocked, QuotaExceeded)
 
 
 @dataclass
 class Settings:
     priority: dict[Cap, list[str]]
-    enabled: dict[str, bool] = field(default_factory=dict)  # vắng mặt = đang bật
+    enabled: dict[str, bool] = field(default_factory=dict)
     fault_injection: set[str] = field(default_factory=set)
 
     @classmethod
@@ -82,7 +79,6 @@ class Settings:
         priority = {}
         for cap in Cap:
             listed = [str(s) for s in cfg.priority.get(cap, [])]
-            # Nguồn đã đăng ký nhưng chưa có trong file cấu hình được thử sau cùng.
             priority[cap] = listed + [n for n in registered if n not in listed]
         return cls(
             priority=priority,

@@ -15,7 +15,6 @@ const config = {
   findings: { label: 'Findings', color: 'var(--destructive)' },
 } satisfies ChartConfig
 
-// API trả ngày theo giờ Việt Nam dạng YYYY-MM-DD; hiện thành 18/11.
 function dayLabel(date: string) {
   const [, m, d] = date.split('-')
   return `${d}/${m}`

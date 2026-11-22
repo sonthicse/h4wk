@@ -40,7 +40,6 @@ const buttonVariants = cva(
   }
 )
 
-// Primitive animate-ui: scale nhẹ khi hover/nhấn, tự tắt khi reduced-motion. asChild vẫn dùng được với <a>, <Link>.
 function Button({
   className,
   variant = "default",
@@ -51,7 +50,7 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
   }) {
-  // Ép kiểu vì ButtonProps của primitive là HTMLMotionProps (khác ComponentProps<"button"> ở onDrag...) và không nhận data-*.
+
   const primitiveProps = {
     "data-variant": variant,
     "data-size": size,

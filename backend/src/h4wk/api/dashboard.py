@@ -62,7 +62,7 @@ class TopVideo(BaseModel):
     id: str
     title: str | None
     channel: str | None
-    score: int  # high 3, medium 2, low 1; bỏ nghi vấn đã bị bác
+    score: int
     findings: SeverityCounts
 
 
@@ -73,9 +73,9 @@ class Dashboard(BaseModel):
     findings_by_severity: SeverityCounts
     findings_by_status: StatusCounts
     videos_by_review_status: StatusCounts
-    activity: list[DayActivity]  # 14 ngày, cũ trước, theo giờ Việt Nam
-    youtube_quota: Usage | None  # quota YouTube API hôm nay
-    supadata_credits: Usage | None  # credit Supadata trong kỳ; None khi chưa có key hoặc lỗi
+    activity: list[DayActivity]
+    youtube_quota: Usage | None
+    supadata_credits: Usage | None
     jev_usage: JevMonthUsage | None
     top_video: TopVideo | None
 
@@ -87,7 +87,7 @@ def _day(capture: str) -> date:
 @router.get("/api/dashboard")
 def dashboard(latest_only: bool = False) -> Dashboard:
     """latest_only=true: số nghi vấn và video nổi bật chỉ tính bản thu mới nhất mỗi video."""
-    channel_count = len(watchlist.load_channels())  # danh sách kênh nằm ở config/watchlist.toml
+    channel_count = len(watchlist.load_channels())
 
     root = data_dir() / "videos"
     captures_by_video = {

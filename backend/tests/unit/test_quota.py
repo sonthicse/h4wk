@@ -13,7 +13,6 @@ NOON = datetime(2026, 11, 19, 10, 0, tzinfo=VN_TZ)
 
 
 def test_period_changes_at_pacific_midnight() -> None:
-    # 2026-11-19 15:00 +07:00 = 00:00 PST (UTC-8) ngày 19
     before = datetime(2026, 11, 19, 14, 59, tzinfo=VN_TZ)
     after = datetime(2026, 11, 19, 15, 0, tzinfo=VN_TZ)
     assert quota.period(before) == "2026-11-18"
@@ -22,7 +21,6 @@ def test_period_changes_at_pacific_midnight() -> None:
 
 
 def test_resets_at_follows_daylight_saving() -> None:
-    # giờ mùa hè (PDT, UTC-7): nửa đêm Pacific là 14:00 giờ Việt Nam
     assert quota.resets_at(datetime(2026, 7, 1, 10, 0, tzinfo=VN_TZ)) == datetime(
         2026, 7, 1, 14, 0, tzinfo=VN_TZ
     )
@@ -41,7 +39,7 @@ def test_spend_accumulates_and_new_period_resets(data_dir: Path) -> None:
 
 def test_stops_at_ninety_percent(data_dir: Path) -> None:
     quota.spend(8999, NOON)
-    quota.spend(1, NOON)  # 8999 < 9000: còn được dùng
+    quota.spend(1, NOON)
     assert quota.usage(NOON).used == 9000
     with pytest.raises(QuotaExceeded, match="9000/10000"):
         quota.spend(1, NOON)

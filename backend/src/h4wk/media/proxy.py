@@ -48,7 +48,6 @@ def _render(path: Path, inputs: list[str], options: list[str]) -> None:
 def _cached_streams(path: Path) -> list[dict]:
     if path.is_file():
         try:
-            # Đọc các gói cuối: ffprobe vẫn có thể đọc header của tệp bị cắt dở.
             subprocess.run(
                 [
                     "ffmpeg",
@@ -121,7 +120,6 @@ def prepare_media(
         for s in cached
     ):
         if not has_audio:
-            # Video câm: giữ đúng độ dài khi tạo track im lặng dành riêng cho STT.
             duration = next(s["duration"] for s in _streams(proxy) if s["codec_type"] == "video")
             audio_input = ["-f", "lavfi", "-i", "anullsrc=r=16000:cl=mono", "-t", duration]
         _render(

@@ -129,7 +129,7 @@ def test_lexicon_groups_use_c4_categories():
     assert by_phrase["xuyên tạc"] == Category.FABRICATION
     assert by_phrase["kích động"] == Category.INCITEMENT
     assert by_phrase["bí mật nhà nước"] == Category.STATE_SECRET
-    assert len({e.phrase for e in lexicon}) == len(lexicon)  # không trùng cụm từ
+    assert len({e.phrase for e in lexicon}) == len(lexicon)
     phrases = {e.phrase for e in lexicon}
     assert {"lừa đảo", "đồ hèn", "xuyên tạc", "kích động", "bí mật nhà nước"} <= phrases
 
@@ -160,8 +160,5 @@ def test_sample_capture_t44_gives_findings(tmp_path):
     entity = Entity(id="e_01", name="Trần Văn Mẫu", aliases=["Mẫu Ca"], abbreviations=["TVM"])
     hits, findings, _ = analyze(data, timeline, [entity], None, "r_x", tmp_path)
     kinds = sorted(f.source_kind for f in findings)
-    # lời nói nhắc tên kèm "lừa đảo", chữ trên hình "TRẦN VĂN MẪU LỪA ĐẢO",
-    # chữ góc "TVM đồ hèn", comment "Trần Văn Mẫu đúng là lừa đảo"
     assert kinds == ["comment", "ocr", "ocr", "speech"]
-    # Đoạn chỉ có ảnh chế khuôn mặt không có chữ nhắc tên: tầng tĩnh không bắt được (cần T41).
     assert "seg_0003" not in {f.segment_id for f in findings}

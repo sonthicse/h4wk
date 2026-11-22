@@ -10,7 +10,6 @@ const POLL_MS = 5000
 
 type BadgeVariant = 'severe' | 'default' | 'destructive' | 'outline' | 'secondary'
 
-// Nhãn và màu theo bản phác: video mới đỏ đặc, xong đen, lỗi đỏ nhạt.
 const kindBadge: Record<string, { label: string; variant: BadgeVariant }> = {
   channel_added: { label: 'channel', variant: 'outline' },
   new_video: { label: 'new video', variant: 'severe' },
@@ -19,7 +18,6 @@ const kindBadge: Record<string, { label: string; variant: BadgeVariant }> = {
   review: { label: 'review', variant: 'outline' },
 }
 
-// Một dòng: chuyện gì xảy ra, với video/kênh nào.
 function eventText(event: WatchEvent) {
   const video = event.video_title ?? event.video_id
   const channel = event.channel_title
@@ -41,7 +39,7 @@ function eventText(event: WatchEvent) {
 
 function EventItem({ event }: { event: WatchEvent }) {
   const status = event.job?.status
-  // Job còn đang chạy thì nhãn là trạng thái job (queued, running).
+
   const badge =
     status && status !== 'done' && status !== 'failed'
       ? { label: status, variant: 'secondary' as const }
@@ -71,8 +69,6 @@ function EventItem({ event }: { event: WatchEvent }) {
   )
 }
 
-// Dòng sự kiện (T31): poll mỗi 5 giây.
-// Cột phải đã tự cuộn nên hiện nhiều hơn.
 const MAX_EVENTS = 5
 
 export default function EventFeed() {

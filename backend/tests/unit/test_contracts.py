@@ -19,9 +19,8 @@ from h4wk.evidence.models import Manifest
 from h4wk.media.timeline import Timeline
 
 SHA = "a" * 64
-FID = "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3Z"  # f_ + ULID
+FID = "f_01JD3Z8K5Q6R7S8T9V0W1X2Y3Z"
 
-# ---------------------------------------------------------------- ví dụ hợp lệ
 
 MANIFEST: dict[str, Any] = {
     "schema": "h4wk.manifest/1",
@@ -199,9 +198,6 @@ SOURCES: dict[str, Any] = {
 }
 
 
-# ------------------------------------------------------------ bảng ví dụ hợp lệ
-
-
 def _set(path: str, value: Any):
     """Trả về hàm sửa một trường theo đường dẫn kiểu 'a.0.b'."""
 
@@ -258,14 +254,10 @@ VALID: list[tuple[Any, dict[str, Any]]] = [
 @pytest.mark.parametrize(("model", "data"), VALID, ids=lambda x: getattr(x, "__name__", ""))
 def test_valid_examples(model: type[BaseModel], data: dict[str, Any]) -> None:
     obj = model.model_validate(data)
-    # Ghi ra JSON rồi đọc lại phải ra cùng đối tượng.
     assert model.model_validate_json(obj.model_dump_json()) == obj
 
 
-# ----------------------------------------------------------- ví dụ bị từ chối
-
 REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
-    # manifest
     (Manifest, _set("schema", "h4wk.manifest/2")(MANIFEST), "sai phiên bản schema"),
     (Manifest, _set("sources.3.provider", "ytdlp")(MANIFEST), "no_source mà có provider"),
     (Manifest, _set("sources.0.provider", None)(MANIFEST), "ok mà không có provider"),
@@ -292,7 +284,6 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Manifest, _set("level", "everything")(MANIFEST), "mức thu không tồn tại"),
     (Manifest, _set("trigger", {"type": "watchlist"})(MANIFEST), "watchlist thiếu watch_item"),
     (Manifest, _set("api_key", "sk-123")(MANIFEST), "trường lạ"),
-    # normalized
     (Normalized, _set("transcripts.0.kind", "manual")(NORMALIZED), "loại transcript lạ"),
     (
         Normalized,
@@ -305,7 +296,6 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Normalized, _set("comments.0.parent_id", "c1")(NORMALIZED), "comment tự trả lời chính nó"),
     (Normalized, _set("comments.0.author_name", 123)(NORMALIZED), "author_name không phải chuỗi"),
     (Normalized, _set("video.views", 1)(NORMALIZED), "trường lạ"),
-    # timeline
     (Timeline, _set("segments.0.end", 90.0)(TIMELINE), "end < start"),
     (Timeline, _set("segments.0.ocr.0.t", 200.0)(TIMELINE), "khung hình ngoài đoạn"),
     (Timeline, _set("segments.0.frames.0.t", 200.0)(TIMELINE), "keyframe ngoài đoạn"),
@@ -315,11 +305,9 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Timeline, _set("segments.0.id", "7")(TIMELINE), "id đoạn sai dạng"),
     (Timeline, _set("capture", "hôm nay")(TIMELINE), "capture sai dạng"),
     (Timeline, _set("capture", "20261118T084530Z")(TIMELINE), "capture dạng UTC cũ"),
-    # hit
     (EntityHit, _set("via", "voice")(HIT), "via lạ"),
     (EntityHit, {**HIT, "via": "comment", "comment_id": None}, "via comment thiếu comment_id"),
     (EntityHit, {**HIT, "via": "face", "frame": None}, "via face thiếu frame"),
-    # finding
     (Finding, _finding(source_kind="visual", frame=None), "visual thiếu frame"),
     (
         Finding,
@@ -343,23 +331,19 @@ REJECTED: list[tuple[type[BaseModel], dict[str, Any], str]] = [
     (Finding, _finding(source_kind="visual", segment_id=None), "visual thiếu segment_id"),
     (Finding, _finding(id="f_01jd3z8k5q6r7s8t9v0w1x2y3z"), "id ULID chữ thường"),
     (Finding, _finding(key="b" * 64), "trường key đã bỏ"),
-    # review
     (ReviewDecision, _set("status", "approved")(REVIEW), "status lạ"),
     (ReviewDecision, _set("by", "thi")(REVIEW), "actor thiếu tiền tố"),
     (ReviewDecision, _set("finding_id", "f_0001")(REVIEW), "finding_id sai dạng"),
     (ReviewDecision, {**REVIEW, "status": "rejected", "note": ""}, "reject không lý do"),
     (ReviewDecision, {**REVIEW, "status": "rejected", "note": "   "}, "reject lý do trắng"),
-    # sources
     (SourcesConfig, _set("priority", {"video.media": ["tiktok"]})(SOURCES), "nguồn lạ"),
     (SourcesConfig, _set("priority", {"video.media": ["ytdlp", "ytdlp"]})(SOURCES), "trùng nguồn"),
     (SourcesConfig, _set("sources.youtube_api.api_key", "AIza…")(SOURCES), "secret trong toml"),
     (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 0}}, "0 luồng mỗi kênh"),
     (SourcesConfig, {**SOURCES, "watchlist": {"threads_per_channel": 9}}, "quá 8 luồng"),
-    # entities
     (EntitiesConfig, _set("entities.1.id", "e_01")(ENTITIES), "trùng id đối tượng"),
     (EntitiesConfig, _set("entities.0.id", "nva")(ENTITIES), "id đối tượng sai dạng"),
     (EntitiesConfig, _set("entities.0.name", "")(ENTITIES), "đối tượng thiếu tên"),
-    # watchlist
     (WatchlistConfig, _set("channels.1.channel_id", "UC1")(WATCHLIST), "trùng kênh"),
     (WatchlistConfig, _set("channels.1.id", "w_001")(WATCHLIST), "trùng id kênh"),
     (WatchlistConfig, _set("channels.0.level", "video")(WATCHLIST), "mức thu lạ"),
@@ -447,7 +431,6 @@ def test_legacy_timeline_visual_becomes_frames() -> None:
     timeline = Timeline.model_validate(legacy)
     assert timeline == Timeline.model_validate(TIMELINE)
     assert "visual" not in timeline.model_dump_json()
-    # visual cũ ngoài đoạn vẫn bị chặn như frames.
     legacy["segments"][0]["visual"][0]["t"] = 200.0
     with pytest.raises(ValidationError, match="outside segment"):
         Timeline.model_validate(legacy)
@@ -469,9 +452,6 @@ def test_legacy_validator_leaves_wrong_types_to_pydantic(patch: dict[str, Any]) 
         Timeline.model_validate({**TIMELINE, **patch})
 
 
-# ------------------------------------------------------------ quy ước chung
-
-
 def test_datetime_serializes_vietnam_time() -> None:
     m = Manifest.model_validate(MANIFEST)
     dumped = json.loads(m.model_dump_json())
@@ -480,7 +460,6 @@ def test_datetime_serializes_vietnam_time() -> None:
 
 
 def test_utc_input_is_converted_to_vietnam_time() -> None:
-    # YouTube trả giờ UTC; khi đọc vào phải đổi sang giờ Việt Nam.
     for value in ["2026-11-18T08:45:30Z", datetime(2026, 11, 18, 8, 45, 30, tzinfo=UTC)]:
         m = Manifest.model_validate({**MANIFEST, "collected_at": value})
         assert m.collected_at.utcoffset() == timedelta(hours=7)
@@ -515,9 +494,6 @@ def test_finding_start_zero_is_valid() -> None:
 def test_hits_and_findings_files_are_lists() -> None:
     TypeAdapter(list[EntityHit]).validate_python([HIT, HIT])
     TypeAdapter(list[Finding]).validate_python([FINDING])
-
-
-# ------------------------------------------------------------------- file mẫu
 
 
 @pytest.mark.parametrize(
@@ -565,7 +541,6 @@ def test_video_verdict_requires_evidence(fields, message):
         finding_ids=[f"f_{0:026d}"],
     )
     assert VideoVerdict.model_validate(valid).violation == "yes"
-    # Kết luận cũ do LLM viết có trường model: bỏ khi đọc.
     old_model = {"provider": "openrouter", "model": "x"}
     legacy = VideoVerdict.model_validate(valid | {"model": old_model})
     assert legacy == VideoVerdict.model_validate(valid)

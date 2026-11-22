@@ -66,9 +66,6 @@ def test_empty_when_nothing_collected(client: TestClient) -> None:
     assert client.get("/api/videos").json() == []
 
 
-# ----------------------------------------------------------- T29: bằng chứng
-
-
 def test_capture_manifest_and_download(client: TestClient, sample) -> None:
     detail = client.get(f"/api/videos/{VID}/captures/{CAP}").json()
     assert detail["manifest"]["level"] == "full"

@@ -12,7 +12,6 @@ const MAX_GROUPS = 10
 
 type Group = { key: string; first: VideoFinding; count: number; severity: Severity; ids: Set<string> }
 
-// Gộp nghi vấn cùng nguồn và cùng quote (khoá bỏ dấu); dòng đại diện là nghi vấn sớm nhất của nhóm.
 function groupFindings(list: VideoFinding[]): Group[] {
   const map = new Map<string, Group>()
   for (const f of list) {
@@ -30,7 +29,6 @@ function groupFindings(list: VideoFinding[]): Group[] {
   return [...map.values()]
 }
 
-// Mốc thời gian của nghi vấn; nguồn không có mốc (tiêu đề, mô tả, thumbnail, comment) thì '—'.
 const isTimed = (f: VideoFinding) => timedSources.has(f.sourceKind) && f.start !== null
 const timeRange = (f: VideoFinding) => (isTimed(f) ? `${formatTime(f.start!)}–${formatTime(f.end ?? f.start!)}` : '—')
 
@@ -40,8 +38,6 @@ const severityColor: Record<Severity, string> = {
   low: 'bg-sky-500',
 }
 
-// Thanh thời gian: tô mọi đoạn nghi vấn xuất hiện theo severity; bấm vào thanh để seek,
-// bấm vào một đoạn để mở nghi vấn và nhảy tới đầu đoạn đó − 2s.
 export default function FindingTimeline({
   findings,
   player,
@@ -60,7 +56,7 @@ export default function FindingTimeline({
   const untimed = findings.filter((f) => !isTimed(f))
   const groups = groupFindings([...timed, ...untimed])
   const listRef = useRef<HTMLUListElement>(null)
-  // Nhóm nào có đoạn đang nằm dưới đầu phát thì được tô và tự cuộn vào tầm nhìn.
+
   const nowKey = groups.find((g) => [...g.ids].some((id) => {
     const f = findings.find((x) => x.id === id)
     return f !== undefined && isTimed(f) && inSpans(f, currentTime)
@@ -69,7 +65,7 @@ export default function FindingTimeline({
     const box = listRef.current
     const row = box?.querySelector<HTMLElement>('[data-now="true"]')
     if (!box || !row) return
-    // offsetTop tính theo LI.relative nên luôn 0; đo theo toạ độ so với vùng cuộn.
+
     const top = row.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop
     box.scrollTo({ top: top - box.clientHeight / 3, behavior: 'smooth' })
   }, [nowKey])

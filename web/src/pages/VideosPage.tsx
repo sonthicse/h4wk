@@ -8,8 +8,6 @@ import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { formatVnDateTime } from '@/lib/format'
 
-// Danh sách video đã thu (GET /api/videos), mới thu trước.
-// Mã bản thu YYYYMMDDTHHMMSS đã là giờ Việt Nam: đổi sang HH:MM dd/mm/yyyy.
 const captureLabel = (id: string) => {
   const m = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})\d{2}$/.exec(id)
   return m ? `${m[4]}:${m[5]} ${m[3]}/${m[2]}/${m[1]}` : id

@@ -42,7 +42,6 @@ export default function FilesTable({ videoId, captureId, capture }: { videoId: s
   })
   const sizes = new Map(capture.files.map((f) => [f.path, f.bytes]))
 
-  // Danh sách hiển thị: theo manifest; sau khi verify thì theo kết quả (có thêm file `unexpected`).
   const result = verify.data
   const rows: VerifyFile[] =
     result?.files ??

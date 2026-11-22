@@ -3,7 +3,6 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 
 export type DonutSlice = { key: string; label: string; value: number; color: string }
 
-// Biểu đồ vòng tròn: mỗi nhóm một cung, tổng số ở giữa. Không có dữ liệu thì vẽ vòng xám.
 export default function Donut({ slices, centerLabel }: { slices: DonutSlice[]; centerLabel: string }) {
   const total = slices.reduce((sum, s) => sum + s.value, 0)
   const config = Object.fromEntries(slices.map((s) => [s.key, { label: s.label, color: s.color }])) satisfies ChartConfig
@@ -13,7 +12,6 @@ export default function Donut({ slices, centerLabel }: { slices: DonutSlice[]; c
     <div className="relative size-22 shrink-0">
       <ChartContainer config={config} className="relative z-10 aspect-square size-22">
         <PieChart>
-          {/* Tooltip hiện ngay tại chỗ (không trượt theo chuột) và nằm trên số ở giữa vòng tròn. */}
           {total > 0 && (
             <ChartTooltip
               isAnimationActive={false}

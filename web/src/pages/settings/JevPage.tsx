@@ -27,7 +27,7 @@ const sourceLabel: Record<string, string> = {
 }
 
 const num = (n: number) => n.toLocaleString('en-US')
-// Null nghĩa là TypeSafe không báo số; khác với 0.
+
 const tokens = (n: number | null) => (n === null ? 'Not reported' : num(n))
 
 function KeyCard() {
@@ -80,7 +80,6 @@ function KeyCard() {
             <AlertDescription>Add a TypeSafe API key to analyse speech, comments, titles and images.</AlertDescription>
           </Alert>
         )}
-        {/* Cùng cách nhập key như thẻ nguồn ở Settings → Sources. */}
         <div className="space-y-1.5">
           <label htmlFor="jev-key" className="font-medium">
             TypeSafe API key

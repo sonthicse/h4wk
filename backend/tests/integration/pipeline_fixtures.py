@@ -83,7 +83,6 @@ def fake_source(
         "_recognize",
         lambda paths: [[{"text": "Chữ", "bbox": [0, 0, 1, 1], "score": 1}] for _ in paths],
     )
-    # Mọi khung giống hệt nhau về hình: bước chọn keyframe chỉ giữ khung đầu (chữ "Chữ" quá ngắn).
     monkeypatch.setattr(
         pipeline,
         "_ref_embedder",

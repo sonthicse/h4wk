@@ -1,6 +1,5 @@
 import { useRef, useState, type SyntheticEvent } from 'react'
 
-// Giao diện của trình phát; các thành phần khác (transcript, thanh nghi vấn, keyframe) chỉ dùng phần này.
 export type PlayerControls = {
   currentTime: number
   playing: boolean
@@ -10,7 +9,6 @@ export type PlayerControls = {
   pause: () => void
 }
 
-// Phần gắn vào thẻ <video> thật.
 export type VideoProps = {
   ref: React.RefObject<HTMLVideoElement | null>
   onLoadedMetadata: (e: SyntheticEvent<HTMLVideoElement>) => void
@@ -20,11 +18,9 @@ export type VideoProps = {
   onError: () => void
 }
 
-// Hook trên thẻ <video>: currentTime = video.currentTime, seek = gán video.currentTime.
-// `durationHint` (từ metadata) dùng khi chưa có media; có media thì lấy độ dài thật của file.
 export function usePlayer(durationHint: number, initialTime = 0, autoplay = false) {
   const ref = useRef<HTMLVideoElement>(null)
-  const target = useRef(initialTime) // vị trí muốn tới; áp dụng khi media nạp xong nếu seek quá sớm
+  const target = useRef(initialTime)
   const [currentTime, setCurrentTime] = useState(initialTime)
   const [playing, setPlaying] = useState(false)
   const [mediaDuration, setMediaDuration] = useState(0)
@@ -45,7 +41,7 @@ export function usePlayer(durationHint: number, initialTime = 0, autoplay = fals
       const el = e.currentTarget
       setMediaDuration(Number.isFinite(el.duration) ? el.duration : 0)
       if (target.current > 0) el.currentTime = target.current
-      // Trình duyệt có thể chặn tự phát; khi đó người dùng bấm Play.
+
       if (autoplay) el.play().catch(() => {})
     },
     onTimeUpdate: (e) => setCurrentTime(e.currentTarget.currentTime),

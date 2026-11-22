@@ -27,7 +27,6 @@ function timeRange(f: Finding) {
   return f.start == null ? '—' : `${formatTime(f.start)}–${formatTime(f.end ?? f.start)}`
 }
 
-// Mở trang Video detail tại đúng nghi vấn (trang tự nhảy tới start − 2s).
 function videoLink(f: Finding) {
   return `/videos/${encodeURIComponent(f.video_id)}?finding=${encodeURIComponent(f.id)}`
 }
@@ -129,12 +128,10 @@ export default function FindingsPage() {
   const [filters, setFilters] = useState<Filters>(emptyFilters)
   const [selected, setSelected] = useState<Finding | null>(null)
 
-  // Dùng hàng đợi rà soát để có trạng thái của từng nghi vấn (chỉ lần phân tích mới nhất mỗi bản thu).
   const findings = useQuery({ queryKey: ['review-queue'], queryFn: () => listQueue() })
   const statusOf = (f: Finding): ReviewStatus => findings.data?.find((it) => it.finding.id === f.id)?.status ?? 'unreviewed'
   const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
-  // Nghi vấn chỉ ghi id đối tượng (e_01); tên lấy từ danh sách đối tượng.
-  // Vi phạm xét theo nội dung (violence, hate, forgery, state_secret) có thể không có đối tượng.
+
   const entityName = (id: string | null | undefined) => (id ? (entities.data?.find((e) => e.id === id)?.name ?? id) : '—')
 
   const allFindings = (findings.data ?? []).map((it) => it.finding)
@@ -245,7 +242,6 @@ export default function FindingsPage() {
               </TableCell>
               <TableCell>{f.source_kind}</TableCell>
               <TableCell className="whitespace-nowrap">{entityName(f.entity)}</TableCell>
-              {/* Cột Quote lấy phần rộng còn lại và cắt chữ, để bảng vừa khung không cuộn ngang. */}
               <TableCell className="w-full max-w-0 truncate" title={f.quote}>
                 {f.quote}
               </TableCell>

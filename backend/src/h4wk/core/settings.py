@@ -9,7 +9,6 @@ from h4wk.core import tomlw
 from h4wk.core.config import config_dir
 from h4wk.core.config_models import SourcesConfig, load_toml
 
-# Tên nguồn → tên secret chứa API key (yt-dlp không cần key).
 SOURCE_KEYS: dict[str, str | None] = {
     "ytdlp": None,
     "youtube_api": "YOUTUBE_API_KEY",

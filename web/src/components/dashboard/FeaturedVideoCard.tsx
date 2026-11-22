@@ -10,15 +10,12 @@ type Severity = Finding['severity']
 const WEIGHT: Record<Severity, number> = { high: 3, medium: 2, low: 1 }
 const LEAD_S = 2
 
-// Nghi vấn của video nổi bật (backend chọn ở /api/dashboard: high 3, medium 2, low 1, bỏ đã Reject), nặng nhất trước.
 function videoFindings(findings: Finding[], videoId: string) {
   return findings
     .filter((f) => f.video_id === videoId)
     .sort((a, b) => WEIGHT[b.severity] - WEIGHT[a.severity] || (a.start ?? 0) - (b.start ?? 0))
 }
 
-// Mô tả YouTube thường mở đầu bằng chính tiêu đề (có khi thêm tên kênh, viết hoa, đổi thứ tự),
-// nên bỏ dòng đầu nếu gần như trùng bộ từ với tiêu đề để không bị lặp.
 function stripRepeatedTitle(description: string, title?: string | null) {
   if (!title) return description
   const tokens = (s: string) =>
@@ -42,9 +39,6 @@ function stripRepeatedTitle(description: string, title?: string | null) {
   return similar >= 0.8 ? lines.slice(first + 1).join('\n').trim() : description
 }
 
-// Trình phát nhúng của YouTube (bản nocookie), tự phát không tiếng từ giây `start`.
-// Ẩn hết nút điều khiển của YouTube; thẻ bọc ngoài là link nên iframe không nhận chuột.
-// Khi backend có luồng video proxy (T26) thì thay bằng <video> phát từ bản thu.
 function EmbeddedPlayer({ videoId, start }: { videoId: string; start: number }) {
   const src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&mute=1&start=${start}&rel=0&controls=0&disablekb=1&fs=0&modestbranding=1&iv_load_policy=3`
   return (
@@ -88,7 +82,6 @@ export default function FeaturedVideoCard({ topVideoId }: { topVideoId: string |
     )
   }
 
-  // Phát từ nghi vấn nặng nhất (danh sách đã sắp nặng trước).
   const start = Math.max(0, Math.floor((top.findings[0].start ?? 0) - LEAD_S))
   const description = stripRepeatedTitle(detail.data?.video.description ?? '', video?.title)
 

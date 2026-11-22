@@ -42,17 +42,16 @@ RUN_DIR = DERIVED_DIR / "analysis" / RUN_ID
 REFS_DIR = HERE / "refs" / ENTITY
 SRC = "sources/ytdlp"
 
-# Kịch bản 40 giây, 4 đoạn 10 giây.
-CUES = [  # (start, end, lời nói) — chỉ có trong phụ đề
+CUES = [
     (0.5, 4.5, "Hôm nay mình nói về Trần Văn Mẫu."),
     (5.0, 9.5, "Ai cũng biết hắn là kẻ lừa đảo."),
     (10.5, 19.0, "Mọi người xem dòng chữ trên màn hình."),
     (20.5, 29.0, "Còn đây là bức ảnh mà ai cũng đang chia sẻ."),
     (30.5, 39.0, "Hẹn gặp lại các bạn ở video sau."),
 ]
-BIG_TEXT = "TRẦN VĂN MẪU LỪA ĐẢO"  # 10–20 s, giữa khung
-MEME_TEXT = "TỘI PHẠM"  # 20–30 s, đè lên ảnh khuôn mặt, không nhắc tên
-CORNER_TEXT = "TVM đồ hèn"  # 34.0–35.0 s, chữ nhỏ góc dưới phải
+BIG_TEXT = "TRẦN VĂN MẪU LỪA ĐẢO"
+MEME_TEXT = "TỘI PHẠM"
+CORNER_TEXT = "TVM đồ hèn"
 FRAMES = {
     "frames/000015.jpg": 15.0,
     "frames/000025.jpg": 25.0,
@@ -64,7 +63,6 @@ BBOX_FACE = [192, 52, 256, 256]
 BBOX_REF = [400, 80, 200, 200]
 BBOX_CORNER = [545, 336, 88, 18]
 BBOX_MEME = [218, 316, 202, 38]
-# id nghi vấn: f_ + ULID (cố định để fixture ổn định).
 FIDS = [f"f_01JD3Z8K5Q6R7S8T9V0W1X2Y3{c}" for c in "ABCDE"]
 
 

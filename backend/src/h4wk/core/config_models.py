@@ -14,9 +14,6 @@ def _no_duplicates[T](items: list[T]) -> list[T]:
     return items
 
 
-# ---------------------------------------------------------------- sources.toml
-
-
 class SourceName(StrEnum):
     YTDLP = "ytdlp"
     YOUTUBE_API = "youtube_api"
@@ -25,7 +22,7 @@ class SourceName(StrEnum):
 
 class SourceConfig(Contract):
     enabled: bool = True
-    fault_injection: bool = False  # giả lập nguồn bị chặn, cho test và demo
+    fault_injection: bool = False
 
 
 class YtDlpConfig(SourceConfig):
@@ -45,19 +42,14 @@ class CollectSettings(Contract):
 class WatchlistSettings(Contract):
     check_interval_min: int = Field(default=2, ge=1)
     initial_videos: int = Field(default=10, ge=0)
-    # Mỗi kênh xử lý song song tối đa bấy nhiêu video; các kênh chạy song song với nhau.
     threads_per_channel: int = Field(default=1, ge=1, le=8)
 
 
 class SourcesConfig(Contract):
     sources: SourcesSection = SourcesSection()
-    # Thứ tự ưu tiên nguồn cho từng loại dữ liệu.
     priority: dict[Cap, Annotated[list[SourceName], AfterValidator(_no_duplicates)]] = {}
     collect: CollectSettings = CollectSettings()
     watchlist: WatchlistSettings = WatchlistSettings()
-
-
-# -------------------------------------------------------------- watchlist.toml
 
 
 class WatchChannel(Contract):

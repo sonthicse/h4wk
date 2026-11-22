@@ -55,13 +55,12 @@ def _run(monkeypatch, replies):
     monkeypatch.setattr(jev.secrets, "get", lambda name: SECRET)
     monkeypatch.setattr(jev.urllib.request, "urlopen", urlopen)
     monkeypatch.setattr(jev.time, "sleep", lambda s: None)
-    monkeypatch.setattr(jev, "CONCURRENCY", 1)  # trả lời theo đúng thứ tự request
+    monkeypatch.setattr(jev, "CONCURRENCY", 1)
     return jev.classify(data.model_copy(update={"comments": []}), timeline, [ENTITY], [], "r_x")
 
 
 def test_one_line_per_logical_request(data_dir, monkeypatch):
     http = lambda code: HTTPError(jev.URL, code, "", {"retry-after": "0"}, None)  # noqa: E731
-    # title: ok; đoạn có OCR: 429, 429 rồi ok.
     _run(monkeypatch, [_answer(), http(429), http(429), _answer(0.1)])
     rows = _lines(data_dir)
     sources = [r["source_kind"] for r in rows]
@@ -141,13 +140,13 @@ def test_usage_api_periods_sources_and_errors(client: TestClient, data_dir):
         ("speech", "ocr", "visual", "thumbnail", "comment", "metadata")
     )
     meta = next(s for s in today["by_source"] if s["source"] == "metadata")
-    assert meta["requests"] == 2 and meta["kept"] == 1  # tiêu đề và mô tả gộp một dòng
+    assert meta["requests"] == 2 and meta["kept"] == 1
     week = client.get("/api/settings/jev/usage?period=7d").json()
     assert week["requests"] == 4 and week["errors"] == 1
     assert week["recent_errors"][0]["status"] == "HTTP 500"
     assert week["recent_errors"][0]["source"] == "speech"
     month = client.get("/api/settings/jev/usage?period=30d").json()
-    assert month["requests"] == 5  # dòng 40 ngày trước bị loại
+    assert month["requests"] == 5
     assert "limit" not in month
     for key in ("since", "until"):
         assert datetime.fromisoformat(month[key]).utcoffset() == timedelta(hours=7)
@@ -191,7 +190,7 @@ def test_connection_test_ok_error_and_no_key(client: TestClient, data_dir, monke
     audit = (data_dir / "log" / "audit.jsonl").read_text(encoding="utf-8")
     assert "settings.jev.test" in audit and SECRET not in audit
     usage = client.get("/api/settings/jev/usage").json()
-    assert usage["requests"] == 2  # thiếu key thì chưa gửi
+    assert usage["requests"] == 2
     assert usage["by_source"][-1]["source"] == "connection_test"
     assert usage["recent_errors"][0]["video_id"] is None
 
@@ -201,7 +200,7 @@ def test_dashboard_has_jev_usage_field(client: TestClient, data_dir):
 
 
 def test_month_start_uses_vietnam_time():
-    utc_evening = datetime.fromisoformat("2026-10-31T18:00:00+00:00")  # 01/11 01:00 giờ VN
+    utc_evening = datetime.fromisoformat("2026-10-31T18:00:00+00:00")
     assert jev_log.month_start(utc_evening).isoformat() == "2026-11-01T00:00:00+07:00"
 
 

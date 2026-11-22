@@ -19,7 +19,6 @@ DSH = Path.home() / ".dsh"
 SOURCES = DSH / "skill-sources"
 AGENT_SKILLS = SOURCES / "agent-skills"
 
-# handle -> skill. Skill của agent-skills nằm ở agent-skills/skills/<tên>; playwright-cli nằm riêng.
 SKILLS = {
     "lead": ["planning-and-task-breakdown", "spec-driven-development", "interview-me"],
     "backend": [
@@ -73,7 +72,6 @@ def main() -> int:
             dest = root / "skills" / skill
             shutil.rmtree(dest, ignore_errors=True)
             shutil.copytree(source_of(skill), dest)
-        # Skill của agent-skills trỏ tới ../../references/*.md, tính từ skills/<tên>/SKILL.md.
         if any(s != "playwright-cli" for s in skills):
             shutil.rmtree(root / "references", ignore_errors=True)
             shutil.copytree(AGENT_SKILLS / "references", root / "references")

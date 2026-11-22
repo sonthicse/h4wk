@@ -48,7 +48,6 @@ def recover(queue: Literal["default", "gpu"]) -> list[str]:
         task = next_task(job)
         if task not in QUEUE_TASKS[queue]:
             continue
-        # Giành job bằng update có điều kiện: mỗi worker đều gọi on_startup.
         with Session(get_engine()) as s:
             res = s.execute(
                 update(JobRow)  # type: ignore[arg-type]

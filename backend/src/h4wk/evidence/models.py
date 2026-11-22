@@ -25,9 +25,9 @@ class SourceStatus(StrEnum):
     QUOTA_EXCEEDED = "quota_exceeded"
     NOT_FOUND = "not_found"
     UNSUPPORTED = "unsupported"
-    DISABLED = "disabled"  # nguồn bị tắt trong Settings
-    SUSPENDED = "suspended"  # nguồn đang bị tạm ngưng
-    NO_SOURCE = "no_source"  # không còn nguồn nào cho loại dữ liệu này
+    DISABLED = "disabled"
+    SUSPENDED = "suspended"
+    NO_SOURCE = "no_source"
 
 
 class Trigger(Contract):
@@ -43,8 +43,8 @@ class Trigger(Contract):
 
 
 class Cost(Contract):
-    quota_units: NonNegInt | None = None  # YouTube API
-    credits: NonNegInt | None = None  # Supadata
+    quota_units: NonNegInt | None = None
+    credits: NonNegInt | None = None
 
 
 class SourceCall(Contract):

@@ -51,8 +51,6 @@ def _ts(v: str | None) -> datetime | None:
 
 
 def video_from_supadata(d: dict[str, Any]) -> Video:
-    # uploadDate chỉ có ngày (00:00 UTC): published_at là 07:00 giờ VN của ngày đó, không phải
-    # giờ đăng thật.
     return Video(
         id=d["id"],
         channel_id=d["channel"]["id"],
@@ -76,11 +74,10 @@ def transcript_from_supadata(d: dict[str, Any]) -> Transcript:
         for c in d.get("content") or []
     ]
     rows = [r for r in rows if r[2]]
-    rows.sort(key=lambda r: r[0])  # sort ổn định: nguồn có thể xếp không theo thời gian
+    rows.sort(key=lambda r: r[0])
     segments = []
     for i, (start, end, text) in enumerate(rows):
         if i + 1 < len(rows):
-            # phụ đề tự động hay hiện chồng lên câu sau; end không bao giờ nhỏ hơn start
             end = max(start, min(end, rows[i + 1][0]))
         segments.append(TranscriptSegment(start=round(start, 3), end=round(end, 3), text=text))
     return Transcript(
@@ -129,7 +126,7 @@ class SupadataCollector:
     def _get(
         self, path: str, params: dict[str, Any] | None = None, timeout: float = 30
     ) -> tuple[int, dict[str, Any]]:
-        key = self.key()  # đọc mỗi lần để đổi key ở Settings có hiệu lực ngay
+        key = self.key()
         if not key:
             raise Blocked(f"{KEY_NAME} is not set")
         try:
@@ -162,8 +159,6 @@ class SupadataCollector:
     def _fetch(self, cap: Cap, target: Target, workdir: Path) -> Normalized:
         n: dict[str, Any] = {"schema": "h4wk.normalized/1"}
         if cap == Cap.VIDEO_METADATA:
-            # /youtube/video bị đánh dấu deprecated, nhưng /metadata không trả channel id mà Video
-            # bắt buộc, nên vẫn dùng.
             _, d = self._get("youtube/video", {"id": target.id})
             self._write_json(workdir / f"{target.id}.video.json", d)
             n["video"] = video_from_supadata(d)
@@ -195,7 +190,7 @@ class SupadataCollector:
         return Health(True, f"{u.plan}: {u.used}/{u.limit} credits this billing period")
 
 
-_me_cache: dict[str, tuple[float, CreditUsage | None]] = {}  # key → (thời điểm, kết quả)
+_me_cache: dict[str, tuple[float, CreditUsage | None]] = {}
 
 
 def credits_usage(collector: SupadataCollector | None = None) -> CreditUsage | None:

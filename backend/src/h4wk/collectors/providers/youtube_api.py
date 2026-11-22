@@ -40,7 +40,7 @@ from h4wk.evidence.models import Cost
 
 API = "https://www.googleapis.com/youtube/v3"
 KEY_NAME = "YOUTUBE_API_KEY"
-MAX_LIST_VIDEOS = 200  # danh sách video của kênh/playlist: tối đa 4 trang 50
+MAX_LIST_VIDEOS = 200
 CATEGORIES = {
     "1": "Film & Animation",
     "2": "Autos & Vehicles",
@@ -225,13 +225,12 @@ class YouTubeApiCollector:
         self, path: str, params: dict[str, Any], empty_on: str | None = None
     ) -> dict[str, Any]:
         """Gọi một endpoint (1 đơn vị quota). Lỗi có reason `empty_on` coi như không có dữ liệu."""
-        key = self.key()  # đọc mỗi lần để đổi key ở Settings có hiệu lực ngay
+        key = self.key()
         if not key:
             raise Blocked(f"{KEY_NAME} is not set")
         quota.spend(1, self.now())
         self._units += 1
         try:
-            # Key đặt theo từng request, không đặt trên client (request tải ảnh không mang key).
             r = self.client.get(
                 f"{API}/{path}", params=params, headers={"X-Goog-Api-Key": key}, timeout=30
             )
@@ -368,11 +367,10 @@ class YouTubeApiCollector:
         rel = f"sources/{workdir.name}"
         out = []
         for name, (url, w, h) in thumbnails_from_api(item).items():
-            # API có thể liệt kê bản lớn hơn bản thật có (vd "fhd" trả 404): thử bản nhỏ hơn.
             tries = thumbnail_candidates(item) if name == "maxres" else [(url, w, h)]
             for url, w, h in tries:
                 try:
-                    r = self.client.get(url, timeout=30)  # không kèm key, không tính quota
+                    r = self.client.get(url, timeout=30)
                 except (httpx2.TransportError, httpx2.TimeoutException) as e:
                     if name == "maxres":
                         raise Transient(str(e)) from e

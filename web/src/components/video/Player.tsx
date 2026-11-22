@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils'
 
 const severityBar = { high: 'bg-red-500/60', medium: 'bg-amber-500/60', low: 'bg-sky-500/60' }
 
-// Trình phát thật trên <video>; không có media (hoặc nạp lỗi) thì hiện khung trống, thanh seek vẫn dùng được cho transcript/timeline.
 export default function Player({
   player,
   videoProps,

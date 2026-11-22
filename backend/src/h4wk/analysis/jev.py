@@ -18,8 +18,8 @@ from h4wk.core.ids import new_ulid
 
 URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-latest"
-MAX_IMAGES = 4  # keyframe tối đa trong một request
-CONCURRENCY = 4  # số request Jev chạy song song
+MAX_IMAGES = 4
+CONCURRENCY = 4
 QUESTIONS = {
     "category": {
         "type": "choice",
@@ -132,7 +132,6 @@ QUESTIONS = {
         },
     },
 }
-# Vi phạm xét theo nội dung, không cần đối tượng: ai nói hay nhắm vào ai cũng vậy.
 QUESTIONS["violation"] = {
     "type": "choice",
     "instructions": (
@@ -220,12 +219,11 @@ def _configuration(entities, video_title):
 
 
 def _keep(answers):
-    if "target" not in answers:  # chưa khai báo đối tượng: không hỏi câu này
+    if "target" not in answers:
         return False
     return answers["is_attack"]["noul"] >= 0.5 and answers["target"]["choice"] != "none"
 
 
-# Ngưỡng tổng xác suất các danh mục vi phạm (tức 1 − P(none)); đo ở docs/eval/violation.md.
 CONTENT_THRESHOLD = 0.6
 
 
@@ -258,7 +256,6 @@ def _call(key, state, questions, images=()):
     body = {"model": MODEL, "state": state, "questions": questions}
     headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     if images:
-        # Ảnh trên API Jev còn thử nghiệm, phải bật bằng header này.
         headers["TypeSafe-Danger-Zone-Images"] = "true"
         assets = {
             f"<image-{i}>": {"type": "image", "format": "jpeg", "data_base64": _encode(path)}
@@ -422,7 +419,7 @@ def classify(
             images=[capture_dir / thumb.file] if capture_dir else [],
         )
     texts = {c.id: c.text for c in data.comments}
-    for comment in data.comments:  # mọi comment, mỗi comment một request
+    for comment in data.comments:
         parent = texts.get(comment.parent_id)
         add(
             "comment",
@@ -451,7 +448,6 @@ def classify(
             record["model"] = reply["model"]
             target = answers.get("target", {}).get("choice")
             probs = answers.get("category", {}).get("probabilities", {})
-            # Ưu tiên nghi vấn nhắm vào đối tượng; không có thì xét vi phạm theo nội dung.
             by_content = _content_violation(answers)
             if _keep(answers):
                 if target not in questions["target"]["criteria"]:
@@ -488,7 +484,7 @@ def classify(
             return None, record
 
     def request(item):
-        jev_log.take_retries()  # đếm 429 riêng cho request logic này (cùng luồng với _call)
+        jev_log.take_retries()
         finding, record = judge(item)
         jev_log.record(
             video_id=timeline.video_id,

@@ -108,11 +108,11 @@ def _reply_with(answers, seen=None):
 @pytest.mark.parametrize(
     ("violation", "attack", "expected"),
     [
-        ({"violence": 0.7, "none": 0.3}, 0.1, ("violence", None)),  # vi phạm theo nội dung
-        ({"hate": 0.4, "none": 0.6}, 0.1, None),  # dưới ngưỡng
-        ({"violence": 0.35, "hate": 0.3, "none": 0.35}, 0.1, ("violence", None)),  # chia đôi
-        ({"violence": 0.55, "none": 0.45}, 0.1, None),  # dưới 0,6
-        ({"violence": 0.9}, 0.8, ("insult", "e_01")),  # nhắm vào đối tượng thì ưu tiên
+        ({"violence": 0.7, "none": 0.3}, 0.1, ("violence", None)),
+        ({"hate": 0.4, "none": 0.6}, 0.1, None),
+        ({"violence": 0.35, "hate": 0.3, "none": 0.35}, 0.1, ("violence", None)),
+        ({"violence": 0.55, "none": 0.45}, 0.1, None),
+        ({"violence": 0.9}, 0.8, ("insult", "e_01")),
     ],
 )
 def test_content_violation(monkeypatch, violation, attack, expected):
@@ -280,7 +280,7 @@ def test_call_with_images_resizes_and_lists_state(monkeypatch, tmp_path):
         assert asset["type"] == "image" and asset["format"] == "jpeg"
         raw = np.frombuffer(base64.b64decode(asset["data_base64"]), np.uint8)
         shapes.append(cv2.imdecode(raw, cv2.IMREAD_COLOR).shape[:2])
-    assert shapes[0] == (320, 1024)  # 640x200 -> 1024x320
+    assert shapes[0] == (320, 1024)
     assert min(shapes[1]) == 320
 
 
@@ -333,14 +333,11 @@ def test_classify_sends_keyframes_and_thumbnail_images(monkeypatch, tmp_path):
     by_text = {s["source_type"]: (s, imgs) for s, imgs in calls if imgs}
     keyframes = [(s, imgs) for s, imgs in calls if "keyframe" in s["source_type"]]
     assert len(keyframes) == 2
-    # Chọn theo nội dung, không theo thứ tự các luồng.
     first = next(c for c in keyframes if c[0]["text"])
     second = next(c for c in keyframes if not c[0]["text"])
-    # 7 keyframe lấy cách đều còn 4; dòng OCR lặp chỉ gửi một lần.
     assert first[0]["text"] == "Dòng chữ"
     assert first[1] == [derived / f"frames/{i}.jpg" for i in (1, 3, 5, 7)]
     assert second[0]["text"] == "" and second[1] == [derived / "frames/9.jpg"]
-    # Đoạn chỉ có ảnh sinh nghi vấn visual đúng frame, quote rỗng; đoạn có chữ sinh ocr.
     visual = [f for f in findings if f.source_kind == "visual"]
     assert [(f.segment_id, f.frame, f.quote) for f in visual] == [("seg_0002", "frames/9.jpg", "")]
     ocr_findings = [f for f in findings if f.source_kind == "ocr"]

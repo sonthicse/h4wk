@@ -29,7 +29,6 @@ function checkResultText(n: number) {
   return n === 1 ? '1 new video' : `${n} new videos`
 }
 
-// Một dòng của bảng watchlist. Mỗi dòng có mutation riêng để Check now của kênh này không chặn kênh khác.
 export default function WatchlistRow({ item }: { item: WatchItem }) {
   const queryClient = useQueryClient()
   const [confirming, setConfirming] = useState(false)

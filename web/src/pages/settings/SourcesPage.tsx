@@ -19,7 +19,6 @@ import {
   type SourcesSettings,
 } from '@/api/settings'
 
-// Bản nháp: những gì người dùng đang sửa nhưng chưa Save.
 type Draft = {
   enabled: Record<SourceName, boolean>
   priority: Record<Cap, SourceName[]>
@@ -29,7 +28,7 @@ type Draft = {
 function toDraft(data: SourcesSettings): Draft {
   return {
     enabled: Object.fromEntries(data.sources.map((s) => [s.name, s.enabled])) as Draft['enabled'],
-    // Loại dữ liệu mà file cấu hình không ghi thì coi là rỗng.
+
     priority: Object.fromEntries(caps.map((c) => [c, [...(data.priority[c] ?? [])]])) as Draft['priority'],
     keys: {},
   }
@@ -37,7 +36,7 @@ function toDraft(data: SourcesSettings): Draft {
 
 function SourcesForm({ data }: { data: SourcesSettings }) {
   const queryClient = useQueryClient()
-  const [saved, setSaved] = useState(toDraft(data)) // bản đã lưu, để so sánh
+  const [saved, setSaved] = useState(toDraft(data))
   const [draft, setDraft] = useState(toDraft(data))
   const [justSaved, setJustSaved] = useState(false)
 
@@ -48,7 +47,7 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
         sources: Object.fromEntries(changed.map((s) => [s.name, { enabled: draft.enabled[s.name] }])),
         priority: draft.priority,
       })
-      // Bật/tắt và thứ tự đã lưu; key mới (nếu có) vẫn là thay đổi chưa lưu.
+
       setSaved({ ...draft, keys: saved.keys })
       for (const [name, value] of Object.entries(draft.keys)) {
         if (!value) continue
@@ -59,7 +58,7 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
             `Settings saved, but the ${sourceLabel[name as SourceName]} key was not: ${e instanceof Error ? e.message : e}`,
           )
         }
-        // Key đã lưu thì bỏ khỏi bản nháp, để lần Save sau không gửi lại.
+
         setDraft((d) => ({ ...d, keys: { ...d.keys, [name]: '' } }))
       }
     },
@@ -75,8 +74,7 @@ function SourcesForm({ data }: { data: SourcesSettings }) {
 
   const paused = Object.fromEntries(data.sources.map((s) => [s.name, s.status === 'paused'])) as Record<SourceName, boolean>
   const implemented = Object.fromEntries(data.sources.map((s) => [s.name, s.implemented])) as Record<SourceName, boolean>
-  // `uncovered` tính theo trạng thái đã lưu: tắt hết nguồn trong bản nháp thì cảnh báo cap rỗng chỉ hiện sau khi Save.
-  // Danh sách rỗng nghĩa là file cấu hình không ghi; backend tự thử mọi nguồn, chỉ báo khi API báo `uncovered`.
+
   const emptyCaps = caps.filter((c) =>
     draft.priority[c].length > 0
       ? draft.priority[c].every((n) => !draft.enabled[n] || !implemented[n])
@@ -181,6 +179,6 @@ export default function SourcesPage() {
     )
   }
   if (!settings.data) return <Skeleton className="h-96 w-full" />
-  // Form giữ bản nháp riêng nên khi Resume làm dữ liệu tải lại, phần đang sửa không bị mất.
+
   return <SourcesForm data={settings.data} />
 }

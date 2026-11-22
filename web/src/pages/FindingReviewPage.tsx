@@ -15,7 +15,6 @@ import { formatTime, inSpans, severityVariant, showReason } from '@/lib/findings
 import { formatVnDateTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
-// Hàng đợi và quyết định lấy từ API rà soát (T25); quyết định ghi vào reviews.jsonl ở backend.
 type View = 'unreviewed' | 'needs_info' | 'all'
 
 const statusVariant: Record<ReviewStatus, 'outline' | 'default' | 'secondary'> = {
@@ -30,13 +29,11 @@ function timeRange(item: QueueItem) {
   return f.start == null ? '—' : `${formatTime(f.start)}–${formatTime(f.end ?? f.start)}`
 }
 
-// Mở trang Video detail tại đúng nghi vấn (trang tự nhảy tới start − 2s).
 function videoLink(item: QueueItem) {
   const f = item.finding
   return `/videos/${encodeURIComponent(f.video_id)}?finding=${encodeURIComponent(f.id)}`
 }
 
-// Khung hình của nghi vấn ocr/visual/thumbnail kèm khung bao, dùng lại FrameImage của Video detail.
 function FramePreview({ item, entityNames }: { item: QueueItem; entityNames: Record<string, string> }) {
   const f = item.finding
   const timeline = useQuery({
@@ -76,7 +73,7 @@ export default function FindingReviewPage() {
   const queryClient = useQueryClient()
   const queueQuery = useQuery({ queryKey: ['review-queue'], queryFn: () => listQueue() })
   const entities = useQuery({ queryKey: ['entities'], queryFn: listEntities })
-  // Vi phạm xét theo nội dung (violence, hate, forgery, state_secret) có thể không có đối tượng.
+
   const entityName = (id: string | null | undefined) => (id ? (entities.data?.find((e) => e.id === id)?.name ?? id) : '—')
   const entityNames = Object.fromEntries((entities.data ?? []).map((e) => [e.id, e.name]))
   const [view, setView] = useState<View>('unreviewed')
@@ -85,7 +82,6 @@ export default function FindingReviewPage() {
   const [note, setNote] = useState('')
   const noteRef = useRef<HTMLTextAreaElement>(null)
 
-  // Backend đã sắp theo mức độ rồi thời gian.
   const all = queueQuery.data ?? []
   const queue = all.filter((it) => view === 'all' || it.status === view)
   const selected = queue.find((it) => it.finding.id === selectedId) ?? queue[0] ?? null
@@ -118,7 +114,7 @@ export default function FindingReviewPage() {
       setRejecting(true)
       return
     }
-    // Sang nghi vấn kế tiếp trong hàng đợi để duyệt liên tục không phải rời trang.
+
     const i = queue.indexOf(selected)
     const next = queue[i + 1] ?? (i > 0 ? queue[i - 1] : undefined)
     save.mutate(
@@ -137,7 +133,6 @@ export default function FindingReviewPage() {
     if (rejecting) noteRef.current?.focus()
   }, [rejecting])
 
-  // Phím tắt: j/k hoặc ↓/↑ chuyển nghi vấn, c Confirm, r Reject, n Needs info. Bỏ qua khi đang gõ chữ.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const target = e.target as HTMLElement
@@ -225,7 +220,6 @@ export default function FindingReviewPage() {
           </ul>
         </HoverHighlight>
 
-        {/* key theo nghi vấn để panel cuộn lại về đầu mỗi khi chuyển nghi vấn. */}
         <section key={f?.id} className="min-h-0 overflow-y-auto rounded-md border p-4">
           {selected && f ? (
             <div className="space-y-4">

@@ -23,8 +23,8 @@ from h4wk.media.files import atomic_output
 class KeyframeSettings(Contract):
     """Ngưỡng giữ khung (cố định trong code)."""
 
-    phash_threshold: int = Field(default=6, ge=0, le=64)  # số bit khác nhau trong pHash 64 bit
-    tile_threshold: float = Field(default=2.0, ge=0, le=255)  # lệch trung bình mỗi ô, 0–255
+    phash_threshold: int = Field(default=6, ge=0, le=64)
+    tile_threshold: float = Field(default=2.0, ge=0, le=255)
 
 
 class Keyframe(Contract):
@@ -63,7 +63,6 @@ def _extract(proxy: Path, staging: Path, settings: KeyframeSettings) -> list[Key
     try:
         while capture.grab():
             t = capture.get(cv2.CAP_PROP_POS_MSEC) / 1000
-            # PySceneDetect làm tròn timestamp tới microsecond.
             scene = max(1, bisect_right(starts, t + 0.000001))
             slot = math.floor((t - starts[scene - 1] + 0.000001) * 2)
             if scene == previous_scene and slot == previous_slot:
@@ -79,7 +78,6 @@ def _extract(proxy: Path, staging: Path, settings: KeyframeSettings) -> list[Key
                 not new_scene
                 and (fingerprint ^ previous_hash).bit_count() <= settings.phash_threshold
             ):
-                # 4 hàng × 4 cột; lấy trung bình trên pixel và ba kênh trong từng ô.
                 tiles = cv2.absdiff(small, previous_small).reshape(4, 36, 4, 64, 3)
                 if tiles.mean(axis=(1, 3, 4)).max() <= settings.tile_threshold:
                     continue
@@ -99,9 +97,9 @@ def _extract(proxy: Path, staging: Path, settings: KeyframeSettings) -> list[Key
 
 
 SELECTED_FILE = "selected.json"
-TEXT_MIN_SCORE = 0.8  # dòng OCR dưới ngưỡng này hay là nhiễu, không tính là chữ mới
+TEXT_MIN_SCORE = 0.8
 TEXT_MIN_CHARS = 4
-TEXT_SAME_RATIO = 0.8  # hai dòng giống nhau từ mức này coi là một (OCR đọc lệch vài ký tự)
+TEXT_SAME_RATIO = 0.8
 
 
 def _fold(text: str) -> str:

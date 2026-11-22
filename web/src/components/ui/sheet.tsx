@@ -43,7 +43,6 @@ function SheetOverlay({
   )
 }
 
-// opacity-100!: Animate UI vừa trượt vừa làm mờ dần panel; giữ panel rõ nét, chỉ trượt vào.
 function SheetContent({
   className,
   children,

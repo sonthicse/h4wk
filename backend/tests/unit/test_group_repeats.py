@@ -32,10 +32,9 @@ def _analyze(tmp_path, segments, title=""):
 
 
 def test_banner_in_every_segment_becomes_one_finding(tmp_path):
-    # Hai khung trong đoạn 1 cùng có băng rôn, OCR đọc lệch ở đoạn 2.
     segments = [_segment(1, BANNER[:1] * 2), _segment(2, BANNER[1:2]), _segment(3, BANNER[2:])]
     (finding,) = _analyze(tmp_path, segments)
-    assert finding.quote == BANNER[0]  # bản đọc gặp nhiều nhất
+    assert finding.quote == BANNER[0]
     assert [o.segment_id for o in finding.occurrences] == ["seg_0001", "seg_0002", "seg_0003"]
     assert (finding.segment_id, finding.start) == ("seg_0001", 10)
     assert [o.start for o in finding.occurrences] == [10, 20, 30]
@@ -51,7 +50,6 @@ def test_different_text_or_one_segment_stays_separate(tmp_path):
     ]
     findings = _analyze(tmp_path, segments)
     assert [f.segment_id for f in findings] == ["seg_0001", "seg_0002"]
-    # Cùng một đoạn: một chỗ xuất hiện thì không cần occurrences.
     assert all(f.occurrences == [] for f in findings)
 
 

@@ -21,14 +21,13 @@ function move(order: SourceName[], from: number, to: number) {
   return next
 }
 
-// Thứ tự nguồn của một loại dữ liệu. Kéo thả bằng HTML5 drag and drop, hoặc dùng nút lên/xuống bằng bàn phím.
 export default function PriorityList({ cap, order, enabled, paused, changed, onChange }: Props) {
-  // Nguồn đang được kéo; chỉ nằm trong danh sách này nên thả sang loại dữ liệu khác sẽ bị bỏ qua.
+
   const [dragFrom, setDragFrom] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState<number | null>(null)
   const [announce, setAnnounce] = useState('')
 
-  const isEmpty = order.length === 0 // file cấu hình không ghi loại này; backend thử mọi nguồn theo thứ tự mặc định
+  const isEmpty = order.length === 0
   const noSource = !isEmpty && order.every((name) => !enabled[name])
   const allPaused = !isEmpty && !noSource && order.filter((name) => enabled[name]).every((name) => paused[name])
 
@@ -36,7 +35,7 @@ export default function PriorityList({ cap, order, enabled, paused, changed, onC
     const name = order[index]
     onChange(move(order, index, index + step))
     setAnnounce(`${sourceLabel[name]} moved to position ${index + step + 1} for ${cap}.`)
-    // Giữ focus trên nút vừa bấm sau khi danh sách đổi chỗ; nút ở mép bị khoá thì chuyển sang nút còn lại.
+
     setTimeout(() => {
       const want = document.getElementById(`${cap}-${name}-${step < 0 ? 'up' : 'down'}`) as HTMLButtonElement | null
       const other = document.getElementById(`${cap}-${name}-${step < 0 ? 'down' : 'up'}`) as HTMLButtonElement | null

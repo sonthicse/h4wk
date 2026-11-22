@@ -59,8 +59,6 @@ def test_index_survives_restart(client: TestClient) -> None:
         assert [e["id"] for e in c2.get("/api/entities").json()] == ["e_01"]
 
 
-# ------------------------------------------------------------- T39: sửa, ảnh mẫu
-
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 32
 JPG = b"\xff\xd8\xff\xe0" + b"\x01" * 32
 
@@ -145,10 +143,8 @@ def test_patch_description_set_keep_and_clear(client: TestClient) -> None:
     _add(client)
     r = client.patch("/api/entities/e_01", json={"description": "Singer"})
     assert r.json()["description"] == "Singer"
-    # Không gửi description thì giữ nguyên.
     r = client.patch("/api/entities/e_01", json={"aliases": ["Mẫu Ca"]})
     assert r.json()["description"] == "Singer" and load_entities()[0].description == "Singer"
-    # Chuỗi rỗng thì xoá, các trường khác không đổi.
     r = client.patch("/api/entities/e_01", json={"description": ""})
     assert r.status_code == 200 and r.json()["description"] is None
     saved = load_entities()[0]

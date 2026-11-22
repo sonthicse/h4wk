@@ -10,7 +10,7 @@ function formatCost(cost: SourceCall['cost']) {
   if (cost?.quota_units) parts.push(`${cost.quota_units} quota ${cost.quota_units === 1 ? 'unit' : 'units'}`)
   if (cost?.credits) parts.push(`${cost.credits} ${cost.credits === 1 ? 'credit' : 'credits'}`)
   if (parts.length) return parts.join(', ')
-  return cost ? 'free' : '—' // có ghi chi phí nhưng bằng 0: miễn phí
+  return cost ? 'free' : '—'
 }
 
 export default function SourcesTable({ sources }: { sources: SourceCall[] }) {

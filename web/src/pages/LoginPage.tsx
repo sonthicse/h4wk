@@ -17,7 +17,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
-  // Trang người dùng định vào trước khi bị chuyển sang đây (RequireLogin gửi kèm).
   const from = (location.state as { from?: string } | null)?.from ?? '/dashboard'
 
   const signIn = useMutation({

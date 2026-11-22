@@ -9,7 +9,6 @@ import TermListInput from '@/components/entities/TermListInput'
 
 type Form = { name: string; aliases: string[]; abbreviations: string[]; description: string }
 
-// Form sửa tên, biệt danh, viết tắt. Trang cha đặt `key` theo id đối tượng để form khởi tạo lại khi đổi đối tượng.
 export default function EntityForm({ entity }: { entity: Entity }) {
   const queryClient = useQueryClient()
   const initial: Form = {

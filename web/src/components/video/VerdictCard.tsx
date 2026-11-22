@@ -13,7 +13,6 @@ function Kbd({ children }: { children: React.ReactNode }) {
   return <kbd className="rounded border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">{children}</kbd>
 }
 
-// Thẻ kết luận của video, nút duyệt cả video và bằng chứng. Không có kết luận thì không hiện gì.
 export default function VerdictCard({ videoId }: { videoId: string }) {
   const queryClient = useQueryClient()
   const detail = useQuery({ queryKey: ['verdict', videoId], queryFn: () => getVerdict(videoId) })
@@ -29,7 +28,7 @@ export default function VerdictCard({ videoId }: { videoId: string }) {
       setNote('')
     },
     onSettled: (_d, err) => {
-      // 409: kết luận đã đổi, tải lại để lấy run mới.
+
       queryClient.invalidateQueries({ queryKey: ['verdict', videoId] })
       queryClient.invalidateQueries({ queryKey: ['review-videos'] })
       if (err) setRejecting(false)
@@ -52,7 +51,6 @@ export default function VerdictCard({ videoId }: { videoId: string }) {
     if (rejecting) noteRef.current?.focus()
   }, [rejecting])
 
-  // Phím tắt c/r/n như hàng đợi; bỏ qua khi đang gõ chữ.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const target = e.target as HTMLElement

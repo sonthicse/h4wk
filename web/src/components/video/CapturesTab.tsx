@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatVnDateTime } from '@/lib/format'
 import type { CaptureSummary } from '@/api/videos'
 
-// Lịch sử các lần thu của video, mới nhất ở trên; bấm mã để mở trang Capture.
 export default function CapturesTab({ captures, videoId }: { captures: CaptureSummary[]; videoId: string }) {
   if (captures.length === 0) return <p className="py-4 text-sm text-muted-foreground">No captures yet.</p>
 

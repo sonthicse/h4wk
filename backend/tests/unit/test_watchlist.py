@@ -87,11 +87,11 @@ def test_add_channel_queues_10_of_15_then_nothing(client: TestClient, fake, data
     assert r.status_code == 201, r.text
     item = r.json()
     assert item["channel_id"] == CHANNEL and not item["initialized"]
-    service.run_due()  # lần đầu: bước thêm kênh
+    service.run_due()
     assert len(_jobs(item["id"])) == 10
-    assert len(fake["started"]) == 1  # mỗi kênh một luồng: các job còn lại chờ
+    assert len(fake["started"]) == 1
     assert list((data_dir / "channels" / CHANNEL / "captures").iterdir())
-    service.check(item["id"])  # lần sau: không có gì mới
+    service.check(item["id"])
     assert len(_jobs(item["id"])) == 10
     got = client.get("/api/watchlist").json()[0]
     assert got["initialized"] and got["latest_video"]["id"] in ids
@@ -134,7 +134,7 @@ def test_each_channel_has_its_own_lane(client: TestClient, fake, config_dir, thr
     first = active(a["id"])[0]
     _finish(first)
     assert len(active(a["id"])) == threads and first not in active(a["id"])
-    assert len(active(b.id)) == threads  # kênh khác không đổi
+    assert len(active(b.id)) == threads
 
 
 def test_worker_threads_follow_channels(fake, config_dir) -> None:
@@ -149,7 +149,7 @@ def test_worker_threads_follow_channels(fake, config_dir) -> None:
 def test_check_now_also_uses_channel_listing(client: TestClient, fake) -> None:
     item = client.post("/api/watchlist", json={"url": "@VietTan"}).json()
     service.check(item["id"])
-    fake["listed"] = [_vid(7)]  # RSS còn cache, chưa có video này
+    fake["listed"] = [_vid(7)]
     r = client.post(f"/api/watchlist/{item['id']}/check")
     assert r.status_code == 200 and r.json()["new_videos"] == [_vid(7)]
 
@@ -160,7 +160,7 @@ def test_crud_and_duplicate(client: TestClient, fake) -> None:
     assert client.post("/api/watchlist", json={"url": "@VietTan"}).status_code == 409
     r = client.patch(f"/api/watchlist/{item['id']}", json={"enabled": False})
     assert r.json()["enabled"] is False
-    service.run_due()  # mục đang tắt không được kiểm tra
+    service.run_due()
     assert fake["started"] == []
     assert client.delete(f"/api/watchlist/{item['id']}").status_code == 204
     assert client.get("/api/watchlist").json() == []
@@ -175,7 +175,7 @@ def test_watchlist_file_is_the_source(client: TestClient, fake, config_dir) -> N
     assert 'channel_id = "UCJDyIKGZ9zpTKDTEXpivGZw"' in path.read_text(encoding="utf-8")
     client.patch(f"/api/watchlist/{item['id']}", json={"level": "metadata"})
     assert 'level = "metadata"' in path.read_text(encoding="utf-8")
-    service.update_item(item["id"], last_error="boom")  # trạng thái chạy không vào file
+    service.update_item(item["id"], last_error="boom")
     assert "boom" not in path.read_text(encoding="utf-8")
 
     path.write_text(

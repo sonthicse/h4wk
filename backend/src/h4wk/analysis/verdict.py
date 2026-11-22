@@ -15,7 +15,6 @@ from h4wk.core.types import VN_TZ
 
 
 def _rank(finding):
-    # Jev ghi xác suất danh mục trong lý do; các tầng khác chỉ có mức tin cậy.
     match = re.fullmatch(r"Jev: \w+ p=(\d\.\d\d)", finding.reason)
     probability = (
         float(match[1]) if match else (0, 0.6, 0.85)[list(Confidence).index(finding.confidence)]

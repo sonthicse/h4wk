@@ -93,7 +93,6 @@ def collect(body: CollectBody, actor: ActorDep) -> list[Job]:
 
 
 class ReanalyzeBody(BaseModel):
-    # Bỏ trống: mọi video đã có bản thu xử lý xong.
     video_ids: list[str] | None = None
 
 

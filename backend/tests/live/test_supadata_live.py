@@ -14,9 +14,7 @@ from h4wk.core import secrets
 from h4wk.evidence.models import Manifest, SourceStatus, Trigger
 from h4wk.evidence.verify import FileStatus, verify
 
-# Video tiếng Việt công khai, có phụ đề tự động (spike T2).
 VIDEO = "https://www.youtube.com/watch?v=oAFNS8b7br0"
-# "Me at the zoo", 19 giây, không có phụ đề tiếng Việt: đi qua native rồi generate.
 SHORT = "https://www.youtube.com/watch?v=jNQXAC9IVRw"
 
 

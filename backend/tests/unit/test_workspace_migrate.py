@@ -45,5 +45,4 @@ def test_init_moves_old_entities_and_watchlist_to_config(data_dir, config_dir):
     assert (config_dir / "watchlist.toml").is_file()
     [channel] = service.load_channels()
     assert (channel.id, channel.channel_id, channel.level) == ("w_002", "UC123", "metadata")
-    # Trạng thái chạy giữ nguyên trong database, không phải khởi tạo lại.
     assert service.get_item("w_002").initialized

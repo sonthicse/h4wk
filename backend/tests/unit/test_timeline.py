@@ -27,12 +27,12 @@ def test_grouping_cuts_only_between_sentences():
         TranscriptSegment(start=a, end=b, text=t)
         for a, b, t in [
             (0, 4, "Phía Việt Nam coi Trung Quốc"),
-            (4, 9, "là điểm tựa"),  # chữ thường: tiếp câu trước dù đoạn đã đủ 8 giây
+            (4, 9, "là điểm tựa"),
             (9, 12, "chiến lược quan trọng nhất"),
             (12, 15, "Đó là lời khẳng định."),
             (15, 20, "Ngày hôm sau"),
             (20, 24, "tờ báo đăng tin"),
-            (24, 45, "tiếp nữa"),  # đoạn sẽ dài 33 giây: buộc cắt giữa câu
+            (24, 45, "tiếp nữa"),
         ]
     ]
     segments = group_segments(sentences)

@@ -12,7 +12,6 @@ from h4wk.collectors.targets import parse_target
 from h4wk.evidence.models import Manifest, Trigger
 from h4wk.evidence.verify import FileStatus, verify
 
-# Video tiếng Việt công khai, khoảng 7 phút, có phụ đề tự động (đã dùng ở spike T2).
 VIDEO = "https://www.youtube.com/watch?v=oAFNS8b7br0"
 
 

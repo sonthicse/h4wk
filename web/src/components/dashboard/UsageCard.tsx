@@ -4,8 +4,6 @@ import type { DashboardStats, Usage } from '@/api/dashboard'
 
 const num = (n: number) => n.toLocaleString('en-US')
 
-// usage = null: nguồn chưa theo dõi mức dùng (T14/T15 chưa làm).
-// period: "today" (YouTube, reset theo ngày) hoặc "this month" (Supadata).
 function Meter({ label, period, usage, unit }: { label: string; period: string; usage: Usage | null | undefined; unit: string }) {
   if (!usage) {
     return (
@@ -29,7 +27,6 @@ function Meter({ label, period, usage, unit }: { label: string; period: string; 
   )
 }
 
-// Quota YouTube Data API, credit Supadata và token Jev đã dùng.
 export default function UsageCard({ youtubeQuota, supadataCredits, jevUsage }: { youtubeQuota: Usage | null | undefined; supadataCredits: Usage | null | undefined; jevUsage: DashboardStats['jev_usage'] }) {
   return (
     <Card className="self-start">
@@ -44,7 +41,6 @@ export default function UsageCard({ youtubeQuota, supadataCredits, jevUsage }: {
             <span className="font-medium">Jev</span>
             <span className="text-muted-foreground">This month (VN)</span>
           </div>
-          {/* Chưa có request hoặc TypeSafe không báo số thì hiện 0. */}
           <p className="tabular-nums">
             Requests: {num(jevUsage?.requests ?? 0)} · Input: {num(jevUsage?.input_tokens ?? 0)} · Output: {num(jevUsage?.output_tokens ?? 0)}
           </p>

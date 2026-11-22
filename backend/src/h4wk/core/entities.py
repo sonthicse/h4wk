@@ -131,8 +131,6 @@ def update_entity(session: Session, entity_id: str, **fields: object) -> Entity:
     raise NotFound(entity_id)
 
 
-# ------------------------------------------------------------------ ảnh mẫu
-
 RefKind = Literal["face", "image"]
 MAX_REF_BYTES = 10 * 1024 * 1024
 REF_FILE = re.compile(r"^[0-9a-f]{16}\.(jpg|png|webp)$")

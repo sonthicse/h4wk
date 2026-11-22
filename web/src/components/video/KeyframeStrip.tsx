@@ -6,20 +6,16 @@ import { frameUrl, type VideoFinding } from '@/api/videos'
 import type { Bbox, Keyframe } from './keyframes'
 import type { PlayerControls } from './usePlayer'
 
-// Ba loại khung bao, mỗi loại một màu (có chú giải bên dưới ảnh).
 const boxStyle = {
   ocr: { label: 'OCR text', color: 'border-yellow-400 text-yellow-300' },
   face: { label: 'Face match', color: 'border-red-500 text-red-400' },
   ref: { label: 'Reference image match', color: 'border-cyan-400 text-cyan-300' },
 }
 
-// Chiều cao (px khung 480p) tối thiểu phía trên box để đặt nhãn.
 const LABEL_ROOM = 28
 
-// Kích thước khung khi chưa đọc được ảnh (bản proxy 480p).
 const DEFAULT_SIZE = { w: 854, h: 480 }
 
-// Lớp khung bao của một keyframe. Bbox tính theo pixel của ảnh nên quy về % theo kích thước thật `size`.
 export function BoxLayer({ frame, size }: { frame: Keyframe; size: { w: number; h: number } }) {
   const all = [
     ...frame.ocr.map((b) => ({ ...b, kind: 'ocr' as const })),
@@ -39,8 +35,8 @@ export function BoxLayer({ frame, size }: { frame: Keyframe; size: { w: number; 
           <span
             className={cn(
               'absolute left-[-2px] bg-black/70 px-1 text-[11px] whitespace-nowrap',
-              // Nhãn khuôn mặt nằm trong box, ở đáy, để không đè nhãn của ảnh mẫu bao quanh khuôn mặt.
-              b.kind === 'face' ? 'bottom-0' : b.bbox[1] < LABEL_ROOM ? 'top-0' : '-top-5', // sát mép trên thì đặt vào trong box
+
+              b.kind === 'face' ? 'bottom-0' : b.bbox[1] < LABEL_ROOM ? 'top-0' : '-top-5',
             )}
           >
             {b.text}
@@ -51,7 +47,6 @@ export function BoxLayer({ frame, size }: { frame: Keyframe; size: { w: number; 
   )
 }
 
-// Chú giải ba loại khung bao.
 export function BoxLegend() {
   return (
     <ul className="flex flex-wrap gap-3 text-xs">
@@ -65,7 +60,6 @@ export function BoxLegend() {
   )
 }
 
-// Ảnh keyframe thật, kèm các khung bao nếu `boxes`.
 export function FrameImage({
   frame,
   src,
@@ -99,7 +93,6 @@ export function FrameImage({
   )
 }
 
-// Dải keyframe. Bấm một khung: seek tới khung đó. Khung đang phát được tô và tự cuộn vào tầm nhìn.
 export default function KeyframeStrip({
   videoId,
   capture,

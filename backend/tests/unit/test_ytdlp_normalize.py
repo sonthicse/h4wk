@@ -30,7 +30,7 @@ def test_video(info: dict) -> None:
     assert v.duration_s == 40 and v.view_count == 12 and v.comment_count == 3
     assert v.category == "News & Politics" and v.tags == ["thử nghiệm", "h4wk"]
     assert v.published_at == datetime.fromtimestamp(1795509000, UTC)
-    assert v.published_at.utcoffset().total_seconds() == 7 * 3600  # giờ Việt Nam
+    assert v.published_at.utcoffset().total_seconds() == 7 * 3600
     assert v.is_live is False and v.availability == "public"
 
 
@@ -51,7 +51,6 @@ def test_comments_keep_replies(info: dict) -> None:
 
 
 def test_subtitle_languages_only_vietnamese(info: dict) -> None:
-    # bản người đăng tải lên (vi*) và bản tự động gốc vi-orig; không lấy bản dịch máy
     assert y.subtitle_langs(info) == (["vi"], ["vi-orig"])
 
 
@@ -63,7 +62,7 @@ def test_transcripts_from_json3(tmp_path: Path, info: dict) -> None:
     auto = ts[TranscriptKind.AUTO]
     assert auto.lang == "vi"
     assert [(s.start, s.end, s.text) for s in auto.segments] == [
-        (0.5, 2.1, "Hôm nay mình"),  # kết thúc khi câu sau bắt đầu
+        (0.5, 2.1, "Hôm nay mình"),
         (2.1, 7.1, "nói về Trần Văn Mẫu."),
     ]
     assert ts[TranscriptKind.UPLOADED].segments[0].text == "Phụ đề do người đăng tải lên"
@@ -71,7 +70,7 @@ def test_transcripts_from_json3(tmp_path: Path, info: dict) -> None:
 
 def test_thumbnail_choice(info: dict) -> None:
     urls = y.thumbnail_urls(info)
-    assert urls["maxres"] == "https://i.ytimg.com/vi/h4wkDemo001/maxresdefault.jpg"  # jpg lớn nhất
+    assert urls["maxres"] == "https://i.ytimg.com/vi/h4wkDemo001/maxresdefault.jpg"
     assert urls["0"] == "https://i.ytimg.com/vi/h4wkDemo001/0.jpg"
     assert list(urls) == ["maxres", "0", "1", "2", "3"]
 

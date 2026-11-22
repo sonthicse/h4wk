@@ -27,8 +27,8 @@ from h4wk.media.timeline import Timeline
 logger = logging.getLogger(__name__)
 
 MODEL_ID = "facebook/dinov2-small"
-MODEL_REVISION = "ed25f3a"  # DINOv2 ViT-S/14, Apache-2.0
-DEFAULT_THRESHOLD = 0.75  # xem số đo ở docstring đầu module
+MODEL_REVISION = "ed25f3a"
+DEFAULT_THRESHOLD = 0.75
 
 
 class Embedder(Protocol):

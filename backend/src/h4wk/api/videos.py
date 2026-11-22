@@ -54,7 +54,7 @@ class CaptureSummary(BaseModel):
 class VideoDetail(BaseModel):
     video: Video
     channel: Channel | None
-    captures: list[CaptureSummary]  # cũ trước, mới sau
+    captures: list[CaptureSummary]
 
 
 def _not_found(what: str = "video") -> HTTPException:
@@ -157,7 +157,6 @@ def get_video(video_id: str) -> VideoDetail:
         n = _normalized(d, cap)
         kinds = [t.kind for t in (n.transcripts if n else [])]
         kinds += [t.kind for t in _derived_transcripts(d, cap) if t.kind not in kinds]
-        # selected.json là keyframe đã chọn; bản thu cũ chỉ có index.json (mọi khung ứng viên).
         selected = d / "derived" / cap / "frames" / "selected.json"
         index = d / "derived" / cap / "frames" / "index.json"
         if selected.is_file():

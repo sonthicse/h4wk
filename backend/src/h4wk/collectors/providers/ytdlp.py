@@ -37,7 +37,6 @@ from h4wk.collectors.targets import Target, TargetKind
 from h4wk.core.config import config_dir
 from h4wk.core.config_models import SourcesConfig, load_toml
 
-# Video 720p kèm audio; chưa có 720p (video vừa đăng) thì lấy bản tốt nhất hiện có.
 MEDIA_FORMAT = "bv*[height<=720]+ba/b[height<=720]/bv*+ba/b"
 AUTO_ORIG = "vi-orig"
 _VIDEO_CAPS = {Cap.VIDEO_METADATA, Cap.TRANSCRIPTS, Cap.COMMENTS, Cap.THUMBNAILS, Cap.MEDIA}
@@ -167,12 +166,11 @@ def _segments_from_json3(data: dict[str, Any]) -> list[TranscriptSegment]:
         text = "".join(s.get("utf8", "") for s in ev.get("segs") or []).strip()
         if text:
             events.append((ev["tStartMs"] / 1000, ev.get("dDurationMs", 0) / 1000, text))
-    events.sort(key=lambda e: e[0])  # sort ổn định: nguồn có thể xếp không theo thời gian
+    events.sort(key=lambda e: e[0])
     segments = []
     for i, (start, dur, text) in enumerate(events):
         end = start + dur
         if i + 1 < len(events):
-            # phụ đề tự động hiện chồng lên câu sau; end không bao giờ nhỏ hơn start
             end = max(start, min(end, events[i + 1][0]))
         segments.append(TranscriptSegment(start=round(start, 3), end=round(end, 3), text=text))
     return segments
@@ -296,7 +294,7 @@ class YtDlpCollector:
                     duration_s=info.get("duration"),
                 )
             ]
-        else:  # kênh và playlist: chỉ liệt kê, không tải từng video
+        else:
             url = f"{target.url}/videos" if target.kind != TargetKind.PLAYLIST else target.url
             info = self._extract(url, extract_flat="in_playlist")
             self._write_json(workdir / f"{target.id}.flat.json", info)
@@ -315,7 +313,7 @@ class YtDlpCollector:
             for name, url in thumbnail_urls(info).items():
                 try:
                     data = ydl.urlopen(url).read()
-                except Exception as e:  # thiếu một ảnh khung không làm hỏng cả loại dữ liệu
+                except Exception as e:
                     if name == "maxres":
                         raise classify_error(e) from e
                     continue

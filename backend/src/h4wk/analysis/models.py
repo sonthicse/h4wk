@@ -32,22 +32,18 @@ class SourceKind(StrEnum):
 
 
 class Category(StrEnum):
-    # Nhắm vào một đối tượng đã khai báo (cần `entity`).
     INSULT = "insult"
     UNSUPPORTED_ACCUSATION = "unsupported_accusation"
     FABRICATION = "fabrication"
     INCITEMENT = "incitement"
-    # Vi phạm xét theo nội dung, không cần đối tượng (`entity` có thể trống).
     STATE_SECRET = "state_secret"
     VIOLENCE = "violence"
     HATE = "hate"
     FORGERY = "forgery"
-    # Không vi phạm.
     LEGITIMATE_CRITICISM = "legitimate_criticism"
     NEUTRAL = "neutral"
 
 
-# Danh mục vi phạm không cần đối tượng bị nhắm tới.
 CONTENT_VIOLATIONS = {Category.STATE_SECRET, Category.VIOLENCE, Category.HATE, Category.FORGERY}
 
 
@@ -95,11 +91,9 @@ class ModelRef(Contract):
     model: str
 
 
-# id của nghi vấn: `f_` + ULID (26 ký tự Crockford base32), duy nhất trong toàn hệ thống.
 FindingId = Annotated[str, StringConstraints(pattern=r"^f_[0-9A-HJKMNP-TV-Z]{26}$")]
 
 
-# Nghi vấn nằm trong video: cần segment_id và start để phát video từ start − 2s (màn 1).
 _TIMED_KINDS = {SourceKind.SPEECH, SourceKind.OCR, SourceKind.VISUAL}
 
 
@@ -141,7 +135,7 @@ class Finding(Contract):
     quote: str = ""
     frame: RelPath | None = None
     bbox: BBox | None = None
-    entity: str | None = None  # trống với vi phạm xét theo nội dung (CONTENT_VIOLATIONS)
+    entity: str | None = None
     category: Category
     severity: Severity
     confidence: Confidence
@@ -239,7 +233,6 @@ class ReviewDecision(Contract):
 
     @model_validator(mode="after")
     def _reject_needs_reason(self) -> Self:
-        # reviews.jsonl chỉ ghi thêm, ghi sai thì không sửa được, nên chặn ngay ở quy ước.
         if self.status == "rejected" and not self.note.strip():
             raise ValueError("Reject needs a note")
         return self

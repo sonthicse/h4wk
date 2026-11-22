@@ -25,7 +25,6 @@ from h4wk.evidence.models import Trigger
 from h4wk.jobs import lanes, pipeline
 from h4wk.watchlist import rss
 
-# Có thể thay trong test.
 fetch_feed: Callable[[str], list[rss.FeedEntry]] = rss.fetch_feed
 
 
@@ -59,9 +58,6 @@ def trigger_of(item_id: str) -> str:
     return f"system:watchlist:{item_id}"
 
 
-# ------------------------------------------------------------ config/watchlist.toml
-
-# Trường cấu hình (ghi vào file); trường còn lại của WatchItemRow là trạng thái chạy.
 CONFIG_FIELDS = set(WatchChannel.model_fields) - {"id"}
 
 
@@ -122,7 +118,7 @@ def _sync() -> list[WatchChannel]:
                 s.add(row)
         try:
             s.commit()
-        except IntegrityError:  # tiến trình khác vừa đồng bộ cùng lúc; kết quả như nhau
+        except IntegrityError:
             s.rollback()
     return channels
 
@@ -241,7 +237,6 @@ def _start_job(item: WatchItemRow, video_id: str) -> str:
 
 def _channel_capture(item: WatchItemRow) -> list[str]:
     """Bản thu hồ sơ kênh trong channels/<channel_id>/captures/; trả về ID video, mới trước."""
-    # Tên bản thu chính xác đến giây; hai lần thu liền nhau thì chờ sang giây kế.
     now = _now()
     if (data_dir() / "channels" / item.channel_id / "captures" / f"{now:%Y%m%dT%H%M%S}").exists():
         time.sleep(1 - now.microsecond / 1_000_000)
@@ -317,7 +312,7 @@ def check(item_id: str, *, listing: bool = False) -> list[str]:
 def run_due() -> None:
     """Gọi bởi periodic task: kiểm tra các mục đang bật đã tới chu kỳ."""
     interval = timedelta(minutes=_settings().check_interval_min)
-    lanes.fill_all()  # job chờ còn sót (worker khởi động lại, hoặc vừa tăng số luồng)
+    lanes.fill_all()
     now = _now()
     for item in list_items():
         last = item.last_checked_at
@@ -328,7 +323,7 @@ def run_due() -> None:
         if item.enabled and (last is None or now - last >= interval):
             try:
                 check(item.id)
-            except Exception:  # lỗi đã ghi vào mục và audit; mục khác vẫn chạy
+            except Exception:
                 continue
 
 

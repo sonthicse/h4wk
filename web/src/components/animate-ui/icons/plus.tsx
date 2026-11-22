@@ -1,4 +1,4 @@
-// Lấy từ registry animate-ui (icons-plus), © 2025 Elliot Sutton, MIT + Commons Clause, xem LICENSE.md cùng thư mục; chỉ đổi import sang @animate-ui/react/icons.
+
 'use client';
 
 import { motion, type Variants } from 'motion/react';

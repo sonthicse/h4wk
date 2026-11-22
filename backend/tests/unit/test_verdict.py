@@ -62,7 +62,7 @@ def test_summary_categories_and_top_confidence():
     result = decide(findings, "r_test", timeline)
     assert result.categories == ["insult", "incitement"]
     assert result.severity == "high"
-    assert result.confidence == "highly_likely"  # của nghi vấn xếp đầu
+    assert result.confidence == "highly_likely"
     assert result.finding_ids[0] == findings[2].id
     assert (
         result.summary

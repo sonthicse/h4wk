@@ -91,7 +91,7 @@ def test_priority_change_is_used_by_next_job(client: TestClient, cfg) -> None:
 
     orch = Orchestrator.from_config(root=data_dir())
     assert orch.settings.priority[Cap.VIDEO_METADATA][0] == "ytdlp"
-    assert "# " not in (cfg / "sources.toml").read_text(encoding="utf-8")  # file đã ghi lại
+    assert "# " not in (cfg / "sources.toml").read_text(encoding="utf-8")
 
 
 def test_disabling_media_sources_reports_uncovered(client: TestClient, cfg) -> None:

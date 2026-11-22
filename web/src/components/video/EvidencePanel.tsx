@@ -3,7 +3,6 @@ import { getVerdict, type QueueItem } from '@/api/review'
 
 type Kind = QueueItem['finding']['source_kind']
 
-// Bằng chứng nhóm theo loại, theo thứ tự trong bản phác.
 const groups: { label: string; kinds: Kind[] }[] = [
   { label: 'On-screen text', kinds: ['ocr', 'thumbnail'] },
   { label: 'Speech', kinds: ['speech'] },
@@ -11,13 +10,10 @@ const groups: { label: string; kinds: Kind[] }[] = [
   { label: 'Comments', kinds: ['comment'] },
 ]
 
-// Nghi vấn sớm nhất của nhóm; nghi vấn không có mốc thời gian xếp sau.
 function earliest(list: QueueItem[]): QueueItem {
   return [...list].sort((a, b) => (a.finding.start ?? Infinity) - (b.finding.start ?? Infinity))[0]
 }
 
-// Bằng chứng của kết luận: số nghi vấn theo loại; bấm một dòng mở nghi vấn sớm nhất của loại đó.
-// Không có kết luận thì không hiện gì.
 export default function EvidencePanel({ videoId, items, onOpen }: { videoId: string; items: QueueItem[]; onOpen: (it: QueueItem) => void }) {
   const detail = useQuery({ queryKey: ['verdict', videoId], queryFn: () => getVerdict(videoId) })
   if (!detail.data?.verdict || items.length === 0) return null

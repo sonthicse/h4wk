@@ -19,8 +19,6 @@ import VideoDetailPage from '@/pages/VideoDetailPage'
 import VideosPage from '@/pages/VideosPage'
 import WatchlistPage from '@/pages/WatchlistPage'
 
-// Phiên hết hạn giữa chừng (API trả 401): kiểm tra lại /api/auth/me để RequireLogin chuyển sang /login.
-// Bỏ qua lỗi của chính query ['me'], nếu không sẽ gọi lại /api/auth/me mãi và trang kẹt ở "Loading…".
 function onError(error: Error, queryKey?: readonly unknown[]) {
   if (error instanceof UnauthorizedError && queryKey?.[0] !== 'me') {
     queryClient.invalidateQueries({ queryKey: ['me'] })

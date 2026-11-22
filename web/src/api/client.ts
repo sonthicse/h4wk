@@ -1,9 +1,8 @@
-// Gọi API backend qua proxy /api của Vite. Cookie phiên (HttpOnly) được trình duyệt tự gửi kèm.
+
 import type { components } from '@/api/schema'
 
 export type Schemas = components['schemas']
 
-// Lỗi 401: chưa đăng nhập hoặc phiên đã hết hạn.
 export class UnauthorizedError extends Error {}
 
 export class ApiError extends Error {
@@ -14,19 +13,17 @@ export class ApiError extends Error {
   }
 }
 
-// Lấy thông báo lỗi từ body FastAPI ({"detail": "..."} hoặc danh sách lỗi validate).
 async function errorMessage(res: Response): Promise<string> {
   try {
     const body = await res.json()
     if (typeof body.detail === 'string') return body.detail
     if (Array.isArray(body.detail)) return body.detail.map((d: { msg: string }) => d.msg).join('; ')
   } catch {
-    // body không phải JSON
+
   }
   return `${res.status} ${res.statusText}`
 }
 
-// `body` là object thì gửi JSON; là File/Blob (ví dụ ảnh) thì gửi nguyên bytes kèm đúng content-type.
 export async function api<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
   const body = init?.body
   const raw = body instanceof Blob

@@ -6,7 +6,6 @@ import { formatTime, overlapsSpans } from '@/lib/findings'
 import { cn } from '@/lib/utils'
 import type { PlayerControls } from './usePlayer'
 
-// Transcript tự cuộn theo thời gian phát; bấm một đoạn để seek.
 export default function TranscriptPane({
   transcripts,
   findings,
@@ -29,7 +28,6 @@ export default function TranscriptPane({
 
   const activeIndex = transcript?.segments.findIndex((s) => player.currentTime >= s.start && player.currentTime < s.end) ?? -1
 
-  // Cuộn riêng trong khung transcript (không dùng scrollIntoView để khỏi kéo cả trang).
   useEffect(() => {
     const box = listRef.current
     const row = box?.querySelector<HTMLElement>('[data-active="true"]')

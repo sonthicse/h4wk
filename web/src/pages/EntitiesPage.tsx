@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
-// "1 entity" / "2 entities".
 function plural(n: number, word: string) {
   return n === 1 ? `${n} ${word}` : `${n} ${word === 'entity' ? 'entities' : word + 's'}`
 }
@@ -28,7 +27,6 @@ export default function EntitiesPage() {
         <h1 className="text-2xl font-semibold">Entities</h1>
         <Badge variant="outline">{plural(all.length, 'entity')}</Badge>
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          {/* Sửa đối tượng chỉ áp dụng cho lần phân tích sau; nút này áp dụng cho video đã có. */}
           <ReanalyzeButton label="Re-analyze all videos" />
           <Button onClick={() => setCreating(true)}>New entity</Button>
         </div>
@@ -60,7 +58,6 @@ export default function EntitiesPage() {
   )
 }
 
-// Một thẻ cho mỗi đối tượng: thông tin sửa được, rồi hai nhóm ảnh mẫu đặt cạnh nhau.
 function EntityCard({ entity }: { entity: Entity }) {
   return (
     <section className="space-y-4 rounded-xl border p-5">

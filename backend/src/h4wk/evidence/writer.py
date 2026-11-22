@@ -110,7 +110,7 @@ class CaptureWriter:
             (self.tmp / "manifest.json").write_text(
                 manifest.model_dump_json(indent=2), encoding="utf-8"
             )
-            os.rename(self.tmp, target)  # cùng ổ đĩa nên là một bước
+            os.rename(self.tmp, target)
         except BaseException:
             self.abort()
             raise

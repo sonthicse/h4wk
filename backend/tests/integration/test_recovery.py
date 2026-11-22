@@ -57,11 +57,9 @@ def test_stopped_between_collect_and_media(
         m.setattr(pipeline, "media", lambda job_id: None)
         _post(client)
     job = _only_job()
-    # Đang chờ ở hàng đợi gpu: status queued, recover không đụng tới.
     assert (job.status, job.step) == ("queued", "media") and job.capture
     assert recovery.next_task(job) == "media"
     assert recovery.recover("gpu") == []
-    # Giả lập job đã chạy dở nhưng mất dấu (running ở bước media, tiến độ 40).
     pipeline._update(job.id, status="running")
     calls, captures = len(fetched), _captures(data_dir)
 
@@ -80,7 +78,7 @@ def test_stopped_inside_media(
 
     with monkeypatch.context() as m:
         m.setattr(ocr, "process_ocr", boom)
-        _post(client)  # Huey bắt KeyboardInterrupt, job dừng ở bước ocr
+        _post(client)
     job = _only_job()
     assert (job.status, job.step) == ("running", "ocr")
     captures = _captures(data_dir)

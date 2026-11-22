@@ -142,7 +142,6 @@ def collect(job_id: str) -> None:
     try:
         capture = None if job.force else _recent_capture(job)
         if capture is None:
-            # Tên bản thu chính xác đến giây.
             now = _now()
             if (_video_dir(job) / "captures" / now.strftime(CAPTURE_TS_FORMAT)).exists():
                 time.sleep(1 - now.microsecond / 1_000_000)
@@ -156,12 +155,10 @@ def collect(job_id: str) -> None:
             capture = path.name
             n = Normalized.model_validate_json((path / "normalized.json").read_text("utf-8"))
             if n.video is None:
-                # Bản thu vẫn được giữ làm bằng chứng của lần thu thất bại.
                 raise RuntimeError(f"no source returned video metadata (capture {capture})")
     except Exception as e:
         _fail(job_id, "collect", e)
         return
-    # "queued" kèm bước kế tiếp trong lúc chờ hàng đợi: running chỉ còn nghĩa là đang chạy thật.
     _update(job_id, status="queued", step="media", capture=capture, progress=40)
     media(job_id)
 
@@ -179,7 +176,6 @@ def _select_frames(
         ]
         vectors = _ref_embedder.embed(images)
     except Exception as e:
-        # Thiếu torch, hết VRAM...: chỉ bỏ được khung trùng chữ và trùng hash.
         logger.warning("Frame embedding failed, keeping near-duplicate frames: %s", e)
         audit.log(job.trigger, "media.frames", job.id, {"error": str(e)}, status="error")
         vectors = None
@@ -197,7 +193,6 @@ def _match(
     timeline: Timeline,
 ) -> None:
     """Khớp keyframe và thumbnail cục bộ với ảnh mẫu; ghi ref_hits.json."""
-    # Xoá kết quả cũ để lần chạy lại (thu lại cùng bản thu, recovery) không dùng dấu hiệu lỗi thời.
     (out / "ref_hits.json").unlink(missing_ok=True)
     refs = {}
     for entity in load_entities():
@@ -217,11 +212,10 @@ def _match(
             images,
             refs,
             _ref_embedder,
-            None,  # ngưỡng mặc định chốt ở T40
+            None,
             out / "embeddings.npz",
         )
     except Exception as e:
-        # Tải model lỗi (mất mạng), hết VRAM...: bỏ qua bước này, job vẫn chạy tiếp tới analyze.
         logger.warning("Reference image matching failed: %s", e)
         audit.log(job.trigger, "media.match", job.id, {"error": str(e)}, status="error")
         return
@@ -271,7 +265,6 @@ def media(job_id: str) -> None:
         frames = []
         source_hash = None
         has_video = any(m.kind == "video" for m in data.media)
-        # Bản thu full không có video (vd yt-dlp bị tắt): bỏ STT và keyframe, vẫn phân tích văn bản.
         if job.level == CollectLevel.FULL and has_video:
             job = _update(job_id, step="transcribe", progress=48)
             video_file = stt.transcribe_capture(cap_dir, out, _stt_worker)
@@ -288,7 +281,6 @@ def media(job_id: str) -> None:
             lines = ocr.process_ocr(cap_dir, out)
             thumbnails = list(dict.fromkeys(t.file for t in data.thumbnails if t.file))
             if frames:
-                # OCR chạy trên mọi khung ứng viên; timeline và khớp ảnh chỉ dùng keyframe.
                 frames = _select_frames(job, out, frames, lines)
                 kept = {f.file for f in frames} | set(thumbnails)
                 lines = [line for line in lines if line.frame in kept]
@@ -320,7 +312,6 @@ def analyze_capture(video_dir: Path, cap: str, *, reject_quota: bool = False):
         path = derived / name
         if path.is_file():
             ref_hits.extend(TypeAdapter(list[EntityHit]).validate_json(path.read_bytes()))
-    # T11: dấu hiệu tên và tầng tĩnh; runner ghi hits.json và findings.json.
     out = derived / "analysis" / run_id
 
     def check_quota(error: str | None) -> None:

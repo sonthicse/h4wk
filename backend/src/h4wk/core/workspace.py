@@ -13,9 +13,7 @@ def init_workspace(data_dir: Path, config_dir: Path) -> list[Path]:
     hay kênh nào. Trả về danh sách file cấu hình vừa tạo.
     """
     data_dir.mkdir(parents=True, exist_ok=True)
-    get_engine(data_dir)  # tạo database chỉ mục nếu chưa có
-    # Chuyển đối tượng và watchlist từ chỗ lưu cũ (data/, database) sang config/ trước khi chép
-    # file mẫu, để file mẫu rỗng không đè mất dữ liệu cũ.
+    get_engine(data_dir)
     from h4wk.core.entities import migrate_legacy as migrate_entities
     from h4wk.watchlist.service import migrate_legacy as migrate_watchlist
 
@@ -23,7 +21,7 @@ def init_workspace(data_dir: Path, config_dir: Path) -> list[Path]:
     migrate_watchlist()
     created: list[Path] = []
     for example in sorted(config_dir.glob("*.toml.example")):
-        target = example.with_suffix("")  # bỏ đuôi .example
+        target = example.with_suffix("")
         if not target.exists():
             shutil.copyfile(example, target)
             created.append(target)

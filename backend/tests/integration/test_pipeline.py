@@ -217,7 +217,6 @@ def test_ytdlp_disabled_still_collects_text(
     for what in expected:
         ok = [s for s in by_what[what] if s["status"] == "ok"]
         assert [s["provider"] for s in ok] == ["youtube_api"], what
-        # thumbnails dùng lại video đã lấy ở bước metadata nên không tốn thêm quota
         assert ok[0]["cost"]["quota_units"] == expected[what], what
     normalized = json.loads((cap / "normalized.json").read_bytes())
     assert normalized["video"]["id"] == "h4wkDemo001" and normalized["media"] == []
@@ -276,7 +275,7 @@ def test_no_ref_images_skips_matching(
             raise AssertionError("không được gọi")
 
     monkeypatch.setattr(pipeline, "_ref_embedder", Boom())
-    _entity(client)  # đối tượng không có ảnh mẫu: không chạy khớp ảnh
+    _entity(client)
     r = client.post("/api/collect", json={"url": VIDEO})
     job = client.get(f"/api/jobs/{r.json()[0]['id']}").json()
     assert job["status"] == "done", job["error"]
@@ -298,8 +297,8 @@ def test_stale_ref_hits_are_removed_when_matching_is_skipped(
     j1 = client.get(f"/api/jobs/{first['id']}").json()
     derived = data_dir / "videos" / j1["video_id"] / "derived" / j1["capture"]
     assert (derived / "ref_hits.json").exists()
-    shutil.rmtree(data_dir / "entities" / "e_01" / "refs" / "image")  # bỏ ảnh mẫu: không khớp
-    second = client.post("/api/collect", json={"url": VIDEO}).json()[0]  # cùng bản thu
+    shutil.rmtree(data_dir / "entities" / "e_01" / "refs" / "image")
+    second = client.post("/api/collect", json={"url": VIDEO}).json()[0]
     j2 = client.get(f"/api/jobs/{second['id']}").json()
     assert j2["status"] == "done" and j2["capture"] == j1["capture"]
     assert not (derived / "ref_hits.json").exists()

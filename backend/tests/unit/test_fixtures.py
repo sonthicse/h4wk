@@ -57,7 +57,6 @@ def test_manifest_hashes_match_every_file(manifest: Manifest) -> None:
         for p in CAPTURE_DIR.rglob("*")
         if p.is_file() and p.name != "manifest.json"
     }
-    # Không thiếu file, không có file lạ.
     assert on_disk == set(manifest.files)
     for rel, entry in manifest.files.items():
         path = CAPTURE_DIR / rel
@@ -94,7 +93,6 @@ def test_findings_match_run_and_capture(findings: list[Finding], timeline: Timel
     assert len({f.id for f in findings}) == len(findings)
     for f in findings:
         assert (f.run_id, f.video_id, f.capture) == (RUN_ID, VIDEO_ID, CAPTURE)
-    # Kịch bản T44: có nghi vấn hình ảnh ở đoạn không ai nhắc tên.
     speech_by_seg = {s.id: s.speech for s in timeline.segments}
     visual = [f for f in findings if f.source_kind == SourceKind.VISUAL]
     assert visual
