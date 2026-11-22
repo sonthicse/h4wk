@@ -22,17 +22,10 @@ class EntityRow(SQLModel, table=True):
     name: str
 
 
-class UserRow(SQLModel, table=True):
-    __tablename__ = "users"
-    username: str = Field(primary_key=True)
-    password_hash: str  # argon2
-    created_at: datetime
-
-
 class SessionRow(SQLModel, table=True):
     __tablename__ = "sessions"
     token_hash: str = Field(primary_key=True)  # SHA-256 của token trong cookie
-    username: str = Field(foreign_key="users.username")
+    username: str
     expires_at: datetime
 
 
@@ -171,6 +164,7 @@ def get_engine(root: Path | None = None) -> Engine:
             cur.execute("PRAGMA foreign_keys=ON")
             cur.close()
 
+        _drop_legacy_accounts(engine)
         SQLModel.metadata.create_all(engine)
         _add_missing_columns(engine)
         _engines[path] = engine
@@ -185,6 +179,16 @@ def drop_index() -> None:
         engine.dispose()
     for suffix in ("", "-wal", "-shm"):
         Path(f"{path}{suffix}").unlink(missing_ok=True)
+
+
+def _drop_legacy_accounts(engine: Engine) -> None:
+    """Index cũ có bảng users (nhiều tài khoản) và sessions trỏ khoá ngoại tới đó. Nay chỉ còn
+    một tài khoản lấy từ .env: bỏ hai bảng cũ, sessions được tạo lại (phải đăng nhập lại)."""
+    with engine.begin() as conn:
+        tables = {r[0] for r in conn.exec_driver_sql("SELECT name FROM sqlite_master")}
+        if "users" in tables:
+            conn.exec_driver_sql("DROP TABLE IF EXISTS sessions")
+            conn.exec_driver_sql("DROP TABLE users")
 
 
 def _add_missing_columns(engine: Engine) -> None:

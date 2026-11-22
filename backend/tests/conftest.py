@@ -10,6 +10,13 @@ USERNAME, PASSWORD = "thi", "mật-khẩu-thử"
 
 
 @pytest.fixture(autouse=True)
+def account(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tài khoản duy nhất lấy từ biến môi trường (thắng .env thật của máy)."""
+    monkeypatch.setenv("H4WK_USERNAME", USERNAME)
+    monkeypatch.setenv("H4WK_PASSWORD", PASSWORD)
+
+
+@pytest.fixture(autouse=True)
 def data_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     d = tmp_path / "data"
     monkeypatch.setenv("H4WK_DATA_DIR", str(d))
@@ -27,11 +34,9 @@ def config_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 @pytest.fixture
 def anon_client(data_dir: Path) -> Iterator[TestClient]:
-    """Client chưa đăng nhập; đã có sẵn tài khoản USERNAME."""
+    """Client chưa đăng nhập; tài khoản USERNAME lấy từ biến môi trường."""
     from h4wk.api.app import app
-    from h4wk.core.auth import create_user
 
-    create_user(USERNAME, PASSWORD)
     with TestClient(app) as c:
         yield c
 

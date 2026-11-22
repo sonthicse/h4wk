@@ -1,22 +1,21 @@
-"""Tài khoản và phiên đăng nhập (T7). Mật khẩu lưu dạng hash argon2; cookie chỉ chứa token
-ngẫu nhiên, database lưu SHA-256 của token."""
+"""Đăng nhập một tài khoản duy nhất. Tên và mật khẩu lấy từ `H4WK_USERNAME`, `H4WK_PASSWORD`
+trong .env hoặc biến môi trường. Cookie chỉ chứa token ngẫu nhiên, database lưu SHA-256
+của token."""
 
 import hashlib
+import hmac
 import secrets
 from datetime import datetime, timedelta
 
-from argon2 import PasswordHasher
-from argon2.exceptions import VerificationError
 from sqlmodel import Session
 
-from h4wk.core.db import SessionRow, UserRow, as_aware, get_engine
+from h4wk.core import secrets as keys
+from h4wk.core.db import SessionRow, as_aware, get_engine
 from h4wk.core.types import VN_TZ
 
 SESSION_COOKIE = "h4wk_session"
 SESSION_TTL = timedelta(days=7)
-_hasher = PasswordHasher()
-# Hash giả để người dùng không tồn tại cũng tốn thời gian như sai mật khẩu.
-_DUMMY_HASH = _hasher.hash("không-dùng")
+USERNAME_KEY, PASSWORD_KEY = "H4WK_USERNAME", "H4WK_PASSWORD"
 
 
 def _now() -> datetime:
@@ -27,24 +26,21 @@ def _token_hash(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def create_user(username: str, password: str) -> None:
+def account() -> tuple[str, str]:
+    """Tên và mật khẩu của tài khoản duy nhất; thiếu thì báo lỗi rõ."""
+    env = keys.env_values()
+    username, password = env.get(USERNAME_KEY), env.get(PASSWORD_KEY)
     if not username or not password:
-        raise ValueError("username and password must not be empty")
-    with Session(get_engine()) as s:
-        if s.get(UserRow, username):
-            raise ValueError(f"user {username!r} already exists")
-        s.add(UserRow(username=username, password_hash=_hasher.hash(password), created_at=_now()))
-        s.commit()
+        raise RuntimeError(f"set {USERNAME_KEY} and {PASSWORD_KEY} in .env")
+    return username, password
 
 
 def authenticate(username: str, password: str) -> bool:
-    with Session(get_engine()) as s:
-        user = s.get(UserRow, username)
-    try:
-        _hasher.verify(user.password_hash if user else _DUMMY_HASH, password)
-    except VerificationError:
-        return False
-    return user is not None
+    expected_user, expected_password = account()
+    # So sánh thời gian cố định, kiểm cả hai vế để thời gian không lộ vế nào sai.
+    user_ok = hmac.compare_digest(username.encode(), expected_user.encode())
+    password_ok = hmac.compare_digest(password.encode(), expected_password.encode())
+    return user_ok and password_ok
 
 
 def start_session(username: str) -> str:

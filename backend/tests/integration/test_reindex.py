@@ -12,7 +12,6 @@ from typer.testing import CliRunner
 
 from h4wk.analysis.models import Finding
 from h4wk.cli import app
-from h4wk.core.auth import create_user
 from h4wk.core.db import finding_row, get_engine
 from h4wk.core.reindex import reindex
 
@@ -34,7 +33,6 @@ def sample(client: TestClient, data_dir: Path) -> list[Finding]:
 
 
 def _relogin(client: TestClient) -> None:
-    create_user(USERNAME, PASSWORD)
     r = client.post("/api/auth/login", json={"username": USERNAME, "password": PASSWORD})
     assert r.status_code == 204, r.text
 
@@ -100,7 +98,7 @@ def test_cli_asks_before_deleting(data_dir: Path) -> None:
     assert r.exit_code != 0 and db.exists()
     r = runner.invoke(app, ["reindex", "--yes"])
     assert r.exit_code == 0, r.output
-    assert "findings: 0" in r.output and "h4wk user create" in r.output
+    assert "findings: 0" in r.output
 
 
 def _latest_state(client: TestClient) -> list:

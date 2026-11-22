@@ -16,7 +16,7 @@ Dự án đang ở giai đoạn thử nghiệm. Một số hạn chế được 
 
 | Module id | Trách nhiệm | Phụ thuộc | Hợp đồng cung cấp |
 |---|---|---|---|
-| `core` | Đối tượng và ảnh mẫu của đối tượng, 2 tài khoản, nhật ký, database chỉ mục, cấu hình và lưu secret | không có | Mô hình Đối tượng, `audit.log()`, C5: định dạng file cấu hình |
+| `core` | Đối tượng và ảnh mẫu của đối tượng, một tài khoản đăng nhập, nhật ký, database chỉ mục, cấu hình và lưu secret | không có | Mô hình Đối tượng, `audit.log()`, C5: định dạng file cấu hình |
 | `evidence-store` | Bản thu được khoá chống sửa nhầm, manifest, SHA-256, tách dữ liệu gốc và phái sinh, kiểm tra toàn vẹn | `core` | C1: cấu trúc bản thu |
 | `collectors` | Hợp đồng adapter, danh sách nguồn thu, điều phối theo thứ tự ưu tiên và chuyển nguồn khi lỗi; adapter yt-dlp, YouTube API, Supadata | `evidence-store` | C2: mô hình dữ liệu chung, giao diện `Collector` |
 | `media-pipeline` | Bản 480p, tách audio, speech-to-text, keyframe theo mức thay đổi, OCR, ghép timeline | `evidence-store` | C3: cấu trúc timeline |
@@ -72,7 +72,6 @@ Lệnh backend chạy trong thư mục `backend/`. Thư mục dữ liệu lấy 
 # Backend (trong backend/)
 uv sync                                             # cài dependency
 uv run h4wk init                                    # tạo data/, database chỉ mục, file cấu hình mẫu
-uv run h4wk user create <username>                  # tạo tài khoản (2 người)
 uv run h4wk schema export                           # xuất JSON Schema của C1–C5 vào docs/contracts/
 uv run uvicorn h4wk.api.app:app --reload            # chạy API ở :8000
 uv run huey_consumer h4wk.jobs.queue.huey -w 2      # worker cho hàng đợi default
@@ -207,7 +206,7 @@ Checkpoint là mốc để cả nhóm kiểm tra lại, không chặn việc b�
 
 ### 10.1 `core`
 
-Cả hệ thống là một cuộc theo dõi duy nhất, không có khái niệm case: đối tượng, watchlist, video, nghi vấn và nhật ký đều dùng chung. Module quản lý đối tượng cần bảo vệ, hai tài khoản, nhật ký thao tác, cấu hình và secret.
+Cả hệ thống là một cuộc theo dõi duy nhất, không có khái niệm case: đối tượng, watchlist, video, nghi vấn và nhật ký đều dùng chung. Module quản lý đối tượng cần bảo vệ, một tài khoản đăng nhập, nhật ký thao tác, cấu hình và secret.
 
 Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh mẫu: ảnh khuôn mặt (dùng cho khớp khuôn mặt) và ảnh hay bị dùng lại như ảnh chân dung quen thuộc hoặc logo (dùng cho khớp ảnh mẫu). Ảnh mẫu lưu ở `data/entities/<entity_id>/refs/{face,image}/`; danh sách đối tượng nằm trong `data/entities.json`.
 
@@ -215,11 +214,11 @@ Mỗi đối tượng có tên, biệt danh, viết tắt và hai loại ảnh m
 
 Hợp đồng C5 là định dạng của `config/sources.toml` và `config/analysis.toml`, viết bằng Pydantic. C5 nằm trong `core` để giao diện Settings và các module đọc cấu hình cùng dựa vào một định nghĩa.
 
-Hạn chế được chấp nhận: tài khoản, watchlist, danh sách video đã biết và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại đối tượng, video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên.
+Hạn chế được chấp nhận: phiên đăng nhập, watchlist, danh sách video đã biết và lịch sử job chỉ nằm trong database. `h4wk reindex` dựng lại đối tượng, video, bản thu, nghi vấn và quyết định rà soát từ file, nhưng làm mất các dữ liệu kể trên.
 
 Nghiệm thu:
 
-- Đăng nhập bằng session cookie.
+- Một tài khoản duy nhất: tên và mật khẩu đặt ở `H4WK_USERNAME`, `H4WK_PASSWORD` trong `.env` (thiếu thì API không khởi động). Đăng nhập bằng session cookie; database chỉ lưu SHA-256 của token phiên, không lưu mật khẩu.
 - Mọi API ghi dữ liệu đều để lại một dòng nhật ký, kể cả khi thao tác thất bại.
 - `h4wk reindex` dựng lại được danh sách đối tượng, video, nghi vấn và quyết định rà soát từ `data/`.
 

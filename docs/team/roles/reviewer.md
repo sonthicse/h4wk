@@ -30,12 +30,12 @@ Bạn điều khiển trình duyệt thật (Chromium headless) bằng `playwrig
 2. Mở trình duyệt. Luôn chạy `playwright-cli` khi đang đứng ở `<worktree>/.tmp/` (tạo nếu chưa có): CLI ghi snapshot và ảnh vào `.playwright-cli/` của thư mục hiện tại, và `.tmp/` bị gitignore. Luôn dùng phiên riêng `-s=reviewer`:
    `playwright-cli -s=reviewer open --browser=chromium http://127.0.0.1:5180/login`
    (máy không có Google Chrome, nên phải có `--browser=chromium`).
-3. Đăng nhập: đọc tài khoản trong `~/.config/h4wk-review.env`, `snapshot` để lấy ref của ô nhập và nút, rồi `fill` và `click`.
+3. Đăng nhập: đọc `H4WK_USERNAME`, `H4WK_PASSWORD` trong `.env` của repo chính, `snapshot` để lấy ref của ô nhập và nút, rồi `fill` và `click`.
 4. Với từng trang bị thay đổi, đi theo đúng luồng người dùng sẽ làm: `goto`, `snapshot`, bấm, gõ, mở dialog, thử trạng thái rỗng và trạng thái lỗi nếu dựng được. Xem bằng mắt ở hai cỡ: `resize 1440 900` rồi `resize 390 844`, mỗi cỡ chụp `screenshot` và xem ảnh bằng `read_image`. Kiểm `console error` sau mỗi trang. Kiểm tràn ngang bằng `eval "document.documentElement.scrollWidth - window.innerWidth"` (lớn hơn 0 là tràn).
 5. Đánh giá theo điều 5 và 6 của "Kiểm tra những gì". Ảnh minh hoạ cho một nhận xét thì đính kèm vào tin báo kết quả (`attachments`, đường dẫn trong `<worktree>/.tmp/.playwright-cli/`).
 6. Xong thì `playwright-cli -s=reviewer close` và dừng hai background job đã mở.
 
-Không xem được (thiếu `playwright-cli`, thiếu file tài khoản, server không lên): ghi rõ lý do trong báo cáo, đánh giá điều 5 và 6 chỉ từ code, và nói rõ là chưa xem giao diện thật. Không tự cài thư viện.
+Không xem được (thiếu `playwright-cli`, thiếu tài khoản trong `.env`, server không lên): ghi rõ lý do trong báo cáo, đánh giá điều 5 và 6 chỉ từ code, và nói rõ là chưa xem giao diện thật. Không tự cài thư viện.
 
 ## Tra cứu code bằng graphify
 

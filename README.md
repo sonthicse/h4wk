@@ -54,7 +54,7 @@ cd web && npm run dev
 
 Các bước chạy thử 3 màn demo nằm ở [docs/demo-checklist.md](docs/demo-checklist.md).
 
-Mở http://localhost:3000 và đăng nhập (tạo tài khoản bằng `cd backend && uv run h4wk user create <tên>`).
+Mở http://localhost:3000 và đăng nhập bằng `H4WK_USERNAME`, `H4WK_PASSWORD` trong `.env`.
 
 Worker GPU dùng model STT từ `H4WK_STT_MODEL` (mặc định `large-v3`). Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
 
@@ -67,7 +67,7 @@ cd web && npm run build && npm run lint
 
 Test gọi mạng thật (yt-dlp tải một video khoảng 20 MB) chạy riêng: `cd backend && uv run pytest -m live`.
 
-Các lệnh khác (tạo tài khoản, worker, verify bản thu…) có ở [SPEC.md §4](SPEC.md#4-lệnh); lệnh nào chưa có thì sẽ được thêm dần theo task.
+Các lệnh khác (worker, verify bản thu…) có ở [SPEC.md §4](SPEC.md#4-lệnh); lệnh nào chưa có thì sẽ được thêm dần theo task.
 
 ## Không commit
 

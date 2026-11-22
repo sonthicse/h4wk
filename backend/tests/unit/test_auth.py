@@ -1,4 +1,4 @@
-"""T7: đăng nhập 2 tài khoản bằng session cookie."""
+"""Đăng nhập một tài khoản duy nhất (lấy từ .env) bằng session cookie."""
 
 import json
 from pathlib import Path
@@ -6,10 +6,8 @@ from pathlib import Path
 import pytest
 from conftest import PASSWORD, USERNAME
 from fastapi.testclient import TestClient
-from typer.testing import CliRunner
 
-from h4wk.cli import app as cli
-from h4wk.core.auth import authenticate, create_user
+from h4wk.core import auth
 
 
 def _lines(path: Path) -> list[dict]:
@@ -65,21 +63,44 @@ def test_expired_session_is_rejected(client: TestClient, monkeypatch: pytest.Mon
     assert client.get("/api/entities").status_code == 401
 
 
-def test_password_is_hashed(data_dir: Path) -> None:
-    create_user("bao", "bí-mật")
+def test_only_the_env_account_logs_in() -> None:
+    assert auth.authenticate(USERNAME, PASSWORD)
+    assert not auth.authenticate(USERNAME, "sai")
+    assert not auth.authenticate("khác", PASSWORD)
+
+
+def test_missing_account_fails_clearly(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("H4WK_PASSWORD")
+    monkeypatch.setattr(auth.keys, "env_values", lambda: {"H4WK_USERNAME": USERNAME})
+    with pytest.raises(RuntimeError, match="H4WK_USERNAME and H4WK_PASSWORD"):
+        auth.account()
+    from h4wk.api.app import app
+
+    with pytest.raises(RuntimeError, match="H4WK_PASSWORD"), TestClient(app):
+        pass  # API không khởi động khi thiếu tài khoản
+
+
+def test_password_is_not_stored(client: TestClient, data_dir: Path) -> None:
     # Chế độ WAL: dữ liệu mới có thể còn nằm trong file -wal.
     db = b"".join(p.read_bytes() for p in data_dir.glob("index.db*"))
-    assert b"b\xc3\xad-m\xe1\xba\xadt" not in db and b"$argon2" in db
-    assert authenticate("bao", "bí-mật") and not authenticate("bao", "sai")
+    assert PASSWORD.encode() not in db
 
 
-def test_duplicate_user_rejected(data_dir: Path) -> None:
-    create_user("bao", "x")
-    with pytest.raises(ValueError):
-        create_user("bao", "y")
+def test_legacy_users_table_is_dropped(data_dir: Path) -> None:
+    """Index cũ có bảng users và sessions trỏ khoá ngoại tới đó: bỏ cả hai, đăng nhập vẫn chạy."""
+    import sqlite3
 
-
-def test_cli_user_create(data_dir: Path) -> None:
-    r = CliRunner().invoke(cli, ["user", "create", "bao"], input="pw-123\npw-123\n")
-    assert r.exit_code == 0, r.output
-    assert authenticate("bao", "pw-123")
+    data_dir.mkdir(parents=True)
+    con = sqlite3.connect(data_dir / "index.db")
+    con.executescript(
+        "CREATE TABLE users (username TEXT PRIMARY KEY, password_hash TEXT, created_at TEXT);"
+        "CREATE TABLE sessions (token_hash TEXT PRIMARY KEY,"
+        " username TEXT REFERENCES users(username), expires_at TEXT);"
+    )
+    con.close()
+    token = auth.start_session(USERNAME)
+    assert auth.session_user(token) == USERNAME
+    con = sqlite3.connect(data_dir / "index.db")
+    tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    con.close()
+    assert "users" not in tables and "sessions" in tables

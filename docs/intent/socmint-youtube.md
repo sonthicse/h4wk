@@ -77,7 +77,7 @@ Cùng ngày, sau vòng review tài liệu:
 - Các mốc thời gian xử lý chuyển thành mục tiêu, không bắt buộc.
 - Bỏ phương án làm đơn giản ở cuối tuần 4; Settings giữ đủ 7 mục.
 - Thêm khớp khuôn mặt và khớp ảnh mẫu, và cho phép phân tích hình ảnh dựa trên ngữ cảnh cả video. Khớp khuôn mặt đảo ngược quy định "không nhận diện khuôn mặt" ở mục 13 và 14 của mô tả gốc, nên được giới hạn như ở phần Ràng buộc.
-- Cơ chế khoá bản thu chỉ chống sửa nhầm, và dựng lại database có thể làm mất tài khoản và watchlist. Nhóm chấp nhận hai hạn chế này trong giai đoạn thử nghiệm.
+- Cơ chế khoá bản thu chỉ chống sửa nhầm, và dựng lại database có thể làm mất watchlist. Nhóm chấp nhận hai hạn chế này trong giai đoạn thử nghiệm.
 
 Cùng ngày, sau phần 1 của spike T2:
 

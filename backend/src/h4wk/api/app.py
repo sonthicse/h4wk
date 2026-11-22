@@ -1,6 +1,7 @@
 """Ứng dụng FastAPI. Router của từng module được gắn vào đây."""
 
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import request_validation_exception_handler
@@ -21,7 +22,14 @@ from h4wk.api import (
 )
 from h4wk.core import audit, auth
 
-app = FastAPI(title="h4wk")
+
+@asynccontextmanager
+async def _lifespan(_: FastAPI) -> AsyncIterator[None]:
+    auth.account()  # thiếu H4WK_USERNAME hoặc H4WK_PASSWORD thì API không khởi động
+    yield
+
+
+app = FastAPI(title="h4wk", lifespan=_lifespan)
 app.include_router(auth_api.router)
 app.include_router(entities.router)
 app.include_router(jobs.router)
