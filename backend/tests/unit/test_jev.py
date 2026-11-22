@@ -113,6 +113,8 @@ def _reply_with(answers, seen=None):
     [
         ({"violence": 0.7, "none": 0.3}, 0.1, ("violence", None)),  # vi phạm theo nội dung
         ({"hate": 0.4, "none": 0.6}, 0.1, None),  # dưới ngưỡng
+        ({"violence": 0.35, "hate": 0.3, "none": 0.35}, 0.1, ("violence", None)),  # chia đôi
+        ({"violence": 0.55, "none": 0.45}, 0.1, None),  # dưới 0,6
         ({"violence": 0.9}, 0.8, ("insult", "e_01")),  # nhắm vào đối tượng thì ưu tiên
     ],
 )

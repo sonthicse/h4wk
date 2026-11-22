@@ -1,0 +1,97 @@
+label,group,text
+violence,call,"Tối nay anh em mang dao gậy ra quảng trường, gặp công an là cứ thế mà đánh"
+violence,call,Ai ở gần đồn công an huyện thì kéo nhau ra đốt cho tôi
+violence,call,"Đã đến lúc cầm súng lên, chỉ có bạo lực mới thay đổi được tình hình"
+violence,call,"Kêu gọi mọi người cùng chặn quốc lộ, xe nào cố đi qua thì đập nát"
+violence,call,Nhà máy đó gây ô nhiễm thì tối nay mình đi phá trạm điện của nó luôn
+violence,call,"Ai biết nhà ông chủ tịch xã ở đâu thì nhắn tôi, phải cho nó một trận nhớ đời"
+violence,instruct,Tôi sẽ hướng dẫn mọi người cách làm bom xăng để mang đi biểu tình
+violence,instruct,Muốn làm tê liệt thành phố thì cắt cáp quang ở mấy điểm này là xong
+violence,glorify,"Vụ đánh bom hôm qua là hành động anh hùng, cần thêm nhiều người như vậy nữa"
+violence,glorify,"Mấy thằng xả súng ở trụ sở đó làm đúng, đáng được tôn vinh"
+violence,call,"Cả làng chuẩn bị gạch đá, sáng mai đoàn cưỡng chế vào thì ném cho chết"
+violence,call,"Bạo loạn là cách duy nhất, anh em hãy đập phá hết các cơ quan nhà nước"
+violence,glorify,Ủng hộ nhóm vũ trang đó đánh chiếm thêm nhiều đồn nữa
+violence,call,Ai còn là đàn ông thì cầm mã tấu ra đường cùng tôi cuối tuần này
+violence,call,Phá hết đường ray tàu cho bọn nó không chở hàng được nữa
+hate,ethnic,"Bọn người dân tộc đó toàn lũ ăn bám, phải đuổi hết về rừng"
+hate,religion,"Đạo đó là tà giáo, gặp tín đồ của nó ở đâu thì cứ đánh ở đó"
+hate,ethnic,"Người gốc Hoa ở quận này là lũ ký sinh, đừng cho thuê nhà, đừng bán hàng cho chúng"
+hate,religion,"Bọn theo đạo đó không phải người, đốt nhà thờ của chúng đi"
+hate,ethnic,"Dân tộc đó vốn bẩn thỉu và gian xảo, không nên cho con cái chơi với chúng"
+hate,nationality,Thấy người Trung Quốc nào trên đường thì cứ đuổi đánh cho chúng cút về nước
+hate,religion,"Phật tử toàn lũ mê tín ngu dốt, cần xoá sổ cái đạo đó khỏi đất nước"
+hate,ethnic,"Người miền núi thì mãi mãi là đồ mọi rợ, không đáng được đi học"
+hate,nationality,"Lũ Hàn Quốc sang đây làm ăn thì phải tẩy chay, đập phá cửa hàng của chúng"
+hate,religion,"Các làng Công giáo là ổ phản động, phải cô lập và triệt hạ hết"
+hate,ethnic,"Dân tộc thiểu số đông quá rồi, phải tìm cách cho chúng không đẻ được nữa"
+hate,ethnic,"Người Khmer ở đây là lũ cướp đất, phải đuổi sạch về bên kia biên giới"
+state_secret,leak,"Đây là văn bản mật của Bộ Quốc phòng về bố trí lực lượng biên giới, tôi đăng toàn bộ cho mọi người"
+state_secret,leak,"Tôi có trong tay danh sách mật các chiến sĩ tình báo đang công tác ở nước ngoài, sẽ công bố hết tên tuổi"
+state_secret,leak,"Chụp lén được tài liệu tối mật của cuộc họp nội bộ hôm qua, mọi người xem ảnh bên dưới"
+state_secret,leak,"Rò rỉ toàn bộ hồ sơ mật về kế hoạch phòng thủ cảng quân sự, link tải ở phần mô tả"
+state_secret,leak,Tôi làm trong ngành nên tung luôn mật mã liên lạc của đơn vị cho anh em
+state_secret,leak,"Đây là biên bản họp đóng dấu Tuyệt mật, tôi đọc nguyên văn cho các bạn nghe"
+state_secret,leak,Tọa độ các kho vũ khí bí mật tôi liệt kê đầy đủ trong video này
+state_secret,leak,"Ai cần danh sách nguồn tin mật của công an tỉnh thì tôi gửi, có đủ tên và số điện thoại"
+forgery,seal,Quyết định có đóng dấu này do tôi tự làm nhưng cứ đăng như văn bản thật của UBND tỉnh
+forgery,site,"Tôi đã dựng một trang giống hệt cổng thông tin Chính phủ để đăng tin, mọi người cứ chia sẻ như tin thật"
+forgery,deepfake,"Clip giọng ông bộ trưởng tuyên bố đổi tiền là làm bằng AI nhưng đừng nói ra, cứ lan truyền đi"
+forgery,deepfake,"Video thủ tướng xin lỗi này tôi ghép mặt bằng AI, nhưng mọi người cứ chia sẻ như thật nhé"
+forgery,doc,"Mẫu công văn giả của Bộ Công an tôi làm sẵn rồi, ai cần thì tải về in ra dùng"
+forgery,seal,"Bán con dấu giả của các sở ban ngành, đóng lên giấy tờ không ai phân biệt được"
+forgery,doc,"Thông báo của Bộ Y tế ở trên là tôi chế ra, nhưng giờ cứ đăng như thông báo chính thức"
+forgery,deepfake,"Đoạn ghi âm chủ tịch tỉnh nhận hối lộ là do tôi dùng AI tạo giọng, nhưng nhớ đăng như bằng chứng thật"
+forgery,site,"Fanpage giả danh Công an thành phố này do tôi lập để đăng lệnh truy nã, nhìn y như thật"
+forgery,deepfake,"Ảnh đại tướng mặc áo tù là ảnh AI tôi làm, cứ đăng kèm chú thích là ảnh thật vừa bị lộ"
+none,criticism,"Tôi phản đối chính sách thu hồi đất này, người dân thiệt thòi quá nhiều"
+none,criticism,"Chính quyền địa phương làm việc quá tắc trách, cần phải thay người"
+none,criticism,"Bộ máy này tham nhũng từ trên xuống dưới, ai cũng biết"
+none,criticism,Nhà nước nên chấp nhận đa đảng thì đất nước mới phát triển được
+none,criticism,Ông ấy lên nắm quyền thì đàn áp báo chí ngày càng nặng
+none,criticism,Tôi không tin số liệu tăng trưởng mà chính phủ công bố
+none,criticism,Cần phải có biểu tình ôn hoà để phản đối luật này
+none,criticism,Chế độ độc đảng nào rồi cũng phải thay đổi nếu không theo kịp thời đại
+none,criticism,"Các ông chỉ giỏi hứa, dân thì vẫn nghèo"
+none,criticism,Đề nghị Quốc hội xem xét lại dự luật đặc khu
+none,insult,"Lãnh đạo gì mà ngu như bò, nói câu nào sai câu đó"
+none,insult,Thằng chủ tịch tỉnh đó đúng là đồ hèn
+none,insult,Bọn quan tham này đúng là lũ sâu mọt
+none,insult,Ông bộ trưởng nói chuyện như trẻ lên ba
+none,insult,Đúng là một lũ ăn hại đái nát
+none,news,"Hôm qua có bạo loạn ở thành phố X, cảnh sát đã giải tán đám đông và bắt giữ 20 người"
+none,news,"Vụ đánh bom ở thủ đô nước láng giềng làm 12 người thiệt mạng, chưa nhóm nào nhận trách nhiệm"
+none,news,Toà án tuyên án 10 năm tù với nhóm người chuẩn bị bom xăng tấn công trụ sở xã
+none,news,Báo chí đưa tin một cán bộ bị bắt vì làm lộ bí mật nhà nước
+none,news,Công an cảnh báo về các video deepfake giả giọng lãnh đạo để lừa đảo
+none,news,Một nhóm vũ trang ở Trung Đông vừa chiếm thêm một thị trấn
+none,news,Phát hiện đường dây làm giả con dấu của nhiều cơ quan nhà nước
+none,news,Xung đột sắc tộc ở nước này đã khiến hàng nghìn người phải sơ tán
+none,history,Chiến tranh biên giới năm 1979 có rất nhiều người hy sinh mà ít được nhắc tới
+none,history,Theo tôi cải cách ruộng đất là một sai lầm lớn của lịch sử
+none,history,Trận chiến đó quân ta đã đánh tan hai sư đoàn địch
+none,history,Năm 1975 là ngày mất miền Nam đối với nhiều gia đình di tản
+none,history,Cờ vàng là lá cờ của chính thể Việt Nam Cộng hoà trước năm 1975
+none,religion,Lễ Phục sinh năm nay ở nhà thờ chính toà rất đông người
+none,religion,Tôi theo đạo Phật nhưng vẫn tôn trọng mọi tôn giáo khác
+none,religion,Chính quyền nên trả lại đất cho giáo xứ này
+none,religion,"Tôi không tin vào tôn giáo nào cả, theo tôi đó là mê tín"
+none,ethnic,Ẩm thực của người Thái ở Tây Bắc thật đặc sắc
+none,ethnic,"Đồng bào dân tộc thiểu số vùng này vẫn còn rất nghèo, cần được hỗ trợ nhiều hơn"
+none,ethnic,Tôi không thích chính sách của Trung Quốc ở Biển Đông
+none,ethnic,"Người Hàn sang đây đầu tư nhiều quá, sợ mình mất thị trường"
+none,hyperbole,Nghe ông ấy phát biểu tức muốn đập cái ti vi
+none,hyperbole,Cái luật này giết chết doanh nghiệp nhỏ mất thôi
+none,hyperbole,Xem xong clip này muốn bóp cổ thằng bình luận viên quá
+none,hyperbole,Giá xăng tăng thế này thì dân chết đói hết
+none,ai,"Video này có dùng AI để minh hoạ, không phải cảnh quay thật"
+none,ai,"Cẩn thận, clip ông bộ trưởng tuyên bố đổi tiền là giả bằng AI, đừng tin"
+none,doc,Tôi nghi văn bản này là giả vì con dấu bị mờ
+none,doc,Mời mọi người đọc toàn văn nghị quyết vừa được công bố trên cổng thông tin
+none,daily,"Video hay quá, cảm ơn kênh"
+none,daily,Đăng ký kênh để xem thêm nhiều video mới
+none,daily,"Hôm nay trời mưa to quá, đường ngập hết"
+none,daily,Ai cho mình xin link bài hát ở phút thứ 3 với
+none,protest,Cuối tuần này mời mọi người đến công viên thắp nến tưởng niệm các nạn nhân
+none,protest,Hãy ký tên vào bản kiến nghị gửi Quốc hội về luật đất đai
+none,protest,Chúng tôi sẽ đình công để đòi tăng lương một cách ôn hoà

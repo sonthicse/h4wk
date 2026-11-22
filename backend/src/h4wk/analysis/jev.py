@@ -138,13 +138,17 @@ QUESTIONS["violation"] = {
         "`text` is a Vietnamese YouTube item (see `source_type`). Regardless of who is targeted,"
         " does `text` itself do one of the harmful acts below? Judge what the text does, not the"
         " opinions it holds: news reporting about such acts, criticism, satire without a call to"
-        " act, history and political opinions are `none`."
+        " act, history and political opinions are `none`. Insults, curses, wishing bad karma,"
+        " crude jokes and metaphors aimed at officials, monks, commenters or other individuals"
+        " are `none` unless they call for real physical harm. Prejudice about regions or"
+        " political sides is `none`."
     ),
     "criteria": {
         "violence": {
             "what": (
-                "calls for, plans, instructs or glorifies violence, armed attacks, riots, "
-                "terrorism, or sabotage of infrastructure"
+                "a real call, plan or instruction for physical violence, armed attacks, riots, "
+                "terrorism or sabotage of infrastructure, or praise of a real attack; not "
+                "figures of speech"
             ),
             "examples": [
                 "Mọi người mang dao gậy ra đường tối nay, gặp công an là đánh",
@@ -154,8 +158,8 @@ QUESTIONS["violation"] = {
         },
         "hate": {
             "what": (
-                "incites hatred, discrimination or violence against people because of their "
-                "ethnicity, religion or nationality"
+                "dehumanizes, or calls for harm, expulsion or discrimination against, a whole "
+                "ethnic group, religion or nationality"
             ),
             "examples": [
                 "Bọn người dân tộc đó toàn lũ ăn bám, phải đuổi hết về rừng",
@@ -220,12 +224,18 @@ def _keep(answers):
     return answers["is_attack"]["noul"] >= 0.5 and answers["target"]["choice"] != "none"
 
 
+# Ngưỡng tổng xác suất các danh mục vi phạm (tức 1 − P(none)); đo ở docs/eval/violation.md.
+CONTENT_THRESHOLD = 0.6
+
+
 def _content_violation(answers):
-    """Danh mục vi phạm theo nội dung và xác suất, hoặc None. Trả lời cũ không có câu này."""
+    """(danh mục, xác suất có vi phạm) hoặc None. Xét tổng xác suất các danh mục để câu vừa
+    bạo lực vừa thù hận (xác suất chia đôi) không bị bỏ sót; danh mục là cái cao nhất."""
     probs = answers.get("violation", {}).get("probabilities", {})
-    category = max(CONTENT_VIOLATIONS, key=lambda c: probs.get(c, 0.0))
-    p = probs.get(category, 0.0)
-    return (category, p) if p >= 0.5 else None
+    total = sum(probs.get(c, 0.0) for c in CONTENT_VIOLATIONS)
+    if total < CONTENT_THRESHOLD:
+        return None
+    return max(CONTENT_VIOLATIONS, key=lambda c: probs.get(c, 0.0)), min(total, 1.0)
 
 
 def _encode(path: Path) -> str:
