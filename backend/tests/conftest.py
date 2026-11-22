@@ -11,9 +11,10 @@ USERNAME, PASSWORD = "thi", "mật-khẩu-thử"
 
 @pytest.fixture(autouse=True)
 def account(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Tài khoản duy nhất lấy từ biến môi trường (thắng .env thật của máy)."""
-    monkeypatch.setenv("H4WK_USERNAME", USERNAME)
-    monkeypatch.setenv("H4WK_PASSWORD", PASSWORD)
+    """Tài khoản duy nhất trong .env; test thay .env thật của máy bằng giá trị cố định."""
+    from h4wk.core import secrets
+
+    monkeypatch.setattr(secrets, "dotenv", lambda: {"USERNAME": USERNAME, "PASSWORD": PASSWORD})
 
 
 @pytest.fixture(autouse=True)

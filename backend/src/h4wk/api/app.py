@@ -27,7 +27,7 @@ from h4wk.core.workspace import init_workspace
 
 @asynccontextmanager
 async def _lifespan(_: FastAPI) -> AsyncIterator[None]:
-    auth.account()  # thiếu H4WK_USERNAME hoặc H4WK_PASSWORD thì API không khởi động
+    auth.account()  # .env thiếu USERNAME hoặc PASSWORD thì API không khởi động
     init_workspace(data_dir(), config_dir())  # tạo data/, config/*.toml từ file mẫu
     yield
 

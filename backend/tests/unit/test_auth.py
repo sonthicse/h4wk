@@ -70,14 +70,20 @@ def test_only_the_env_account_logs_in() -> None:
 
 
 def test_missing_account_fails_clearly(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("H4WK_PASSWORD")
-    monkeypatch.setattr(auth.keys, "env_values", lambda: {"H4WK_USERNAME": USERNAME})
-    with pytest.raises(RuntimeError, match="H4WK_USERNAME and H4WK_PASSWORD"):
+    monkeypatch.setattr(auth.keys, "dotenv", lambda: {"USERNAME": USERNAME})
+    monkeypatch.setenv("PASSWORD", PASSWORD)  # biến môi trường không được tính
+    with pytest.raises(RuntimeError, match="USERNAME and PASSWORD"):
         auth.account()
     from h4wk.api.app import app
 
-    with pytest.raises(RuntimeError, match="H4WK_PASSWORD"), TestClient(app):
+    with pytest.raises(RuntimeError, match="PASSWORD"), TestClient(app):
         pass  # API không khởi động khi thiếu tài khoản
+
+
+def test_os_username_is_ignored(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Shell có thể tự đặt USERNAME; chỉ .env được dùng."""
+    monkeypatch.setenv("USERNAME", "ubuntu")
+    assert auth.account() == (USERNAME, PASSWORD)
 
 
 def test_password_is_not_stored(client: TestClient, data_dir: Path) -> None:

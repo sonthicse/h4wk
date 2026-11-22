@@ -39,10 +39,14 @@ def _save(values: dict[str, str]) -> None:
     tmp.replace(path)
 
 
+def dotenv() -> dict[str, str]:
+    """Chỉ giá trị trong file .env ở gốc repo, không lấy biến môi trường."""
+    return {k: v for k, v in dotenv_values(REPO_ROOT / ".env").items() if v}
+
+
 def env_values() -> dict[str, str]:
     """.env rồi biến môi trường (biến môi trường thắng)."""
-    dot = {k: v for k, v in dotenv_values(REPO_ROOT / ".env").items() if v}
-    return {**dot, **{k: v for k, v in os.environ.items() if v}}
+    return {**dotenv(), **{k: v for k, v in os.environ.items() if v}}
 
 
 def all_keys() -> dict[str, str]:

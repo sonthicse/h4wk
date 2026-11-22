@@ -55,7 +55,7 @@ cd web && npm run dev
 
 Các bước chạy thử 3 màn demo nằm ở [docs/demo-checklist.md](docs/demo-checklist.md).
 
-Mở http://localhost:3000 và đăng nhập bằng `H4WK_USERNAME`, `H4WK_PASSWORD` trong `.env`.
+Mở http://localhost:3000 và đăng nhập bằng `USERNAME`, `PASSWORD` trong `.env` (chỉ đọc từ file `.env`, không lấy biến môi trường).
 
 Worker GPU dùng model STT từ `H4WK_STT_MODEL` (mặc định `large-v3`). Phân tích bằng Jev cần `TYPESAFE_API_KEY` trong `.env` hoặc nhập ở Settings → Jev; thiếu key thì chỉ chạy tầng tĩnh.
 

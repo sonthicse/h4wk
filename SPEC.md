@@ -213,7 +213,7 @@ Không có CLI: API tự tạo `data/` và `config/*.toml` từ file mẫu khi k
 
 Nghiệm thu:
 
-- Một tài khoản duy nhất: tên và mật khẩu đặt ở `H4WK_USERNAME`, `H4WK_PASSWORD` trong `.env` (thiếu thì API không khởi động). Đăng nhập bằng session cookie; database chỉ lưu SHA-256 của token phiên, không lưu mật khẩu.
+- Một tài khoản duy nhất: tên và mật khẩu đặt ở `USERNAME`, `PASSWORD` trong file `.env` (không lấy biến môi trường) (thiếu thì API không khởi động). Đăng nhập bằng session cookie; database chỉ lưu SHA-256 của token phiên, không lưu mật khẩu.
 - Mọi API ghi dữ liệu đều để lại một dòng nhật ký, kể cả khi thao tác thất bại.
 
 ### 10.2 `evidence-store`

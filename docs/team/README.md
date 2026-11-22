@@ -33,7 +33,7 @@ Team chạy bằng plugin [`@contexera/dsh-agent-team`](https://github.com/Conte
 
    Máy không có Google Chrome, nên Agent luôn mở bằng `--browser=chromium`. Thiếu thư viện hệ thống thì chạy `sudo playwright-cli install-browser chromium --with-deps`.
 
-   Agent đăng nhập giao diện bằng tài khoản duy nhất của app: `H4WK_USERNAME`, `H4WK_PASSWORD` trong `.env` của repo chính.
+   Agent đăng nhập giao diện bằng tài khoản duy nhất của app: `USERNAME`, `PASSWORD` trong `.env` của repo chính.
 
 ## Dùng hằng ngày
 
